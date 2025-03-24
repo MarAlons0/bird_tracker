@@ -8,7 +8,17 @@
             height: 400px;
             margin: 20px 0;
         }
+        #locationForm .form-control {
+            margin-bottom: 10px;
+        }
+        .location-feedback {
+            color: #28a745;
+            display: none;
+            margin-top: 10px;
+        }
     </style>
+    <!-- Add Google Places API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
 </head>
 <body>
     <div class="container mt-5">
@@ -22,21 +32,34 @@
             <div class="card-body">
                 <form id="locationForm">
                     <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <input type="text" class="form-control" id="locationSearch" 
+                                   placeholder="Search for a location">
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-3">
-                            <input type="text" class="form-control" id="locationName" placeholder="Location Name">
+                            <input type="text" class="form-control" id="locationName" 
+                                   placeholder="Location Name" readonly>
                         </div>
                         <div class="col-md-3">
-                            <input type="number" step="0.0001" class="form-control" id="latitude" placeholder="Latitude">
+                            <input type="number" step="0.0001" class="form-control" 
+                                   id="latitude" placeholder="Latitude" readonly>
                         </div>
                         <div class="col-md-3">
-                            <input type="number" step="0.0001" class="form-control" id="longitude" placeholder="Longitude">
+                            <input type="number" step="0.0001" class="form-control" 
+                                   id="longitude" placeholder="Longitude" readonly>
                         </div>
                         <div class="col-md-2">
-                            <input type="number" class="form-control" id="radius" placeholder="Radius (km)">
+                            <input type="number" class="form-control" id="radius" 
+                                   placeholder="Radius (km)" value="25">
                         </div>
                         <div class="col-md-1">
                             <button type="submit" class="btn btn-primary">Update</button>
                         </div>
+                    </div>
+                    <div class="location-feedback" id="locationFeedback">
+                        Location updated successfully!
                     </div>
                 </form>
             </div>
@@ -70,14 +93,45 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Add JavaScript for form handling and API calls
+        // Initialize Google Places Autocomplete
+        function initAutocomplete() {
+            const input = document.getElementById('locationSearch');
+            const options = {
+                types: ['(cities)', 'establishment', 'natural_feature', 'park'],
+                fields: ['name', 'geometry', 'formatted_address']  // Specify the data we want to receive
+            };
+            
+            const autocomplete = new google.maps.places.Autocomplete(input, options);
+            
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                
+                if (!place.geometry) {
+                    alert('No location details available for this place');
+                    return;
+                }
+                
+                // Fill in the form fields with more detailed information
+                document.getElementById('locationName').value = 
+                    `${place.name} (${place.formatted_address})`;
+                document.getElementById('latitude').value = 
+                    place.geometry.location.lat();
+                document.getElementById('longitude').value = 
+                    place.geometry.location.lng();
+            });
+        }
+
+        // Initialize autocomplete when the page loads
+        google.maps.event.addDomListener(window, 'load', initAutocomplete);
+
+        // Form submission handler
         document.getElementById('locationForm').onsubmit = async (e) => {
             e.preventDefault();
             const data = {
                 name: document.getElementById('locationName').value,
-                latitude: document.getElementById('latitude').value,
-                longitude: document.getElementById('longitude').value,
-                radius: document.getElementById('radius').value
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value),
+                radius: parseFloat(document.getElementById('radius').value)
             };
             
             try {
@@ -90,7 +144,13 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    alert('Location updated successfully!');
+                    const feedback = document.getElementById('locationFeedback');
+                    feedback.style.display = 'block';
+                    setTimeout(() => {
+                        feedback.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert('Error updating location: ' + result.message);
                 }
             } catch (error) {
                 alert('Error updating location: ' + error);
