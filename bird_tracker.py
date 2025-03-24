@@ -198,7 +198,7 @@ Please provide a brief analysis focusing on:
 """
 
             print("DEBUG: Sending request to Claude...")
-            response = self.claude.messages.create(
+            message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 messages=[{
                     "role": "user",
@@ -207,22 +207,23 @@ Please provide a brief analysis focusing on:
             )
             
             print("DEBUG: Claude response received")
-            return response.content[0].text
+            return message.content[0].text
 
         except Exception as e:
             print(f"DEBUG: Error in analyze_observations: {str(e)}")
+            print(f"DEBUG: Error type: {type(e)}")
             return "Error generating insights. Using basic summary instead."
 
     def create_static_map(self, observations):
         """Create a static map of bird observations"""
         print("DEBUG: Starting static map creation...")
         try:
-            # Add User-Agent header and use CartoDB tiles
             headers = {
-                'User-Agent': 'BirdTracker/1.0 (https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/)'
+                'User-Agent': 'BirdTracker/1.0',
+                'Accept': 'image/png',
             }
             m = StaticMap(800, 600, 
-                         url_template='https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+                         url_template='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png',
                          headers=headers)
 
             # Process observations
