@@ -192,21 +192,10 @@ Please provide a brief analysis focusing on:
             )
             
             print("DEBUG: Claude response received")
-            
-            # Extract the text from the response
-            if hasattr(response.content[0], 'text'):
-                analysis = response.content[0].text
-            else:
-                analysis = str(response.content)
-            
-            print("DEBUG: Analysis length:", len(analysis))
-            return analysis
+            return response.content[0].text
 
         except Exception as e:
-            print(f"DEBUG: Detailed error in analyze_observations: {str(e)}")
-            print(f"DEBUG: Error type: {type(e)}")
-            import traceback
-            print(f"DEBUG: Stack trace: {traceback.format_exc()}")
+            print(f"DEBUG: Error in analyze_observations: {str(e)}")
             return "Error generating insights. Using basic summary instead."
 
     def create_static_map(self, observations):
