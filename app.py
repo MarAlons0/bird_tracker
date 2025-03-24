@@ -18,6 +18,11 @@ def home():
                              error="Google Maps API key not configured")
     
     print(f"DEBUG: Using Google Places API key: {api_key[:6]}...{api_key[-4:] if api_key else 'None'}")
+    
+    # Add request debugging
+    print("DEBUG: Request headers:", dict(request.headers))
+    print("DEBUG: Request URL:", request.url)
+    
     return render_template('index.html', google_maps_api_key=api_key)
 
 @app.route('/api/update-location', methods=['POST'])
