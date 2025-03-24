@@ -198,14 +198,16 @@ Please provide a brief analysis focusing on:
 """
 
             print("DEBUG: Sending request to Claude...")
-            response = self.claude.complete(
-                prompt=prompt,
+            response = self.claude.messages.create(
                 model="claude-3-opus-20240229",
-                max_tokens=2000
+                messages=[{
+                    "role": "user",
+                    "content": prompt
+                }]
             )
             
             print("DEBUG: Claude response received")
-            return response.completion
+            return response.content[0].text
 
         except Exception as e:
             print(f"DEBUG: Error in analyze_observations: {str(e)}")
@@ -215,8 +217,13 @@ Please provide a brief analysis focusing on:
         """Create a static map of bird observations"""
         print("DEBUG: Starting static map creation...")
         try:
-            # Initialize map centered on Cincinnati
-            m = StaticMap(800, 600, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
+            # Add User-Agent header and use CartoDB tiles
+            headers = {
+                'User-Agent': 'BirdTracker/1.0 (https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/)'
+            }
+            m = StaticMap(800, 600, 
+                         url_template='https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+                         headers=headers)
 
             # Process observations
             for obs in observations:
