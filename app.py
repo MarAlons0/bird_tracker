@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from bird_tracker import BirdSightingTracker
 import os
 from dotenv import load_dotenv
+import requests
 
 app = Flask(__name__)
 load_dotenv()
@@ -13,17 +14,26 @@ tracker = BirdSightingTracker()
 def home():
     api_key = os.getenv('GOOGLE_PLACES_API_KEY')
     if not api_key:
-        print("WARNING: Google Places API key not found in environment variables")
         return render_template('error.html', 
                              error="Google Maps API key not configured")
     
-    print(f"DEBUG: Using Google Places API key: {api_key[:6]}...{api_key[-4:] if api_key else 'None'}")
+    # Test Places API directly
+    test_url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&key={api_key}"
+    try:
+        response = requests.get(test_url)
+        response_data = response.json()
+        print("DEBUG: Places API Test Response:", response_data)
+        
+        if response_data.get('status') == 'REQUEST_DENIED':
+            print("WARNING: Places API request denied:", response_data.get('error_message'))
+    except Exception as e:
+        print("ERROR: Failed to test Places API:", str(e))
     
-    # Add request debugging
-    print("DEBUG: Request headers:", dict(request.headers))
-    print("DEBUG: Request URL:", request.url)
-    
-    return render_template('index.html', google_maps_api_key=api_key)
+    return render_template('index.html', 
+                         google_maps_api_key=api_key,
+                         debug_info={
+                             'api_test': response_data if 'response_data' in locals() else None
+                         })
 
 @app.route('/api/update-location', methods=['POST'])
 def update_location():

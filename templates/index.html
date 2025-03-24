@@ -19,6 +19,14 @@
     </style>
 </head>
 <body>
+    {% if debug_info and debug_info.api_test %}
+    <div class="alert alert-info">
+        API Status: {{ debug_info.api_test.status }}
+        {% if debug_info.api_test.error_message %}
+        <br>Error: {{ debug_info.api_test.error_message }}
+        {% endif %}
+    </div>
+    {% endif %}
     <div class="container mt-5">
         <h1 class="text-center mb-4">Bird Tracker</h1>
         
@@ -220,10 +228,25 @@
         }
     </script>
     
-    <!-- Update the Google Maps script tag with error handling -->
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete"
-        onerror="console.error('Failed to load Google Maps script');">
+    <!-- Update Google Maps script loading -->
+    <script>
+        function loadGoogleMapsScript() {
+            console.log('Starting to load Google Maps script...');
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete&v=weekly`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                console.error('Failed to load Google Maps script');
+                console.log('API Key used:', '{{ google_maps_api_key }}'.substring(0, 6) + '...');
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- Load the script -->
+    <script>
+        loadGoogleMapsScript();
     </script>
 </body>
 </html> 
