@@ -1,0 +1,53 @@
+from flask import Flask, render_template, request, jsonify
+import json
+import os
+
+app = Flask(__name__)
+
+def load_locations():
+    try:
+        with open('locations.json', 'r') as f:
+            return json.load(f)
+    except TimeoutError:
+        print("Timeout while reading locations.json")
+        return []
+    except FileNotFoundError:
+        print("locations.json not found")
+        return []
+    except json.JSONDecodeError:
+        print("Invalid JSON in locations.json")
+        return []
+    except Exception as e:
+        print(f"Error loading locations: {e}")
+        return []
+
+@app.route('/')
+def home():
+    try:
+        locations = load_locations()
+        return render_template('index.html', locations=locations)
+    except Exception as e:
+        print(f"Error in home route: {e}")
+        return render_template('index.html', locations=[])
+
+@app.route('/api/location', methods=['POST'])
+def update_location():
+    try:
+        data = {
+            'lat': request.form.get('lat'),
+            'lng': request.form.get('lng'),
+            'name': request.form.get('name'),
+            'radius': request.form.get('radius')
+        }
+        with open('locations.json', 'w') as f:
+            json.dump([data], f)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+if __name__ == '__main__':
+    print("Starting Flask server...")
+    app.run(host='0.0.0.0', port=5001, debug=True)
+
+
+

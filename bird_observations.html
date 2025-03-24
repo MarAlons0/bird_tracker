@@ -1,0 +1,2939 @@
+
+                <html>
+                <head>
+                    <style>
+                        .folium-map { width: 100%; height: 600px; }
+                    </style>
+                </head>
+                <body>
+                    <div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -> Trust Notebook</span><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    
+    &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
+    
+        &lt;script&gt;
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        &lt;/script&gt;
+    
+    &lt;style&gt;html, body {width: 100%;height: 100%;margin: 0;padding: 0;}&lt;/style&gt;
+    &lt;style&gt;#map {position:absolute;top:0;bottom:0;right:0;left:0;}&lt;/style&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/&gt;
+    
+            &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; /&gt;
+            &lt;style&gt;
+                #map_da7d0d4cccf3e437e8867d8062bf6ad2 {
+                    position: relative;
+                    width: 800.0px;
+                    height: 600.0px;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            &lt;/style&gt;
+        
+&lt;/head&gt;
+&lt;body&gt;
+    
+    
+            &lt;div class=&quot;folium-map&quot; id=&quot;map_da7d0d4cccf3e437e8867d8062bf6ad2&quot; &gt;&lt;/div&gt;
+        
+&lt;/body&gt;
+&lt;script&gt;
+    
+    
+            var map_da7d0d4cccf3e437e8867d8062bf6ad2 = L.map(
+                &quot;map_da7d0d4cccf3e437e8867d8062bf6ad2&quot;,
+                {
+                    center: [39.1031, -84.512],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 10,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_3ced8bcd9d202159cf809631c10b957e = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_3ced8bcd9d202159cf809631c10b957e.addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+        
+    
+            var feature_group_19e722b776477299333a21f96e0bf5c8 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_632132d9a5e17a732d7e0dff028c2e7a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_4721301aa2f1e40e40deb7a666cc3ddd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_5acf9ad143c8eae4a949a50bdf479442 = $(`&lt;div id=&quot;html_5acf9ad143c8eae4a949a50bdf479442&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Great Horned Owl&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cornelius Lane &amp; Court, Okeana&lt;br&gt;                     Date: 2025-03-13 07:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4721301aa2f1e40e40deb7a666cc3ddd.setContent(html_5acf9ad143c8eae4a949a50bdf479442);
+            
+        
+
+        circle_marker_632132d9a5e17a732d7e0dff028c2e7a.bindPopup(popup_4721301aa2f1e40e40deb7a666cc3ddd)
+        ;
+
+        
+    
+    
+            var circle_marker_e0edff930bc7ff3f860376afb871df71 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_a2a160319cb56ad849ce4030bf343088 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_132cde5fb3d95b399474ff01101b5680 = $(`&lt;div id=&quot;html_132cde5fb3d95b399474ff01101b5680&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Cooper&#x27;s Hawk&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 6705 Steger Drive, Cincinnati, Ohio, US (39.185, -84.473)&lt;br&gt;                     Date: 2025-03-12 18:42&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a2a160319cb56ad849ce4030bf343088.setContent(html_132cde5fb3d95b399474ff01101b5680);
+            
+        
+
+        circle_marker_e0edff930bc7ff3f860376afb871df71.bindPopup(popup_a2a160319cb56ad849ce4030bf343088)
+        ;
+
+        
+    
+    
+            var circle_marker_6e9b7a983a6ebfc73032ac69c452f4b0 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_d4746a25d42879cc71bcf784fa47990c = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_7bc2ff135162ffa6b26f61f81742477a = $(`&lt;div id=&quot;html_7bc2ff135162ffa6b26f61f81742477a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Short-eared Owl&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_d4746a25d42879cc71bcf784fa47990c.setContent(html_7bc2ff135162ffa6b26f61f81742477a);
+            
+        
+
+        circle_marker_6e9b7a983a6ebfc73032ac69c452f4b0.bindPopup(popup_d4746a25d42879cc71bcf784fa47990c)
+        ;
+
+        
+    
+    
+            var circle_marker_19fa5d7f33fec95ff06d59cf9e73f1d3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_1c7f34c2cc095614abc3afac24d60a23 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4e5fb2dbed135a7d6bb3a4655673294d = $(`&lt;div id=&quot;html_4e5fb2dbed135a7d6bb3a4655673294d&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Eastern Meadowlark&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_1c7f34c2cc095614abc3afac24d60a23.setContent(html_4e5fb2dbed135a7d6bb3a4655673294d);
+            
+        
+
+        circle_marker_19fa5d7f33fec95ff06d59cf9e73f1d3.bindPopup(popup_1c7f34c2cc095614abc3afac24d60a23)
+        ;
+
+        
+    
+    
+            var circle_marker_d1dd64207f600ad075c40c8578827ea0 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_92a9ff6932ba5e5b7c5ce5ef35ec8cff = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_d6a303c1a2aac7fc7e8ef2d832ebd876 = $(`&lt;div id=&quot;html_d6a303c1a2aac7fc7e8ef2d832ebd876&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Barred Owl&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_92a9ff6932ba5e5b7c5ce5ef35ec8cff.setContent(html_d6a303c1a2aac7fc7e8ef2d832ebd876);
+            
+        
+
+        circle_marker_d1dd64207f600ad075c40c8578827ea0.bindPopup(popup_92a9ff6932ba5e5b7c5ce5ef35ec8cff)
+        ;
+
+        
+    
+    
+            var circle_marker_b6829712be88660ed610c5eedec5b5fa = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_39e871aa114a68ac00006200aeb73a3d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8c5c5d83ae6c7cb6be046dc5b121a791 = $(`&lt;div id=&quot;html_8c5c5d83ae6c7cb6be046dc5b121a791&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-tailed Hawk&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Armleder Park&lt;br&gt;                     Date: 2025-03-12 18:25&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_39e871aa114a68ac00006200aeb73a3d.setContent(html_8c5c5d83ae6c7cb6be046dc5b121a791);
+            
+        
+
+        circle_marker_b6829712be88660ed610c5eedec5b5fa.bindPopup(popup_39e871aa114a68ac00006200aeb73a3d)
+        ;
+
+        
+    
+    
+            var circle_marker_de569442511af52d7ca34f38dacce0ca = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_c80b0a2af4af66307010dd889ddd74fa = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8eee3386a2e1613c04b37c5a2d6ccee6 = $(`&lt;div id=&quot;html_8eee3386a2e1613c04b37c5a2d6ccee6&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Bald Eagle&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve--Lodge Pond&lt;br&gt;                     Date: 2025-03-12 18:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c80b0a2af4af66307010dd889ddd74fa.setContent(html_8eee3386a2e1613c04b37c5a2d6ccee6);
+            
+        
+
+        circle_marker_de569442511af52d7ca34f38dacce0ca.bindPopup(popup_c80b0a2af4af66307010dd889ddd74fa)
+        ;
+
+        
+    
+    
+            var circle_marker_20a2de36557270832d7a4dac47e4c785 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_3f4d68cba59c946ae5c9f46a7654ebff = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_2a006386f617ea0b78a0cb911c794efd = $(`&lt;div id=&quot;html_2a006386f617ea0b78a0cb911c794efd&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-shouldered Hawk&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Riverpointe&lt;br&gt;                     Date: 2025-03-12 16:55&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3f4d68cba59c946ae5c9f46a7654ebff.setContent(html_2a006386f617ea0b78a0cb911c794efd);
+            
+        
+
+        circle_marker_20a2de36557270832d7a4dac47e4c785.bindPopup(popup_3f4d68cba59c946ae5c9f46a7654ebff)
+        ;
+
+        
+    
+    
+            var circle_marker_759669c5f3a975607ddd8ae9172388fe = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_c2037f1d3a836d44f163c97395b3e2f4 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_be10036500e4bba9e76a197c64b772c3 = $(`&lt;div id=&quot;html_be10036500e4bba9e76a197c64b772c3&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Eastern Screech-Owl&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cincinnati Nature Center--Rowe Woods&lt;br&gt;                     Date: 2025-03-12 08:32&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c2037f1d3a836d44f163c97395b3e2f4.setContent(html_be10036500e4bba9e76a197c64b772c3);
+            
+        
+
+        circle_marker_759669c5f3a975607ddd8ae9172388fe.bindPopup(popup_c2037f1d3a836d44f163c97395b3e2f4)
+        ;
+
+        
+    
+    
+            var circle_marker_6be10f71658ee8579a49deda839f36b9 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_934b8a2f42be8b600d5d1d247494272d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6c589d8dd197ec2d169bf3aeae14d1d9 = $(`&lt;div id=&quot;html_6c589d8dd197ec2d169bf3aeae14d1d9&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Lesser Yellowlegs&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Miami-Erie Canal Bike Path--Between Gilmore MetroPark and Ellis Lake Wetlands&lt;br&gt;                     Date: 2025-03-11 15:38&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_934b8a2f42be8b600d5d1d247494272d.setContent(html_6c589d8dd197ec2d169bf3aeae14d1d9);
+            
+        
+
+        circle_marker_6be10f71658ee8579a49deda839f36b9.bindPopup(popup_934b8a2f42be8b600d5d1d247494272d)
+        ;
+
+        
+    
+    
+            var circle_marker_e9f4fe8ece67e7bf3cb839ea5c9c6f4c = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_503783538c933670989547908721b906 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_dd59d32165318b9579ebebc8c5f57c1d = $(`&lt;div id=&quot;html_dd59d32165318b9579ebebc8c5f57c1d&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Sharp-shinned Hawk&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: jordan road&lt;br&gt;                     Date: 2025-03-11 15:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_503783538c933670989547908721b906.setContent(html_dd59d32165318b9579ebebc8c5f57c1d);
+            
+        
+
+        circle_marker_e9f4fe8ece67e7bf3cb839ea5c9c6f4c.bindPopup(popup_503783538c933670989547908721b906)
+        ;
+
+        
+    
+    
+            var circle_marker_a3d3bd39e3eb06fae2ea750aec98380a = L.circleMarker(
+                [39.36112, -84.17845],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_3bdb3028c8df20f703b626812e92c402 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6271027411e0bf3ab5133b0ac05c64df = $(`&lt;div id=&quot;html_6271027411e0bf3ab5133b0ac05c64df&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Osprey&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Mounts Park, Morrow US-OH 39.36112, -84.17845&lt;br&gt;                     Date: 2025-03-11 13:57&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3bdb3028c8df20f703b626812e92c402.setContent(html_6271027411e0bf3ab5133b0ac05c64df);
+            
+        
+
+        circle_marker_a3d3bd39e3eb06fae2ea750aec98380a.bindPopup(popup_3bdb3028c8df20f703b626812e92c402)
+        ;
+
+        
+    
+    
+            var circle_marker_8fbae492418ad2fe38478275f438a862 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_f11c5e77c5692dcdc73d6da01e7982a6 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_71711d3fea727bc7c077a123e6cb2706 = $(`&lt;div id=&quot;html_71711d3fea727bc7c077a123e6cb2706&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Greater Yellowlegs&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Gilmore Ponds MetroPark (do not walk along or cross railroad tracks)&lt;br&gt;                     Date: 2025-03-10 11:10&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f11c5e77c5692dcdc73d6da01e7982a6.setContent(html_71711d3fea727bc7c077a123e6cb2706);
+            
+        
+
+        circle_marker_8fbae492418ad2fe38478275f438a862.bindPopup(popup_f11c5e77c5692dcdc73d6da01e7982a6)
+        ;
+
+        
+    
+    
+            var circle_marker_245ccef3bef7bc11f70e2daada46307c = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;red&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;red&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_19e722b776477299333a21f96e0bf5c8);
+        
+    
+        var popup_0640da16cc57a83f6e4c54032d6f6b12 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_14b0604e577a9e3c654173e315eb4a42 = $(`&lt;div id=&quot;html_14b0604e577a9e3c654173e315eb4a42&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Peregrine Falcon&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Tylersville Rd&lt;br&gt;                     Date: 2025-03-07 09:46&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_0640da16cc57a83f6e4c54032d6f6b12.setContent(html_14b0604e577a9e3c654173e315eb4a42);
+            
+        
+
+        circle_marker_245ccef3bef7bc11f70e2daada46307c.bindPopup(popup_0640da16cc57a83f6e4c54032d6f6b12)
+        ;
+
+        
+    
+    
+            feature_group_19e722b776477299333a21f96e0bf5c8.addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+        
+    
+            var feature_group_6caa1e02ae071affb64549db628e2558 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_cb0304d20dc46e14b3effcc2dfcff066 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_69a830248386f474428f9a9be9b67828 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_812c87ab8b2ea56d2b0ec853dd23c91a = $(`&lt;div id=&quot;html_812c87ab8b2ea56d2b0ec853dd23c91a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Wood Duck&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Woodland Mound Park&lt;br&gt;                     Date: 2025-03-13 07:52&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_69a830248386f474428f9a9be9b67828.setContent(html_812c87ab8b2ea56d2b0ec853dd23c91a);
+            
+        
+
+        circle_marker_cb0304d20dc46e14b3effcc2dfcff066.bindPopup(popup_69a830248386f474428f9a9be9b67828)
+        ;
+
+        
+    
+    
+            var circle_marker_63f837b2817d25b8195973d811340445 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_0631dabeeecdcea763d3e6eb76347aef = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8a71c32326377ef40381739b319451b3 = $(`&lt;div id=&quot;html_8a71c32326377ef40381739b319451b3&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Canada Goose&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Miami University--Peffer Woods Trails&lt;br&gt;                     Date: 2025-03-12 19:48&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_0631dabeeecdcea763d3e6eb76347aef.setContent(html_8a71c32326377ef40381739b319451b3);
+            
+        
+
+        circle_marker_63f837b2817d25b8195973d811340445.bindPopup(popup_0631dabeeecdcea763d3e6eb76347aef)
+        ;
+
+        
+    
+    
+            var circle_marker_0408d8678e9bb509c414807e276deae3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_0f5c9d9ad9476fb2853171e9dcce0c7e = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4bb526c970926f31258401fd2073a54d = $(`&lt;div id=&quot;html_4bb526c970926f31258401fd2073a54d&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Hooded Merganser&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_0f5c9d9ad9476fb2853171e9dcce0c7e.setContent(html_4bb526c970926f31258401fd2073a54d);
+            
+        
+
+        circle_marker_0408d8678e9bb509c414807e276deae3.bindPopup(popup_0f5c9d9ad9476fb2853171e9dcce0c7e)
+        ;
+
+        
+    
+    
+            var circle_marker_2d4bea4cd4e1b973797bd5cc0e9261f4 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_fa6e8c11294b0998b226c1b00aa81a8f = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_35df9e3cd32d76dfaaef133fb7258c63 = $(`&lt;div id=&quot;html_35df9e3cd32d76dfaaef133fb7258c63&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Common Merganser&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_fa6e8c11294b0998b226c1b00aa81a8f.setContent(html_35df9e3cd32d76dfaaef133fb7258c63);
+            
+        
+
+        circle_marker_2d4bea4cd4e1b973797bd5cc0e9261f4.bindPopup(popup_fa6e8c11294b0998b226c1b00aa81a8f)
+        ;
+
+        
+    
+    
+            var circle_marker_7e22fe52756c7fcc7f9ca9182e023d10 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_517e55863a79415885ddbd83e6c9cbab = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8825a6853c0000451518bad6f12c4966 = $(`&lt;div id=&quot;html_8825a6853c0000451518bad6f12c4966&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ring-necked Duck&lt;/b&gt;&lt;br&gt;                     Count: 11&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_517e55863a79415885ddbd83e6c9cbab.setContent(html_8825a6853c0000451518bad6f12c4966);
+            
+        
+
+        circle_marker_7e22fe52756c7fcc7f9ca9182e023d10.bindPopup(popup_517e55863a79415885ddbd83e6c9cbab)
+        ;
+
+        
+    
+    
+            var circle_marker_de11a71e3d455317fbc1fc37b6270546 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_ffd44fa896357c7aa0a26ec94076359b = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_2e3540e4b65498a94dd368b8b89a11e1 = $(`&lt;div id=&quot;html_2e3540e4b65498a94dd368b8b89a11e1&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Green-winged Teal&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ffd44fa896357c7aa0a26ec94076359b.setContent(html_2e3540e4b65498a94dd368b8b89a11e1);
+            
+        
+
+        circle_marker_de11a71e3d455317fbc1fc37b6270546.bindPopup(popup_ffd44fa896357c7aa0a26ec94076359b)
+        ;
+
+        
+    
+    
+            var circle_marker_7009a89b3e9167259f4ac56dfba24368 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_ef3902962cc0b12e317c925635138ab4 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_25d3fac68a24e5693dc761f3661f66d1 = $(`&lt;div id=&quot;html_25d3fac68a24e5693dc761f3661f66d1&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Mute Swan&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: Fernald Preserve--Lodge Pond&lt;br&gt;                     Date: 2025-03-12 18:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ef3902962cc0b12e317c925635138ab4.setContent(html_25d3fac68a24e5693dc761f3661f66d1);
+            
+        
+
+        circle_marker_7009a89b3e9167259f4ac56dfba24368.bindPopup(popup_ef3902962cc0b12e317c925635138ab4)
+        ;
+
+        
+    
+    
+            var circle_marker_efe295500d6ae7b85b0751c3a93ecfb3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_7dfedf762e787f013ae655358fa38fdd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_7e68c438b1bd762fe2efc9a54606eb1b = $(`&lt;div id=&quot;html_7e68c438b1bd762fe2efc9a54606eb1b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Blue-winged Teal&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: Fernald Preserve--Lodge Pond&lt;br&gt;                     Date: 2025-03-12 18:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_7dfedf762e787f013ae655358fa38fdd.setContent(html_7e68c438b1bd762fe2efc9a54606eb1b);
+            
+        
+
+        circle_marker_efe295500d6ae7b85b0751c3a93ecfb3.bindPopup(popup_7dfedf762e787f013ae655358fa38fdd)
+        ;
+
+        
+    
+    
+            var circle_marker_1cf23e4c7b9ac4bc62ab2e772557edb4 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_9154d772cddd5259558fd7c3868b5174 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6e52acf8f4a0f7c094d5f7158b634ef0 = $(`&lt;div id=&quot;html_6e52acf8f4a0f7c094d5f7158b634ef0&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-breasted Merganser&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Armleder Park--Little Miami River Canoe Access&lt;br&gt;                     Date: 2025-03-12 09:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_9154d772cddd5259558fd7c3868b5174.setContent(html_6e52acf8f4a0f7c094d5f7158b634ef0);
+            
+        
+
+        circle_marker_1cf23e4c7b9ac4bc62ab2e772557edb4.bindPopup(popup_9154d772cddd5259558fd7c3868b5174)
+        ;
+
+        
+    
+    
+            var circle_marker_a1f8b76d94c2be66f7bed4ba2d725772 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_73f35b920eb0ca04c62cb956afa1e2d6 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_d2e5220b87863652cb9af6c908a1e59e = $(`&lt;div id=&quot;html_d2e5220b87863652cb9af6c908a1e59e&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ruddy Duck&lt;/b&gt;&lt;br&gt;                     Count: 11&lt;br&gt;                     Location: Lake Barber&lt;br&gt;                     Date: 2025-03-11 22:27&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_73f35b920eb0ca04c62cb956afa1e2d6.setContent(html_d2e5220b87863652cb9af6c908a1e59e);
+            
+        
+
+        circle_marker_a1f8b76d94c2be66f7bed4ba2d725772.bindPopup(popup_73f35b920eb0ca04c62cb956afa1e2d6)
+        ;
+
+        
+    
+    
+            var circle_marker_9361ce8fc09d55636258400e80c9b3c4 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_277fb4c72e578569391c71c0af16de39 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_d69558265741e4afca3ee35c5394cb97 = $(`&lt;div id=&quot;html_d69558265741e4afca3ee35c5394cb97&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Black Duck&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: Campbell County Environmental Education Center&lt;br&gt;                     Date: 2025-03-11 09:51&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_277fb4c72e578569391c71c0af16de39.setContent(html_d69558265741e4afca3ee35c5394cb97);
+            
+        
+
+        circle_marker_9361ce8fc09d55636258400e80c9b3c4.bindPopup(popup_277fb4c72e578569391c71c0af16de39)
+        ;
+
+        
+    
+    
+            var circle_marker_fb9dc5206e2c8bc22e149175d4995210 = L.circleMarker(
+                [39.12586, -84.54659],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_a69b834058559e761303528cff1eccaa = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_d59c029d5f89c3992c5fcca4048eb577 = $(`&lt;div id=&quot;html_d59c029d5f89c3992c5fcca4048eb577&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Muscovy Duck x Mallard (hybrid)&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 1521 Queen City Ave, Cincinnati US-OH 39.12586, -84.54659&lt;br&gt;                     Date: 2025-03-11 08:25&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a69b834058559e761303528cff1eccaa.setContent(html_d59c029d5f89c3992c5fcca4048eb577);
+            
+        
+
+        circle_marker_fb9dc5206e2c8bc22e149175d4995210.bindPopup(popup_a69b834058559e761303528cff1eccaa)
+        ;
+
+        
+    
+    
+            var circle_marker_e8633195101abd0d464a89ede61661d2 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_f3e7f28904d94c3eb6083690cfa7aaa7 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_b54e8ecd106aa9529e550d719070cc0b = $(`&lt;div id=&quot;html_b54e8ecd106aa9529e550d719070cc0b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Muscovy Duck&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: General James Taylor Park (Mouth of Licking River)&lt;br&gt;                     Date: 2025-03-10 11:40&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f3e7f28904d94c3eb6083690cfa7aaa7.setContent(html_b54e8ecd106aa9529e550d719070cc0b);
+            
+        
+
+        circle_marker_e8633195101abd0d464a89ede61661d2.bindPopup(popup_f3e7f28904d94c3eb6083690cfa7aaa7)
+        ;
+
+        
+    
+    
+            var circle_marker_2a3f525ad9218d3656e27cfeb7892666 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_16bcb6f12c8c32b6a3597a647f704a19 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_b12a662983da8aeeed603cd0cde50269 = $(`&lt;div id=&quot;html_b12a662983da8aeeed603cd0cde50269&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ross&#x27;s Goose&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 6850 River Road, Fairfield, Ohio, US (39.316, -84.61)&lt;br&gt;                     Date: 2025-03-10 08:48&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_16bcb6f12c8c32b6a3597a647f704a19.setContent(html_b12a662983da8aeeed603cd0cde50269);
+            
+        
+
+        circle_marker_2a3f525ad9218d3656e27cfeb7892666.bindPopup(popup_16bcb6f12c8c32b6a3597a647f704a19)
+        ;
+
+        
+    
+    
+            var circle_marker_8c5e5fea85fab7b6fe47f3fbda25ce6a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_26be5198bc7eb3bef6fe7dd85e51f550 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_72080c446e3a25f36ad1ffbe762e2fbf = $(`&lt;div id=&quot;html_72080c446e3a25f36ad1ffbe762e2fbf&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Greater White-fronted Goose&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Great Miami River--Lost Bridge&lt;br&gt;                     Date: 2025-03-08 08:52&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_26be5198bc7eb3bef6fe7dd85e51f550.setContent(html_72080c446e3a25f36ad1ffbe762e2fbf);
+            
+        
+
+        circle_marker_8c5e5fea85fab7b6fe47f3fbda25ce6a.bindPopup(popup_26be5198bc7eb3bef6fe7dd85e51f550)
+        ;
+
+        
+    
+    
+            var circle_marker_8cd8fe5eb9678ba43e99551a69bfa41a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_63586b9874afc32cfd50560fcca5ab5e = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_c8bedf29da5e15a40243033c2b5119a1 = $(`&lt;div id=&quot;html_c8bedf29da5e15a40243033c2b5119a1&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Tundra Swan&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Harvest Meadows&lt;br&gt;                     Date: 2025-03-07 12:10&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_63586b9874afc32cfd50560fcca5ab5e.setContent(html_c8bedf29da5e15a40243033c2b5119a1);
+            
+        
+
+        circle_marker_8cd8fe5eb9678ba43e99551a69bfa41a.bindPopup(popup_63586b9874afc32cfd50560fcca5ab5e)
+        ;
+
+        
+    
+    
+            var circle_marker_04795c01d86bd79cb6bb69b0a13a1f67 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;blue&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;blue&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_6caa1e02ae071affb64549db628e2558);
+        
+    
+        var popup_915a2a0ca4c3f9cdc567a41ac8f7ad32 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_23387ab06a9db12927461df0707b1761 = $(`&lt;div id=&quot;html_23387ab06a9db12927461df0707b1761&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Snow Goose&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Conrey Rd. Bird and Butterfly Sanctuary&lt;br&gt;                     Date: 2025-02-28 18:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_915a2a0ca4c3f9cdc567a41ac8f7ad32.setContent(html_23387ab06a9db12927461df0707b1761);
+            
+        
+
+        circle_marker_04795c01d86bd79cb6bb69b0a13a1f67.bindPopup(popup_915a2a0ca4c3f9cdc567a41ac8f7ad32)
+        ;
+
+        
+    
+    
+            feature_group_6caa1e02ae071affb64549db628e2558.addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+        
+    
+            var feature_group_a2672dbaad5eca0ac5662e1a92bf103a = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_10a1c9ce33f39529662c9914038b3bc5 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_af8290e87281e521b91bcaf219b705d5 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_32679c3ed84e6865ed5bb2d4b8d90ba0 = $(`&lt;div id=&quot;html_32679c3ed84e6865ed5bb2d4b8d90ba0&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Song Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_af8290e87281e521b91bcaf219b705d5.setContent(html_32679c3ed84e6865ed5bb2d4b8d90ba0);
+            
+        
+
+        circle_marker_10a1c9ce33f39529662c9914038b3bc5.bindPopup(popup_af8290e87281e521b91bcaf219b705d5)
+        ;
+
+        
+    
+    
+            var circle_marker_de41cd7dbdd4c81d41fb0abcfdb3008d = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_f6e79f57df71b772ba41c87fa8b4f296 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_ceecb342b914941b94c19cf09cfd567e = $(`&lt;div id=&quot;html_ceecb342b914941b94c19cf09cfd567e&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;White-throated Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Funke House&lt;br&gt;                     Date: 2025-03-12 20:01&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f6e79f57df71b772ba41c87fa8b4f296.setContent(html_ceecb342b914941b94c19cf09cfd567e);
+            
+        
+
+        circle_marker_de41cd7dbdd4c81d41fb0abcfdb3008d.bindPopup(popup_f6e79f57df71b772ba41c87fa8b4f296)
+        ;
+
+        
+    
+    
+            var circle_marker_0f66af2376fd50f7197a16d8b81c68d3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_cfdb28c4a16e2dbb418559c49ae1d6d3 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_1271bd47e73e0159dd5930d207738e7b = $(`&lt;div id=&quot;html_1271bd47e73e0159dd5930d207738e7b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;House Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_cfdb28c4a16e2dbb418559c49ae1d6d3.setContent(html_1271bd47e73e0159dd5930d207738e7b);
+            
+        
+
+        circle_marker_0f66af2376fd50f7197a16d8b81c68d3.bindPopup(popup_cfdb28c4a16e2dbb418559c49ae1d6d3)
+        ;
+
+        
+    
+    
+            var circle_marker_1b4d933d5fe4505b81d86a0c30965218 = L.circleMarker(
+                [39.13359, -84.517],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_9d57789632ae2904371c4af7627b3ed1 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6b716347056bb04d4e42274ef588ccf3 = $(`&lt;div id=&quot;html_6b716347056bb04d4e42274ef588ccf3&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;House Finch&lt;/b&gt;&lt;br&gt;                     Count: 8&lt;br&gt;                     Location: MRI Imaging Center, Cincinnati US-OH 39.13359, -84.51700&lt;br&gt;                     Date: 2025-03-12 19:07&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_9d57789632ae2904371c4af7627b3ed1.setContent(html_6b716347056bb04d4e42274ef588ccf3);
+            
+        
+
+        circle_marker_1b4d933d5fe4505b81d86a0c30965218.bindPopup(popup_9d57789632ae2904371c4af7627b3ed1)
+        ;
+
+        
+    
+    
+            var circle_marker_a632cb705f8b409880ff0b29ad8f596f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_96b981c902868c4285aabfddc25e9a5c = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_39818b4f3539e86a056395ef5c4aab4f = $(`&lt;div id=&quot;html_39818b4f3539e86a056395ef5c4aab4f&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Purple Finch&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_96b981c902868c4285aabfddc25e9a5c.setContent(html_39818b4f3539e86a056395ef5c4aab4f);
+            
+        
+
+        circle_marker_a632cb705f8b409880ff0b29ad8f596f.bindPopup(popup_96b981c902868c4285aabfddc25e9a5c)
+        ;
+
+        
+    
+    
+            var circle_marker_7f83b0f1f169223863d9257d39d7177c = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_f9ac867c3e39ada7a491c4570b9544dd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_092d9438ddb835687944d4dcc63acd72 = $(`&lt;div id=&quot;html_092d9438ddb835687944d4dcc63acd72&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Field Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f9ac867c3e39ada7a491c4570b9544dd.setContent(html_092d9438ddb835687944d4dcc63acd72);
+            
+        
+
+        circle_marker_7f83b0f1f169223863d9257d39d7177c.bindPopup(popup_f9ac867c3e39ada7a491c4570b9544dd)
+        ;
+
+        
+    
+    
+            var circle_marker_a6091b5fcc4115710cb58752acec9f91 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_6f00d9a3dba0b38f6d1e562920bdc3bc = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_52fd56a61bc4246e9830289c014ee79e = $(`&lt;div id=&quot;html_52fd56a61bc4246e9830289c014ee79e&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Tree Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_6f00d9a3dba0b38f6d1e562920bdc3bc.setContent(html_52fd56a61bc4246e9830289c014ee79e);
+            
+        
+
+        circle_marker_a6091b5fcc4115710cb58752acec9f91.bindPopup(popup_6f00d9a3dba0b38f6d1e562920bdc3bc)
+        ;
+
+        
+    
+    
+            var circle_marker_96564e77bd993e4949a9013d31156939 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_038866acdd936031a2f0aba5bdd39641 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_32bbb0b1463e3209504164d50ed6cfad = $(`&lt;div id=&quot;html_32bbb0b1463e3209504164d50ed6cfad&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;White-crowned Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 5&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_038866acdd936031a2f0aba5bdd39641.setContent(html_32bbb0b1463e3209504164d50ed6cfad);
+            
+        
+
+        circle_marker_96564e77bd993e4949a9013d31156939.bindPopup(popup_038866acdd936031a2f0aba5bdd39641)
+        ;
+
+        
+    
+    
+            var circle_marker_66e56cbfb71cf33c0f6a8245f224e90b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_4aebe2a8ed9c4a8345d1d8e118dc5292 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_a3411cacc8ad7a54406b6910e0a7d809 = $(`&lt;div id=&quot;html_a3411cacc8ad7a54406b6910e0a7d809&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Swamp Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4aebe2a8ed9c4a8345d1d8e118dc5292.setContent(html_a3411cacc8ad7a54406b6910e0a7d809);
+            
+        
+
+        circle_marker_66e56cbfb71cf33c0f6a8245f224e90b.bindPopup(popup_4aebe2a8ed9c4a8345d1d8e118dc5292)
+        ;
+
+        
+    
+    
+            var circle_marker_42d742dd70f67ef7e9e16ecc2aff8895 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_3dc2f45a660eb307fa0a8c98426c532d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_91f4721cabd9eef4424225d8b9dba352 = $(`&lt;div id=&quot;html_91f4721cabd9eef4424225d8b9dba352&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Goldfinch&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Walker nest&lt;br&gt;                     Date: 2025-03-12 17:39&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3dc2f45a660eb307fa0a8c98426c532d.setContent(html_91f4721cabd9eef4424225d8b9dba352);
+            
+        
+
+        circle_marker_42d742dd70f67ef7e9e16ecc2aff8895.bindPopup(popup_3dc2f45a660eb307fa0a8c98426c532d)
+        ;
+
+        
+    
+    
+            var circle_marker_8ea8e68dfe0ab938d54c1ad94e87bc7e = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_73ec2b6d026fecd510bf7eaf4f3ff62d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_3474d0f2041082fca4c43fe6f88766ed = $(`&lt;div id=&quot;html_3474d0f2041082fca4c43fe6f88766ed&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Yellow-rumped Warbler&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Pendery Sports Park&lt;br&gt;                     Date: 2025-03-12 17:31&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_73ec2b6d026fecd510bf7eaf4f3ff62d.setContent(html_3474d0f2041082fca4c43fe6f88766ed);
+            
+        
+
+        circle_marker_8ea8e68dfe0ab938d54c1ad94e87bc7e.bindPopup(popup_73ec2b6d026fecd510bf7eaf4f3ff62d)
+        ;
+
+        
+    
+    
+            var circle_marker_d7fa3cd93305fe31abb2dbe10a1d6667 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_98b43ea89a8d4c4153d59cdb065bb7b3 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_47f2c82639f80dad606f9539f46a5d2b = $(`&lt;div id=&quot;html_47f2c82639f80dad606f9539f46a5d2b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Pine Warbler&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Winton Woods--Fitness Trail&lt;br&gt;                     Date: 2025-03-12 14:08&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_98b43ea89a8d4c4153d59cdb065bb7b3.setContent(html_47f2c82639f80dad606f9539f46a5d2b);
+            
+        
+
+        circle_marker_d7fa3cd93305fe31abb2dbe10a1d6667.bindPopup(popup_98b43ea89a8d4c4153d59cdb065bb7b3)
+        ;
+
+        
+    
+    
+            var circle_marker_e93e8fee060f9230c4a46415c41f595a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_f89d8fae34a0812efee0e35d931f9247 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4195017c7bf0480c66695e093640250a = $(`&lt;div id=&quot;html_4195017c7bf0480c66695e093640250a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Chipping Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 503 Pontius Rd.&lt;br&gt;                     Date: 2025-03-12 13:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f89d8fae34a0812efee0e35d931f9247.setContent(html_4195017c7bf0480c66695e093640250a);
+            
+        
+
+        circle_marker_e93e8fee060f9230c4a46415c41f595a.bindPopup(popup_f89d8fae34a0812efee0e35d931f9247)
+        ;
+
+        
+    
+    
+            var circle_marker_9f5493e8355cecf0e26c5615bea8cea8 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_8d28f6e78d8d0a9bfe96f3801956c2c8 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_f3dfc30a66e517b1432bf7adf814cb05 = $(`&lt;div id=&quot;html_f3dfc30a66e517b1432bf7adf814cb05&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Hermit Thrush&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Richardson Forest Preserve&lt;br&gt;                     Date: 2025-03-12 10:08&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_8d28f6e78d8d0a9bfe96f3801956c2c8.setContent(html_f3dfc30a66e517b1432bf7adf814cb05);
+            
+        
+
+        circle_marker_9f5493e8355cecf0e26c5615bea8cea8.bindPopup(popup_8d28f6e78d8d0a9bfe96f3801956c2c8)
+        ;
+
+        
+    
+    
+            var circle_marker_b3cb5d808f9b08d34225b0c63757a9da = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_07f6950e6d9290ed540627afb20ca6a7 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_13375f1a6590bf61b39952309fcc32c8 = $(`&lt;div id=&quot;html_13375f1a6590bf61b39952309fcc32c8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Fox Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Richardson Forest Preserve&lt;br&gt;                     Date: 2025-03-12 10:08&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_07f6950e6d9290ed540627afb20ca6a7.setContent(html_13375f1a6590bf61b39952309fcc32c8);
+            
+        
+
+        circle_marker_b3cb5d808f9b08d34225b0c63757a9da.bindPopup(popup_07f6950e6d9290ed540627afb20ca6a7)
+        ;
+
+        
+    
+    
+            var circle_marker_b3535afbed2e04a9f428378028fc586f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;green&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;green&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_a2672dbaad5eca0ac5662e1a92bf103a);
+        
+    
+        var popup_b34a8ee5e5608b19467433b38fc32e13 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e923ffa50db440c9732f8dab677f332d = $(`&lt;div id=&quot;html_e923ffa50db440c9732f8dab677f332d&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Savannah Sparrow&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Cincinnati Nature Center--Rowe Woods&lt;br&gt;                     Date: 2025-03-11 13:46&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_b34a8ee5e5608b19467433b38fc32e13.setContent(html_e923ffa50db440c9732f8dab677f332d);
+            
+        
+
+        circle_marker_b3535afbed2e04a9f428378028fc586f.bindPopup(popup_b34a8ee5e5608b19467433b38fc32e13)
+        ;
+
+        
+    
+    
+            feature_group_a2672dbaad5eca0ac5662e1a92bf103a.addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+        
+    
+            var feature_group_7b7d274edd3d2a513ee6a9d828022617 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_0e6ff2b21c7bfe2448faa8d261959823 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_7edea63118594f23e19ca65a9356e596 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4e09fccfcebd77a198844d5415257a1f = $(`&lt;div id=&quot;html_4e09fccfcebd77a198844d5415257a1f&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Mallard&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Woodland Mound Park&lt;br&gt;                     Date: 2025-03-13 07:52&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_7edea63118594f23e19ca65a9356e596.setContent(html_4e09fccfcebd77a198844d5415257a1f);
+            
+        
+
+        circle_marker_0e6ff2b21c7bfe2448faa8d261959823.bindPopup(popup_7edea63118594f23e19ca65a9356e596)
+        ;
+
+        
+    
+    
+            var circle_marker_d350c3e960f796e5d1b7c3c18f4c7793 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_dbe6bc8943ef959d3937b24b46262b9e = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_129b7127b2b272e28687560d8de4f6c7 = $(`&lt;div id=&quot;html_129b7127b2b272e28687560d8de4f6c7&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Belted Kingfisher&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_dbe6bc8943ef959d3937b24b46262b9e.setContent(html_129b7127b2b272e28687560d8de4f6c7);
+            
+        
+
+        circle_marker_d350c3e960f796e5d1b7c3c18f4c7793.bindPopup(popup_dbe6bc8943ef959d3937b24b46262b9e)
+        ;
+
+        
+    
+    
+            var circle_marker_520c15ee142fd7ec5a31e155080a2a0b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_fcf147899f51f0e03e558303ac31856d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e39330d052aad821147d9a0e6905567b = $(`&lt;div id=&quot;html_e39330d052aad821147d9a0e6905567b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Crow&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_fcf147899f51f0e03e558303ac31856d.setContent(html_e39330d052aad821147d9a0e6905567b);
+            
+        
+
+        circle_marker_520c15ee142fd7ec5a31e155080a2a0b.bindPopup(popup_fcf147899f51f0e03e558303ac31856d)
+        ;
+
+        
+    
+    
+            var circle_marker_41ffe2239723b82b72e2b4e94b906432 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_a5d735420c7c70431286ddaae80cf687 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_862c41a2286c1408775cf3950c953373 = $(`&lt;div id=&quot;html_862c41a2286c1408775cf3950c953373&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Carolina Chickadee&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a5d735420c7c70431286ddaae80cf687.setContent(html_862c41a2286c1408775cf3950c953373);
+            
+        
+
+        circle_marker_41ffe2239723b82b72e2b4e94b906432.bindPopup(popup_a5d735420c7c70431286ddaae80cf687)
+        ;
+
+        
+    
+    
+            var circle_marker_18eb6f6eb944f6ede9fff2388e31ef22 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_695495b20494063dbf0bd9713db101bd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_fb22faa3d24e58a0e30e963d55277c9a = $(`&lt;div id=&quot;html_fb22faa3d24e58a0e30e963d55277c9a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Tufted Titmouse&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_695495b20494063dbf0bd9713db101bd.setContent(html_fb22faa3d24e58a0e30e963d55277c9a);
+            
+        
+
+        circle_marker_18eb6f6eb944f6ede9fff2388e31ef22.bindPopup(popup_695495b20494063dbf0bd9713db101bd)
+        ;
+
+        
+    
+    
+            var circle_marker_dac128a4655e4e653dde8e188d18341a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_21bf9f22af510de1b9c8b6db831b0506 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_df670ebbd682efe87bc04162c678a5a0 = $(`&lt;div id=&quot;html_df670ebbd682efe87bc04162c678a5a0&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;White-breasted Nuthatch&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_21bf9f22af510de1b9c8b6db831b0506.setContent(html_df670ebbd682efe87bc04162c678a5a0);
+            
+        
+
+        circle_marker_dac128a4655e4e653dde8e188d18341a.bindPopup(popup_21bf9f22af510de1b9c8b6db831b0506)
+        ;
+
+        
+    
+    
+            var circle_marker_3836a35904e23c6c81ed21770f8189bf = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_f7f0c7e2e2ccf8cea365c5aa1d8c529a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_75d028bbf2ebb30f54d52c1e20d48d4f = $(`&lt;div id=&quot;html_75d028bbf2ebb30f54d52c1e20d48d4f&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Carolina Wren&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f7f0c7e2e2ccf8cea365c5aa1d8c529a.setContent(html_75d028bbf2ebb30f54d52c1e20d48d4f);
+            
+        
+
+        circle_marker_3836a35904e23c6c81ed21770f8189bf.bindPopup(popup_f7f0c7e2e2ccf8cea365c5aa1d8c529a)
+        ;
+
+        
+    
+    
+            var circle_marker_cabbbb7aaed80f2184fbfd1c98e3a79d = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_24e60f9d522996eec05ed7637b63b9f7 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_b24b71cd6d9b949e2a72584721ea3237 = $(`&lt;div id=&quot;html_b24b71cd6d9b949e2a72584721ea3237&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-winged Blackbird&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_24e60f9d522996eec05ed7637b63b9f7.setContent(html_b24b71cd6d9b949e2a72584721ea3237);
+            
+        
+
+        circle_marker_cabbbb7aaed80f2184fbfd1c98e3a79d.bindPopup(popup_24e60f9d522996eec05ed7637b63b9f7)
+        ;
+
+        
+    
+    
+            var circle_marker_fe1e7538f51bafc78a6e9418920598e2 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_7b31485ceeca61566f4c47d0a96f560f = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_c78c910859141d111c75d6342a231d41 = $(`&lt;div id=&quot;html_c78c910859141d111c75d6342a231d41&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Cardinal&lt;/b&gt;&lt;br&gt;                     Count: 7&lt;br&gt;                     Location: Indian Creek MetroPark&lt;br&gt;                     Date: 2025-03-13 07:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_7b31485ceeca61566f4c47d0a96f560f.setContent(html_c78c910859141d111c75d6342a231d41);
+            
+        
+
+        circle_marker_fe1e7538f51bafc78a6e9418920598e2.bindPopup(popup_7b31485ceeca61566f4c47d0a96f560f)
+        ;
+
+        
+    
+    
+            var circle_marker_a51cd4fafd17b6e37947a4ec7f2fef42 = L.circleMarker(
+                [39.26565, -84.48623],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_211c7fad40ff370985ab11e76d6d8918 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_5ecaf1b78d833c55280459141c7ef08a = $(`&lt;div id=&quot;html_5ecaf1b78d833c55280459141c7ef08a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Woodcock&lt;/b&gt;&lt;br&gt;                     Count: 5&lt;br&gt;                     Location: Glenwood Gardens, Woodlawn US-OH 39.26565, -84.48623&lt;br&gt;                     Date: 2025-03-13 07:10&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_211c7fad40ff370985ab11e76d6d8918.setContent(html_5ecaf1b78d833c55280459141c7ef08a);
+            
+        
+
+        circle_marker_a51cd4fafd17b6e37947a4ec7f2fef42.bindPopup(popup_211c7fad40ff370985ab11e76d6d8918)
+        ;
+
+        
+    
+    
+            var circle_marker_22ababda8feca2fce039ab476c78cfca = L.circleMarker(
+                [39.26565, -84.48623],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_3c78933a27dc8d0082c849f874f9f034 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_3c7422a747758798ce8ae17c1ac580fa = $(`&lt;div id=&quot;html_3c7422a747758798ce8ae17c1ac580fa&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Robin&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Glenwood Gardens, Woodlawn US-OH 39.26565, -84.48623&lt;br&gt;                     Date: 2025-03-13 07:10&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3c78933a27dc8d0082c849f874f9f034.setContent(html_3c7422a747758798ce8ae17c1ac580fa);
+            
+        
+
+        circle_marker_22ababda8feca2fce039ab476c78cfca.bindPopup(popup_3c78933a27dc8d0082c849f874f9f034)
+        ;
+
+        
+    
+    
+            var circle_marker_d30e62e28162b6ee6f568c09f18e3306 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_210826b18cc6af5629e2b66dee0a72f8 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e95c7359d7a648c278946f0ec542aafb = $(`&lt;div id=&quot;html_e95c7359d7a648c278946f0ec542aafb&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Mourning Dove&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Funke House&lt;br&gt;                     Date: 2025-03-12 20:01&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_210826b18cc6af5629e2b66dee0a72f8.setContent(html_e95c7359d7a648c278946f0ec542aafb);
+            
+        
+
+        circle_marker_d30e62e28162b6ee6f568c09f18e3306.bindPopup(popup_210826b18cc6af5629e2b66dee0a72f8)
+        ;
+
+        
+    
+    
+            var circle_marker_63aba4170de5e1a3658f2558df75398e = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_1c5c9570ad600ab15d5bafbd4003dd3d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4726819791f15164def57ec25f3aa1fa = $(`&lt;div id=&quot;html_4726819791f15164def57ec25f3aa1fa&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Eastern Bluebird&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Funke House&lt;br&gt;                     Date: 2025-03-12 20:01&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_1c5c9570ad600ab15d5bafbd4003dd3d.setContent(html_4726819791f15164def57ec25f3aa1fa);
+            
+        
+
+        circle_marker_63aba4170de5e1a3658f2558df75398e.bindPopup(popup_1c5c9570ad600ab15d5bafbd4003dd3d)
+        ;
+
+        
+    
+    
+            var circle_marker_9a0c0e7fe12597c74f5301524a154095 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_a973345569a5099dcba4c256a4442772 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_d40ae93addc143ec15e6558faad40c80 = $(`&lt;div id=&quot;html_d40ae93addc143ec15e6558faad40c80&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Common Grackle&lt;/b&gt;&lt;br&gt;                     Count: 12&lt;br&gt;                     Location: Funke House&lt;br&gt;                     Date: 2025-03-12 20:01&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a973345569a5099dcba4c256a4442772.setContent(html_d40ae93addc143ec15e6558faad40c80);
+            
+        
+
+        circle_marker_9a0c0e7fe12597c74f5301524a154095.bindPopup(popup_a973345569a5099dcba4c256a4442772)
+        ;
+
+        
+    
+    
+            var circle_marker_c3991d408f2aa678adbbed95af76765f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_eee4c1ced2d71d5f44cdaa643b8f68e3 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_28dafdd7eac2f7dd48985a2f61e8552d = $(`&lt;div id=&quot;html_28dafdd7eac2f7dd48985a2f61e8552d&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Tree Swallow&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Eagle Ridge (private property)&lt;br&gt;                     Date: 2025-03-12 19:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_eee4c1ced2d71d5f44cdaa643b8f68e3.setContent(html_28dafdd7eac2f7dd48985a2f61e8552d);
+            
+        
+
+        circle_marker_c3991d408f2aa678adbbed95af76765f.bindPopup(popup_eee4c1ced2d71d5f44cdaa643b8f68e3)
+        ;
+
+        
+    
+    
+            var circle_marker_ba1eb4c622de1ab2670ee14f3a0dbfe2 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_1392386db47a79156793159d929698fb = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_f6c537aacc1640486084ff458617b6e0 = $(`&lt;div id=&quot;html_f6c537aacc1640486084ff458617b6e0&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-bellied Woodpecker&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cornelius Lane &amp; Court, Okeana&lt;br&gt;                     Date: 2025-03-12 19:21&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_1392386db47a79156793159d929698fb.setContent(html_f6c537aacc1640486084ff458617b6e0);
+            
+        
+
+        circle_marker_ba1eb4c622de1ab2670ee14f3a0dbfe2.bindPopup(popup_1392386db47a79156793159d929698fb)
+        ;
+
+        
+    
+    
+            var circle_marker_5e0f6a8f89ef4d65fb9baf38ba4c31d6 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_ad6cd710b029c78ef8d5a73b8324d0d1 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_dea56f25cd1a45dc4812ae62f48664dc = $(`&lt;div id=&quot;html_dea56f25cd1a45dc4812ae62f48664dc&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Blue Jay&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cornelius Lane &amp; Court, Okeana&lt;br&gt;                     Date: 2025-03-12 19:21&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ad6cd710b029c78ef8d5a73b8324d0d1.setContent(html_dea56f25cd1a45dc4812ae62f48664dc);
+            
+        
+
+        circle_marker_5e0f6a8f89ef4d65fb9baf38ba4c31d6.bindPopup(popup_ad6cd710b029c78ef8d5a73b8324d0d1)
+        ;
+
+        
+    
+    
+            var circle_marker_d07d7bdacd0433bb6b39855bbc089c89 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_daa7bb584294c63e83c6a66a0afe01ef = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_38f2706ceba03bc6f08850ea3aa1ef1b = $(`&lt;div id=&quot;html_38f2706ceba03bc6f08850ea3aa1ef1b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Eastern Towhee&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cornelius Lane &amp; Court, Okeana&lt;br&gt;                     Date: 2025-03-12 19:21&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_daa7bb584294c63e83c6a66a0afe01ef.setContent(html_38f2706ceba03bc6f08850ea3aa1ef1b);
+            
+        
+
+        circle_marker_d07d7bdacd0433bb6b39855bbc089c89.bindPopup(popup_daa7bb584294c63e83c6a66a0afe01ef)
+        ;
+
+        
+    
+    
+            var circle_marker_c8a9ce838a8e377ed02e259e27c5a5d6 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_32c05e1ba0d76291213d32cc9199f1ba = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_b2efbd0019463f5f43f5cb91447fdf2f = $(`&lt;div id=&quot;html_b2efbd0019463f5f43f5cb91447fdf2f&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Greater Scaup&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_32c05e1ba0d76291213d32cc9199f1ba.setContent(html_b2efbd0019463f5f43f5cb91447fdf2f);
+            
+        
+
+        circle_marker_c8a9ce838a8e377ed02e259e27c5a5d6.bindPopup(popup_32c05e1ba0d76291213d32cc9199f1ba)
+        ;
+
+        
+    
+    
+            var circle_marker_7049b3a7c13f72ba136294fac6ab8e98 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_ff1195365e16b0d7fc92f01f085608a7 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4551614ff1b1be199d9b3d0f15ed72ce = $(`&lt;div id=&quot;html_4551614ff1b1be199d9b3d0f15ed72ce&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Lesser Scaup&lt;/b&gt;&lt;br&gt;                     Count: 18&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ff1195365e16b0d7fc92f01f085608a7.setContent(html_4551614ff1b1be199d9b3d0f15ed72ce);
+            
+        
+
+        circle_marker_7049b3a7c13f72ba136294fac6ab8e98.bindPopup(popup_ff1195365e16b0d7fc92f01f085608a7)
+        ;
+
+        
+    
+    
+            var circle_marker_552f39b63e08f65e002b08cadc484b35 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_3217fc07682e69f73b1a80cc9fbe24ad = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e68d89828154893432613f51524ce603 = $(`&lt;div id=&quot;html_e68d89828154893432613f51524ce603&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Bufflehead&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3217fc07682e69f73b1a80cc9fbe24ad.setContent(html_e68d89828154893432613f51524ce603);
+            
+        
+
+        circle_marker_552f39b63e08f65e002b08cadc484b35.bindPopup(popup_3217fc07682e69f73b1a80cc9fbe24ad)
+        ;
+
+        
+    
+    
+            var circle_marker_2fb7bc4d6705b4dcdff500983d168f1c = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_d9e71c1d8238ef8668b7679ebe2e0136 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_c75d8c348ccf42f0f729d343216c01b4 = $(`&lt;div id=&quot;html_c75d8c348ccf42f0f729d343216c01b4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Common Goldeneye&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_d9e71c1d8238ef8668b7679ebe2e0136.setContent(html_c75d8c348ccf42f0f729d343216c01b4);
+            
+        
+
+        circle_marker_2fb7bc4d6705b4dcdff500983d168f1c.bindPopup(popup_d9e71c1d8238ef8668b7679ebe2e0136)
+        ;
+
+        
+    
+    
+            var circle_marker_2f553df110493c2e058c244f14cf9b8f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_3f48b53104c91f805a73b8fa89534657 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_23d82a83e359f0e8f2b23ca22a1cf600 = $(`&lt;div id=&quot;html_23d82a83e359f0e8f2b23ca22a1cf600&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Horned Grebe&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 19:13&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3f48b53104c91f805a73b8fa89534657.setContent(html_23d82a83e359f0e8f2b23ca22a1cf600);
+            
+        
+
+        circle_marker_2f553df110493c2e058c244f14cf9b8f.bindPopup(popup_3f48b53104c91f805a73b8fa89534657)
+        ;
+
+        
+    
+    
+            var circle_marker_702de548f636005ef57c15af3f8300c2 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_d7a8acd23e0b54d9c038e03fde2ecce1 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_29ee4f30a871817a07d5b17afaaa6897 = $(`&lt;div id=&quot;html_29ee4f30a871817a07d5b17afaaa6897&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Sandhill Crane&lt;/b&gt;&lt;br&gt;                     Count: 15&lt;br&gt;                     Location: Morris&lt;br&gt;                     Date: 2025-03-12 18:49&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_d7a8acd23e0b54d9c038e03fde2ecce1.setContent(html_29ee4f30a871817a07d5b17afaaa6897);
+            
+        
+
+        circle_marker_702de548f636005ef57c15af3f8300c2.bindPopup(popup_d7a8acd23e0b54d9c038e03fde2ecce1)
+        ;
+
+        
+    
+    
+            var circle_marker_06cbf7ee1e1efd2545df88db450b7b42 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_c7e9dc3a139c7cebb3d1979bb46b7738 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_20cc81c9d0fbb07f0039ed4d20907277 = $(`&lt;div id=&quot;html_20cc81c9d0fbb07f0039ed4d20907277&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Gadwall&lt;/b&gt;&lt;br&gt;                     Count: 10&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c7e9dc3a139c7cebb3d1979bb46b7738.setContent(html_20cc81c9d0fbb07f0039ed4d20907277);
+            
+        
+
+        circle_marker_06cbf7ee1e1efd2545df88db450b7b42.bindPopup(popup_c7e9dc3a139c7cebb3d1979bb46b7738)
+        ;
+
+        
+    
+    
+            var circle_marker_27f33fd9f9ad36c9373f70e9df81f3eb = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_4a151569c231e43ea4f56d6b2092f3c2 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e27a419a8e82c0594e21abc1c13df7cd = $(`&lt;div id=&quot;html_e27a419a8e82c0594e21abc1c13df7cd&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Wigeon&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4a151569c231e43ea4f56d6b2092f3c2.setContent(html_e27a419a8e82c0594e21abc1c13df7cd);
+            
+        
+
+        circle_marker_27f33fd9f9ad36c9373f70e9df81f3eb.bindPopup(popup_4a151569c231e43ea4f56d6b2092f3c2)
+        ;
+
+        
+    
+    
+            var circle_marker_f691cab6c294b4a451f5c03bbd36b39a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_2c2c10b0134721d4add32b72bd075e52 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6d68cb9109888535d692017277000c31 = $(`&lt;div id=&quot;html_6d68cb9109888535d692017277000c31&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Redhead&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_2c2c10b0134721d4add32b72bd075e52.setContent(html_6d68cb9109888535d692017277000c31);
+            
+        
+
+        circle_marker_f691cab6c294b4a451f5c03bbd36b39a.bindPopup(popup_2c2c10b0134721d4add32b72bd075e52)
+        ;
+
+        
+    
+    
+            var circle_marker_5995d6697213df011287119c3eed904e = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_c009719d66fa55060e2f9b5c75583f40 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_de2a3ef1c74314e035893fe001d24695 = $(`&lt;div id=&quot;html_de2a3ef1c74314e035893fe001d24695&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Coot&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c009719d66fa55060e2f9b5c75583f40.setContent(html_de2a3ef1c74314e035893fe001d24695);
+            
+        
+
+        circle_marker_5995d6697213df011287119c3eed904e.bindPopup(popup_c009719d66fa55060e2f9b5c75583f40)
+        ;
+
+        
+    
+    
+            var circle_marker_df511ee96e0e4069a947eb21a507ff21 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_10f9ee30dc3a8b8bc2b872a543a78116 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_fbb1fd55f9f8f2baa19d068897d106bf = $(`&lt;div id=&quot;html_fbb1fd55f9f8f2baa19d068897d106bf&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Killdeer&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_10f9ee30dc3a8b8bc2b872a543a78116.setContent(html_fbb1fd55f9f8f2baa19d068897d106bf);
+            
+        
+
+        circle_marker_df511ee96e0e4069a947eb21a507ff21.bindPopup(popup_10f9ee30dc3a8b8bc2b872a543a78116)
+        ;
+
+        
+    
+    
+            var circle_marker_4fcf3181b22f7e0898fb1096495226d9 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_14d61d62872466769b1959ae486260dd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e6e362f41f1a3cd6494757734442b5db = $(`&lt;div id=&quot;html_e6e362f41f1a3cd6494757734442b5db&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Wilson&#x27;s Snipe&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_14d61d62872466769b1959ae486260dd.setContent(html_e6e362f41f1a3cd6494757734442b5db);
+            
+        
+
+        circle_marker_4fcf3181b22f7e0898fb1096495226d9.bindPopup(popup_14d61d62872466769b1959ae486260dd)
+        ;
+
+        
+    
+    
+            var circle_marker_92d91d76662002197d97edd9f91e53f8 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_a3ff2810b713ccd96d1ddaf376cb30fd = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_f538b5ddf1e77bee57055de1bad55e29 = $(`&lt;div id=&quot;html_f538b5ddf1e77bee57055de1bad55e29&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Great Blue Heron&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a3ff2810b713ccd96d1ddaf376cb30fd.setContent(html_f538b5ddf1e77bee57055de1bad55e29);
+            
+        
+
+        circle_marker_92d91d76662002197d97edd9f91e53f8.bindPopup(popup_a3ff2810b713ccd96d1ddaf376cb30fd)
+        ;
+
+        
+    
+    
+            var circle_marker_1c909881056758624207765c0023e8b6 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_7a91ef75b22d7d78bc79991ab0864ed2 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8377aa174318652f28173c8e147bce88 = $(`&lt;div id=&quot;html_8377aa174318652f28173c8e147bce88&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Harrier&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_7a91ef75b22d7d78bc79991ab0864ed2.setContent(html_8377aa174318652f28173c8e147bce88);
+            
+        
+
+        circle_marker_1c909881056758624207765c0023e8b6.bindPopup(popup_7a91ef75b22d7d78bc79991ab0864ed2)
+        ;
+
+        
+    
+    
+            var circle_marker_78d95e7b3a3451163ceab9bf89eb19d1 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_e907a04599756570c5e4863a8134f924 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_88243c36f907a1bf8de66172e365ced8 = $(`&lt;div id=&quot;html_88243c36f907a1bf8de66172e365ced8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Hairy Woodpecker&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_e907a04599756570c5e4863a8134f924.setContent(html_88243c36f907a1bf8de66172e365ced8);
+            
+        
+
+        circle_marker_78d95e7b3a3451163ceab9bf89eb19d1.bindPopup(popup_e907a04599756570c5e4863a8134f924)
+        ;
+
+        
+    
+    
+            var circle_marker_63cc334c899c8cb92c0b948c03c06e9f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_7a2fdfc2a61a644aa8198478ff573a9a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_a4e14758d221b21f13322baf23c656c1 = $(`&lt;div id=&quot;html_a4e14758d221b21f13322baf23c656c1&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Flicker&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_7a2fdfc2a61a644aa8198478ff573a9a.setContent(html_a4e14758d221b21f13322baf23c656c1);
+            
+        
+
+        circle_marker_63cc334c899c8cb92c0b948c03c06e9f.bindPopup(popup_7a2fdfc2a61a644aa8198478ff573a9a)
+        ;
+
+        
+    
+    
+            var circle_marker_1d0ab863a515422835bb4f34dcae2ca7 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_090ee2993c47f2c1d7a7cf11bf258858 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_763f571f47c90bb9ed894182498f151c = $(`&lt;div id=&quot;html_763f571f47c90bb9ed894182498f151c&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Kestrel&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_090ee2993c47f2c1d7a7cf11bf258858.setContent(html_763f571f47c90bb9ed894182498f151c);
+            
+        
+
+        circle_marker_1d0ab863a515422835bb4f34dcae2ca7.bindPopup(popup_090ee2993c47f2c1d7a7cf11bf258858)
+        ;
+
+        
+    
+    
+            var circle_marker_582c88d701939868d1e498a845d4ac2e = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_eea3ca4ca5db48c799e5a81e12e0a06f = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_ee28cc02eecd345415a125dd1fa17516 = $(`&lt;div id=&quot;html_ee28cc02eecd345415a125dd1fa17516&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;European Starling&lt;/b&gt;&lt;br&gt;                     Count: 15&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_eea3ca4ca5db48c799e5a81e12e0a06f.setContent(html_ee28cc02eecd345415a125dd1fa17516);
+            
+        
+
+        circle_marker_582c88d701939868d1e498a845d4ac2e.bindPopup(popup_eea3ca4ca5db48c799e5a81e12e0a06f)
+        ;
+
+        
+    
+    
+            var circle_marker_8e7c4dd5f489102abc11123fc94c6d2e = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_387b5fd06d836654621e93b9612d1c31 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_56d573c2db24c048fa5319fa3228eaea = $(`&lt;div id=&quot;html_56d573c2db24c048fa5319fa3228eaea&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Brown Thrasher&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_387b5fd06d836654621e93b9612d1c31.setContent(html_56d573c2db24c048fa5319fa3228eaea);
+            
+        
+
+        circle_marker_8e7c4dd5f489102abc11123fc94c6d2e.bindPopup(popup_387b5fd06d836654621e93b9612d1c31)
+        ;
+
+        
+    
+    
+            var circle_marker_a483f65e9c524a16fb04b60d2cbf0af7 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_a17013bf33acfb7a004c76de7e52ffd3 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4e43ab79d942d3a159f822161f211845 = $(`&lt;div id=&quot;html_4e43ab79d942d3a159f822161f211845&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Dark-eyed Junco&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a17013bf33acfb7a004c76de7e52ffd3.setContent(html_4e43ab79d942d3a159f822161f211845);
+            
+        
+
+        circle_marker_a483f65e9c524a16fb04b60d2cbf0af7.bindPopup(popup_a17013bf33acfb7a004c76de7e52ffd3)
+        ;
+
+        
+    
+    
+            var circle_marker_c759f6f7d1c950de1cb0b7908f5cd26d = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_8cfd44ed178312e5fc46d01a0e31cd59 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_5fec3dd932fd3865519f844953b017d4 = $(`&lt;div id=&quot;html_5fec3dd932fd3865519f844953b017d4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Brown-headed Cowbird&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_8cfd44ed178312e5fc46d01a0e31cd59.setContent(html_5fec3dd932fd3865519f844953b017d4);
+            
+        
+
+        circle_marker_c759f6f7d1c950de1cb0b7908f5cd26d.bindPopup(popup_8cfd44ed178312e5fc46d01a0e31cd59)
+        ;
+
+        
+    
+    
+            var circle_marker_a328ae2083041137edab790cdc7df575 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_03ea437e4693cfa153e314509592b5e6 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_06720686e7f904d0e3305723cf87684a = $(`&lt;div id=&quot;html_06720686e7f904d0e3305723cf87684a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Rusty Blackbird&lt;/b&gt;&lt;br&gt;                     Count: 15&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_03ea437e4693cfa153e314509592b5e6.setContent(html_06720686e7f904d0e3305723cf87684a);
+            
+        
+
+        circle_marker_a328ae2083041137edab790cdc7df575.bindPopup(popup_03ea437e4693cfa153e314509592b5e6)
+        ;
+
+        
+    
+    
+            var circle_marker_ccb5242103365487e0ade65b1383119b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_5200e495c3522953effada5d9c380452 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_dea8ac6df2330a69cbd62d86d60b3d68 = $(`&lt;div id=&quot;html_dea8ac6df2330a69cbd62d86d60b3d68&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Pintail&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_5200e495c3522953effada5d9c380452.setContent(html_dea8ac6df2330a69cbd62d86d60b3d68);
+            
+        
+
+        circle_marker_ccb5242103365487e0ade65b1383119b.bindPopup(popup_5200e495c3522953effada5d9c380452)
+        ;
+
+        
+    
+    
+            var circle_marker_031c0b615a61d768056356ff3c578e73 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_c4448d020a994ae5c7b1165d86bf697d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_cf6eee731adfede14baa383497dcc2c4 = $(`&lt;div id=&quot;html_cf6eee731adfede14baa383497dcc2c4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Turkey Vulture&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c4448d020a994ae5c7b1165d86bf697d.setContent(html_cf6eee731adfede14baa383497dcc2c4);
+            
+        
+
+        circle_marker_031c0b615a61d768056356ff3c578e73.bindPopup(popup_c4448d020a994ae5c7b1165d86bf697d)
+        ;
+
+        
+    
+    
+            var circle_marker_90ac6c0589c58235529b1be5290fd9bd = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_ded1cbb1f12eb411864a148fa5c9e8bb = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_e67887977a945c2824d23895dca3bb4a = $(`&lt;div id=&quot;html_e67887977a945c2824d23895dca3bb4a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Mockingbird&lt;/b&gt;&lt;br&gt;                     Count: 8&lt;br&gt;                     Location: Fernald Preserve (Hamilton Co.)&lt;br&gt;                     Date: 2025-03-12 18:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ded1cbb1f12eb411864a148fa5c9e8bb.setContent(html_e67887977a945c2824d23895dca3bb4a);
+            
+        
+
+        circle_marker_90ac6c0589c58235529b1be5290fd9bd.bindPopup(popup_ded1cbb1f12eb411864a148fa5c9e8bb)
+        ;
+
+        
+    
+    
+            var circle_marker_b00ed9fcebfb6da2da5ffbf2d5cccacd = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_abfe7ff127774c09aec94f588c0ee2ae = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_28a527d97019f9c8798e3483cfc65190 = $(`&lt;div id=&quot;html_28a527d97019f9c8798e3483cfc65190&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Downy Woodpecker&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: My Backyard&lt;br&gt;                     Date: 2025-03-12 18:34&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_abfe7ff127774c09aec94f588c0ee2ae.setContent(html_28a527d97019f9c8798e3483cfc65190);
+            
+        
+
+        circle_marker_b00ed9fcebfb6da2da5ffbf2d5cccacd.bindPopup(popup_abfe7ff127774c09aec94f588c0ee2ae)
+        ;
+
+        
+    
+    
+            var circle_marker_24dd82ee54c63294ac399a1d4a9ee9ea = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_517319b5c5eedc7e8f5ecc62ef11276c = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_9192ad83512808f915582d44e9d84288 = $(`&lt;div id=&quot;html_9192ad83512808f915582d44e9d84288&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Pileated Woodpecker&lt;/b&gt;&lt;br&gt;                     Count: 2&lt;br&gt;                     Location: My Backyard&lt;br&gt;                     Date: 2025-03-12 18:34&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_517319b5c5eedc7e8f5ecc62ef11276c.setContent(html_9192ad83512808f915582d44e9d84288);
+            
+        
+
+        circle_marker_24dd82ee54c63294ac399a1d4a9ee9ea.bindPopup(popup_517319b5c5eedc7e8f5ecc62ef11276c)
+        ;
+
+        
+    
+    
+            var circle_marker_2e5283a54c8031aebcaef45406a1a20b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_3c4b26435e588a6677ff4786f4a71b7a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_0daba48aebe495ae6792b89efe72f2b1 = $(`&lt;div id=&quot;html_0daba48aebe495ae6792b89efe72f2b1&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Pectoral Sandpiper&lt;/b&gt;&lt;br&gt;                     Count: 7&lt;br&gt;                     Location: Armleder Park&lt;br&gt;                     Date: 2025-03-12 18:25&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_3c4b26435e588a6677ff4786f4a71b7a.setContent(html_0daba48aebe495ae6792b89efe72f2b1);
+            
+        
+
+        circle_marker_2e5283a54c8031aebcaef45406a1a20b.bindPopup(popup_3c4b26435e588a6677ff4786f4a71b7a)
+        ;
+
+        
+    
+    
+            var circle_marker_5e77797b37c20a8d4a455fbcb41c4da1 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_5a16adb6fb971e5eb8891dbf531a2569 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_dc8f6d18eb988830f5d051c7697f4499 = $(`&lt;div id=&quot;html_dc8f6d18eb988830f5d051c7697f4499&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Double-crested Cormorant&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: Armleder Park&lt;br&gt;                     Date: 2025-03-12 18:25&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_5a16adb6fb971e5eb8891dbf531a2569.setContent(html_dc8f6d18eb988830f5d051c7697f4499);
+            
+        
+
+        circle_marker_5e77797b37c20a8d4a455fbcb41c4da1.bindPopup(popup_5a16adb6fb971e5eb8891dbf531a2569)
+        ;
+
+        
+    
+    
+            var circle_marker_4f9919fc926f184aeabd36786ea3e4fc = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_4f4035b6f27003c0ad3fe892b9b754ca = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_8b948050f4ebfab1c06d6b7c1aa7fe71 = $(`&lt;div id=&quot;html_8b948050f4ebfab1c06d6b7c1aa7fe71&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Golden-crowned Kinglet&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Armleder Park&lt;br&gt;                     Date: 2025-03-12 18:25&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4f4035b6f27003c0ad3fe892b9b754ca.setContent(html_8b948050f4ebfab1c06d6b7c1aa7fe71);
+            
+        
+
+        circle_marker_4f9919fc926f184aeabd36786ea3e4fc.bindPopup(popup_4f4035b6f27003c0ad3fe892b9b754ca)
+        ;
+
+        
+    
+    
+            var circle_marker_fdc050148affbc30b92ced283ad5272c = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_2bc174de7667966bd51e08a05630e37c = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_bac6a038f453a1ad13977acfdda08529 = $(`&lt;div id=&quot;html_bac6a038f453a1ad13977acfdda08529&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Northern Shoveler&lt;/b&gt;&lt;br&gt;                     Count: 13&lt;br&gt;                     Location: Fernald Preserve--Lodge Pond&lt;br&gt;                     Date: 2025-03-12 18:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_2bc174de7667966bd51e08a05630e37c.setContent(html_bac6a038f453a1ad13977acfdda08529);
+            
+        
+
+        circle_marker_fdc050148affbc30b92ced283ad5272c.bindPopup(popup_2bc174de7667966bd51e08a05630e37c)
+        ;
+
+        
+    
+    
+            var circle_marker_1d52dfc96bbf035c0c3e1ce588552904 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_458da752b1c5252b8b507fe093dbbee9 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_bfc970721e4fdfdd25e6da672efcb6c8 = $(`&lt;div id=&quot;html_bfc970721e4fdfdd25e6da672efcb6c8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Pied-billed Grebe&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Fernald Preserve--Lodge Pond&lt;br&gt;                     Date: 2025-03-12 18:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_458da752b1c5252b8b507fe093dbbee9.setContent(html_bfc970721e4fdfdd25e6da672efcb6c8);
+            
+        
+
+        circle_marker_1d52dfc96bbf035c0c3e1ce588552904.bindPopup(popup_458da752b1c5252b8b507fe093dbbee9)
+        ;
+
+        
+    
+    
+            var circle_marker_21e544a414e1d7a4c3f71b4428e39241 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_dcfc821bd6dfc88f59316b9c63f544fc = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_07b4dcfb5392697b5d2ddb7290c1b80a = $(`&lt;div id=&quot;html_07b4dcfb5392697b5d2ddb7290c1b80a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-headed Woodpecker&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Cincinnati Nature Center--Rowe Woods&lt;br&gt;                     Date: 2025-03-12 18:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_dcfc821bd6dfc88f59316b9c63f544fc.setContent(html_07b4dcfb5392697b5d2ddb7290c1b80a);
+            
+        
+
+        circle_marker_21e544a414e1d7a4c3f71b4428e39241.bindPopup(popup_dcfc821bd6dfc88f59316b9c63f544fc)
+        ;
+
+        
+    
+    
+            var circle_marker_864f34c9b92e7fcd5916f519af624a30 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_483314fdeb085c066c865bda64ad0c35 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_ffd47df85297689e8f420cd37397c6c9 = $(`&lt;div id=&quot;html_ffd47df85297689e8f420cd37397c6c9&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Rock Pigeon&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 17:40&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_483314fdeb085c066c865bda64ad0c35.setContent(html_ffd47df85297689e8f420cd37397c6c9);
+            
+        
+
+        circle_marker_864f34c9b92e7fcd5916f519af624a30.bindPopup(popup_483314fdeb085c066c865bda64ad0c35)
+        ;
+
+        
+    
+    
+            var circle_marker_02e74e0ea44131a05c29018aeb0b5939 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_4922fb8a24d80385df7c2cf395332c17 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_4c566d5c4181b2bbc595e9e68cdd6b8b = $(`&lt;div id=&quot;html_4c566d5c4181b2bbc595e9e68cdd6b8b&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Yellow-bellied Sapsucker&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Walker nest&lt;br&gt;                     Date: 2025-03-12 17:39&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4922fb8a24d80385df7c2cf395332c17.setContent(html_4c566d5c4181b2bbc595e9e68cdd6b8b);
+            
+        
+
+        circle_marker_02e74e0ea44131a05c29018aeb0b5939.bindPopup(popup_4922fb8a24d80385df7c2cf395332c17)
+        ;
+
+        
+    
+    
+            var circle_marker_5c62523afd540b4ea73c40592d96ca8f = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_978444386498eca41ba25ae2ee63ec19 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6e53dbc2edbb3c5ce005c62077388bbc = $(`&lt;div id=&quot;html_6e53dbc2edbb3c5ce005c62077388bbc&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Brown Creeper&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Miami University--Natural Areas Bird Blind&lt;br&gt;                     Date: 2025-03-12 17:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_978444386498eca41ba25ae2ee63ec19.setContent(html_6e53dbc2edbb3c5ce005c62077388bbc);
+            
+        
+
+        circle_marker_5c62523afd540b4ea73c40592d96ca8f.bindPopup(popup_978444386498eca41ba25ae2ee63ec19)
+        ;
+
+        
+    
+    
+            var circle_marker_0617438f194a52facc3fe0294071e1c3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_d76ab9807f501cf0930ce5d29e9e496d = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_55e4a085eb3d6a9da5709d6c56270aae = $(`&lt;div id=&quot;html_55e4a085eb3d6a9da5709d6c56270aae&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Black Vulture&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: Riverpointe&lt;br&gt;                     Date: 2025-03-12 16:55&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_d76ab9807f501cf0930ce5d29e9e496d.setContent(html_55e4a085eb3d6a9da5709d6c56270aae);
+            
+        
+
+        circle_marker_0617438f194a52facc3fe0294071e1c3.bindPopup(popup_d76ab9807f501cf0930ce5d29e9e496d)
+        ;
+
+        
+    
+    
+            var circle_marker_09f4fc1e3f6eb779acb15b6a92577e3b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_f506a6509b53289cea059e41c627a121 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_0fc97ae21f2dead48788e63792920c40 = $(`&lt;div id=&quot;html_0fc97ae21f2dead48788e63792920c40&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Eastern Phoebe&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Dry Creek Rd&lt;br&gt;                     Date: 2025-03-12 13:51&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f506a6509b53289cea059e41c627a121.setContent(html_0fc97ae21f2dead48788e63792920c40);
+            
+        
+
+        circle_marker_09f4fc1e3f6eb779acb15b6a92577e3b.bindPopup(popup_f506a6509b53289cea059e41c627a121)
+        ;
+
+        
+    
+    
+            var circle_marker_aefadb0e3d6a085ddbc0f7a6691d1907 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_f466e8b56c36534dc60717cae92803a5 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_440e650208bfb1ae0b889eadcb727fe0 = $(`&lt;div id=&quot;html_440e650208bfb1ae0b889eadcb727fe0&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Pine Siskin&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Mitchell Memorial Forest&lt;br&gt;                     Date: 2025-03-12 13:31&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f466e8b56c36534dc60717cae92803a5.setContent(html_440e650208bfb1ae0b889eadcb727fe0);
+            
+        
+
+        circle_marker_aefadb0e3d6a085ddbc0f7a6691d1907.bindPopup(popup_f466e8b56c36534dc60717cae92803a5)
+        ;
+
+        
+    
+    
+            var circle_marker_9a5494fb7f3288c87eb61f7bd81ea57a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_f10584e6fb1a3027da8098f37d042cbf = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_aa743acaef2586e0a3dc04835abe0d5f = $(`&lt;div id=&quot;html_aa743acaef2586e0a3dc04835abe0d5f&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Wild Turkey&lt;/b&gt;&lt;br&gt;                     Count: 3&lt;br&gt;                     Location: 503 Pontius Rd.&lt;br&gt;                     Date: 2025-03-12 13:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_f10584e6fb1a3027da8098f37d042cbf.setContent(html_aa743acaef2586e0a3dc04835abe0d5f);
+            
+        
+
+        circle_marker_9a5494fb7f3288c87eb61f7bd81ea57a.bindPopup(popup_f10584e6fb1a3027da8098f37d042cbf)
+        ;
+
+        
+    
+    
+            var circle_marker_8820ab69efe132662d3c4da7d3a301ac = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_e070709273a25fdefcd47e9dbb4ef9b5 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_789ac89c31624e48bace8113e24c6884 = $(`&lt;div id=&quot;html_789ac89c31624e48bace8113e24c6884&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Horned Lark&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Voice of America MetroPark&lt;br&gt;                     Date: 2025-03-12 13:01&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_e070709273a25fdefcd47e9dbb4ef9b5.setContent(html_789ac89c31624e48bace8113e24c6884);
+            
+        
+
+        circle_marker_8820ab69efe132662d3c4da7d3a301ac.bindPopup(popup_e070709273a25fdefcd47e9dbb4ef9b5)
+        ;
+
+        
+    
+    
+            var circle_marker_a321f9e7d32463b8676104a108b597cf = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_ea9b6b7b679ab9e91f8a8a07d6315a23 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_2dfcdf68ec47f14a4478709d7ecf5da5 = $(`&lt;div id=&quot;html_2dfcdf68ec47f14a4478709d7ecf5da5&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Great Egret&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Gilmore Ponds MetroPark (do not walk along or cross railroad tracks)&lt;br&gt;                     Date: 2025-03-12 10:12&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ea9b6b7b679ab9e91f8a8a07d6315a23.setContent(html_2dfcdf68ec47f14a4478709d7ecf5da5);
+            
+        
+
+        circle_marker_a321f9e7d32463b8676104a108b597cf.bindPopup(popup_ea9b6b7b679ab9e91f8a8a07d6315a23)
+        ;
+
+        
+    
+    
+            var circle_marker_3a29a82ccb0be634b92630803dd476da = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_ca1bdadfb6212211173d5a642316a748 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_17ad73f4ae8ff9a00a2330ee536fcab8 = $(`&lt;div id=&quot;html_17ad73f4ae8ff9a00a2330ee536fcab8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Cedar Waxwing&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Winton Woods--Fitness Trail&lt;br&gt;                     Date: 2025-03-12 09:10&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_ca1bdadfb6212211173d5a642316a748.setContent(html_17ad73f4ae8ff9a00a2330ee536fcab8);
+            
+        
+
+        circle_marker_3a29a82ccb0be634b92630803dd476da.bindPopup(popup_ca1bdadfb6212211173d5a642316a748)
+        ;
+
+        
+    
+    
+            var circle_marker_90909e4c460c0b4fc5c9b6e3354f53bc = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_dea1f7afa8551c364184e2a6c5230e77 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_293ad2d3064586f55b11bdd43bbdc1ab = $(`&lt;div id=&quot;html_293ad2d3064586f55b11bdd43bbdc1ab&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ruby-crowned Kinglet&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Ohio::Hamilton County::Clifton--Interwood House&lt;br&gt;                     Date: 2025-03-12 08:37&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_dea1f7afa8551c364184e2a6c5230e77.setContent(html_293ad2d3064586f55b11bdd43bbdc1ab);
+            
+        
+
+        circle_marker_90909e4c460c0b4fc5c9b6e3354f53bc.bindPopup(popup_dea1f7afa8551c364184e2a6c5230e77)
+        ;
+
+        
+    
+    
+            var circle_marker_821ea07c45ea56f805cb7dca90ce897a = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_5a06657d79219ba49226bcb10894143b = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_56f63095f55543b7db751336443fab51 = $(`&lt;div id=&quot;html_56f63095f55543b7db751336443fab51&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Pipit&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: FurField Dog Park&lt;br&gt;                     Date: 2025-03-12 08:05&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_5a06657d79219ba49226bcb10894143b.setContent(html_56f63095f55543b7db751336443fab51);
+            
+        
+
+        circle_marker_821ea07c45ea56f805cb7dca90ce897a.bindPopup(popup_5a06657d79219ba49226bcb10894143b)
+        ;
+
+        
+    
+    
+            var circle_marker_4f5cf46a6a850163aac1601469e8a40d = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_12703cd1473d7256326c8c06f6e1030b = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_6266deb63a9808fa6501f995178a9b74 = $(`&lt;div id=&quot;html_6266deb63a9808fa6501f995178a9b74&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Canvasback&lt;/b&gt;&lt;br&gt;                     Count: 9&lt;br&gt;                     Location: Lake Barber&lt;br&gt;                     Date: 2025-03-11 22:27&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_12703cd1473d7256326c8c06f6e1030b.setContent(html_6266deb63a9808fa6501f995178a9b74);
+            
+        
+
+        circle_marker_4f5cf46a6a850163aac1601469e8a40d.bindPopup(popup_12703cd1473d7256326c8c06f6e1030b)
+        ;
+
+        
+    
+    
+            var circle_marker_537c9d68f8068033217ab0fb75b87935 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_4c93ac4b664ef6422a5dc37b2836061e = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_cf624ed55b8dec40176dbc8eba4523ac = $(`&lt;div id=&quot;html_cf624ed55b8dec40176dbc8eba4523ac&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ring-billed Gull&lt;/b&gt;&lt;br&gt;                     Count: 6&lt;br&gt;                     Location: Great Miami River Trail--Middletown&lt;br&gt;                     Date: 2025-03-11 18:24&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4c93ac4b664ef6422a5dc37b2836061e.setContent(html_cf624ed55b8dec40176dbc8eba4523ac);
+            
+        
+
+        circle_marker_537c9d68f8068033217ab0fb75b87935.bindPopup(popup_4c93ac4b664ef6422a5dc37b2836061e)
+        ;
+
+        
+    
+    
+            var circle_marker_04167b7a81713005d3982e4eaa7e1bbd = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_a6c484825b87379a894a7b941690c45a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_063b19b20a8645b1a8f8762f485816ca = $(`&lt;div id=&quot;html_063b19b20a8645b1a8f8762f485816ca&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Winter Wren&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Miami-Erie Canal Bike Path--Between Gilmore MetroPark and Ellis Lake Wetlands&lt;br&gt;                     Date: 2025-03-11 18:03&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_a6c484825b87379a894a7b941690c45a.setContent(html_063b19b20a8645b1a8f8762f485816ca);
+            
+        
+
+        circle_marker_04167b7a81713005d3982e4eaa7e1bbd.bindPopup(popup_a6c484825b87379a894a7b941690c45a)
+        ;
+
+        
+    
+    
+            var circle_marker_6c140bf9f836a0d59001904410ddc660 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_225dbde30988c399a973b69d5a239d32 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_f6cf0c748b9d65af34e1723d903ca3ba = $(`&lt;div id=&quot;html_f6cf0c748b9d65af34e1723d903ca3ba&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Bonaparte&#x27;s Gull&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: East Fork SP--South Beach&lt;br&gt;                     Date: 2025-03-11 08:35&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_225dbde30988c399a973b69d5a239d32.setContent(html_f6cf0c748b9d65af34e1723d903ca3ba);
+            
+        
+
+        circle_marker_6c140bf9f836a0d59001904410ddc660.bindPopup(popup_225dbde30988c399a973b69d5a239d32)
+        ;
+
+        
+    
+    
+            var circle_marker_bf86ebaab9974488f60affc57e5a99d3 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_4a6fe9356736c96808c6b3c6109991a9 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_05f0feaaf134598f6aa0ca1273664faf = $(`&lt;div id=&quot;html_05f0feaaf134598f6aa0ca1273664faf&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Ring-necked Pheasant&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 545 Chapel Road, Amelia, Ohio, US (39.034, -84.185)&lt;br&gt;                     Date: 2025-03-10 16:30&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_4a6fe9356736c96808c6b3c6109991a9.setContent(html_05f0feaaf134598f6aa0ca1273664faf);
+            
+        
+
+        circle_marker_bf86ebaab9974488f60affc57e5a99d3.bindPopup(popup_4a6fe9356736c96808c6b3c6109991a9)
+        ;
+
+        
+    
+    
+            var circle_marker_466834aaacbe45afc09e0d3df0e57b6b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_9e95c5b18fc8dfda2b20798915483d4f = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_3fe823f316bac81944efa919a03a5e86 = $(`&lt;div id=&quot;html_3fe823f316bac81944efa919a03a5e86&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Common Loon&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: marsh lake&lt;br&gt;                     Date: 2025-03-10 12:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_9e95c5b18fc8dfda2b20798915483d4f.setContent(html_3fe823f316bac81944efa919a03a5e86);
+            
+        
+
+        circle_marker_466834aaacbe45afc09e0d3df0e57b6b.bindPopup(popup_9e95c5b18fc8dfda2b20798915483d4f)
+        ;
+
+        
+    
+    
+            var circle_marker_555c10a589bd191bc630207aae9180a8 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_c1d2a19213f82355ab521512e9388bfa = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_77b3d16fdbdd4fee83e1b39be06ffd01 = $(`&lt;div id=&quot;html_77b3d16fdbdd4fee83e1b39be06ffd01&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Merlin&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Voice of America MetroPark&lt;br&gt;                     Date: 2025-03-10 10:00&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_c1d2a19213f82355ab521512e9388bfa.setContent(html_77b3d16fdbdd4fee83e1b39be06ffd01);
+            
+        
+
+        circle_marker_555c10a589bd191bc630207aae9180a8.bindPopup(popup_c1d2a19213f82355ab521512e9388bfa)
+        ;
+
+        
+    
+    
+            var circle_marker_120da854cc53020b6ed7876612863bad = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_1633896736c426dbbd902338fb47ad98 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_7f1f2eaf845a4e6ffd3fdf39609e1f6a = $(`&lt;div id=&quot;html_7f1f2eaf845a4e6ffd3fdf39609e1f6a&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American White Pelican&lt;/b&gt;&lt;br&gt;                     Count: 4&lt;br&gt;                     Location: East Fork SP--South Beach&lt;br&gt;                     Date: 2025-03-10 09:06&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_1633896736c426dbbd902338fb47ad98.setContent(html_7f1f2eaf845a4e6ffd3fdf39609e1f6a);
+            
+        
+
+        circle_marker_120da854cc53020b6ed7876612863bad.bindPopup(popup_1633896736c426dbbd902338fb47ad98)
+        ;
+
+        
+    
+    
+            var circle_marker_828eb888e7f673d78c06beb200ab4da8 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_2dca7bb240011f55c83d81d527809791 = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_5e44751eb36d861963f5f60d4dfc8928 = $(`&lt;div id=&quot;html_5e44751eb36d861963f5f60d4dfc8928&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;American Herring Gull&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: East Fork SP--South Beach&lt;br&gt;                     Date: 2025-03-10 08:51&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_2dca7bb240011f55c83d81d527809791.setContent(html_5e44751eb36d861963f5f60d4dfc8928);
+            
+        
+
+        circle_marker_828eb888e7f673d78c06beb200ab4da8.bindPopup(popup_2dca7bb240011f55c83d81d527809791)
+        ;
+
+        
+    
+    
+            var circle_marker_df04b4fa49af0267fbb07bea33298a07 = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_27fda7c2927dd99fd096a08d23d3bf5a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_267ec9e13c54a1fca9103c94600a50f4 = $(`&lt;div id=&quot;html_267ec9e13c54a1fca9103c94600a50f4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Red-breasted Nuthatch&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: Home&lt;br&gt;                     Date: 2025-03-04 13:50&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_27fda7c2927dd99fd096a08d23d3bf5a.setContent(html_267ec9e13c54a1fca9103c94600a50f4);
+            
+        
+
+        circle_marker_df04b4fa49af0267fbb07bea33298a07.bindPopup(popup_27fda7c2927dd99fd096a08d23d3bf5a)
+        ;
+
+        
+    
+    
+            var circle_marker_1f35965b89c563798f6ec0a3f463d55b = L.circleMarker(
+                [39.1031, -84.512],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;gray&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;gray&quot;, &quot;fillOpacity&quot;: 0.2, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 8, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(feature_group_7b7d274edd3d2a513ee6a9d828022617);
+        
+    
+        var popup_2d154f53d3971a21896f09c8956cb64a = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_fe14906f248419e6f7c496025aece8b5 = $(`&lt;div id=&quot;html_fe14906f248419e6f7c496025aece8b5&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;&gt;                     &lt;b&gt;Gray Catbird&lt;/b&gt;&lt;br&gt;                     Count: 1&lt;br&gt;                     Location: 6010 Belair Drive, Florence Ky&lt;br&gt;                     Date: 2025-03-01 13:36&lt;br&gt;                     &lt;/div&gt;`)[0];
+                popup_2d154f53d3971a21896f09c8956cb64a.setContent(html_fe14906f248419e6f7c496025aece8b5);
+            
+        
+
+        circle_marker_1f35965b89c563798f6ec0a3f463d55b.bindPopup(popup_2d154f53d3971a21896f09c8956cb64a)
+        ;
+
+        
+    
+    
+            feature_group_7b7d274edd3d2a513ee6a9d828022617.addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+        
+    
+            var layer_control_99b733dfc1794d4cf3eaf073046a73a8_layers = {
+                base_layers : {
+                    &quot;openstreetmap&quot; : tile_layer_3ced8bcd9d202159cf809631c10b957e,
+                },
+                overlays :  {
+                    &quot;Raptors&quot; : feature_group_19e722b776477299333a21f96e0bf5c8,
+                    &quot;Waterfowl&quot; : feature_group_6caa1e02ae071affb64549db628e2558,
+                    &quot;Songbirds&quot; : feature_group_a2672dbaad5eca0ac5662e1a92bf103a,
+                    &quot;Other Birds&quot; : feature_group_7b7d274edd3d2a513ee6a9d828022617,
+                },
+            };
+            let layer_control_99b733dfc1794d4cf3eaf073046a73a8 = L.control.layers(
+                layer_control_99b733dfc1794d4cf3eaf073046a73a8_layers.base_layers,
+                layer_control_99b733dfc1794d4cf3eaf073046a73a8_layers.overlays,
+                {
+  &quot;position&quot;: &quot;topright&quot;,
+  &quot;collapsed&quot;: true,
+  &quot;autoZIndex&quot;: true,
+}
+            ).addTo(map_da7d0d4cccf3e437e8867d8062bf6ad2);
+
+        
+&lt;/script&gt;
+&lt;/html&gt;" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe></div></div>
+                </body>
+                </html>
+                

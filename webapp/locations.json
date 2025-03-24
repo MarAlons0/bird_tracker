@@ -1,0 +1,26 @@
+{
+    "cincinnati": {
+        "name": "Cincinnati",
+        "lat": 39.1031,
+        "lng": -84.5120,
+        "radius": 30
+    },
+    "dayton": {
+        "name": "Dayton",
+        "lat": 39.7589,
+        "lng": -84.1916,
+        "radius": 30
+    },
+    "columbus": {
+        "name": "Columbus",
+        "lat": 39.9612,
+        "lng": -82.9988,
+        "radius": 30
+    },
+    "cleveland": {
+        "name": "Cleveland",
+        "lat": 41.4993,
+        "lng": -81.6944,
+        "radius": 30
+    }
+}
