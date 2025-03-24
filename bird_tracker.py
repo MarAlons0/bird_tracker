@@ -16,6 +16,8 @@ from apscheduler.triggers.cron import CronTrigger
 import logging
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MISSED
 from dotenv import load_dotenv
+import httpx
+from anthropic import Anthropic
 
 class BirdSightingTracker:
     def __init__(self):
@@ -31,7 +33,13 @@ class BirdSightingTracker:
             'recipient': os.getenv('RECIPIENT_EMAIL')
         }
         self.active_location = self._get_active_location()
-        self.claude = anthropic.Client(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        
+        # Update this part
+        http_client = httpx.Client()
+        self.claude = Anthropic(
+            api_key=os.getenv('ANTHROPIC_API_KEY'),
+            http_client=http_client
+        )
         
         # Start daily report scheduler
         self.scheduler = self.start_daily_reports()
