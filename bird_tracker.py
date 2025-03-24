@@ -31,7 +31,7 @@ class BirdSightingTracker:
             'recipient': os.getenv('RECIPIENT_EMAIL')
         }
         self.active_location = self._get_active_location()
-        self.claude = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        self.claude = anthropic.Client(api_key=os.getenv('ANTHROPIC_API_KEY'))
         
         # Start daily report scheduler
         self.scheduler = self.start_daily_reports()
