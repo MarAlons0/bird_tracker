@@ -22,6 +22,7 @@ from anthropic import Anthropic
 class BirdSightingTracker:
     def __init__(self):
         load_dotenv()
+        self.config = self._load_config()
         self.api_key = os.getenv('EBIRD_API_KEY')
         self.base_url = "https://api.ebird.org/v2"
         self.email_config = {
@@ -190,17 +191,14 @@ Please provide a brief analysis focusing on:
 """
 
             print("DEBUG: Sending request to Claude...")
-            response = self.claude.messages.create(
+            response = self.claude.complete(
+                prompt=prompt,
                 model="claude-3-opus-20240229",
-                max_tokens=2000,
-                messages=[{
-                    "role": "user",
-                    "content": prompt
-                }]
+                max_tokens=2000
             )
             
             print("DEBUG: Claude response received")
-            return response.content[0].text
+            return response.completion
 
         except Exception as e:
             print(f"DEBUG: Error in analyze_observations: {str(e)}")
@@ -211,7 +209,7 @@ Please provide a brief analysis focusing on:
         print("DEBUG: Starting static map creation...")
         try:
             # Initialize map centered on Cincinnati
-            m = StaticMap(800, 600, url_template='http://a.tile.openstreetmap.org/{z}/{x}/{y}.png')
+            m = StaticMap(800, 600, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
 
             # Process observations
             for obs in observations:
