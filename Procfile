@@ -1,1 +1,2 @@
-web: gunicorn webapp.app:app
+web: gunicorn app:app
+clock: python scheduler.py
