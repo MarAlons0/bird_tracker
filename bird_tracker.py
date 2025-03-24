@@ -292,39 +292,105 @@ Please provide a brief analysis focusing on:
             <html>
             <head>
                 <style>
-                    body {{ font-family: Arial, sans-serif; }}
+                    body {{ 
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                    }}
+                    .header {{
+                        text-align: center;
+                        margin-bottom: 30px;
+                    }}
+                    .main-title {{
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }}
+                    .subtitle {{
+                        font-size: 16px;
+                        color: #666;
+                        margin-bottom: 20px;
+                    }}
+                    .analysis {{
+                        margin: 20px 0;
+                        padding: 0 20px;
+                    }}
+                    .analysis ol {{
+                        margin-bottom: 20px;
+                    }}
+                    .analysis li {{
+                        margin-bottom: 10px;
+                    }}
+                    .analysis ul {{
+                        margin-top: 5px;
+                        margin-left: 20px;
+                    }}
                     pre {{ 
                         white-space: pre-wrap;
                         font-family: monospace;
                         margin: 10px 0;
+                        padding: 10px;
+                        background-color: #f8f9fa;
+                        border-radius: 4px;
                     }}
                     .map-container {{
                         margin: 20px 0;
                         padding: 10px;
-                        border: 1px solid #ccc;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
                         text-align: center;
+                        background-color: #f8f9fa;
                     }}
                     .map-image {{
                         max-width: 100%;
                         height: auto;
+                        border-radius: 4px;
+                    }}
+                    .map-legend {{
+                        font-size: 14px;
+                        color: #666;
+                        margin-top: 10px;
+                    }}
+                    .raw-data {{
+                        margin-top: 30px;
+                        border-top: 1px solid #ddd;
+                        padding-top: 20px;
                     }}
                 </style>
             </head>
             <body>
-                <pre>{header}</pre>
-                <pre>{ai_analysis}</pre>
+                <div class="header">
+                    <div class="main-title">Mario's Bird Tracker</div>
+                    <div class="subtitle">(powered by eBird)</div>
+                </div>
+                
+                <div class="analysis">
+                    {self._format_ai_analysis(ai_analysis)}
+                </div>
+
                 <div class="map-container">
                     <h2>Bird Observation Map</h2>
                     <img src="data:image/png;base64,{map_image}" class="map-image" alt="Bird Observation Map">
-                    <p><small>Map Legend: Red = Raptors, Blue = Waterfowl, Green = Songbirds, Gray = Other Birds</small></p>
+                    <p class="map-legend">Map Legend: Red = Birds of Prey, Blue = Other Birds</p>
                 </div>
-                <pre>{raw_data}</pre>
+
+                <div class="raw-data">
+                    <h3>Raw Observation Data</h3>
+                    <pre>{raw_data}</pre>
+                </div>
             </body>
             </html>
             """
 
             # Create plain text version
-            text_content = f"{header}\n{ai_analysis}\n{raw_data}"
+            text_content = f"""
+            MARIO'S BIRD TRACKER
+            (powered by eBird)
+
+            {ai_analysis}
+
+            {raw_data}
+            """
 
             # Attach both versions
             part1 = MIMEText(text_content, 'plain')
@@ -543,6 +609,39 @@ Please provide a brief analysis focusing on:
         except Exception as e:
             print(f"Error sending test email: {str(e)}")
             return False
+
+    def _format_ai_analysis(self, analysis):
+        """Format AI analysis with proper HTML structure"""
+        # Split into sections
+        sections = analysis.split('\n')
+        formatted = []
+        current_list = []
+        in_list = False
+        
+        for line in sections:
+            # Check if line starts with number and period (e.g., "1.", "2.")
+            if line.strip() and line.strip()[0].isdigit() and '. ' in line:
+                if in_list:
+                    formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
+                    current_list = []
+                formatted.append(f'<p><strong>{line.strip()}</strong></p>')
+                in_list = True
+            # Check if line starts with dash or bullet
+            elif line.strip().startswith('-') or line.strip().startswith('•'):
+                current_list.append(f'<li>{line.strip()[1:].strip()}</li>')
+            # Regular text
+            elif line.strip():
+                if in_list:
+                    formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
+                    current_list = []
+                    in_list = False
+                formatted.append(f'<p>{line.strip()}</p>')
+        
+        # Add any remaining list items
+        if current_list:
+            formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
+        
+        return '\n'.join(formatted)
 
 if __name__ == "__main__":
     try:
