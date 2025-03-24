@@ -200,14 +200,22 @@ Please provide a brief analysis focusing on:
             print("DEBUG: Sending request to Claude...")
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
-                messages=[{
-                    "role": "user",
-                    "content": prompt
-                }]
+                max_tokens=2000,
+                system="You are a bird expert analyzing recent observations.",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
             )
             
             print("DEBUG: Claude response received")
-            return message.content[0].text
+            if hasattr(message, 'content') and message.content:
+                return message.content[0].text
+            else:
+                print(f"DEBUG: Unexpected response format: {message}")
+                return "Error: Unexpected API response format"
 
         except Exception as e:
             print(f"DEBUG: Error in analyze_observations: {str(e)}")
@@ -215,69 +223,56 @@ Please provide a brief analysis focusing on:
             return "Error generating insights. Using basic summary instead."
 
     def create_static_map(self, observations):
-        """Create a static map of bird observations"""
-        print("DEBUG: Starting static map creation...")
+        """Create a static map of bird observations using Google Maps"""
         try:
-            headers = {
-                'User-Agent': 'BirdTracker/1.0',
-                'Accept': 'image/png',
+            base_url = "https://maps.googleapis.com/maps/api/staticmap"
+            
+            # Set map parameters
+            params = {
+                'center': f"{self.active_location['latitude']},{self.active_location['longitude']}",
+                'zoom': '11',
+                'size': '800x600',
+                'maptype': 'roadmap',
+                'key': os.getenv('GOOGLE_MAPS_API_KEY')
             }
-            m = StaticMap(800, 600, 
-                         url_template='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png',
-                         headers=headers)
-
-            # Process observations
+            
+            # Add markers for each observation
+            markers = []
             for obs in observations:
                 try:
-                    # Try to get coordinates from the location name
-                    coords = None
-                    if 'US-OH' in obs['locName']:
-                        loc_parts = obs['locName'].split('US-OH')
-                        if len(loc_parts) > 1:
-                            try:
-                                coords_text = loc_parts[1].strip()
-                                lat, lng = map(float, coords_text.split(','))
-                                coords = (lng, lat)  # Note: StaticMap uses (lng, lat) order
-                            except:
-                                coords = None
-
-                    # If no coordinates found, use Cincinnati coordinates
-                    if not coords:
-                        coords = (-84.5120, 39.1031)  # Cincinnati coordinates
-
-                    # Determine marker color based on bird type
-                    species = obs['comName']
-                    if any(term in species.lower() for term in ['hawk', 'eagle', 'owl', 'falcon', 'kite', 'osprey']):
-                        color = '#ff0000'  # Red for raptors
-                    elif any(term in species.lower() for term in ['duck', 'goose', 'swan', 'merganser', 'teal']):
-                        color = '#0000ff'  # Blue for waterfowl
-                    elif any(term in species.lower() for term in ['warbler', 'sparrow', 'finch', 'thrush']):
-                        color = '#00ff00'  # Green for songbirds
-                    else:
-                        color = '#808080'  # Gray for others
-
-                    # Add marker
-                    marker = CircleMarker(coords, color, 8)
-                    m.add_marker(marker)
-
+                    lat = None
+                    lng = None
+                    
+                    # Extract coordinates from location string
+                    if '(' in obs['locName'] and ')' in obs['locName']:
+                        coords_text = obs['locName'].split('(')[-1].split(')')[0]
+                        try:
+                            lat, lng = map(float, coords_text.split(','))
+                            # Color code by bird type
+                            color = 'red' if any(term in obs['comName'].lower() 
+                                              for term in ['hawk', 'eagle', 'owl', 'falcon']) else 'blue'
+                            markers.append(f"color:{color}|{lat},{lng}")
+                        except:
+                            continue
+                
                 except Exception as e:
-                    print(f"DEBUG: Error processing observation: {str(e)}")
+                    print(f"DEBUG: Error processing observation for map: {str(e)}")
                     continue
-
-            # Render map
-            image = m.render()
             
-            # Convert to base64 for embedding in email
-            with io.BytesIO() as bio:
-                image.save(bio, format='PNG')
-                img_str = base64.b64encode(bio.getvalue()).decode()
-
-            return img_str
-
+            if markers:
+                params['markers'] = markers
+            
+            print("DEBUG: Making map request...")
+            response = requests.get(base_url, params=params)
+            
+            if response.status_code == 200:
+                print("DEBUG: Map generated successfully")
+                return base64.b64encode(response.content).decode()
+            else:
+                raise Exception(f"Map API returned status code {response.status_code}")
+                
         except Exception as e:
-            print(f"DEBUG: Error creating static map: {str(e)}")
-            import traceback
-            print(f"DEBUG: Stack trace: {traceback.format_exc()}")
+            print(f"DEBUG: Error creating map: {str(e)}")
             return None
 
     def send_email(self, subject, header, ai_analysis, raw_data, map_path=None):
