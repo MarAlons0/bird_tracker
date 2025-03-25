@@ -22,21 +22,17 @@
     {% if debug_info %}
     <div class="alert alert-info">
         <h5>API Status Information:</h5>
-        {% if debug_info.geocoding_test %}
-        <p>Geocoding API Status: {{ debug_info.geocoding_test.status }}</p>
-        {% if debug_info.geocoding_test.error_message %}
-        <p>Geocoding Error: {{ debug_info.geocoding_test.error_message }}</p>
-        {% endif %}
-        {% endif %}
-        
-        {% if debug_info.places_test %}
-        <p>Places API Status: {{ debug_info.places_test.status }}</p>
-        {% if debug_info.places_test.error_message %}
-        <p>Places Error: {{ debug_info.places_test.error_message }}</p>
-        {% endif %}
-        {% endif %}
-        
-        <p>Billing Enabled: {{ debug_info.billing_enabled }}</p>
+        {% for api_name, test in debug_info.api_tests.items() %}
+        <div class="mb-3">
+            <h6>{{ api_name|title }} API:</h6>
+            {% if test.error %}
+            <p class="text-danger">Error: {{ test.error }}</p>
+            {% else %}
+            <p>Status Code: {{ test.status }}</p>
+            <p>Response: {{ test.response }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
     {% endif %}
     <div class="container mt-5">
@@ -245,8 +241,8 @@
         function loadGoogleMapsScript() {
             console.log('Starting to load Google Maps script...');
             const script = document.createElement('script');
-            // Load Maps API first, then Places
-            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap&v=weekly`;
+            // Load both Maps and Places APIs at once
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initializeAll&v=weekly`;
             script.async = true;
             script.defer = true;
             script.onerror = function() {
@@ -256,14 +252,10 @@
             document.head.appendChild(script);
         }
 
-        // Initialize map first
-        function initMap() {
-            console.log('Map initialized, loading Places API...');
-            // Load Places API after Maps is loaded
-            const placesScript = document.createElement('script');
-            placesScript.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete`;
-            placesScript.async = true;
-            document.head.appendChild(placesScript);
+        // Initialize everything at once
+        function initializeAll() {
+            console.log('Initializing Maps and Places...');
+            initAutocomplete();
         }
     </script>
     
