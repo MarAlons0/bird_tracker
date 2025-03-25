@@ -245,7 +245,8 @@
         function loadGoogleMapsScript() {
             console.log('Starting to load Google Maps script...');
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete&v=weekly`;
+            // Load Maps API first, then Places
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap&v=weekly`;
             script.async = true;
             script.defer = true;
             script.onerror = function() {
@@ -253,6 +254,16 @@
                 console.log('API Key used:', '{{ google_maps_api_key }}'.substring(0, 6) + '...');
             };
             document.head.appendChild(script);
+        }
+
+        // Initialize map first
+        function initMap() {
+            console.log('Map initialized, loading Places API...');
+            // Load Places API after Maps is loaded
+            const placesScript = document.createElement('script');
+            placesScript.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete`;
+            placesScript.async = true;
+            document.head.appendChild(placesScript);
         }
     </script>
     
