@@ -17,29 +17,31 @@ def home():
         return render_template('error.html', 
                              error="Google Maps API key not configured")
     
-    # Test Places API directly
-    test_url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&key={api_key}"
+    # Test with a simpler API endpoint first
+    test_url = f"https://maps.googleapis.com/maps/api/geocode/json?address=Cincinnati&key={api_key}"
     try:
         response = requests.get(test_url)
         response_data = response.json()
-        print("DEBUG: Places API Test Response:", response_data)
+        print("DEBUG: Geocoding API Test Response:", response_data)
         
-        if response_data.get('status') == 'REQUEST_DENIED':
-            print("WARNING: Places API request denied:", response_data.get('error_message'))
-            # Add billing status check
-            print("DEBUG: Checking billing status for project...")
-            
+        # Now test Places API
+        places_url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&key={api_key}"
+        places_response = requests.get(places_url)
+        places_data = places_response.json()
+        print("DEBUG: Places API Test Response:", places_data)
+        
         return render_template('index.html', 
                              google_maps_api_key=api_key,
                              debug_info={
-                                 'api_test': response_data,
-                                 'billing_enabled': True  # We know billing is enabled
+                                 'geocoding_test': response_data,
+                                 'places_test': places_data,
+                                 'billing_enabled': True
                              })
             
     except Exception as e:
-        print("ERROR: Failed to test Places API:", str(e))
+        print("ERROR: Failed to test APIs:", str(e))
         return render_template('error.html', 
-                             error=f"Failed to test Places API: {str(e)}")
+                             error=f"Failed to test APIs: {str(e)}")
 
 @app.route('/api/update-location', methods=['POST'])
 def update_location():

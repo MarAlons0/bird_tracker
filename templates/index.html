@@ -22,10 +22,20 @@
     {% if debug_info %}
     <div class="alert alert-info">
         <h5>API Status Information:</h5>
-        <p>Status: {{ debug_info.api_test.status }}</p>
-        {% if debug_info.api_test.error_message %}
-        <p>Error: {{ debug_info.api_test.error_message }}</p>
+        {% if debug_info.geocoding_test %}
+        <p>Geocoding API Status: {{ debug_info.geocoding_test.status }}</p>
+        {% if debug_info.geocoding_test.error_message %}
+        <p>Geocoding Error: {{ debug_info.geocoding_test.error_message }}</p>
         {% endif %}
+        {% endif %}
+        
+        {% if debug_info.places_test %}
+        <p>Places API Status: {{ debug_info.places_test.status }}</p>
+        {% if debug_info.places_test.error_message %}
+        <p>Places Error: {{ debug_info.places_test.error_message }}</p>
+        {% endif %}
+        {% endif %}
+        
         <p>Billing Enabled: {{ debug_info.billing_enabled }}</p>
     </div>
     {% endif %}
