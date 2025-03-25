@@ -1,144 +1,206 @@
-from flask import Flask, render_template, request, jsonify
-from bird_tracker import BirdSightingTracker
+from flask import Flask, render_template, jsonify, request
+from flask_cors import CORS
+from datetime import datetime
+import sys
 import os
-from dotenv import load_dotenv
-import requests
+import json
 import logging
+from dotenv import load_dotenv
+from logging_config import setup_logging
+import anthropic
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-app = Flask(__name__)
+# Load environment variables
 load_dotenv()
 
-# Initialize the bird tracker
-tracker = BirdSightingTracker()
+# Setup logging
+setup_logging()
+logger = logging.getLogger(__name__)
+
+# Add parent directory to path so we can import bird_tracker
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bird_tracker import BirdSightingTracker
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
+
+# Initialize bird tracker
+try:
+    tracker = BirdSightingTracker()
+    logger.info("Bird tracker initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize bird tracker: {e}")
+    raise
+
+def load_locations():
+    try:
+        with open('locations.json', 'r') as f:
+            return json.load(f)
+    except TimeoutError:
+        print("Timeout while reading locations.json")
+        return []
+    except FileNotFoundError:
+        print("locations.json not found")
+        return []
+    except json.JSONDecodeError:
+        print("Invalid JSON in locations.json")
+        return []
+    except Exception as e:
+        print(f"Error loading locations: {e}")
+        return []
 
 @app.route('/')
-def index():
+def home():
     try:
-        # Get API key
-        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
-        if not api_key:
-            logger.error("Google Maps API key not configured")
-            return render_template('error.html', 
-                               error="Google Maps API key not configured")
-      
-        # Test each API separately
-        api_tests = {}
-        
-        # Test Geocoding API
-        geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address=Cincinnati&key={api_key}"
-        try:
-            response = requests.get(geocode_url)
-            api_tests['geocoding'] = {
-                'status': response.status_code,
-                'response': response.json(),
-                'headers': dict(response.headers)
-            }
-            logger.debug("Geocoding API Response: %s", api_tests['geocoding'])
-        except Exception as e:
-            logger.error("Geocoding API failed: %s", str(e))
-            api_tests['geocoding'] = {'error': str(e)}
-
-        # Test Places API
-        places_url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&key={api_key}"
-        try:
-            response = requests.get(places_url)
-            api_tests['places'] = {
-                'status': response.status_code,
-                'response': response.json(),
-                'headers': dict(response.headers)
-            }
-            logger.debug("Places API Response: %s", api_tests['places'])
-        except Exception as e:
-            logger.error("Places API failed: %s", str(e))
-            api_tests['places'] = {'error': str(e)}
+        email_schedule = {
+            'hour': int(os.getenv('EMAIL_SCHEDULE_HOUR', '7')),
+            'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
+        }
+        observations = tracker.get_recent_observations()
+        logger.debug(f"Found {len(observations)} recent observations")
         
         return render_template('index.html', 
-                           google_maps_api_key=api_key,
-                           debug_info={
-                               'api_tests': api_tests,
-                               'billing_enabled': True
-                           })
-                           
+                             location=tracker.active_location,
+                             email_schedule=email_schedule)
     except Exception as e:
-        logger.error("Error in index route: %s", str(e), exc_info=True)
-        return render_template('error.html', 
-                           error=f"Server error: {str(e)}")
+        logger.error(f"Error in home route: {e}")
+        return render_template('error.html', error=str(e))
 
-@app.route('/api/update-location', methods=['POST'])
+@app.route('/map')
+def map():
+    observations = tracker.get_recent_observations()
+    return render_template('map.html', 
+                         observations=observations,
+                         location=tracker.active_location)
+
+@app.route('/report')
+def report():
+    observations = tracker.get_recent_observations()
+    analysis = tracker.analyze_observations(observations)
+    return render_template('report.html',
+                         observations=observations,
+                         analysis=analysis,
+                         location=tracker.active_location)
+
+@app.route('/api/observations')
+def get_observations():
+    observations = tracker.get_recent_observations()
+    return jsonify(observations)
+
+@app.route('/api/analysis')
+def get_analysis():
+    try:
+        observations = tracker.get_recent_observations()
+        logger.debug(f"Analyzing {len(observations)} observations")
+        analysis = tracker.analyze_observations(observations)
+        logger.debug(f"Analysis result: {analysis}")
+        return jsonify({'analysis': analysis})
+    except Exception as e:
+        logger.error(f"Analysis error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/location', methods=['POST'])
 def update_location():
-    data = request.json
     try:
-        # Validate input
-        required_fields = ['name', 'latitude', 'longitude', 'radius']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({
-                    'status': 'error',
-                    'message': f'Missing required field: {field}'
-                }), 400
-
-        # Validate coordinates
-        lat = float(data['latitude'])
-        lng = float(data['longitude'])
-        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
-            return jsonify({
-                'status': 'error',
-                'message': 'Invalid coordinates'
-            }), 400
-
-        # Update location
-        tracker.set_location(
-            name=data['name'],
-            latitude=lat,
-            longitude=lng,
-            radius=float(data['radius'])
-        )
+        name = request.form.get('name')
+        lat = float(request.form.get('lat'))
+        lng = float(request.form.get('lng'))
+        radius = int(request.form.get('radius'))
         
-        print(f"Location updated to: {data['name']} ({lat}, {lng})")
-        return jsonify({'status': 'success'})
-    except Exception as e:
-        print(f"Error updating location: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 400
+        # Validate inputs
+        if not all([name, lat, lng, radius]):
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+            return jsonify({"error": "Invalid coordinates"}), 400
+        
+        if not (1 <= radius <= 50):
+            return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
 
-@app.route('/api/analyze', methods=['POST'])
-def analyze():
-    data = request.json
+        # Update tracker location
+        tracker.set_location(name, lat, lng, radius)
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
     try:
-        # Get observations for the specified location
+        message = request.json.get('message')
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+
+        # Get current observations and analysis for context
         observations = tracker.get_recent_observations()
         
-        # Create a custom prompt based on user query
-        prompt = f"""
-        Analyze these bird observations with focus on: {data['query']}
-        
-        Observations:
-        {observations}
-        
-        Please provide specific insights about {data['query']}.
-        """
-        
-        # Get analysis from Claude
+        # Create prompt with context
+        prompt = f"""You are a helpful bird expert assistant. Use the following context to answer the user's question:
+
+Current Location: {tracker.active_location['name']}
+Recent Observations: {len(observations)} birds observed
+Observation Period: Last 21 days
+
+The user asks: {message}
+
+Please provide a concise, informative response focusing on the bird-related aspects of the question.
+"""
+
+        # Get response from Claude
         response = tracker.claude.messages.create(
             model="claude-3-opus-20240229",
+            max_tokens=500,
             messages=[{
                 "role": "user",
                 "content": prompt
             }]
         )
-        
+
         return jsonify({
-            'status': 'success',
-            'analysis': response.content[0].text
+            'response': response.content[0].text
         })
+
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 400
+        print(f"Chat error: {str(e)}")
+        return jsonify({
+            'error': 'Error processing chat request'
+        }), 500
+
+@app.route('/api/email-schedule', methods=['POST'])
+def update_email_schedule():
+    try:
+        hour = request.form.get('hour')
+        minute = request.form.get('minute')
+        
+        if not all([hour, minute]):
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        success = tracker.update_email_schedule(hour, minute)
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Email schedule updated to {hour:02d}:{minute:02d}"
+            })
+        else:
+            return jsonify({
+                "error": "Failed to update email schedule"
+            }), 500
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Add error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error.html', error="Page not found"), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {error}")
+    return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    print("Starting Flask server...")
+    app.run(host='localhost', port=8000, debug=True) 

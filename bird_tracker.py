@@ -35,12 +35,12 @@ class BirdSightingTracker:
         }
         self.active_location = self._get_active_location()
         
-        # Update this part
-        http_client = httpx.Client()
-        self.claude = Anthropic(
-            api_key=os.getenv('ANTHROPIC_API_KEY'),
-            http_client=http_client
-        )
+        # Initialize Claude with the latest API version
+        anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+        if not anthropic_api_key:
+            raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
+        print(f"DEBUG: Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
+        self.claude = Anthropic(api_key=anthropic_api_key)
         
         # Start daily report scheduler
         self.scheduler = self.start_daily_reports()
@@ -71,6 +71,30 @@ class BirdSightingTracker:
             'longitude': float(os.getenv('DEFAULT_LONGITUDE', '-84.5120')),
             'radius': float(os.getenv('DEFAULT_RADIUS', '25'))
         }
+    
+    def get_current_location(self):
+        """Return the current tracking location"""
+        try:
+            # Get the active location section name from config
+            active_location = self.config['locations']['active_location']
+            section_name = f'location_{active_location}'
+            
+            # Get location details from config
+            if self.config.has_section(section_name):
+                return {
+                    'name': self.config[section_name]['name'],
+                    'latitude': float(self.config[section_name]['latitude']),
+                    'longitude': float(self.config[section_name]['longitude']),
+                    'radius': float(self.config[section_name]['radius'])
+                }
+            else:
+                # Fall back to active_location if section not found
+                return self.active_location
+                
+        except Exception as e:
+            print(f"Error getting current location: {str(e)}")
+            # Fall back to active_location if any error occurs
+            return self.active_location
     
     def get_taxonomic_info(self, species_code):
         """
@@ -131,84 +155,51 @@ class BirdSightingTracker:
             return "No observations to analyze."
 
         try:
-            # Prepare data for Claude with week-by-week comparison
-            current_week = []
-            previous_week = []
-            species_count_current = {}
-            species_count_previous = {}
-            locations = set()
-            birds_of_prey = set()
+            print("DEBUG: Starting observation analysis...")
             
-            # Split observations into current and previous week
-            one_week_ago = datetime.now() - timedelta(days=7)
-            
-            for obs in observations:
-                species = obs['comName']
-                count = obs.get('howMany', 1)
-                location = obs['locName']
-                date = datetime.strptime(obs['obsDt'].split()[0], '%Y-%m-%d')
-                
-                if date >= one_week_ago:
-                    current_week.append(f"{species} ({count} seen at {location} on {obs['obsDt']})")
-                    species_count_current[species] = species_count_current.get(species, 0) + count
-                else:
-                    previous_week.append(f"{species} ({count} seen at {location} on {obs['obsDt']})")
-                    species_count_previous[species] = species_count_previous.get(species, 0) + count
-                
-                locations.add(location)
-                
-                if any(term in species.lower() for term in ['hawk', 'eagle', 'owl', 'falcon', 'kite', 'osprey']):
-                    birds_of_prey.add(species)
-
-            print("DEBUG: Data prepared successfully")
-            print(f"DEBUG: Current week species: {len(species_count_current)}")
-            print(f"DEBUG: Previous week species: {len(species_count_previous)}")
-            print(f"DEBUG: Birds of prey found: {len(birds_of_prey)}")
-
             # Create the prompt
-            prompt = f"""Analyze these Cincinnati bird observations with week-over-week comparison:
+            prompt = f"""You are an expert ornithologist. Analyze these bird observations and provide insights:
 
-Two-Week Summary:
-Current Week Species: {len(species_count_current)}
-Previous Week Species: {len(species_count_previous)}
-Birds of Prey: {', '.join(birds_of_prey)}
-Total Locations: {len(locations)}
+            {self.format_observations_for_analysis(observations)}
 
-Current Week Highlights:
-{chr(10).join(current_week[:10])}  # Show first 10 observations
-
-Previous Week Highlights:
-{chr(10).join(previous_week[:10])}  # Show first 10 observations
-
-Please provide a brief analysis focusing on:
-1. Notable changes between weeks
-2. Significant bird of prey activity
-3. Key locations for observation
-4. Migration patterns
-
-5. Rare Bird Alerts
-   - Unusual species for the region
-   - Species outside their normal range
-   - First-of-season sightings
-
-6. Photography Tips
-   - Best times for specific species
-   - Recommended locations and setups
-   - Target species behavior patterns
-"""
+            Please provide a detailed analysis with exactly these four sections, using bullet points and following this format precisely:
+            
+            Most Common Species:
+            - List the 3-5 most frequently observed species with exact counts
+            - Include specific behavior patterns observed
+            - Note any interesting interactions between common species
+            
+            Rare or Unusual Sightings:
+            - Identify any uncommon species for this location/season
+            - Explain why each sighting is significant
+            - Note any conservation implications
+            
+            Notable Patterns:
+            - Analyze daily/weekly activity patterns
+            - Discuss any migration trends visible in the data
+            - Compare current observations with expected seasonal patterns
+            
+            Recommendations:
+            - Suggest specific locations within the area for optimal viewing
+            - Recommend best times of day for observation
+            - List essential equipment for local birdwatching
+            - Share tips for identifying the current common species
+            """
 
             print("DEBUG: Sending request to Claude...")
-            message = self.claude.messages.create(
-                model="claude-3-opus-20240229",
-                max_tokens=2000,
-                system="You are a bird expert analyzing recent observations.",
-                messages=[
-                    {
+            try:
+                message = self.claude.messages.create(
+                    model="claude-3-opus-20240229",
+                    max_tokens=1000,
+                    messages=[{
                         "role": "user",
                         "content": prompt
-                    }
-                ]
-            )
+                    }]
+                )
+                print(f"DEBUG: Claude API response status: {message}")
+            except Exception as api_error:
+                logger.error(f"Claude API error: {str(api_error)}")
+                raise
             
             print("DEBUG: Claude response received")
             if hasattr(message, 'content') and message.content:
@@ -218,8 +209,8 @@ Please provide a brief analysis focusing on:
                 return "Error: Unexpected API response format"
 
         except Exception as e:
-            print(f"DEBUG: Error in analyze_observations: {str(e)}")
-            print(f"DEBUG: Error type: {type(e)}")
+            logger.error(f"Error in analyze_observations: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
             return "Error generating insights. Using basic summary instead."
 
     def create_static_map(self, observations):
@@ -612,36 +603,58 @@ Please provide a brief analysis focusing on:
 
     def _format_ai_analysis(self, analysis):
         """Format AI analysis with proper HTML structure"""
-        # Split into sections
-        sections = analysis.split('\n')
+        sections = analysis.split('\n\n')  # Split on double newlines
         formatted = []
-        current_list = []
-        in_list = False
         
-        for line in sections:
-            # Check if line starts with number and period (e.g., "1.", "2.")
-            if line.strip() and line.strip()[0].isdigit() and '. ' in line:
-                if in_list:
-                    formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
-                    current_list = []
-                formatted.append(f'<p><strong>{line.strip()}</strong></p>')
-                in_list = True
-            # Check if line starts with dash or bullet
-            elif line.strip().startswith('-') or line.strip().startswith('•'):
-                current_list.append(f'<li>{line.strip()[1:].strip()}</li>')
-            # Regular text
-            elif line.strip():
-                if in_list:
-                    formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
-                    current_list = []
-                    in_list = False
-                formatted.append(f'<p>{line.strip()}</p>')
-        
-        # Add any remaining list items
-        if current_list:
-            formatted.append('<ul>' + '\n'.join(current_list) + '</ul>')
+        for section in sections:
+            if not section.strip():
+                continue
+            
+            lines = section.split('\n')
+            if not lines:
+                continue
+            
+            # Handle section header
+            header = lines[0].strip(':')
+            formatted.append(f'<h3 class="mt-4 mb-3">{header}</h3>')
+            
+            # Handle bullet points
+            bullets = []
+            current_paragraph = []
+            
+            for line in lines[1:]:
+                line = line.strip()
+                if not line:
+                    continue
+                    
+                if line.startswith('-'):
+                    bullets.append(f'<li class="mb-2">{line.strip("- ")}</li>')
+                elif line.strip():
+                    current_paragraph.append(line)
+            
+            # Add any paragraph text first
+            if current_paragraph:
+                formatted.append(f'<p class="mb-3">{"<br>".join(current_paragraph)}</p>')
+            
+            # Then add bullet points
+            if bullets:
+                formatted.append('<ul class="list-group list-group-flush mb-4">\n' + 
+                               '\n'.join(bullets) + 
+                               '\n</ul>')
         
         return '\n'.join(formatted)
+
+    @staticmethod
+    def format_observations_for_analysis(observations):
+        """Format observations for Claude analysis"""
+        if not observations:
+            return "No observations available"
+        
+        formatted = []
+        for obs in observations:
+            formatted.append(f"- {obs['comName']} ({obs['sciName']}) - Count: {obs['howMany']} - Date: {obs['obsDt']}")
+        
+        return "\n".join(formatted)
 
 if __name__ == "__main__":
     try:
