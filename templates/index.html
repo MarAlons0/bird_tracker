@@ -245,18 +245,24 @@
             const mapDiv = document.createElement('div');
             mapDiv.style.height = '200px';
             mapDiv.style.width = '200px';
+            mapDiv.id = 'test-map';
             document.body.appendChild(mapDiv);
 
+            window.gm_authFailure = function() {
+                console.error('Google Maps authentication failed');
+                document.getElementById('test-map').innerHTML = 
+                    '<div class="alert alert-danger">Google Maps failed to load. Authentication error.</div>';
+            };
+
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initTestMap`;
             script.async = true;
             script.defer = true;
 
-            script.onload = function() {
-                console.log('Maps script loaded successfully');
-                // Try to create a basic map first
+            window.initTestMap = function() {
+                console.log('Maps callback initiated');
                 try {
-                    new google.maps.Map(mapDiv, {
+                    const map = new google.maps.Map(document.getElementById('test-map'), {
                         center: { lat: -34.397, lng: 150.644 },
                         zoom: 8
                     });
@@ -266,23 +272,27 @@
                     loadPlacesLibrary();
                 } catch (err) {
                     console.error('Error creating basic map:', err);
+                    document.getElementById('test-map').innerHTML = 
+                        '<div class="alert alert-danger">Error creating map: ' + err.message + '</div>';
                 }
             };
 
             script.onerror = function(error) {
                 console.error('Failed to load Google Maps script:', error);
                 console.log('API Key used:', '{{ google_maps_api_key }}'.substring(0, 6) + '...');
+                document.getElementById('test-map').innerHTML = 
+                    '<div class="alert alert-danger">Failed to load Google Maps</div>';
             };
 
             document.head.appendChild(script);
         }
 
         function loadPlacesLibrary() {
+            console.log('Loading Places library...');
             const placesScript = document.createElement('script');
-            placesScript.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places`;
+            placesScript.src = `https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAutocomplete`;
             placesScript.onload = function() {
                 console.log('Places library loaded');
-                initAutocomplete();
             };
             placesScript.onerror = function(err) {
                 console.error('Error loading Places library:', err);
@@ -292,5 +302,29 @@
 
         document.addEventListener('DOMContentLoaded', loadGoogleMapsScript);
     </script>
+
+    <!-- Add debug info display -->
+    {% if debug_info %}
+    <div class="container mt-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>API Debug Information</h5>
+            </div>
+            <div class="card-body">
+                {% for api_name, test in debug_info.api_tests.items() %}
+                <div class="mb-3">
+                    <h6>{{ api_name|title }} API Test:</h6>
+                    {% if test.error %}
+                    <pre class="text-danger">{{ test.error }}</pre>
+                    {% else %}
+                    <pre>Status: {{ test.status }}</pre>
+                    <pre>{{ test.response|tojson(indent=2) }}</pre>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </body>
 </html> 

@@ -3,6 +3,11 @@ from bird_tracker import BirdSightingTracker
 import os
 from dotenv import load_dotenv
 import requests
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 load_dotenv()
@@ -11,37 +16,57 @@ load_dotenv()
 tracker = BirdSightingTracker()
 
 @app.route('/')
-def home():
-    api_key = os.getenv('GOOGLE_PLACES_API_KEY')
-    if not api_key:
-        return render_template('error.html', 
-                             error="Google Maps API key not configured")
-    
-    # Test with a simpler API endpoint first
-    test_url = f"https://maps.googleapis.com/maps/api/geocode/json?address=Cincinnati&key={api_key}"
+def index():
     try:
-        response = requests.get(test_url)
-        response_data = response.json()
-        print("DEBUG: Geocoding API Test Response:", response_data)
+        # Get API key
+        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+        if not api_key:
+            logger.error("Google Maps API key not configured")
+            return render_template('error.html', 
+                               error="Google Maps API key not configured")
+      
+        # Test each API separately
+        api_tests = {}
         
-        # Now test Places API
+        # Test Geocoding API
+        geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address=Cincinnati&key={api_key}"
+        try:
+            response = requests.get(geocode_url)
+            api_tests['geocoding'] = {
+                'status': response.status_code,
+                'response': response.json(),
+                'headers': dict(response.headers)
+            }
+            logger.debug("Geocoding API Response: %s", api_tests['geocoding'])
+        except Exception as e:
+            logger.error("Geocoding API failed: %s", str(e))
+            api_tests['geocoding'] = {'error': str(e)}
+
+        # Test Places API
         places_url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&key={api_key}"
-        places_response = requests.get(places_url)
-        places_data = places_response.json()
-        print("DEBUG: Places API Test Response:", places_data)
+        try:
+            response = requests.get(places_url)
+            api_tests['places'] = {
+                'status': response.status_code,
+                'response': response.json(),
+                'headers': dict(response.headers)
+            }
+            logger.debug("Places API Response: %s", api_tests['places'])
+        except Exception as e:
+            logger.error("Places API failed: %s", str(e))
+            api_tests['places'] = {'error': str(e)}
         
         return render_template('index.html', 
-                             google_maps_api_key=api_key,
-                             debug_info={
-                                 'geocoding_test': response_data,
-                                 'places_test': places_data,
-                                 'billing_enabled': True
-                             })
-            
+                           google_maps_api_key=api_key,
+                           debug_info={
+                               'api_tests': api_tests,
+                               'billing_enabled': True
+                           })
+                           
     except Exception as e:
-        print("ERROR: Failed to test APIs:", str(e))
+        logger.error("Error in index route: %s", str(e), exc_info=True)
         return render_template('error.html', 
-                             error=f"Failed to test APIs: {str(e)}")
+                           error=f"Server error: {str(e)}")
 
 @app.route('/api/update-location', methods=['POST'])
 def update_location():
