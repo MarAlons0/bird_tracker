@@ -19,12 +19,14 @@
     </style>
 </head>
 <body>
-    {% if debug_info and debug_info.api_test %}
+    {% if debug_info %}
     <div class="alert alert-info">
-        API Status: {{ debug_info.api_test.status }}
+        <h5>API Status Information:</h5>
+        <p>Status: {{ debug_info.api_test.status }}</p>
         {% if debug_info.api_test.error_message %}
-        <br>Error: {{ debug_info.api_test.error_message }}
+        <p>Error: {{ debug_info.api_test.error_message }}</p>
         {% endif %}
+        <p>Billing Enabled: {{ debug_info.billing_enabled }}</p>
     </div>
     {% endif %}
     <div class="container mt-5">

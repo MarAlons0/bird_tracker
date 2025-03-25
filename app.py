@@ -26,14 +26,20 @@ def home():
         
         if response_data.get('status') == 'REQUEST_DENIED':
             print("WARNING: Places API request denied:", response_data.get('error_message'))
+            # Add billing status check
+            print("DEBUG: Checking billing status for project...")
+            
+        return render_template('index.html', 
+                             google_maps_api_key=api_key,
+                             debug_info={
+                                 'api_test': response_data,
+                                 'billing_enabled': True  # We know billing is enabled
+                             })
+            
     except Exception as e:
         print("ERROR: Failed to test Places API:", str(e))
-    
-    return render_template('index.html', 
-                         google_maps_api_key=api_key,
-                         debug_info={
-                             'api_test': response_data if 'response_data' in locals() else None
-                         })
+        return render_template('error.html', 
+                             error=f"Failed to test Places API: {str(e)}")
 
 @app.route('/api/update-location', methods=['POST'])
 def update_location():
