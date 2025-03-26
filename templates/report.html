@@ -167,11 +167,26 @@
                     <div class="spinner-border spinner-border-sm" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    Generating analysis...
+                    Generating AI analysis... This may take up to 30 seconds.
+                    <div class="progress mt-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
                 </div>`;
+            
+            // Animate progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                if (progress <= 100) {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 300); // Will take 30 seconds to reach 100%
             
             const response = await fetch('/api/analysis');
             const data = await response.json();
+            clearInterval(interval); // Stop progress animation
             
             if (response.status !== 200) {
                 throw new Error(data.error || `Failed to load analysis (Status: ${response.status})`);
