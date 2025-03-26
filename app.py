@@ -71,14 +71,12 @@ def home():
         }
         carousel_images = get_carousel_images()
         google_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        print("DEBUG: Google Places API Key available:", bool(google_key))
-        if google_key:
-            print("DEBUG: Key starts with:", google_key[:10])
+        logger.info(f"Google Places API Key: {google_key[:10]}..." if google_key else "No API key found")
         
-        if not google_key:
+        if not google_key or google_key.strip() == '':
             logger.error("Google Places API key not found!")
-        else:
-            logger.info(f"Google Places API Key loaded (starts with: {google_key[:10]}...)")
+            return render_template('error.html', error="Google Places API key not configured")
+        
         observations = tracker.get_recent_observations()
         logger.debug(f"Found {len(observations)} recent observations")
         

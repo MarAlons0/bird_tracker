@@ -116,42 +116,33 @@ class BirdSightingTracker:
             return None
     
     def get_recent_observations(self, species_list=None):
-        """
-        Get recent bird sightings within radius of active location
-        """
-        endpoint = f"{self.base_url}/data/obs/geo/recent"
-        headers = {'X-eBirdApiToken': self.api_key}
-        params = {
-            'lat': float(self.active_location['latitude']),
-            'lng': float(self.active_location['longitude']),
-            'dist': float(self.active_location['radius']),
-            'back': 21,
-            'maxResults': 1000
-        }
-        
-        print(f"DEBUG: Making API request...")
-        response = requests.get(endpoint, headers=headers, params=params)
-        print(f"DEBUG: API Response Status Code: {response.status_code}")
-        
-        if response.status_code == 200:
-            try:
+        """Get recent bird sightings within radius of active location"""
+        try:
+            endpoint = f"{self.base_url}/data/obs/geo/recent"
+            headers = {'X-eBirdApiToken': self.api_key}
+            params = {
+                'lat': float(self.active_location['latitude']),
+                'lng': float(self.active_location['longitude']),
+                'dist': float(self.active_location['radius']),
+                'back': 21,
+                'maxResults': 1000
+            }
+            
+            logger.debug(f"Making eBird API request to {endpoint}")
+            response = requests.get(endpoint, headers=headers, params=params)
+            logger.debug(f"API Response Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
                 observations = response.json()
-                print(f"DEBUG: Successfully parsed {len(observations)} observations")
+                logger.info(f"Successfully retrieved {len(observations)} observations")
+                return observations or []  # Return empty list instead of None
+            else:
+                logger.error(f"eBird API Error: {response.status_code} - {response.text}")
+                return []
                 
-                # Add taxonomic information to each observation
-                for obs in observations:
-                    print(f"DEBUG: Processing observation for {obs.get('comName', 'Unknown')}")
-                    taxa = self.get_taxonomic_info(obs['speciesCode'])
-                    if taxa:
-                        obs.update(taxa)
-                
-                return observations
-            except Exception as e:
-                print(f"DEBUG: Error parsing response: {str(e)}")
-                return None
-        else:
-            print(f"DEBUG: API Error Response: {response.text}")
-            return None
+        except Exception as e:
+            logger.error(f"Error getting observations: {e}")
+            return []
     
     def analyze_observations(self, observations):
         try:
