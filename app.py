@@ -239,5 +239,5 @@ def internal_error(error):
     return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8000))
-    app.run(host='0.0.0.0', port=port) 
+    print("Starting Flask server...")
+    app.run(host='localhost', port=8000, debug=True) 
