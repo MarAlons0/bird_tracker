@@ -462,7 +462,7 @@ Format your response in HTML with appropriate headings and paragraphs.
         config['locations']['active_location'] = location_name
         
         # Save config
-        with open('/Users/Mario/Documents/bird_tracker/config.ini', 'w') as f:
+        with open('config.ini', 'w') as f:
             config.write(f)
 
     def start_daily_reports(self):
@@ -562,7 +562,7 @@ Format your response in HTML with appropriate headings and paragraphs.
             self.config['email_schedule']['minute'] = str(minute)
             
             # Save config
-            with open('/Users/Mario/Documents/bird_tracker/config.ini', 'w') as f:
+            with open('config.ini', 'w') as f:
                 self.config.write(f)
             
             # Restart scheduler

@@ -71,11 +71,15 @@ def home():
         }
         carousel_images = get_carousel_images()
         google_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        logger.info(f"Google Places API Key: {google_key[:10]}..." if google_key else "No API key found")
+        ebird_key = os.getenv('EBIRD_API_KEY')
         
-        if not google_key or google_key.strip() == '':
+        if not google_key:
             logger.error("Google Places API key not found!")
-            return render_template('error.html', error="Google Places API key not configured")
+            google_key = ''  # Set empty string instead of None
+
+        if not ebird_key:
+            logger.error("eBird API key not found!")
+            return render_template('error.html', error="eBird API key not configured")
         
         observations = tracker.get_recent_observations()
         logger.debug(f"Found {len(observations)} recent observations")
@@ -130,9 +134,7 @@ def get_analysis():
         logger.error(f"Analysis error: {e}")
         error_msg = f"Error during analysis: {str(e)}"
         logger.error(error_msg)
-        return jsonify({
-            'analysis': f'<p class="alert alert-danger">{error_msg}</p>'
-        }), 500
+        return jsonify({'error': error_msg}), 500
 
 @app.route('/api/location', methods=['POST'])
 def update_location():

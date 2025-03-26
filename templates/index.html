@@ -164,21 +164,25 @@ let autocompleteInstance = null;
 
 // Initialize Google Places Autocomplete
 function initAutocomplete() {
-    console.log("Initializing Google Places Autocomplete...");
-    const input = document.getElementById('locationSearch');
-    
-    if (!input) {
-        console.error("Could not find locationSearch input");
-        return;
-    }
-    
-    const options = {
-        types: ['geocode'],  // This allows cities, parks, and other locations
-        fields: ['geometry', 'name', 'formatted_address'],
-        componentRestrictions: { country: 'us' }
-    };
-    
     try {
+        console.log("Initializing Google Places Autocomplete...");
+        const input = document.getElementById('locationSearch');
+        
+        if (!google || !google.maps || !google.maps.places) {
+            console.error("Google Maps API not loaded correctly");
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'Error: Google Maps API not available';
+            input.parentNode.appendChild(errorDiv);
+            return;
+        }
+        
+        const options = {
+            types: ['geocode'],
+            fields: ['geometry', 'name', 'formatted_address'],
+            componentRestrictions: { country: 'us' }
+        };
+        
         // Clean up previous instance if it exists
         if (autocompleteInstance) {
             google.maps.event.clearInstanceListeners(autocompleteInstance);
