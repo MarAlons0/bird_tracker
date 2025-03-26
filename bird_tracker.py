@@ -18,6 +18,10 @@ from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MISSED
 from dotenv import load_dotenv
 import httpx
 from anthropic import Anthropic
+import json
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 class BirdSightingTracker:
     def __init__(self):
@@ -150,45 +154,34 @@ class BirdSightingTracker:
             return None
     
     def analyze_observations(self, observations):
-        """Generate insights using Claude about the bird observations"""
-        if not observations:
-            return "No observations to analyze."
-
         try:
-            print("DEBUG: Starting observation analysis...")
+            if not observations:
+                logger.info("No observations to analyze")
+                return "<p>No recent bird sightings found in this area.</p>"
             
-            # Create the prompt
-            prompt = f"""You are an expert ornithologist. Analyze these bird observations and provide insights:
+            # If credits are available, proceed with Claude analysis
+            prompt = f"""Analyze these bird sightings from {self.active_location['name']} and provide a summary:
 
-            {self.format_observations_for_analysis(observations)}
+Location: {self.active_location['name']}
+Radius: {self.active_location['radius']} miles
+Number of observations: {len(observations)}
+Time period: Last 21 days
 
-            Please provide a detailed analysis with exactly these four sections, using bullet points and following this format precisely:
-            
-            Most Common Species:
-            - List the 3-5 most frequently observed species with exact counts
-            - Include specific behavior patterns observed
-            - Note any interesting interactions between common species
-            
-            Rare or Unusual Sightings:
-            - Identify any uncommon species for this location/season
-            - Explain why each sighting is significant
-            - Note any conservation implications
-            
-            Notable Patterns:
-            - Analyze daily/weekly activity patterns
-            - Discuss any migration trends visible in the data
-            - Compare current observations with expected seasonal patterns
-            
-            Recommendations:
-            - Suggest specific locations within the area for optimal viewing
-            - Recommend best times of day for observation
-            - List essential equipment for local birdwatching
-            - Share tips for identifying the current common species
-            """
+Observations:
+{json.dumps(observations, indent=2)}
 
-            print("DEBUG: Sending request to Claude...")
+Please provide:
+1. A brief overview of bird activity
+2. Notable or rare species
+3. Any interesting patterns
+4. Suggestions for birdwatchers
+
+Format your response in HTML with appropriate headings and paragraphs.
+"""
+            logger.debug("Sending request to Claude API")
+            
             try:
-                message = self.claude.messages.create(
+                response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
                     max_tokens=1000,
                     messages=[{
@@ -196,22 +189,33 @@ class BirdSightingTracker:
                         "content": prompt
                     }]
                 )
-                print(f"DEBUG: Claude API response status: {message}")
+                logger.debug("Received response from Claude API")
+                return response.content[0].text
+                
             except Exception as api_error:
-                logger.error(f"Claude API error: {str(api_error)}")
-                raise
+                logger.error(f"Claude API error: {api_error}")
+                # If API error occurs, fall back to basic analysis
+                species_count = len(set(obs['comName'] for obs in observations))
+                total_sightings = len(observations)
+                
+                return f"""
+                <div class='basic-analysis'>
+                    <h3>Basic Analysis</h3>
+                    <p>In the last 21 days around {self.active_location['name']}:</p>
+                    <ul>
+                        <li>{total_sightings} total bird sightings recorded</li>
+                        <li>{species_count} different species observed</li>
+                    </ul>
+                    <p class='alert alert-info'>
+                        Note: Detailed AI analysis is currently unavailable. 
+                        Basic statistics are shown instead.
+                    </p>
+                </div>
+                """
             
-            print("DEBUG: Claude response received")
-            if hasattr(message, 'content') and message.content:
-                return message.content[0].text
-            else:
-                print(f"DEBUG: Unexpected response format: {message}")
-                return "Error: Unexpected API response format"
-
         except Exception as e:
-            logger.error(f"Error in analyze_observations: {str(e)}")
-            logger.error(f"Error type: {type(e)}")
-            return "Error generating insights. Using basic summary instead."
+            logger.error(f"Error in analyze_observations: {e}")
+            raise
 
     def create_static_map(self, observations):
         """Create a static map of bird observations using Google Maps"""
@@ -655,6 +659,25 @@ class BirdSightingTracker:
             formatted.append(f"- {obs['comName']} ({obs['sciName']}) - Count: {obs['howMany']} - Date: {obs['obsDt']}")
         
         return "\n".join(formatted)
+
+    def send_daily_report(self):
+        """Send daily report email"""
+        try:
+            report = self.generate_daily_report()
+            
+            msg = MIMEText(report)
+            msg['Subject'] = f'Bird Tracker Daily Report - {datetime.now().strftime("%Y-%m-%d")}'
+            msg['From'] = self.email_config['sender_email']
+            msg['To'] = self.email_config['admin_email']  # Use admin_email for recipient
+            
+            with smtplib.SMTP(self.email_config['smtp_server'], 
+                             self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['sender_email'], 
+                           self.email_config['sender_password'])
+                server.send_message(msg)
+        except Exception as e:
+            print(f"Error sending daily report: {str(e)}")
 
 if __name__ == "__main__":
     try:

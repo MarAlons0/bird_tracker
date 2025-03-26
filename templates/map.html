@@ -27,13 +27,37 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
+    <div class="container mt-4">
         <h2>Bird Sightings Map</h2>
-        <p>Showing observations near {{ location.name }}</p>
-        <div id="map"></div>
+        <div id="map" style="height: 500px;"></div>
+       
+       <!-- Observations Table -->
+       <div class="mt-4">
+           <h3>Recent Observations</h3>
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>Species</th>
+                           <th>Count</th>
+                           <th>Location</th>
+                           <th>Date</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       {% for obs in observations %}
+                       <tr>
+                           <td>{{ obs.comName }}</td>
+                           <td>{{ obs.howMany }}</td>
+                           <td>{{ obs.locName }}</td>
+                           <td>{{ obs.obsDt }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+           </div>
+       </div>
     </div>
-</div>
 {% endblock %}
 
 {% block scripts %}

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, url_for
 from flask_cors import CORS
 from datetime import datetime
 import sys
@@ -49,6 +49,19 @@ def load_locations():
         print(f"Error loading locations: {e}")
         return []
 
+def get_carousel_images():
+    image_dir = os.path.join('static', 'images', 'birds')
+    print(f"Looking for images in: {image_dir}")
+    images = []
+    if os.path.exists(image_dir):
+        for file in os.listdir(image_dir):
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                images.append(file)
+        print(f"Found images: {images}")
+    else:
+        print(f"Directory not found: {image_dir}")
+    return sorted(images)
+
 @app.route('/')
 def home():
     try:
@@ -56,12 +69,24 @@ def home():
             'hour': int(os.getenv('EMAIL_SCHEDULE_HOUR', '7')),
             'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
         }
+        carousel_images = get_carousel_images()
+        google_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        print("DEBUG: Google Places API Key available:", bool(google_key))
+        if google_key:
+            print("DEBUG: Key starts with:", google_key[:10])
+        
+        if not google_key:
+            logger.error("Google Places API key not found!")
+        else:
+            logger.info(f"Google Places API Key loaded (starts with: {google_key[:10]}...)")
         observations = tracker.get_recent_observations()
         logger.debug(f"Found {len(observations)} recent observations")
         
         return render_template('index.html', 
                              location=tracker.active_location,
-                             email_schedule=email_schedule)
+                             email_schedule=email_schedule,
+                             carousel_images=carousel_images,
+                             google_maps_key=google_key)
     except Exception as e:
         logger.error(f"Error in home route: {e}")
         return render_template('error.html', error=str(e))
@@ -71,16 +96,14 @@ def map():
     observations = tracker.get_recent_observations()
     return render_template('map.html', 
                          observations=observations,
-                         location=tracker.active_location)
+                         location=tracker.active_location,
+                         google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
 
 @app.route('/report')
 def report():
-    observations = tracker.get_recent_observations()
-    analysis = tracker.analyze_observations(observations)
     return render_template('report.html',
-                         observations=observations,
-                         analysis=analysis,
-                         location=tracker.active_location)
+                         location=tracker.active_location,
+                         google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
 
 @app.route('/api/observations')
 def get_observations():
@@ -92,12 +115,26 @@ def get_analysis():
     try:
         observations = tracker.get_recent_observations()
         logger.debug(f"Analyzing {len(observations)} observations")
+        if not observations:
+            return jsonify({
+                'analysis': '<p class="alert alert-info">No bird sightings found in the last 21 days for this location.</p>'
+            })
+        
         analysis = tracker.analyze_observations(observations)
+        if not analysis:
+            return jsonify({
+                'analysis': '<p class="alert alert-warning">Unable to generate analysis at this time.</p>'
+            })
+        
         logger.debug(f"Analysis result: {analysis}")
         return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Analysis error: {e}")
-        return jsonify({'error': str(e)}), 500
+        error_msg = f"Error during analysis: {str(e)}"
+        logger.error(error_msg)
+        return jsonify({
+            'analysis': f'<p class="alert alert-danger">{error_msg}</p>'
+        }), 500
 
 @app.route('/api/location', methods=['POST'])
 def update_location():
@@ -202,5 +239,5 @@ def internal_error(error):
     return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
-    print("Starting Flask server...")
-    app.run(host='localhost', port=8000, debug=True) 
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port) 

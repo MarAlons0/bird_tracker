@@ -55,9 +55,27 @@
         <p>Location: {{ location.name }} ({{ location.radius }} mile radius)</p>
         
         <!-- AI Analysis Section -->
-        <div class="analysis-section">
-            <h3>Analysis and Insights</h3>
-            {{ analysis|safe }}
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">AI Analysis for {{ location.name }}</h5>
+                    <!-- Loading spinner -->
+                    <div id="loadingAnalysis" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating AI analysis of recent bird sightings...</p>
+                    </div>
+                    <!-- Analysis content (initially hidden) -->
+                    <div id="analysisContent" style="display: none;">
+                        {% if analysis %}
+                            {{ analysis|safe }}
+                        {% else %}
+                            <p>No analysis available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Chat Interface -->
@@ -141,5 +159,31 @@
             sendMessage();
         }
     });
+
+    async function loadAnalysis() {
+        try {
+            const response = await fetch('/api/analysis');
+            const data = await response.json();
+            
+            // Hide loading spinner and show content
+            document.getElementById('loadingAnalysis').style.display = 'none';
+            const contentDiv = document.getElementById('analysisContent');
+            contentDiv.innerHTML = data.analysis;
+            contentDiv.style.display = 'block';
+        } catch (error) {
+            console.error('Error loading analysis:', error);
+            document.getElementById('loadingAnalysis').innerHTML = 
+                `<div class="alert alert-danger">
+                    <h5>Error Loading Analysis</h5>
+                    <p>${error.message || 'An unexpected error occurred'}</p>
+                    <button class="btn btn-outline-primary mt-2" onclick="loadAnalysis()">
+                        <i class="fas fa-sync-alt"></i> Try Again
+                    </button>
+                </div>`;
+        }
+    }
+
+    // Start loading analysis when page loads
+    document.addEventListener('DOMContentLoaded', loadAnalysis);
 </script>
 {% endblock %} 
