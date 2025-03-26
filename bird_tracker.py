@@ -172,19 +172,22 @@ Format your response in HTML with appropriate headings and paragraphs.
             logger.debug("Sending request to Claude API")
             
             try:
+                # Add timeout to Anthropic API request
                 response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
                     max_tokens=1000,
                     messages=[{
                         "role": "user",
                         "content": prompt
-                    }]
+                    }],
+                    timeout=30  # 30 second timeout
                 )
                 logger.debug("Received response from Claude API")
                 return response.content[0].text
                 
             except Exception as api_error:
                 logger.error(f"Claude API error: {api_error}")
+                logger.info("Falling back to basic analysis")
                 # If API error occurs, fall back to basic analysis
                 species_count = len(set(obs['comName'] for obs in observations))
                 total_sightings = len(observations)

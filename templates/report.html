@@ -162,11 +162,19 @@
 
     async function loadAnalysis() {
         try {
+            document.getElementById('analysisContent').innerHTML = `
+                <div class="alert alert-info">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    Generating analysis...
+                </div>`;
+            
             const response = await fetch('/api/analysis');
             const data = await response.json();
             
             if (response.status !== 200) {
-                throw new Error(data.error || 'Failed to load analysis');
+                throw new Error(data.error || `Failed to load analysis (Status: ${response.status})`);
             }
             
             document.getElementById('analysisContent').innerHTML = data.analysis;

@@ -122,14 +122,21 @@ def get_analysis():
                 'analysis': '<p class="alert alert-info">No bird sightings found in the last 21 days for this location.</p>'
             })
         
-        analysis = tracker.analyze_observations(observations)
-        if not analysis:
+        try:
+            analysis = tracker.analyze_observations(observations)
+            if not analysis:
+                return jsonify({
+                    'analysis': '<p class="alert alert-warning">Unable to generate analysis at this time.</p>'
+                })
+            
+            logger.debug(f"Analysis result length: {len(analysis)}")
+            return jsonify({'analysis': analysis})
+        except Exception as analysis_error:
+            logger.error(f"Analysis generation error: {analysis_error}")
             return jsonify({
-                'analysis': '<p class="alert alert-warning">Unable to generate analysis at this time.</p>'
-            })
+                'error': 'Unable to generate analysis at this time. Please try again later.'
+            }), 503
         
-        logger.debug(f"Analysis result: {analysis}")
-        return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Analysis error: {e}")
         error_msg = f"Error during analysis: {str(e)}"
