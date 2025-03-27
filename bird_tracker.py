@@ -152,22 +152,27 @@ class BirdSightingTracker:
             
             logger.info(f"Analyzing {len(observations)} observations for {self.active_location['name']}")
             
-            # Create a summary of observations for the prompt
-            species_count = len(set(obs['comName'] for obs in observations))
-            common_species = [
-                obs['comName'] for obs in observations 
-                if observations.count(obs['comName']) > 2
-            ][:5]  # Get top 5 most common
+            # More efficient species counting
+            species_freq = {}
+            for obs in observations:
+                species_freq[obs['comName']] = species_freq.get(obs['comName'], 0) + 1
+            
+            species_count = len(species_freq)
+            common_species = sorted(
+                [(species, count) for species, count in species_freq.items() if count > 2],
+                key=lambda x: x[1], 
+                reverse=True
+            )[:5]
             
             prompt = f"""Analyze these bird sightings from {self.active_location['name']}:
 
 Location: {self.active_location['name']}
 Total Species: {species_count}
 Total Observations: {len(observations)}
-Common Species: {', '.join(set(common_species))}
+Common Species: {', '.join(f"{species} ({count} sightings)" for species, count in common_species)}
 Time period: Last 21 days
 
-Please provide a brief analysis focusing on:
+Provide a brief analysis (2-3 paragraphs) focusing on:
 1. Notable patterns or trends
 2. Rare or unusual species
 3. Common species activity
@@ -179,33 +184,27 @@ Format as HTML with paragraphs and lists.
             try:
                 response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
-                    max_tokens=1000,
+                    max_tokens=500,  # Reduced from 1000
                     messages=[{
                         "role": "user",
                         "content": prompt
                     }],
-                    timeout=45  # Increase timeout
+                    timeout=45
                 )
                 logger.info("Successfully received response from Claude")
                 return response.content[0].text
                 
             except Exception as api_error:
                 logger.error(f"Claude API error: {api_error}")
-                return self._generate_basic_analysis(observations)
+                return self._generate_basic_analysis(observations, species_freq)
                 
         except Exception as e:
             logger.error(f"Error in analyze_observations: {e}")
             return None
 
-    def _generate_basic_analysis(self, observations):
+    def _generate_basic_analysis(self, observations, species_freq):
         """Generate a basic analysis when AI is unavailable"""
-        species_count = len(set(obs['comName'] for obs in observations))
         total_sightings = len(observations)
-        
-        # Get most common species
-        species_freq = {}
-        for obs in observations:
-            species_freq[obs['comName']] = species_freq.get(obs['comName'], 0) + 1
         common_species = sorted(species_freq.items(), key=lambda x: x[1], reverse=True)[:5]
         
         return f"""
@@ -214,7 +213,7 @@ Format as HTML with paragraphs and lists.
             <p>In the last 21 days around {self.active_location['name']}:</p>
             <ul>
                 <li>{total_sightings} total bird sightings recorded</li>
-                <li>{species_count} different species observed</li>
+                <li>{len(species_freq)} different species observed</li>
             </ul>
             <h4>Most Frequently Observed Species:</h4>
             <ul>
