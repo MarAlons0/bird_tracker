@@ -150,29 +150,33 @@ class BirdSightingTracker:
                 logger.info("No observations to analyze")
                 return "<p>No recent bird sightings found in this area.</p>"
             
-            # If credits are available, proceed with Claude analysis
-            prompt = f"""Analyze these bird sightings from {self.active_location['name']} and provide a summary:
+            logger.info(f"Analyzing {len(observations)} observations for {self.active_location['name']}")
+            
+            # Create a summary of observations for the prompt
+            species_count = len(set(obs['comName'] for obs in observations))
+            common_species = [
+                obs['comName'] for obs in observations 
+                if observations.count(obs['comName']) > 2
+            ][:5]  # Get top 5 most common
+            
+            prompt = f"""Analyze these bird sightings from {self.active_location['name']}:
 
 Location: {self.active_location['name']}
-Radius: {self.active_location['radius']} miles
-Number of observations: {len(observations)}
+Total Species: {species_count}
+Total Observations: {len(observations)}
+Common Species: {', '.join(set(common_species))}
 Time period: Last 21 days
 
-Observations:
-{json.dumps(observations, indent=2)}
+Please provide a brief analysis focusing on:
+1. Notable patterns or trends
+2. Rare or unusual species
+3. Common species activity
 
-Please provide:
-1. A brief overview of bird activity
-2. Notable or rare species
-3. Any interesting patterns
-4. Suggestions for birdwatchers
-
-Format your response in HTML with appropriate headings and paragraphs.
+Format as HTML with paragraphs and lists.
 """
-            logger.debug("Sending request to Claude API")
+            logger.debug(f"Sending prompt to Claude: {prompt[:200]}...")
             
             try:
-                # Add timeout to Anthropic API request
                 response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
                     max_tokens=1000,
@@ -180,36 +184,48 @@ Format your response in HTML with appropriate headings and paragraphs.
                         "role": "user",
                         "content": prompt
                     }],
-                    timeout=30  # 30 second timeout
+                    timeout=45  # Increase timeout
                 )
-                logger.debug("Received response from Claude API")
+                logger.info("Successfully received response from Claude")
                 return response.content[0].text
                 
             except Exception as api_error:
                 logger.error(f"Claude API error: {api_error}")
-                logger.info("Falling back to basic analysis")
-                # If API error occurs, fall back to basic analysis
-                species_count = len(set(obs['comName'] for obs in observations))
-                total_sightings = len(observations)
+                return self._generate_basic_analysis(observations)
                 
-                return f"""
-                <div class='basic-analysis'>
-                    <h3>Basic Analysis</h3>
-                    <p>In the last 21 days around {self.active_location['name']}:</p>
-                    <ul>
-                        <li>{total_sightings} total bird sightings recorded</li>
-                        <li>{species_count} different species observed</li>
-                    </ul>
-                    <p class='alert alert-info'>
-                        Note: Detailed AI analysis is currently unavailable. 
-                        Basic statistics are shown instead.
-                    </p>
-                </div>
-                """
-            
         except Exception as e:
             logger.error(f"Error in analyze_observations: {e}")
-            raise
+            return None
+
+    def _generate_basic_analysis(self, observations):
+        """Generate a basic analysis when AI is unavailable"""
+        species_count = len(set(obs['comName'] for obs in observations))
+        total_sightings = len(observations)
+        
+        # Get most common species
+        species_freq = {}
+        for obs in observations:
+            species_freq[obs['comName']] = species_freq.get(obs['comName'], 0) + 1
+        common_species = sorted(species_freq.items(), key=lambda x: x[1], reverse=True)[:5]
+        
+        return f"""
+        <div class='basic-analysis'>
+            <h3>Basic Analysis</h3>
+            <p>In the last 21 days around {self.active_location['name']}:</p>
+            <ul>
+                <li>{total_sightings} total bird sightings recorded</li>
+                <li>{species_count} different species observed</li>
+            </ul>
+            <h4>Most Frequently Observed Species:</h4>
+            <ul>
+                {' '.join(f'<li>{species} ({count} sightings)</li>' for species, count in common_species)}
+            </ul>
+            <p class='alert alert-info'>
+                Note: Detailed AI analysis is currently unavailable. 
+                Basic statistics are shown instead.
+            </p>
+        </div>
+        """
 
     def create_static_map(self, observations):
         """Create a static map of bird observations using Google Maps"""

@@ -124,12 +124,16 @@ def get_analysis():
         
         try:
             analysis = tracker.analyze_observations(observations)
+            logger.debug(f"Analysis received, length: {len(analysis) if analysis else 0}")
             if not analysis:
                 return jsonify({
                     'analysis': '<p class="alert alert-warning">Unable to generate analysis at this time.</p>'
                 })
             
-            logger.debug(f"Analysis result length: {len(analysis)}")
+            # Verify the response is valid HTML
+            if not analysis.strip().startswith('<'):
+                analysis = f"<p>{analysis}</p>"
+            
             return jsonify({'analysis': analysis})
         except Exception as analysis_error:
             logger.error(f"Analysis generation error: {analysis_error}")
