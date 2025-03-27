@@ -13,6 +13,8 @@ from models import db, User
 import secrets
 from flask_mail import Mail, Message
 import configparser
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 # Load environment variables
 load_dotenv()
@@ -66,9 +68,65 @@ app.config.update(
 # Initialize Flask-Mail AFTER setting the config
 mail = Mail(app)
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('You need administrator privileges to access this page.', 'error')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add_user':
+            email = request.form.get('email')
+            password = request.form.get('password')
+            is_admin = bool(int(request.form.get('is_admin', 0)))
+            
+            if User.query.filter_by(email=email).first():
+                flash('User with this email already exists.', 'error')
+                return redirect(url_for('admin'))
+            
+            user = User(
+                email=email,
+                password=generate_password_hash(password),
+                is_admin=is_admin
+            )
+            db.session.add(user)
+            db.session.commit()
+            flash('User added successfully.', 'success')
+            
+        elif action == 'toggle_status':
+            user_id = request.form.get('user_id')
+            user = User.query.get_or_404(user_id)
+            user.is_active = not user.is_active
+            db.session.commit()
+            flash(f'User {"activated" if user.is_active else "deactivated"} successfully.', 'success')
+            
+        elif action == 'delete_user':
+            user_id = request.form.get('user_id')
+            user = User.query.get_or_404(user_id)
+            if user.id == current_user.id:
+                flash('You cannot delete your own account.', 'error')
+            else:
+                db.session.delete(user)
+                db.session.commit()
+                flash('User deleted successfully.', 'success')
+        
+        return redirect(url_for('admin'))
+    
+    users = User.query.all()
+    return render_template('admin.html', users=users)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

@@ -23,5 +23,6 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     is_approved = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True) 
