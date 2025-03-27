@@ -92,25 +92,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Recent Observations -->
-        <h3 class="mt-4">Recent Observations</h3>
-        <div class="row">
-            {% for obs in observations %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card observation-card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ obs.comName }}</h5>
-                        <p class="card-text">
-                            Count: {{ obs.howMany or 'Not specified' }}<br>
-                            Location: {{ obs.locName }}<br>
-                            Date: {{ obs.obsDt }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
     </div>
 </div>
 {% endblock %}

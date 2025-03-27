@@ -189,12 +189,13 @@ Format as HTML with paragraphs and lists.
                         "role": "user",
                         "content": prompt
                     }],
-                    timeout=45
+                    timeout=60  # Increase timeout to 60 seconds
                 )
                 logger.info("Successfully received response from Claude")
                 return response.content[0].text
                 
             except Exception as api_error:
+                logger.error(f"Claude API error details: {str(api_error)}")
                 logger.error(f"Claude API error: {api_error}")
                 return self._generate_basic_analysis(observations, species_freq)
                 

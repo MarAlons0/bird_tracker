@@ -28,7 +28,7 @@
                         </div>
                         <div class="col-auto">
                             <span class="text-muted">
-                                (Latitude: {{ location.lat }}, Longitude: {{ location.lng }}, Radius: {{ location.radius }} miles)
+                                (Latitude: {{ "%.4f"|format(location.latitude) }}, Longitude: {{ "%.4f"|format(location.longitude) }}, Radius: {{ location.radius }} miles)
                             </span>
                         </div>
                     </div>
