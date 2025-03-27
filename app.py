@@ -147,6 +147,22 @@ def get_analysis():
         logger.error(error_msg)
         return jsonify({'error': error_msg}), 500
 
+@app.route('/api/analysis/basic')
+def get_basic_analysis():
+    try:
+        observations = tracker.get_recent_observations()
+        if not observations:
+            return jsonify({
+                'analysis': '<p class="alert alert-info">No bird sightings found in the last 21 days for this location.</p>'
+            })
+        
+        basic_analysis = tracker._generate_basic_analysis(observations, {})
+        return jsonify({'analysis': basic_analysis})
+        
+    except Exception as e:
+        logger.error(f"Basic analysis error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/location', methods=['POST'])
 def update_location():
     try:

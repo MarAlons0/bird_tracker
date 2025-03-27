@@ -174,19 +174,16 @@
                     </div>
                 </div>`;
             
-            // Animate progress bar
-            const progressBar = document.querySelector('.progress-bar');
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 1;
-                if (progress <= 100) {
-                    progressBar.style.width = `${progress}%`;
-                }
-            }, 300); // Will take 30 seconds to reach 100%
+            // First get basic stats
+            const basicResponse = await fetch('/api/analysis/basic');
+            const basicData = await basicResponse.json();
             
+            // Show basic stats while waiting for AI
+            document.getElementById('analysisContent').innerHTML = basicData.analysis;
+            
+            // Then get AI analysis
             const response = await fetch('/api/analysis');
             const data = await response.json();
-            clearInterval(interval); // Stop progress animation
             
             if (response.status !== 200) {
                 throw new Error(data.error || `Failed to load analysis (Status: ${response.status})`);
