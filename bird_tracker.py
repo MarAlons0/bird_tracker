@@ -135,6 +135,15 @@ class BirdSightingTracker:
             if response.status_code == 200:
                 observations = response.json()
                 logger.info(f"Successfully retrieved {len(observations)} observations")
+                
+                # Save the raw response to a file for analysis
+                try:
+                    with open('ebird_response.json', 'w') as f:
+                        json.dump(observations, f, indent=2)
+                    logger.info("Saved eBird API response to ebird_response.json")
+                except Exception as e:
+                    logger.error(f"Error saving API response: {e}")
+                
                 return observations or []  # Return empty list instead of None
             else:
                 logger.error(f"eBird API Error: {response.status_code} - {response.text}")
@@ -154,8 +163,14 @@ class BirdSightingTracker:
             
             # More efficient species counting
             species_freq = {}
+            total_observations = 0
+            total_birds = 0
             for obs in observations:
-                species_freq[obs['comName']] = species_freq.get(obs['comName'], 0) + 1
+                species = obs['comName']
+                count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
+                species_freq[species] = species_freq.get(species, 0) + count
+                total_observations += 1
+                total_birds += count
             
             species_count = len(species_freq)
             common_species = sorted(
@@ -164,20 +179,44 @@ class BirdSightingTracker:
                 reverse=True
             )[:5]
             
-            prompt = f"""Analyze these bird sightings from {self.active_location['name']}:
+            prompt = f"""Create a weekly bird observation report using eBird API data for {self.active_location['name']}. The report should include:
 
+1. Overview section (under 50 words) summarizing overall bird activity in the area for the week ending {datetime.now().strftime('%B %d, %Y')}.
+
+2. Three analytical sections:
+   a. Noteworthy Changes: Compare observations between this week and the previous week, highlighting significant increases or decreases in species counts or diversity.
+   
+   b. Birds of Prey Analysis: Provide specific data on raptor sightings including hawks, eagles, falcons, and owls. Note any patterns in their activity, locations, or hunting behaviors.
+   
+   c. Unusual Sightings: Identify and describe any species that are rare or unexpected for {self.active_location['name']} during this time of year, including potential reasons for their presence.
+
+For each section, analyze raw observation data to extract meaningful patterns while avoiding speculation. Include relevant counts and observation locations where available.
+
+Data Structure:
+Each observation in the dataset contains the following fields:
+- speciesCode: A unique alphanumeric code identifying each species (e.g., "cangoo" for Canada Goose)
+- comName: The common name of the bird species (e.g., "Canada Goose")
+- sciName: The scientific (Latin) name of the species (e.g., "Branta canadensis")
+- locId: A unique identifier for the observation location (starts with "L")
+- locName: The name of the location where the observation was made
+- obsDt: The date and time of the observation
+- howMany: The count of individuals observed
+- lat: Latitude coordinate of the observation
+- lng: Longitude coordinate of the observation
+- obsValid: Boolean indicating if the observation is valid
+- obsReviewed: Boolean indicating if the observation has been reviewed
+- locationPrivate: Boolean indicating if the location is private
+- subId: Unique identifier for the checklist submission
+
+Data Summary:
 Location: {self.active_location['name']}
-Total Species: {species_count}
-Total Observations: {len(observations)}
-Common Species: {', '.join(f"{species} ({count} sightings)" for species, count in common_species)}
-Time period: Last 21 days
+Total Observations: {total_observations}
+Total Birds: {total_birds}
+Unique Species: {species_count}
+Most Common Birds: {', '.join(f"{species} ({count} birds)" for species, count in common_species[:3])}
+Time period: Last 14 days
 
-Provide a brief analysis (2-3 paragraphs) focusing on:
-1. Notable patterns or trends
-2. Rare or unusual species
-3. Common species activity
-
-Format as HTML with paragraphs and lists.
+Format the report in clear, concise language suitable for both casual birders and experienced naturalists. Use HTML formatting with paragraphs and lists for readability.
 """
             logger.debug(f"Sending prompt to Claude: {prompt[:200]}...")
             
@@ -204,28 +243,36 @@ Format as HTML with paragraphs and lists.
             return None
 
     def _generate_basic_analysis(self, observations, species_freq):
-        """Generate a basic analysis when AI is unavailable"""
-        total_sightings = len(observations)
-        common_species = sorted(species_freq.items(), key=lambda x: x[1], reverse=True)[:5]
-        
-        return f"""
-        <div class='basic-analysis'>
+        """Generate a basic analysis when Claude API fails"""
+        try:
+            # Calculate accurate counts
+            total_observations = len(observations)
+            total_birds = sum(int(obs.get('howMany', 1)) for obs in observations)
+            species_count = len(species_freq)
+            
+            # Get most common species with accurate counts
+            common_species = sorted(
+                [(species, count) for species, count in species_freq.items()],
+                key=lambda x: x[1],
+                reverse=True
+            )[:5]
+            
+            html = f"""
             <h3>Basic Analysis</h3>
             <p>In the last 21 days around {self.active_location['name']}:</p>
-            <ul>
-                <li>{total_sightings} total bird sightings recorded</li>
-                <li>{len(species_freq)} different species observed</li>
-            </ul>
-            <h4>Most Frequently Observed Species:</h4>
-            <ul>
-                {' '.join(f'<li>{species} ({count} sightings)</li>' for species, count in common_species)}
-            </ul>
-            <p class='alert alert-info'>
-                Note: Detailed AI analysis is currently unavailable. 
-                Basic statistics are shown instead.
-            </p>
-        </div>
-        """
+            
+            <p>{total_observations} total observations recorded<br>
+            {total_birds} total birds observed<br>
+            {species_count} different species observed</p>
+            
+            <p>Most Frequently Observed Species:<br>
+            {', '.join(f"{species} ({count} birds)" for species, count in common_species)}</p>
+            """
+            return html
+            
+        except Exception as e:
+            logger.error(f"Error generating basic analysis: {e}")
+            return "<p>Error generating basic analysis. Please try again later.</p>"
 
     def create_static_map(self, observations):
         """Create a static map of bird observations using Google Maps"""

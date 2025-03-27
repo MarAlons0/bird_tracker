@@ -1,6 +1,7 @@
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import Flask, render_template, jsonify, request, url_for, redirect, flash
 from flask_cors import CORS
-from datetime import datetime
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from datetime import datetime, timedelta
 import sys
 import os
 import json
@@ -8,6 +9,10 @@ import logging
 from dotenv import load_dotenv
 from logging_config import setup_logging
 import anthropic
+from models import db, User
+import secrets
+from flask_mail import Mail, Message
+import configparser
 
 # Load environment variables
 load_dotenv()
@@ -23,6 +28,118 @@ from bird_tracker import BirdSightingTracker
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Initialize SQLAlchemy
+db.init_app(app)
+
+# Create tables within application context
+with app.app_context():
+    db.create_all()
+    print("Database tables created")
+
+# Load config from config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# Add debug logging for config
+logger.debug("Loaded email configuration from config.ini:")
+logger.debug(f"MAIL_USERNAME: {config['email'].get('MAIL_USERNAME', 'Not found')}")
+logger.debug(f"MAIL_PASSWORD: {'Set' if config['email'].get('MAIL_PASSWORD') else 'Not found'}")
+
+# Mail configuration
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME=config['email']['MAIL_USERNAME'],
+    MAIL_PASSWORD=config['email']['MAIL_PASSWORD'],
+    MAIL_DEFAULT_SENDER=config['email']['MAIL_USERNAME']
+)
+
+# Initialize Flask-Mail AFTER setting the config
+mail = Mail(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        
+        # Check if email is in allowed list
+        allowed_emails = os.getenv('ALLOWED_EMAILS', '').split(',')
+        if email not in allowed_emails:
+            return render_template('login.html', 
+                error="Sorry, this email is not authorized to access this application.")
+        
+        # Get or create user
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(email=email)
+            db.session.add(user)
+            db.session.commit()
+        
+        # Generate magic link token
+        token = secrets.token_urlsafe(32)
+        user.login_token = token
+        user.token_expiry = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+        
+        # Send magic link email
+        try:
+            login_url = url_for('verify_login', token=token, _external=True)
+            msg = Message('Bird Tracker Login Link',
+                         sender=app.config['MAIL_DEFAULT_SENDER'],
+                         recipients=[email])
+            msg.body = f'''Click the following link to log in to Bird Tracker:
+{login_url}
+
+This link will expire in 1 hour.'''
+            
+            # Add debug logging
+            logger.debug("Email configuration:")
+            logger.debug(f"MAIL_SERVER: {app.config['MAIL_SERVER']}")
+            logger.debug(f"MAIL_PORT: {app.config['MAIL_PORT']}")
+            logger.debug(f"MAIL_USE_TLS: {app.config['MAIL_USE_TLS']}")
+            logger.debug(f"MAIL_USERNAME: {app.config['MAIL_USERNAME']}")
+            logger.debug(f"Sending to: {email}")
+            logger.debug(f"Login URL: {login_url}")
+            
+            mail.send(msg)
+            logger.debug("Email sent successfully")
+            
+            return render_template('check_email.html')
+        except Exception as e:
+            logger.error(f"Failed to send email: {str(e)}", exc_info=True)
+            return render_template('login.html', 
+                error=f"Failed to send login email: {str(e)}")
+        
+    return render_template('login.html')
+
+@app.route('/verify/<token>')
+def verify_login(token):
+    user = User.query.filter_by(login_token=token).first()
+    if user and user.token_expiry > datetime.utcnow():
+        login_user(user)
+        user.login_token = None  # Invalidate token after use
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('login.html', error="Invalid or expired login link")
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 # Initialize bird tracker
 try:
@@ -63,6 +180,7 @@ def get_carousel_images():
     return sorted(images)
 
 @app.route('/')
+@login_required
 def home():
     try:
         email_schedule = {
@@ -94,6 +212,7 @@ def home():
         return render_template('error.html', error=str(e))
 
 @app.route('/map')
+@login_required
 def map():
     observations = tracker.get_recent_observations()
     return render_template('map.html', 
@@ -102,12 +221,14 @@ def map():
                          google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
 
 @app.route('/report')
+@login_required
 def report():
     return render_template('report.html',
                          location=tracker.active_location,
                          google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
 
 @app.route('/api/observations')
+@login_required
 def get_observations():
     observations = tracker.get_recent_observations()
     return jsonify(observations)

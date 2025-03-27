@@ -1,25 +1,26 @@
-from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-import os
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from datetime import datetime
 
-Base = declarative_base()
+# Initialize SQLAlchemy
+db = SQLAlchemy()
 
-class Location(Base):
+class Location(db.Model):
     __tablename__ = 'locations'
     
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    latitude = Column(Float)
-    longitude = Column(Float)
-    radius = Column(Float)
-    is_active = Column(Boolean, default=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    radius = db.Column(db.Float)
+    is_active = db.Column(db.Boolean, default=False)
 
-# Database setup
-database_url = os.getenv('DATABASE_URL')
-if database_url and database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-
-engine = create_engine(database_url or 'sqlite:///bird_tracker.db')
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine) 
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    is_approved = db.Column(db.Boolean, default=False)
+    login_token = db.Column(db.String(100), unique=True, nullable=True)
+    token_expiry = db.Column(db.DateTime, nullable=True) 
