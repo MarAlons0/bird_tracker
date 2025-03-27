@@ -45,51 +45,38 @@
         background: #e9ecef;
         margin-right: auto;
     }
+    .analysis-content {
+        min-height: 200px;
+        background-color: #f8f9fa;
+    }
+    .analysis-content:empty {
+        border: 2px dashed #dee2e6 !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2>Bird Sighting Report</h2>
-        <p>Location: {{ location.name }} ({{ location.radius }} mile radius)</p>
-        
-        <!-- AI Analysis Section -->
-        <div class="container mt-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">AI Analysis for {{ location.name }}</h5>
-                    <!-- Loading spinner -->
-                    <div id="loadingAnalysis" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Generating AI analysis of recent bird sightings...</p>
-                    </div>
-                    <!-- Analysis content (initially hidden) -->
-                    <div id="analysisContent" style="display: none;">
-                        {% if analysis %}
-                            {{ analysis|safe }}
-                        {% else %}
-                            <p>No analysis available.</p>
-                        {% endif %}
-                    </div>
-                </div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>AI Analysis for {{ location.name }}</h2>
+            <div id="analysisContent" class="analysis-content mt-4 p-3 border rounded">
+                <!-- Content will be loaded here -->
             </div>
         </div>
+    </div>
 
-        <!-- Chat Interface -->
-        <div class="chat-container">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot-message">
-                    Hello! I can help you analyze the bird sighting data. What would you like to know?
-                </div>
+    <!-- Chat Interface -->
+    <div class="chat-container mt-4">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hello! I can help you analyze the bird sighting data. What would you like to know?
             </div>
-            <div class="chat-input">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="chatInput" placeholder="Ask about the bird sightings...">
-                    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
-                </div>
+        </div>
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" class="form-control" id="chatInput" placeholder="Ask about the bird sightings...">
+                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
@@ -167,7 +154,11 @@
             const response = await fetch('/api/analysis');
             console.log('AI analysis response received:', response.status);
             const data = await response.json();
-            console.log('AI analysis data:', data);
+            console.log('AI analysis data:', {
+                hasAnalysis: !!data.analysis,
+                length: data.analysis ? data.analysis.length : 0,
+                content: data.analysis
+            });
             
             if (response.status !== 200) {
                 throw new Error(data.error || `Failed to load analysis (Status: ${response.status})`);
@@ -177,7 +168,10 @@
                 throw new Error('No analysis content received');
             }
             
-            document.getElementById('analysisContent').innerHTML = data.analysis;
+            const analysisContent = document.getElementById('analysisContent');
+            console.log('Analysis container before update:', analysisContent.innerHTML);
+            analysisContent.innerHTML = data.analysis;
+            console.log('Analysis container after update:', analysisContent.innerHTML);
             console.log('Analysis displayed successfully');
         } catch (error) {
             console.error('Error loading analysis:', error.message, error.stack);
