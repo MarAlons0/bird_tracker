@@ -43,8 +43,11 @@ db.init_app(app)
 
 # Create tables within application context
 with app.app_context():
-    db.create_all()
-    print("Database tables created")
+    try:
+        db.create_all()
+        print("Database tables created")
+    except Exception as e:
+        print(f"Note: Some tables may already exist: {str(e)}")
 
 # Load config from config.ini
 config = configparser.ConfigParser()
