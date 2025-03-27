@@ -20,6 +20,7 @@ class User(UserMixin, db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     is_approved = db.Column(db.Boolean, default=False)
     login_token = db.Column(db.String(100), unique=True, nullable=True)
