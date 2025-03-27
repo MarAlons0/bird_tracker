@@ -2,46 +2,58 @@ from app import app, db
 from models import User
 import logging
 from sqlalchemy import text
+import os
+from werkzeug.security import generate_password_hash
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def init_db():
-    with app.app_context():
-        logger.debug("Creating database tables...")
-        try:
-            # Drop all existing tables
-            db.drop_all()
-            logger.debug("Dropped existing tables")
-            
-            # Create all tables
-            db.create_all()
-            logger.debug("Created new tables")
-            
-            # Check if admin user exists
-            admin_email = 'alonsoencinci@gmail.com'
-            if not User.query.filter_by(email=admin_email).first():
-                # Create admin user
-                admin = User(
-                    email=admin_email,
-                    is_approved=True
-                )
-                db.session.add(admin)
-                db.session.commit()
-                logger.info(f"Created admin user: {admin_email}")
-            else:
-                logger.info(f"Admin user already exists: {admin_email}")
-                
-            # Verify tables were created
-            with db.engine.connect() as conn:
-                # Use text() to create an executable SQL statement
-                sql = text("SELECT name FROM sqlite_master WHERE type='table';")
-                tables = conn.execute(sql).fetchall()
-                logger.debug(f"Created tables: {[table[0] for table in tables]}")
-                
-        except Exception as e:
-            logger.error(f"Error initializing database: {e}")
-            raise
+    """Initialize the database with required tables and initial data."""
+    print("Database tables created")
+    
+    # Check if admin user exists
+    admin = User.query.filter_by(email='alonsoencinci@gmail.com').first()
+    if not admin:
+        admin = User(
+            email='alonsoencinci@gmail.com',
+            password=generate_password_hash(os.getenv('ADMIN_PASSWORD', 'admin123')),
+            is_admin=True
+        )
+        db.session.add(admin)
+        print("Created admin user: alonsoencinci@gmail.com")
+    
+    # Add other users
+    users = [
+        {
+            'email': 'sasandrap@gmail.com',
+            'name': 'Sandra Perez Maass',
+            'is_admin': False
+        },
+        {
+            'email': 'jalonso91@gmail.com',
+            'name': 'Jordi Alonso',
+            'is_admin': False
+        },
+        {
+            'email': 'nunualonso96@gmail.com',
+            'name': 'Nuria Alonso Perez',
+            'is_admin': False
+        }
+    ]
+    
+    for user_data in users:
+        user = User.query.filter_by(email=user_data['email']).first()
+        if not user:
+            user = User(
+                email=user_data['email'],
+                password=generate_password_hash(os.getenv('DEFAULT_USER_PASSWORD', 'user123')),
+                is_admin=user_data['is_admin']
+            )
+            db.session.add(user)
+            print(f"Created user: {user_data['email']}")
+    
+    db.session.commit()
 
 if __name__ == '__main__':
     init_db() 
