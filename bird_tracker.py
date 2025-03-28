@@ -264,60 +264,48 @@ class BirdSightingTracker:
             return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
 
     def _format_basic_analysis(self):
-        """Format basic analysis of observations"""
+        """Format the basic analysis of bird observations."""
         try:
             observations = self.get_recent_observations()
             if not observations:
-                return "<p>No recent bird sightings found in this area.</p>"
-            
+                return "No recent observations found."
+
             # Calculate statistics
-            species_freq = defaultdict(int)
-            for obs in observations:
-                species = obs.get('comName', 'Unknown Species')
-                count = obs.get('howMany', 1)
-                species_freq[species] += count
-            
             total_observations = len(observations)
-            total_birds = sum(species_freq.values())
-            species_count = len(species_freq)
+            total_birds = sum(obs.get('howMany', 1) for obs in observations)  # Default to 1 if howMany is missing
+            species_count = len(set(obs['comName'] for obs in observations))
             
-            # Get most common species
-            common_species = sorted(
-                [(species, count) for species, count in species_freq.items() if count > 2],
-                key=lambda x: x[1], 
-                reverse=True
-            )[:5]
+            # Get common species (top 5)
+            species_counts = {}
+            for obs in observations:
+                species = obs['comName']
+                count = obs.get('howMany', 1)
+                species_counts[species] = species_counts.get(species, 0) + count
+            
+            common_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)[:5]
             
             # Get birds of prey
-            raptors = [
-                (species, count) for species, count in species_freq.items()
-                if any(raptor in species.lower() for raptor in ['hawk', 'eagle', 'falcon', 'owl'])
-            ]
+            birds_of_prey = [obs for obs in observations if any(prey in obs['comName'].lower() for prey in ['hawk', 'eagle', 'owl', 'falcon', 'osprey'])]
             
-            # Get unusual sightings (species with count of 1)
-            unusual_species = [
-                species for species, count in species_freq.items()
-                if count == 1
-            ]
+            # Get unusual sightings (species seen only once)
+            unusual_species = [species for species, count in species_counts.items() if count == 1]
             
             # Generate HTML report
             html = f"""
             <div class="analysis-section">
-                <h3>Basic Statistics</h3>
-                <ul>
-                    <li>Total Observations: {total_observations}</li>
-                    <li>Total Birds: {total_birds}</li>
-                    <li>Species Count: {species_count}</li>
-                </ul>
+                <h2>Basic Analysis</h2>
+                <p>Total Observations: {total_observations}</p>
+                <p>Total Birds: {total_birds}</p>
+                <p>Species Count: {species_count}</p>
                 
-                <h3>Most Common Species</h3>
+                <h3>Common Species</h3>
                 <ul>
-                    {''.join(f'<li>{species}: {count} individuals</li>' for species, count in common_species)}
+                    {''.join(f'<li>{species}: {count} birds</li>' for species, count in common_species)}
                 </ul>
                 
                 <h3>Birds of Prey</h3>
                 <ul>
-                    {''.join(f'<li>{species}: {count} individuals</li>' for species, count in raptors)}
+                    {''.join(f'<li>{obs["comName"]}</li>' for obs in birds_of_prey)}
                 </ul>
                 
                 <h3>Unusual Sightings</h3>
@@ -327,10 +315,9 @@ class BirdSightingTracker:
             </div>
             """
             return html
-            
         except Exception as e:
-            logger.error(f"Error in _format_basic_analysis: {e}")
-            return "<p>Error generating basic analysis. Please try again later.</p>"
+            logging.error(f"Error in basic analysis: {str(e)}")
+            return "Error generating basic analysis."
 
     def create_static_map(self, observations):
         """Create a static map of bird observations using Google Maps"""
