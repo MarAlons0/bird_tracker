@@ -173,7 +173,7 @@ class BirdSightingTracker:
                 logger.info("No observations to analyze")
                 return "<p>No recent bird sightings found in this area.</p>"
             
-            logger.info(f"Analyzing {len(observations)} observations for {self.active_location['name']}")
+            logger.info(f"Starting analysis of {len(observations)} observations for {self.active_location['name']}")
             
             # More efficient species counting
             species_freq = {}
@@ -284,8 +284,8 @@ Raw Observation Data:
                     raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
                 
                 # Log the full prompt for debugging
-                logger.debug("Full prompt for Claude:")
-                logger.debug(prompt)
+                logger.info("Full prompt for Claude:")
+                logger.info(prompt)
                 
                 response = self.claude.messages.create(
                     model="claude-3-sonnet-20240229",
@@ -297,20 +297,17 @@ Raw Observation Data:
                 
                 logger.info("Successfully received response from Claude")
                 analysis = response.content[0].text
-                logger.debug(f"Analysis length: {len(analysis)} characters")
-                logger.debug(f"Analysis preview: {analysis[:200]}...")
+                logger.info(f"Analysis length: {len(analysis)} characters")
+                logger.info("Full analysis from Claude:")
+                logger.info(analysis)
                 
                 if not analysis or len(analysis.strip()) < 100:
                     logger.error("Received empty or very short analysis from Claude")
                     raise ValueError("Invalid response from Claude API")
                 
-                # Log the full analysis for debugging
-                logger.debug("Full analysis from Claude:")
-                logger.debug(analysis)
-                
                 formatted_analysis = self._format_ai_analysis(analysis)
-                logger.debug("Formatted analysis preview:")
-                logger.debug(formatted_analysis[:200] + "...")
+                logger.info("Formatted analysis preview:")
+                logger.info(formatted_analysis[:200] + "...")
                 
                 return formatted_analysis
                 
@@ -858,10 +855,14 @@ Raw Observation Data:
                 
                 # Add section title if it exists
                 if formatted_paragraphs:
-                    section_title = formatted_paragraphs[0].text.strip()
-                    if section_title.startswith(('1.', '2.', '3.')):
-                        formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_title}</h3>')
-                        formatted_sections.extend(formatted_paragraphs[1:])
+                    first_paragraph = formatted_paragraphs[0]
+                    if first_paragraph.startswith('<p class="mb-3">') and first_paragraph.endswith('</p>'):
+                        section_title = first_paragraph[15:-4].strip()  # Remove <p> tags
+                        if section_title.startswith(('1.', '2.', '3.')):
+                            formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_title}</h3>')
+                            formatted_sections.extend(formatted_paragraphs[1:])
+                        else:
+                            formatted_sections.extend(formatted_paragraphs)
                     else:
                         formatted_sections.extend(formatted_paragraphs)
             
@@ -869,6 +870,7 @@ Raw Observation Data:
             
         except Exception as e:
             logger.error(f"Error formatting AI analysis: {e}")
+            logger.error(f"Analysis content: {analysis}")
             # Fallback to simple formatting if there's an error
             return f'<div class="analysis-content">{analysis}</div>'
 
@@ -914,7 +916,9 @@ User Question: {message}
 Please provide a helpful response based on the observations and your expertise. If the question is about specific birds, use the observation data to support your answer."""
 
             logger.info("Attempting to get chat response from Claude...")
-            logger.debug(f"Prompt length: {len(prompt)} characters")
+            logger.info(f"Chat prompt length: {len(prompt)} characters")
+            logger.info("Full chat prompt:")
+            logger.info(prompt)
             
             # Get response from Claude
             response = self.claude.messages.create(
@@ -926,8 +930,12 @@ Please provide a helpful response based on the observations and your expertise. 
             )
             
             logger.info("Successfully received chat response from Claude")
-            logger.debug(f"Response length: {len(response.content[0].text)} characters")
-            return response.content[0].text
+            chat_response = response.content[0].text
+            logger.info(f"Chat response length: {len(chat_response)} characters")
+            logger.info("Full chat response:")
+            logger.info(chat_response)
+            
+            return chat_response
             
         except Exception as e:
             logger.error(f"Error in chat_with_ai: {e}")
