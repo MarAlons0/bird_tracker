@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
 from models import db, User
 from bird_tracker import BirdSightingTracker
@@ -61,4 +61,92 @@ def report():
         
     return render_template('report.html',
                          location=current_app.tracker.active_location,
-                         google_maps_key=google_places_key) 
+                         google_maps_key=google_places_key)
+
+@bp.route('/api/analysis/basic')
+@login_required
+def basic_analysis():
+    try:
+        observations = current_app.tracker.get_recent_observations()
+        if not observations:
+            return jsonify({
+                'analysis': '<div class="alert alert-info">No recent observations found.</div>'
+            })
+        
+        # Calculate basic stats
+        total_species = len(set(obs['comName'] for obs in observations))
+        total_observations = sum(obs['howMany'] for obs in observations)
+        birds_of_prey = [obs for obs in observations if any(term in obs['comName'].lower() 
+                                                          for term in ['hawk', 'eagle', 'owl', 'falcon'])]
+        
+        analysis_html = f"""
+        <div class="analysis-section">
+            <h3>Basic Statistics</h3>
+            <ul class="list-group">
+                <li class="list-group-item">Total Species Observed: {total_species}</li>
+                <li class="list-group-item">Total Birds Counted: {total_observations}</li>
+                <li class="list-group-item">Birds of Prey Species: {len(birds_of_prey)}</li>
+            </ul>
+        </div>
+        """
+        
+        return jsonify({'analysis': analysis_html})
+    except Exception as e:
+        logger.error(f"Error in basic analysis: {e}")
+        return jsonify({
+            'error': str(e),
+            'analysis': '<div class="alert alert-danger">Error generating basic analysis.</div>'
+        }), 500
+
+@bp.route('/api/analysis')
+@login_required
+def ai_analysis():
+    try:
+        observations = current_app.tracker.get_recent_observations()
+        if not observations:
+            return jsonify({
+                'analysis': '<div class="alert alert-info">No recent observations found.</div>'
+            })
+        
+        # Get AI analysis from the tracker
+        analysis = current_app.tracker.generate_ai_analysis(observations)
+        
+        if not analysis:
+            return jsonify({
+                'error': 'No analysis generated',
+                'analysis': '<div class="alert alert-warning">Unable to generate AI analysis.</div>'
+            }), 500
+        
+        return jsonify({'analysis': analysis})
+    except Exception as e:
+        logger.error(f"Error in AI analysis: {e}")
+        return jsonify({
+            'error': str(e),
+            'analysis': '<div class="alert alert-danger">Error generating AI analysis.</div>'
+        }), 500
+
+@bp.route('/api/chat', methods=['POST'])
+@login_required
+def chat():
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        observations = current_app.tracker.get_recent_observations()
+        response = current_app.tracker.chat_with_ai(message, observations)
+        
+        if not response:
+            return jsonify({
+                'error': 'No response generated',
+                'response': 'Sorry, I was unable to process your question.'
+            }), 500
+        
+        return jsonify({'response': response})
+    except Exception as e:
+        logger.error(f"Error in chat: {e}")
+        return jsonify({
+            'error': str(e),
+            'response': 'Sorry, there was an error processing your request.'
+        }), 500 
