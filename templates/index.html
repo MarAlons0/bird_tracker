@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+{% endblock %}
+
 {% block content %}
     <div class="container mt-4">
         <div class="card mb-4">
