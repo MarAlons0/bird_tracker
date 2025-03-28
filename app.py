@@ -47,6 +47,12 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
+    # Configure session settings for Safari
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    
     # Configure Flask-Mail
     app.config['MAIL_SERVER'] = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
     app.config['MAIL_PORT'] = int(os.getenv('SMTP_PORT', '587'))
@@ -60,6 +66,10 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
     cors = CORS(app)
+    
+    # Configure login manager
+    login_manager.login_view = 'auth.login'
+    login_manager.session_protection = 'strong'
     
     # Register blueprints
     from routes import main, auth, admin
