@@ -55,7 +55,7 @@ def create_app():
     login_manager.init_app(app)
     
     # Configure login manager
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
     
     # Register blueprints
@@ -76,31 +76,14 @@ def create_app():
 
 app = create_app()
 CORS(app)  # Enable CORS for all routes
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
 
-# Configure database
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'postgresql://localhost/bird_tracker'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-# Initialize SQLAlchemy
-db = SQLAlchemy(app)
-
-# Create tables within application context
+# Initialize the database
 with app.app_context():
     try:
         db.create_all()
         print("Database tables created")
     except Exception as e:
-        print(f"Note: Some tables may already exist: {str(e)}")
+        print(f"Some tables may already exist: {str(e)}")
 
 # Load config from config.ini
 config = configparser.ConfigParser()
