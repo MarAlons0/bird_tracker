@@ -15,7 +15,6 @@ from flask_mail import Mail, Message
 import configparser
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from flask_sqlalchemy import SQLAlchemy
 from apscheduler.schedulers.background import BackgroundScheduler
 from anthropic import Anthropic
 
@@ -31,7 +30,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bird_tracker import BirdSightingTracker
 
 # Initialize Flask extensions
-db = SQLAlchemy()
 mail = Mail()
 login_manager = LoginManager()
 scheduler = BackgroundScheduler()
@@ -77,14 +75,6 @@ def create_app():
 app = create_app()
 CORS(app)  # Enable CORS for all routes
 
-# Initialize the database
-with app.app_context():
-    try:
-        db.create_all()
-        print("Database tables created")
-    except Exception as e:
-        print(f"Some tables may already exist: {str(e)}")
-
 # Load config from config.ini
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -105,7 +95,7 @@ app.config.update(
 )
 
 # Initialize Flask-Mail AFTER setting the config
-mail = Mail(app)
+mail.init_app(app)
 
 def admin_required(f):
     @wraps(f)
@@ -285,12 +275,12 @@ def home():
             'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
         }
         carousel_images = get_carousel_images()
-        google_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
         ebird_key = os.getenv('EBIRD_API_KEY')
         
-        if not google_key:
+        if not google_places_key:
             logger.error("Google Places API key not found!")
-            google_key = ''  # Set empty string instead of None
+            return render_template('error.html', error="Google Places API key not configured")
 
         if not ebird_key:
             logger.error("eBird API key not found!")
@@ -303,7 +293,7 @@ def home():
                              location=tracker.active_location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
-                             google_maps_key=google_key)
+                             google_maps_key=google_places_key)
     except Exception as e:
         logger.error(f"Error in home route: {e}")
         return render_template('error.html', error=str(e))
@@ -311,18 +301,26 @@ def home():
 @app.route('/map')
 @login_required
 def map():
+    google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+    if not google_places_key:
+        return render_template('error.html', error="Google Places API key not configured")
+        
     observations = tracker.get_recent_observations()
     return render_template('map.html', 
                          observations=observations,
                          location=tracker.active_location,
-                         google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
+                         google_maps_key=google_places_key)
 
 @app.route('/report')
 @login_required
 def report():
+    google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+    if not google_places_key:
+        return render_template('error.html', error="Google Places API key not configured")
+        
     return render_template('report.html',
                          location=tracker.active_location,
-                         google_maps_key=os.getenv('GOOGLE_PLACES_API_KEY'))
+                         google_maps_key=google_places_key)
 
 @app.route('/api/observations')
 @login_required
