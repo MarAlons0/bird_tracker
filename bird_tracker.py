@@ -156,11 +156,19 @@ class BirdSightingTracker:
             
             logger.info(f"Making eBird API request to {endpoint}")
             logger.info(f"Using location: {self.active_location}")
-            response = requests.get(endpoint, headers=headers, params=params)
-            logger.info(f"API Response Status Code: {response.status_code}")
-            logger.info(f"API Response Headers: {response.headers}")
+            logger.info(f"API Key present: {'Yes' if self.api_key else 'No'}")
+            if self.api_key:
+                logger.info(f"API Key starts with: {self.api_key[:8]}...")
             
-            if response.status_code == 200:
+            try:
+                response = requests.get(endpoint, headers=headers, params=params)
+                logger.info(f"API Response Status Code: {response.status_code}")
+                logger.info(f"API Response Headers: {response.headers}")
+                
+                if response.status_code != 200:
+                    logger.error(f"eBird API Error: {response.status_code} - {response.text}")
+                    return []
+                
                 observations = response.json()
                 logger.info(f"Successfully retrieved {len(observations)} observations")
                 if observations:
@@ -168,17 +176,10 @@ class BirdSightingTracker:
                 else:
                     logger.warning("No observations returned from eBird API")
                 
-                # Save the raw response to a file for analysis
-                try:
-                    with open('ebird_response.json', 'w') as f:
-                        json.dump(observations, f, indent=2)
-                    logger.info("Saved eBird API response to ebird_response.json")
-                except Exception as e:
-                    logger.error(f"Error saving API response: {e}")
+                return observations or []
                 
-                return observations or []  # Return empty list instead of None
-            else:
-                logger.error(f"eBird API Error: {response.status_code} - {response.text}")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error making eBird API request: {str(e)}")
                 return []
                 
         except Exception as e:
