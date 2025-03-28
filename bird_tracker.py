@@ -200,7 +200,7 @@ class BirdSightingTracker:
 
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=1000,
                     temperature=0.7,
                     messages=[
@@ -263,13 +263,20 @@ class BirdSightingTracker:
             logger.error(f"Error generating AI analysis: {e}")
             return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
 
-    def _generate_basic_analysis(self, observations, species_freq):
-        """Generate basic analysis of observations"""
+    def _format_basic_analysis(self):
+        """Format basic analysis of observations"""
         try:
+            observations = self.get_recent_observations()
             if not observations:
                 return "<p>No recent bird sightings found in this area.</p>"
             
             # Calculate statistics
+            species_freq = defaultdict(int)
+            for obs in observations:
+                species = obs.get('comName', 'Unknown Species')
+                count = obs.get('howMany', 1)
+                species_freq[species] += count
+            
             total_observations = len(observations)
             total_birds = sum(species_freq.values())
             species_count = len(species_freq)
@@ -322,7 +329,7 @@ class BirdSightingTracker:
             return html
             
         except Exception as e:
-            logger.error(f"Error in _generate_basic_analysis: {e}")
+            logger.error(f"Error in _format_basic_analysis: {e}")
             return "<p>Error generating basic analysis. Please try again later.</p>"
 
     def create_static_map(self, observations):
@@ -820,7 +827,7 @@ class BirdSightingTracker:
             
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=500,
                     temperature=0.7,
                     messages=[
