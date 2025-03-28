@@ -135,7 +135,7 @@ This link will expire in 1 hour.'''
         
     return render_template('login.html')
 
-@bp.route('/verify/<token>')
+@bp.route('/auth/verify/<token>')
 def verify_login(token):
     logger.info(f"Verifying login token: {token}")
     
