@@ -100,10 +100,10 @@ def login():
         # Send magic link email
         try:
             # Get the host URL from environment or use the request host
-            host_url = os.getenv('HOST_URL', request.host_url.rstrip('/'))
+            host_url = os.getenv('HOST_URL', 'https://mario-bird-tracker.herokuapp.com')
             logger.info(f"Using host URL: {host_url}")
             
-            login_url = f"{host_url}/verify/{token}"
+            login_url = f"{host_url}/auth/verify/{token}"
             logger.info(f"Generated login URL: {login_url}")
             
             msg = Message('Bird Tracker Login Link',
@@ -143,14 +143,16 @@ def verify_login(token):
     user = User.query.filter_by(login_token=token).first()
     if not user:
         logger.warning(f"Token not found in database: {token}")
-        return render_template('login.html', error="Invalid login link. Please request a new one.")
+        flash("Invalid login link. Please request a new one.", "error")
+        return redirect(url_for('auth.login'))
     
     # Check if token is expired
     if user.token_expiry <= datetime.utcnow():
         logger.warning(f"Token expired for user: {user.email}")
         user.login_token = None  # Clear expired token
         db.session.commit()
-        return render_template('login.html', error="Login link has expired. Please request a new one.")
+        flash("Login link has expired. Please request a new one.", "error")
+        return redirect(url_for('auth.login'))
     
     # Token is valid, log user in
     logger.info(f"Token valid for user: {user.email}")
@@ -160,6 +162,7 @@ def verify_login(token):
     
     # Log successful login
     logger.info(f"User logged in successfully: {user.email}")
+    flash("Successfully logged in!", "success")
     return redirect(url_for('main.index'))
 
 @bp.route('/logout')
