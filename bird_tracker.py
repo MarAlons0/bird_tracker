@@ -190,14 +190,14 @@ class BirdSightingTracker:
             
             if not self.get_recent_observations():
                 logging.warning("No observations to analyze")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
 
             observations_text = self.format_observations_for_analysis(self.get_recent_observations())
             logging.info(f"Formatted observations for analysis: {observations_text[:100]}...")
 
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet",
+                    model="claude-3-opus-20240229",
                     max_tokens=1000,
                     temperature=0.7,
                     messages=[
@@ -213,29 +213,29 @@ class BirdSightingTracker:
                 analysis = response.content[0].text
                 if not analysis or len(analysis.strip()) < 50:
                     logging.warning("Received empty or very short analysis from Claude API")
-                    return self._format_basic_analysis()
+                    return self._generate_basic_analysis()
                 
                 return self._format_ai_analysis(analysis)
                 
             except anthropic.NotFoundError as e:
                 logging.error(f"Model not found: {str(e)}")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
             except anthropic.AuthenticationError as e:
                 logging.error(f"Authentication error: {str(e)}")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
             except anthropic.RateLimitError as e:
                 logging.error(f"Rate limit exceeded: {str(e)}")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
             except anthropic.APIError as e:
                 logging.error(f"API error: {str(e)}")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
             except Exception as e:
                 logging.error(f"Error calling Claude API: {str(e)}")
-                return self._format_basic_analysis()
+                return self._generate_basic_analysis()
                 
         except Exception as e:
             logging.error(f"Error in analyze_observations: {str(e)}")
-            return self._format_basic_analysis()
+            return self._generate_basic_analysis()
 
     def generate_ai_analysis(self, observations):
         """Generate AI analysis for the observations"""
@@ -260,7 +260,7 @@ class BirdSightingTracker:
             logger.error(f"Error generating AI analysis: {e}")
             return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
 
-    def _format_basic_analysis(self):
+    def _generate_basic_analysis(self):
         """Format the basic analysis of bird observations."""
         try:
             observations = self.get_recent_observations()
@@ -811,7 +811,7 @@ class BirdSightingTracker:
             
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet",
+                    model="claude-3-opus-20240229",
                     max_tokens=500,
                     temperature=0.7,
                     messages=[
