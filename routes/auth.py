@@ -138,19 +138,42 @@ This link will expire in 1 hour.'''
 @bp.route('/verify/<token>')
 def verify_login(token):
     logger.info(f"Verifying login token: {token}")
+    
+    # Check if token exists
     user = User.query.filter_by(login_token=token).first()
-    if user and user.token_expiry > datetime.utcnow():
-        logger.info(f"Token valid for user: {user.email}")
-        login_user(user)
-        user.login_token = None  # Invalidate token after use
+    if not user:
+        logger.warning(f"Token not found in database: {token}")
+        return render_template('login.html', error="Invalid login link. Please request a new one.")
+    
+    # Check if token is expired
+    if user.token_expiry <= datetime.utcnow():
+        logger.warning(f"Token expired for user: {user.email}")
+        user.login_token = None  # Clear expired token
         db.session.commit()
-        return redirect(url_for('main.index'))
-    logger.warning(f"Invalid or expired token: {token}")
-    return render_template('login.html', error="Invalid or expired login link")
+        return render_template('login.html', error="Login link has expired. Please request a new one.")
+    
+    # Token is valid, log user in
+    logger.info(f"Token valid for user: {user.email}")
+    login_user(user)
+    user.login_token = None  # Invalidate token after use
+    db.session.commit()
+    
+    # Log successful login
+    logger.info(f"User logged in successfully: {user.email}")
+    return redirect(url_for('main.index'))
 
 @bp.route('/logout')
 @login_required
 def logout():
     logger.info(f"User logged out: {current_user.email}")
     logout_user()
-    return redirect(url_for('auth.login')) 
+    return redirect(url_for('auth.login'))
+
+@bp.route('/google-login')
+def google_login():
+    # Generate login URL with state parameter
+    state = secrets.token_urlsafe(16)
+    session['oauth_state'] = state
+    login_url = f"{os.getenv('HOST_URL', 'https://mario-bird-tracker.herokuapp.com')}/auth/callback"
+    auth_url = f"{os.getenv('GOOGLE_AUTH_URL')}?client_id={os.getenv('GOOGLE_CLIENT_ID')}&response_type=code&redirect_uri={login_url}&scope=openid%20email%20profile&state={state}"
+    return redirect(auth_url) 
