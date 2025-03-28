@@ -777,46 +777,73 @@ Raw Observation Data:
 
     def _format_ai_analysis(self, analysis):
         """Format AI analysis with proper HTML structure"""
-        sections = analysis.split('\n\n')  # Split on double newlines
-        formatted = []
-        
-        for section in sections:
-            if not section.strip():
-                continue
+        try:
+            # Split the analysis into sections based on numbered sections
+            sections = []
+            current_section = []
             
-            lines = section.split('\n')
-            if not lines:
-                continue
-            
-            # Handle section header
-            header = lines[0].strip(':')
-            formatted.append(f'<h3 class="mt-4 mb-3">{header}</h3>')
-            
-            # Handle bullet points
-            bullets = []
-            current_paragraph = []
-            
-            for line in lines[1:]:
+            for line in analysis.split('\n'):
                 line = line.strip()
                 if not line:
                     continue
                     
-                if line.startswith('-'):
-                    bullets.append(f'<li class="mb-2">{line.strip("- ")}</li>')
-                elif line.strip():
-                    current_paragraph.append(line)
+                # Check if this is a new numbered section
+                if line.startswith(('1.', '2.', '3.')):
+                    if current_section:
+                        sections.append('\n'.join(current_section))
+                    current_section = [line]
+                else:
+                    current_section.append(line)
             
-            # Add any paragraph text first
-            if current_paragraph:
-                formatted.append(f'<p class="mb-3">{"<br>".join(current_paragraph)}</p>')
+            # Add the last section
+            if current_section:
+                sections.append('\n'.join(current_section))
             
-            # Then add bullet points
-            if bullets:
-                formatted.append('<ul class="list-group list-group-flush mb-4">\n' + 
-                               '\n'.join(bullets) + 
-                               '\n</ul>')
-        
-        return '\n'.join(formatted)
+            # Format each section
+            formatted_sections = []
+            for section in sections:
+                if not section.strip():
+                    continue
+                
+                # Split into paragraphs
+                paragraphs = section.split('\n\n')
+                formatted_paragraphs = []
+                
+                for paragraph in paragraphs:
+                    if not paragraph.strip():
+                        continue
+                    
+                    # Check if this is a bullet point section
+                    if paragraph.strip().startswith('-'):
+                        # Format bullet points
+                        bullets = [f'<li class="mb-2">{line.strip("- ")}</li>' 
+                                 for line in paragraph.split('\n') 
+                                 if line.strip().startswith('-')]
+                        if bullets:
+                            formatted_paragraphs.append(
+                                '<ul class="list-group list-group-flush mb-4">\n' + 
+                                '\n'.join(bullets) + 
+                                '\n</ul>'
+                            )
+                    else:
+                        # Format regular paragraph
+                        formatted_paragraphs.append(f'<p class="mb-3">{paragraph.strip()}</p>')
+                
+                # Add section title if it exists
+                if formatted_paragraphs:
+                    section_title = formatted_paragraphs[0].text.strip()
+                    if section_title.startswith(('1.', '2.', '3.')):
+                        formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_title}</h3>')
+                        formatted_sections.extend(formatted_paragraphs[1:])
+                    else:
+                        formatted_sections.extend(formatted_paragraphs)
+            
+            return '\n'.join(formatted_sections)
+            
+        except Exception as e:
+            logger.error(f"Error formatting AI analysis: {e}")
+            # Fallback to simple formatting if there's an error
+            return f'<div class="analysis-content">{analysis}</div>'
 
     @staticmethod
     def format_observations_for_analysis(observations):
