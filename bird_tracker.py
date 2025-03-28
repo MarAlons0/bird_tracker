@@ -43,7 +43,12 @@ class BirdSightingTracker:
         anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
         if not anthropic_api_key:
             raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
-        print(f"DEBUG: Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
+        
+        # Ensure API key starts with 'sk-ant'
+        if not anthropic_api_key.startswith('sk-ant'):
+            anthropic_api_key = f"sk-ant-{anthropic_api_key}"
+        
+        logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
         self.claude = Anthropic(api_key=anthropic_api_key)
         
         # Start daily report scheduler
