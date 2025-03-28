@@ -49,7 +49,13 @@ class BirdSightingTracker:
             anthropic_api_key = f"sk-ant-{anthropic_api_key}"
         
         logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
-        self.claude = Anthropic(api_key=anthropic_api_key)
+        self.claude = Anthropic(
+            api_key=anthropic_api_key,
+            default_headers={
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            }
+        )
         
         # Start daily report scheduler
         self.scheduler = self.start_daily_reports()
