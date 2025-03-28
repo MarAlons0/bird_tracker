@@ -37,8 +37,15 @@ scheduler = BackgroundScheduler()
 def create_app():
     app = Flask(__name__)
     
-    # Load configuration
-    app.config.from_object('config.Config')
+    # Load environment variables
+    load_dotenv()
+    
+    # Configure the app
+    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Configure Flask-Mail
     app.config['MAIL_SERVER'] = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
