@@ -288,7 +288,7 @@ Raw Observation Data:
                 logger.info(prompt)
                 
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=1000,
                     temperature=0.7,
                     system="You are an expert ornithologist and data analyst. Your task is to analyze bird observation data and provide insights in a clear, professional format.",
@@ -922,7 +922,7 @@ Please provide a helpful response based on the observations and your expertise. 
             
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-sonnet",
                 max_tokens=500,
                 temperature=0.7,
                 system="You are an expert ornithologist and birding guide. Provide helpful, accurate information about birds and birding.",
