@@ -226,35 +226,54 @@ Data Summary:
 Location: {self.active_location['name']}
 Total Observations: {total_observations}
 Total Birds: {total_birds}
-Unique Species: {species_count}
-Most Common Birds: {', '.join(f"{species} ({count} birds)" for species, count in common_species[:3])}
-Time period: Last 14 days
+Species Count: {species_count}
+Most Common Species: {', '.join(f"{species} ({count})" for species, count in common_species)}
 
-Format the report in clear, concise language suitable for both casual birders and experienced naturalists. Use HTML formatting with paragraphs and lists for readability.
-"""
-            logger.debug(f"Sending prompt to Claude: {prompt[:200]}...")
-            
+Raw Observation Data:
+{self.format_observations_for_analysis(observations)}"""
+
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-opus-20240229",
-                    max_tokens=500,  # Reduced from 1000
-                    messages=[{
-                        "role": "user",
-                        "content": prompt
-                    }],
-                    timeout=60  # Increase timeout to 60 seconds
+                    model="claude-3-sonnet-20240229",
+                    max_tokens=1000,
+                    temperature=0.7,
+                    system="You are an expert ornithologist and data analyst. Your task is to analyze bird observation data and provide insights in a clear, professional format.",
+                    messages=[{"role": "user", "content": prompt}]
                 )
-                logger.info("Successfully received response from Claude")
-                return response.content[0].text
                 
-            except Exception as api_error:
-                logger.error(f"Claude API error details: {str(api_error)}")
-                logger.error(f"Claude API error: {api_error}")
+                analysis = response.content[0].text
+                return self._format_ai_analysis(analysis)
+                
+            except Exception as e:
+                logger.error(f"Error getting AI analysis: {e}")
                 return self._generate_basic_analysis(observations, species_freq)
                 
         except Exception as e:
             logger.error(f"Error in analyze_observations: {e}")
-            return None
+            return "<p>Error analyzing observations. Please try again later.</p>"
+
+    def generate_ai_analysis(self, observations):
+        """Generate AI analysis for the observations"""
+        try:
+            if not observations:
+                return "<div class='alert alert-info'>No recent observations found.</div>"
+            
+            # Get AI analysis using the existing analyze_observations method
+            analysis = self.analyze_observations(observations)
+            
+            # Format the analysis with additional styling
+            formatted_analysis = f"""
+            <div class="analysis-section">
+                <h3 class="mb-4">AI Analysis</h3>
+                {analysis}
+            </div>
+            """
+            
+            return formatted_analysis
+            
+        except Exception as e:
+            logger.error(f"Error generating AI analysis: {e}")
+            return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
 
     def _generate_basic_analysis(self, observations, species_freq):
         """Generate a basic analysis when Claude API fails"""
