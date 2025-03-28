@@ -141,49 +141,46 @@ class BirdSightingTracker:
             print(f"DEBUG: Error getting taxonomy: {str(e)}")
             return None
     
-    def get_recent_observations(self, species_list=None):
-        """Get recent bird sightings within radius of active location"""
+    def get_recent_observations(self):
+        """Get recent bird observations from eBird API."""
         try:
-            endpoint = f"{self.base_url}/data/obs/geo/recent"
-            headers = {'X-eBirdApiToken': self.api_key}
-            params = {
-                'lat': float(self.active_location['latitude']),
-                'lng': float(self.active_location['longitude']),
-                'dist': float(self.active_location['radius']),
-                'back': 21,
-                'maxResults': 1000
-            }
-            
-            logger.info(f"Making eBird API request to {endpoint}")
-            logger.info(f"Using location: {self.active_location}")
-            logger.info(f"API Key present: {'Yes' if self.api_key else 'No'}")
-            if self.api_key:
-                logger.info(f"API Key starts with: {self.api_key[:8]}...")
-            
-            try:
-                response = requests.get(endpoint, headers=headers, params=params)
-                logger.info(f"API Response Status Code: {response.status_code}")
-                logger.info(f"API Response Headers: {response.headers}")
-                
-                if response.status_code != 200:
-                    logger.error(f"eBird API Error: {response.status_code} - {response.text}")
-                    return []
-                
-                observations = response.json()
-                logger.info(f"Successfully retrieved {len(observations)} observations")
-                if observations:
-                    logger.info(f"First observation: {observations[0]}")
-                else:
-                    logger.warning("No observations returned from eBird API")
-                
-                return observations or []
-                
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Error making eBird API request: {str(e)}")
+            # Get the active location
+            active_location = self.get_current_location()
+            if not active_location:
+                logging.error("No active location found")
                 return []
-                
+
+            # Construct the API request
+            endpoint = f"{self.base_url}/data/obs/geo/recent"
+            params = {
+                'lat': active_location['latitude'],
+                'lng': active_location['longitude'],
+                'dist': 50,  # 50km radius
+                'back': 7,   # Last 7 days
+                'maxResults': 100
+            }
+            headers = {'X-eBirdApiToken': self.api_key}
+
+            logging.info(f"Making eBird API request to {endpoint}")
+            logging.info(f"API Key present: {'Yes' if self.api_key else 'No'}")
+            if self.api_key:
+                logging.info(f"API Key starts with: {self.api_key[:8]}...")
+
+            response = requests.get(endpoint, params=params, headers=headers)
+            logging.info(f"API Response Status Code: {response.status_code}")
+            logging.info(f"API Response Headers: {dict(response.headers)}")
+
+            if response.status_code == 200:
+                observations = response.json()
+                logging.info(f"Number of observations retrieved: {len(observations)}")
+                if observations:
+                    logging.info(f"First observation: {json.dumps(observations[0], indent=2)}")
+                return observations
+            else:
+                logging.error(f"Error from eBird API: {response.status_code} - {response.text}")
+                return []
         except Exception as e:
-            logger.error(f"Error getting observations: {e}")
+            logging.error(f"Error getting recent observations: {str(e)}")
             return []
     
     def analyze_observations(self):
