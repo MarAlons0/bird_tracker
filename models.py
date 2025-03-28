@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
@@ -25,4 +26,12 @@ class User(UserMixin, db.Model):
     is_approved = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
     login_token = db.Column(db.String(100), unique=True, nullable=True)
-    token_expiry = db.Column(db.DateTime, nullable=True) 
+    token_expiry = db.Column(db.DateTime, nullable=True)
+
+    def set_password(self, password):
+        """Set the user's password"""
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check if the provided password matches"""
+        return check_password_hash(self.password, password) 

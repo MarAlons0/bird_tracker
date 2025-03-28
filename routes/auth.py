@@ -52,6 +52,7 @@ def test_smtp_connection():
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
+        password = request.form.get('password')
         logger.info(f"Login attempt for email: {email}")
         
         # Check if email is in allowed list
@@ -79,96 +80,26 @@ def login():
         if not user:
             logger.info(f"Creating new user for email: {email}")
             user = User(email=email)
+            # Set default password for new users
+            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+            user.set_password(default_password)
             db.session.add(user)
             db.session.commit()
-        else:
-            logger.info(f"Found existing user for email: {email}")
+            logger.info(f"Created new user with default password: {email}")
         
-        # Generate magic link token
-        token = secrets.token_urlsafe(32)
-        user.login_token = token
-        user.token_expiry = datetime.utcnow() + timedelta(hours=1)
-        db.session.commit()
-        logger.info(f"Generated login token for user: {email}")
-        
-        # Test SMTP connection before sending
-        if not test_smtp_connection():
-            logger.error("SMTP connection test failed, cannot send email")
+        # Check password
+        if not user.check_password(password):
+            logger.warning(f"Invalid password for user: {email}")
             return render_template('login.html', 
-                error="Failed to connect to email server. Please try again later.")
+                error="Invalid email or password")
         
-        # Send magic link email
-        try:
-            # Get the host URL from environment or use the request host
-            host_url = os.getenv('HOST_URL', 'https://bird-tracker-app-9af5a4fb26d3.herokuapp.com')
-            logger.info(f"Using host URL: {host_url}")
-            
-            login_url = f"{host_url}/auth/verify/{token}"
-            logger.info(f"Generated login URL: {login_url}")
-            
-            msg = Message('Bird Tracker Login Link',
-                         sender=os.getenv('SMTP_USER'),
-                         recipients=[email])
-            msg.body = f'''Click the following link to log in to Bird Tracker:
-{login_url}
-
-This link will expire in 1 hour.'''
-            
-            # Add detailed debug logging
-            logger.info("Email configuration:")
-            logger.info(f"MAIL_SERVER: {os.getenv('MAIL_SERVER')}")
-            logger.info(f"MAIL_PORT: {os.getenv('MAIL_PORT')}")
-            logger.info(f"MAIL_USE_TLS: {os.getenv('MAIL_USE_TLS')}")
-            logger.info(f"MAIL_USERNAME: {os.getenv('MAIL_USERNAME')}")
-            logger.info(f"Sending to: {email}")
-            logger.info(f"Login URL: {login_url}")
-            
-            from app import mail
-            mail.send(msg)
-            logger.info("Email sent successfully")
-            
-            return render_template('check_email.html')
-        except Exception as e:
-            logger.error(f"Failed to send email: {str(e)}", exc_info=True)
-            return render_template('login.html', 
-                error=f"Failed to send login email: {str(e)}")
-        
-    return render_template('login.html')
-
-@bp.route('/auth/verify/<token>')
-def verify_login(token):
-    try:
-        logger.info(f"Verifying login token: {token}")
-        
-        # Check if token exists
-        user = User.query.filter_by(login_token=token).first()
-        if not user:
-            logger.warning(f"Token not found in database: {token}")
-            flash("Invalid login link. Please request a new one.", "error")
-            return redirect(url_for('auth.login'))
-        
-        # Check if token is expired
-        if user.token_expiry <= datetime.utcnow():
-            logger.warning(f"Token expired for user: {user.email}")
-            user.login_token = None  # Clear expired token
-            db.session.commit()
-            flash("Login link has expired. Please request a new one.", "error")
-            return redirect(url_for('auth.login'))
-        
-        # Token is valid, log user in
-        logger.info(f"Token valid for user: {user.email}")
+        # Log user in
         login_user(user)
-        user.login_token = None  # Invalidate token after use
-        db.session.commit()
-        
-        # Log successful login
-        logger.info(f"User logged in successfully: {user.email}")
+        logger.info(f"User logged in successfully: {email}")
         flash("Successfully logged in!", "success")
         return redirect(url_for('main.index'))
-    except Exception as e:
-        logger.error(f"Error in verify_login: {str(e)}", exc_info=True)
-        flash("An error occurred while verifying your login. Please try again.", "error")
-        return redirect(url_for('auth.login'))
+        
+    return render_template('login.html')
 
 @bp.route('/logout')
 @login_required
