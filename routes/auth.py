@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 def test_smtp_connection():
     try:
-        mail_port = os.getenv('MAIL_PORT', '587')
-        mail_server = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-        mail_username = os.getenv('MAIL_USERNAME')
-        mail_password = os.getenv('MAIL_PASSWORD')
+        mail_port = os.getenv('SMTP_PORT', '587')
+        mail_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+        mail_username = os.getenv('SMTP_USER')
+        mail_password = os.getenv('SMTP_PASSWORD')
         
         logger.info(f"Testing SMTP connection to {mail_server}:{mail_port}")
         
@@ -96,7 +96,7 @@ def login():
             logger.info(f"Generated login URL: {login_url}")
             
             msg = Message('Bird Tracker Login Link',
-                         sender=os.getenv('MAIL_USERNAME'),
+                         sender=os.getenv('SMTP_USER'),
                          recipients=[email])
             msg.body = f'''Click the following link to log in to Bird Tracker:
 {login_url}
