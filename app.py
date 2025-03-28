@@ -15,6 +15,9 @@ from flask_mail import Mail, Message
 import configparser
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from apscheduler.schedulers.background import BackgroundScheduler
+from anthropic import Anthropic
 
 # Load environment variables
 load_dotenv()
@@ -30,7 +33,13 @@ from bird_tracker import BirdSightingTracker
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
+# Configure database
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'postgresql://localhost/bird_tracker'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Flask-Login
@@ -39,7 +48,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Initialize SQLAlchemy
-db.init_app(app)
+db = SQLAlchemy(app)
 
 # Create tables within application context
 with app.app_context():
