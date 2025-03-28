@@ -16,9 +16,20 @@ logger = logging.getLogger(__name__)
 
 def test_smtp_connection():
     try:
-        server = smtplib.SMTP(os.getenv('MAIL_SERVER'), int(os.getenv('MAIL_PORT')))
+        mail_port = os.getenv('MAIL_PORT', '587')
+        mail_server = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+        mail_username = os.getenv('MAIL_USERNAME')
+        mail_password = os.getenv('MAIL_PASSWORD')
+        
+        logger.info(f"Testing SMTP connection to {mail_server}:{mail_port}")
+        
+        if not all([mail_server, mail_port, mail_username, mail_password]):
+            logger.error("Missing SMTP configuration")
+            return False
+            
+        server = smtplib.SMTP(mail_server, int(mail_port))
         server.starttls()
-        server.login(os.getenv('MAIL_USERNAME'), os.getenv('MAIL_PASSWORD'))
+        server.login(mail_username, mail_password)
         server.quit()
         logger.info("SMTP connection test successful")
         return True
