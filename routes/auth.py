@@ -22,19 +22,30 @@ def test_smtp_connection():
         mail_password = os.getenv('SMTP_PASSWORD')
         
         logger.info(f"Testing SMTP connection to {mail_server}:{mail_port}")
+        logger.info(f"Using username: {mail_username}")
+        logger.info(f"Password length: {len(mail_password) if mail_password else 0}")
         
         if not all([mail_server, mail_port, mail_username, mail_password]):
             logger.error("Missing SMTP configuration")
+            logger.error(f"Server: {mail_server}")
+            logger.error(f"Port: {mail_port}")
+            logger.error(f"Username: {mail_username}")
+            logger.error(f"Password present: {bool(mail_password)}")
             return False
             
         server = smtplib.SMTP(mail_server, int(mail_port))
+        logger.info("SMTP connection established")
         server.starttls()
+        logger.info("TLS started")
         server.login(mail_username, mail_password)
+        logger.info("Login successful")
         server.quit()
         logger.info("SMTP connection test successful")
         return True
     except Exception as e:
         logger.error(f"SMTP connection test failed: {str(e)}")
+        logger.error(f"Error type: {type(e)}")
+        logger.error(f"Error args: {e.args}")
         return False
 
 @bp.route('/login', methods=['GET', 'POST'])
