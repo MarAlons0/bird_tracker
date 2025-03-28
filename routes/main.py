@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from models import db, User
 from bird_tracker import BirdSightingTracker
@@ -6,7 +6,6 @@ import os
 import logging
 
 bp = Blueprint('main', __name__)
-tracker = BirdSightingTracker()
 logger = logging.getLogger(__name__)
 
 @bp.route('/')
@@ -32,7 +31,7 @@ def index():
             return render_template('error.html', error="Google Places API key not configured")
         
         return render_template('index.html',
-                             location=tracker.active_location,
+                             location=current_app.tracker.active_location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
                              google_maps_key=google_places_key)
@@ -48,5 +47,5 @@ def report():
         return render_template('error.html', error="Google Places API key not configured")
         
     return render_template('report.html',
-                         location=tracker.active_location,
+                         location=current_app.tracker.active_location,
                          google_maps_key=google_places_key) 

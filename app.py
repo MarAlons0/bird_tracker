@@ -123,6 +123,17 @@ def create_app():
         except Exception as e:
             print(f"Some tables may already exist: {str(e)}")
     
+    # Initialize bird tracker
+    try:
+        tracker = BirdSightingTracker()
+        logger.info("Bird tracker initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize bird tracker: {e}")
+        raise
+
+    # Make tracker available to routes
+    app.tracker = tracker
+    
     return app
 
 app = create_app()
@@ -188,14 +199,6 @@ def admin():
     users = User.query.all()
     return render_template('admin.html', users=users)
 
-# Initialize bird tracker
-try:
-    tracker = BirdSightingTracker()
-    logger.info("Bird tracker initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize bird tracker: {e}")
-    raise
-
 def load_locations():
     try:
         with open('locations.json', 'r') as f:
@@ -246,11 +249,11 @@ def home():
             logger.error("eBird API key not found!")
             return render_template('error.html', error="eBird API key not configured")
         
-        observations = tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations()
         logger.debug(f"Found {len(observations)} recent observations")
         
         return render_template('index.html', 
-                             location=tracker.active_location,
+                             location=app.tracker.active_location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
                              google_maps_key=google_places_key)
@@ -265,10 +268,10 @@ def map():
     if not google_places_key:
         return render_template('error.html', error="Google Places API key not configured")
         
-    observations = tracker.get_recent_observations()
+    observations = app.tracker.get_recent_observations()
     return render_template('map.html', 
                          observations=observations,
-                         location=tracker.active_location,
+                         location=app.tracker.active_location,
                          google_maps_key=google_places_key)
 
 @app.route('/report')
@@ -279,19 +282,19 @@ def report():
         return render_template('error.html', error="Google Places API key not configured")
         
     return render_template('report.html',
-                         location=tracker.active_location,
+                         location=app.tracker.active_location,
                          google_maps_key=google_places_key)
 
 @app.route('/api/observations')
 @login_required
 def get_observations():
-    observations = tracker.get_recent_observations()
+    observations = app.tracker.get_recent_observations()
     return jsonify(observations)
 
 @app.route('/api/analysis')
 def get_analysis():
     try:
-        observations = tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations()
         logger.debug(f"Analyzing {len(observations)} observations")
         if not observations:
             return jsonify({
@@ -300,7 +303,7 @@ def get_analysis():
         
         try:
             logger.info("Starting AI analysis...")
-            analysis = tracker.analyze_observations(observations)
+            analysis = app.tracker.analyze_observations(observations)
             logger.info(f"AI analysis completed, length: {len(analysis) if analysis else 0}")
             
             if not analysis:
@@ -329,13 +332,13 @@ def get_analysis():
 @app.route('/api/analysis/basic')
 def get_basic_analysis():
     try:
-        observations = tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations()
         if not observations:
             return jsonify({
                 'analysis': '<p class="alert alert-info">No bird sightings found in the last 21 days for this location.</p>'
             })
         
-        basic_analysis = tracker._generate_basic_analysis(observations, {})
+        basic_analysis = app.tracker._generate_basic_analysis(observations, {})
         return jsonify({'analysis': basic_analysis})
         
     except Exception as e:
@@ -361,7 +364,7 @@ def update_location():
             return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
 
         # Update tracker location
-        tracker.set_location(name, lat, lng, radius)
+        app.tracker.set_location(name, lat, lng, radius)
         return jsonify({"success": True})
 
     except Exception as e:
@@ -375,12 +378,12 @@ def chat():
             return jsonify({'error': 'No message provided'}), 400
 
         # Get current observations and analysis for context
-        observations = tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations()
         
         # Create prompt with context
         prompt = f"""You are a helpful bird expert assistant. Use the following context to answer the user's question:
 
-Current Location: {tracker.active_location['name']}
+Current Location: {app.tracker.active_location['name']}
 Recent Observations: {len(observations)} birds observed
 Observation Period: Last 21 days
 
@@ -390,7 +393,7 @@ Please provide a concise, informative response focusing on the bird-related aspe
 """
 
         # Get response from Claude
-        response = tracker.claude.messages.create(
+        response = app.tracker.claude.messages.create(
             model="claude-3-opus-20240229",
             max_tokens=500,
             messages=[{
@@ -418,7 +421,7 @@ def update_email_schedule():
         if not all([hour, minute]):
             return jsonify({"error": "Missing required fields"}), 400
         
-        success = tracker.update_email_schedule(hour, minute)
+        success = app.tracker.update_email_schedule(hour, minute)
         if success:
             return jsonify({
                 "success": True,
