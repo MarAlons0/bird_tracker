@@ -67,30 +67,13 @@ def report():
 @login_required
 def basic_analysis():
     try:
-        observations = current_app.tracker.get_recent_observations()
-        if not observations:
+        analysis = current_app.tracker._generate_basic_analysis()
+        if not analysis:
             return jsonify({
                 'analysis': '<div class="alert alert-info">No recent observations found.</div>'
             })
         
-        # Calculate basic stats
-        total_species = len(set(obs['comName'] for obs in observations))
-        total_observations = sum(obs['howMany'] for obs in observations)
-        birds_of_prey = [obs for obs in observations if any(term in obs['comName'].lower() 
-                                                          for term in ['hawk', 'eagle', 'owl', 'falcon'])]
-        
-        analysis_html = f"""
-        <div class="analysis-section">
-            <h3>Basic Statistics</h3>
-            <ul class="list-group">
-                <li class="list-group-item">Total Species Observed: {total_species}</li>
-                <li class="list-group-item">Total Birds Counted: {total_observations}</li>
-                <li class="list-group-item">Birds of Prey Species: {len(birds_of_prey)}</li>
-            </ul>
-        </div>
-        """
-        
-        return jsonify({'analysis': analysis_html})
+        return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Error in basic analysis: {e}")
         return jsonify({
