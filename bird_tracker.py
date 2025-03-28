@@ -211,36 +211,57 @@ class BirdSightingTracker:
             # Log summary statistics
             logger.info(f"Analysis summary: {total_observations} observations, {total_birds} birds, {species_count} species")
             
-            prompt = f"""Create a weekly bird observation report using eBird API data for {self.active_location['name']}. The report should include:
+            prompt = f"""As an experienced naturalist and ornithologist, write a newsletter-style report about bird activity in {self.active_location['name']} for the week ending {datetime.now().strftime('%B %d, %Y')}. Write in an engaging, conversational style that would appeal to both bird enthusiasts and casual readers.
 
-1. Overview section (under 50 words) summarizing overall bird activity in the area for the week ending {datetime.now().strftime('%B %d, %Y')}.
+Your report should read like a naturalist's field notes, telling the story of what's happening in the local bird community. Focus on patterns, behaviors, and ecological relationships rather than just listing species.
 
-2. Three analytical sections:
-   a. Noteworthy Changes: Compare observations between this week and the previous week, highlighting significant increases or decreases in species counts or diversity.
+Structure your report as follows:
+
+1. Opening Observations (2-3 paragraphs):
+   - Begin with a vivid description of the overall bird activity
+   - Paint a picture of the current bird community
+   - Compare to typical patterns for this time of year
+   - Use descriptive language to bring the observations to life
+
+2. Featured Stories:
+   a. The Most Notable Sightings:
+      - Tell the story of the most interesting or significant observations
+      - Explain why these sightings are noteworthy
+      - Connect observations to broader ecological patterns
    
-   b. Birds of Prey Analysis: Provide specific data on raptor sightings including hawks, eagles, falcons, and owls. Note any patterns in their activity, locations, or hunting behaviors.
+   b. Birds of Prey Watch:
+      - Share insights about raptor activity and behavior
+      - Describe any interesting hunting or territorial displays
+      - Discuss the relationship between raptors and their prey
    
-   c. Unusual Sightings: Identify and describe any species that are rare or unexpected for {self.active_location['name']} during this time of year, including potential reasons for their presence.
+   c. Special Guests:
+      - Highlight any unusual or unexpected species
+      - Explain why their presence is significant
+      - Share interesting facts about these species
+   
+   d. Ecological Insights:
+      - Discuss what the observations tell us about the local ecosystem
+      - Note any patterns that might indicate environmental changes
+      - Share thoughts on conservation implications
 
-For each section, analyze raw observation data to extract meaningful patterns while avoiding speculation. Include relevant counts and observation locations where available.
+3. Looking Ahead:
+   - Predict what species to watch for in coming weeks
+   - Suggest the best times and places for birdwatching
+   - Share tips for observing specific species
 
-Data Structure:
-Each observation in the dataset contains the following fields:
-- speciesCode: A unique alphanumeric code identifying each species (e.g., "cangoo" for Canada Goose)
-- comName: The common name of the bird species (e.g., "Canada Goose")
-- sciName: The scientific (Latin) name of the species (e.g., "Branta canadensis")
-- locId: A unique identifier for the observation location (starts with "L")
-- locName: The name of the location where the observation was made
-- obsDt: The date and time of the observation
-- howMany: The count of individuals observed (defaults to 1 if not specified)
-- lat: Latitude coordinate of the observation
-- lng: Longitude coordinate of the observation
-- obsValid: Boolean indicating if the observation is valid
-- obsReviewed: Boolean indicating if the observation has been reviewed
-- locationPrivate: Boolean indicating if the location is private
-- subId: Unique identifier for the checklist submission
+Write in a style that combines scientific accuracy with engaging storytelling. Use the observation data to support your narrative, but feel free to draw on your expertise to provide context and insights about bird behavior, migration patterns, and ecological relationships.
 
-Data Summary:
+Data Context:
+The observations below come from the eBird API, which provides detailed bird sighting data. Each observation includes:
+- comName: Common name of the species
+- sciName: Scientific name of the species
+- howMany: Number of individuals observed
+- obsDt: Date and time of observation
+- locName: Location name where the observation was made
+- lat: Latitude of the observation
+- lng: Longitude of the observation
+
+Summary Statistics:
 Location: {self.active_location['name']}
 Total Observations: {total_observations}
 Total Birds: {total_birds}
