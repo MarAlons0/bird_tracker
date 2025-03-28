@@ -117,8 +117,7 @@ def chat():
         if not message:
             return jsonify({'error': 'No message provided'}), 400
         
-        observations = current_app.tracker.get_recent_observations()
-        response = current_app.tracker.chat_with_ai(message, observations)
+        response = current_app.tracker.chat_with_ai(message)
         
         if not response:
             return jsonify({
