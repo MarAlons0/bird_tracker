@@ -59,7 +59,7 @@ def create_app():
     login_manager.login_message_category = 'info'
     
     # Register blueprints
-    from routes import main, auth, admin
+    from .routes import main, auth, admin
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
