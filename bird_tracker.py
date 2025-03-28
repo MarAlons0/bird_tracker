@@ -167,164 +167,47 @@ class BirdSightingTracker:
             logger.error(f"Error getting observations: {e}")
             return []
     
-    def analyze_observations(self, observations):
+    def analyze_observations(self):
         try:
-            if not observations:
-                logger.info("No observations to analyze")
-                return "<p>No recent bird sightings found in this area.</p>"
+            logging.info("Starting AI analysis of observations")
+            logging.info(f"Using API key: {'Present' if self.api_key else 'Missing'}")
             
-            logger.info(f"Starting analysis of {len(observations)} observations for {self.active_location['name']}")
-            
-            # More efficient species counting
-            species_freq = {}
-            total_observations = 0
-            total_birds = 0
-            
-            # Log the first observation to verify structure
-            if observations:
-                logger.debug(f"First observation structure: {json.dumps(observations[0], indent=2)}")
-            
-            for obs in observations:
-                try:
-                    species = obs.get('comName', 'Unknown Species')
-                    try:
-                        count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
-                    except (ValueError, TypeError):
-                        count = 1  # Default to 1 if conversion fails
-                        logger.warning(f"Could not convert howMany to int for {species}, defaulting to 1")
-                    
-                    species_freq[species] = species_freq.get(species, 0) + count
-                    total_observations += 1
-                    total_birds += count
-                except Exception as e:
-                    logger.error(f"Error processing observation: {e}")
-                    logger.error(f"Observation data: {json.dumps(obs, indent=2)}")
-                    continue
-            
-            species_count = len(species_freq)
-            common_species = sorted(
-                [(species, count) for species, count in species_freq.items() if count > 2],
-                key=lambda x: x[1], 
-                reverse=True
-            )[:5]
-            
-            # Log summary statistics
-            logger.info(f"Analysis summary: {total_observations} observations, {total_birds} birds, {species_count} species")
-            
-            prompt = f"""As an experienced naturalist and ornithologist, write a newsletter-style report about bird activity in {self.active_location['name']} for the week ending {datetime.now().strftime('%B %d, %Y')}. Write in an engaging, conversational style that would appeal to both bird enthusiasts and casual readers.
+            if not self.get_recent_observations():
+                logging.warning("No observations to analyze")
+                return self._format_basic_analysis()
 
-Your report should read like a naturalist's field notes, telling the story of what's happening in the local bird community. Focus on patterns, behaviors, and ecological relationships rather than just listing species.
-
-Structure your report as follows:
-
-1. Opening Observations (2-3 paragraphs):
-   - Begin with a vivid description of the overall bird activity
-   - Paint a picture of the current bird community
-   - Compare to typical patterns for this time of year
-   - Use descriptive language to bring the observations to life
-
-2. Featured Stories:
-   a. The Most Notable Sightings:
-      - Tell the story of the most interesting or significant observations
-      - Explain why these sightings are noteworthy
-      - Connect observations to broader ecological patterns
-   
-   b. Birds of Prey Watch:
-      - Share insights about raptor activity and behavior
-      - Describe any interesting hunting or territorial displays
-      - Discuss the relationship between raptors and their prey
-   
-   c. Special Guests:
-      - Highlight any unusual or unexpected species
-      - Explain why their presence is significant
-      - Share interesting facts about these species
-   
-   d. Ecological Insights:
-      - Discuss what the observations tell us about the local ecosystem
-      - Note any patterns that might indicate environmental changes
-      - Share thoughts on conservation implications
-
-3. Looking Ahead:
-   - Predict what species to watch for in coming weeks
-   - Suggest the best times and places for birdwatching
-   - Share tips for observing specific species
-
-Write in a style that combines scientific accuracy with engaging storytelling. Use the observation data to support your narrative, but feel free to draw on your expertise to provide context and insights about bird behavior, migration patterns, and ecological relationships.
-
-Data Context:
-The observations below come from the eBird API, which provides detailed bird sighting data. Each observation includes:
-- comName: Common name of the species
-- sciName: Scientific name of the species
-- howMany: Number of individuals observed
-- obsDt: Date and time of observation
-- locName: Location name where the observation was made
-- lat: Latitude of the observation
-- lng: Longitude of the observation
-
-Summary Statistics:
-Location: {self.active_location['name']}
-Total Observations: {total_observations}
-Total Birds: {total_birds}
-Species Count: {species_count}
-Most Common Species: {', '.join(f"{species} ({count})" for species, count in common_species)}
-
-Raw Observation Data:
-{self.format_observations_for_analysis(observations)}"""
+            observations_text = self._format_observations_for_analysis()
+            logging.info(f"Formatted observations for analysis: {observations_text[:100]}...")
 
             try:
-                logger.info("Attempting to get AI analysis from Claude...")
-                logger.debug(f"Prompt length: {len(prompt)} characters")
-                
-                # Log the API key status (first few characters only)
-                api_key = os.getenv('ANTHROPIC_API_KEY')
-                if api_key:
-                    logger.info(f"Using Anthropic API key starting with: {api_key[:8]}...")
-                else:
-                    logger.error("No Anthropic API key found in environment variables")
-                    raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
-                
-                # Log the full prompt for debugging
-                logger.info("Full prompt for Claude:")
-                logger.info(prompt)
-                
                 response = self.claude.messages.create(
                     model="claude-3-sonnet",
                     max_tokens=1000,
                     temperature=0.7,
-                    system="You are an expert ornithologist and data analyst. Your task is to analyze bird observation data and provide insights in a clear, professional format.",
-                    messages=[{"role": "user", "content": prompt}]
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": f"As a bird expert, analyze these bird sightings and provide a detailed report in a naturalist newsletter style:\n\n{observations_text}"
+                        }
+                    ]
                 )
+                logging.info("Successfully received response from Claude API")
+                logging.debug(f"Raw response: {response}")
                 
-                logger.info("Successfully received response from Claude")
                 analysis = response.content[0].text
-                logger.info(f"Analysis length: {len(analysis)} characters")
-                logger.info("Full analysis from Claude:")
-                logger.info(analysis)
+                if not analysis or len(analysis.strip()) < 50:
+                    logging.warning("Received empty or very short analysis from Claude API")
+                    return self._format_basic_analysis()
                 
-                if not analysis or len(analysis.strip()) < 100:
-                    logger.error("Received empty or very short analysis from Claude")
-                    raise ValueError("Invalid response from Claude API")
-                
-                formatted_analysis = self._format_ai_analysis(analysis)
-                logger.info("Formatted analysis preview:")
-                logger.info(formatted_analysis[:200] + "...")
-                
-                return formatted_analysis
+                return self._format_ai_analysis(analysis)
                 
             except Exception as e:
-                logger.error(f"Error getting AI analysis: {str(e)}")
-                logger.error(f"Error type: {type(e)}")
-                import traceback
-                logger.error(f"Stack trace: {traceback.format_exc()}")
-                logger.info("Falling back to basic analysis")
-                return self._generate_basic_analysis(observations, species_freq)
+                logging.error(f"Error calling Claude API: {str(e)}")
+                return self._format_basic_analysis()
                 
         except Exception as e:
-            logger.error(f"Error in analyze_observations: {e}")
-            logger.error(f"Error type: {type(e)}")
-            import traceback
-            logger.error(f"Stack trace: {traceback.format_exc()}")
-            return "<p>Error analyzing observations. Please try again later.</p>"
+            logging.error(f"Error in analyze_observations: {str(e)}")
+            return self._format_basic_analysis()
 
     def generate_ai_analysis(self, observations):
         """Generate AI analysis for the observations"""
@@ -333,7 +216,7 @@ Raw Observation Data:
                 return "<div class='alert alert-info'>No recent observations found.</div>"
             
             # Get AI analysis using the existing analyze_observations method
-            analysis = self.analyze_observations(observations)
+            analysis = self.analyze_observations()
             
             # Format the analysis with additional styling
             formatted_analysis = f"""
@@ -619,7 +502,7 @@ Raw Observation Data:
         # AI Analysis section
         ai_analysis = "AI Analysis and Insights\n"
         ai_analysis += "=====================\n"
-        ai_analysis += self.analyze_observations(observations) + "\n\n"
+        ai_analysis += self.analyze_observations() + "\n\n"
 
         # Raw observations section
         raw_data = "Raw Observations\n"
@@ -896,52 +779,41 @@ Raw Observation Data:
         
         return "\n".join(formatted) if formatted else "No valid observations available"
 
-    def chat_with_ai(self, message, observations=None):
-        """Handle chat interactions with the AI"""
+    def chat_with_ai(self, message):
         try:
-            if observations is None:
-                observations = self.get_recent_observations()
+            logging.info("Starting chat with AI")
+            logging.info(f"User message: {message}")
             
-            # Format observations for context
-            observations_text = self.format_observations_for_analysis(observations)
+            # Get the observation history
+            observations_text = self.format_observations_for_analysis(self.get_recent_observations())
             
-            # Create the prompt
-            prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations in {self.active_location['name']}.
-
-Recent Observations:
-{observations_text}
-
-User Question: {message}
-
-Please provide a helpful response based on the observations and your expertise. If the question is about specific birds, use the observation data to support your answer."""
-
-            logger.info("Attempting to get chat response from Claude...")
-            logger.info(f"Chat prompt length: {len(prompt)} characters")
-            logger.info("Full chat prompt:")
-            logger.info(prompt)
-            
-            # Get response from Claude
-            response = self.claude.messages.create(
-                model="claude-3-sonnet",
-                max_tokens=500,
-                temperature=0.7,
-                system="You are an expert ornithologist and birding guide. Provide helpful, accurate information about birds and birding.",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            logger.info("Successfully received chat response from Claude")
-            chat_response = response.content[0].text
-            logger.info(f"Chat response length: {len(chat_response)} characters")
-            logger.info("Full chat response:")
-            logger.info(chat_response)
-            
-            return chat_response
-            
+            try:
+                response = self.claude.messages.create(
+                    model="claude-3-sonnet",
+                    max_tokens=500,
+                    temperature=0.7,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": f"You are a helpful bird expert assistant. Use this observation history for context:\n\n{observations_text}"
+                        },
+                        {
+                            "role": "user",
+                            "content": message
+                        }
+                    ]
+                )
+                logging.info("Successfully received chat response from Claude API")
+                logging.debug(f"Raw chat response: {response}")
+                
+                return response.content[0].text
+                
+            except Exception as e:
+                logging.error(f"Error in chat_with_ai API call: {str(e)}")
+                return "I apologize, but I encountered an error while processing your question. Please try again later."
+                
         except Exception as e:
-            logger.error(f"Error in chat_with_ai: {e}")
-            logger.error(f"Error type: {type(e)}")
-            import traceback
-            logger.error(f"Stack trace: {traceback.format_exc()}")
+            logging.error(f"Error in chat_with_ai: {str(e)}")
             return "I apologize, but I encountered an error while processing your question. Please try again later."
 
     def send_daily_report(self):
