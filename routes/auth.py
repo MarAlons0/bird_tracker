@@ -115,4 +115,48 @@ def google_login():
     session['oauth_state'] = state
     login_url = f"{os.getenv('HOST_URL', 'https://bird-tracker-app-9af5a4fb26d3.herokuapp.com')}/auth/callback"
     auth_url = f"{os.getenv('GOOGLE_AUTH_URL')}?client_id={os.getenv('GOOGLE_CLIENT_ID')}&response_type=code&redirect_uri={login_url}&scope=openid%20email%20profile&state={state}"
-    return redirect(auth_url) 
+    return redirect(auth_url)
+
+@bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Validate inputs
+        if not email or not password or not confirm_password:
+            return render_template('register.html', error="All fields are required")
+        
+        if password != confirm_password:
+            return render_template('register.html', error="Passwords do not match")
+        
+        # Check if email is in allowed list
+        allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+        if not allowed_emails_str:
+            logger.error("ALLOWED_EMAILS environment variable is not set!")
+            return render_template('register.html', 
+                error="System configuration error. Please contact support.")
+        
+        allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
+        if email not in allowed_emails:
+            return render_template('register.html', 
+                error="Sorry, this email is not authorized to access this application.")
+        
+        # Check if user already exists
+        if User.query.filter_by(email=email).first():
+            return render_template('register.html', 
+                error="An account with this email already exists")
+        
+        # Create new user
+        user = User(email=email)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        # Log user in
+        login_user(user)
+        flash("Registration successful! Welcome to Bird Tracker.", "success")
+        return redirect(url_for('main.index'))
+    
+    return render_template('register.html') 
