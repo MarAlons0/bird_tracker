@@ -154,13 +154,19 @@ class BirdSightingTracker:
                 'maxResults': 1000
             }
             
-            logger.debug(f"Making eBird API request to {endpoint}")
+            logger.info(f"Making eBird API request to {endpoint}")
+            logger.info(f"Using location: {self.active_location}")
             response = requests.get(endpoint, headers=headers, params=params)
-            logger.debug(f"API Response Status Code: {response.status_code}")
+            logger.info(f"API Response Status Code: {response.status_code}")
+            logger.info(f"API Response Headers: {response.headers}")
             
             if response.status_code == 200:
                 observations = response.json()
                 logger.info(f"Successfully retrieved {len(observations)} observations")
+                if observations:
+                    logger.info(f"First observation: {observations[0]}")
+                else:
+                    logger.warning("No observations returned from eBird API")
                 
                 # Save the raw response to a file for analysis
                 try:
