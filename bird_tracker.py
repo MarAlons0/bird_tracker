@@ -188,7 +188,7 @@ class BirdSightingTracker:
                 logging.warning("No observations to analyze")
                 return self._format_basic_analysis()
 
-            observations_text = self._format_observations_for_analysis()
+            observations_text = self.format_observations_for_analysis(self.get_recent_observations())
             logging.info(f"Formatted observations for analysis: {observations_text[:100]}...")
 
             try:
