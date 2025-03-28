@@ -213,6 +213,18 @@ class BirdSightingTracker:
                 
                 return self._format_ai_analysis(analysis)
                 
+            except anthropic.NotFoundError as e:
+                logging.error(f"Model not found: {str(e)}")
+                return self._format_basic_analysis()
+            except anthropic.AuthenticationError as e:
+                logging.error(f"Authentication error: {str(e)}")
+                return self._format_basic_analysis()
+            except anthropic.RateLimitError as e:
+                logging.error(f"Rate limit exceeded: {str(e)}")
+                return self._format_basic_analysis()
+            except anthropic.APIError as e:
+                logging.error(f"API error: {str(e)}")
+                return self._format_basic_analysis()
             except Exception as e:
                 logging.error(f"Error calling Claude API: {str(e)}")
                 return self._format_basic_analysis()
