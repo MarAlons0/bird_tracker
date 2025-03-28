@@ -30,7 +30,51 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bird_tracker import BirdSightingTracker
 
-app = Flask(__name__)
+# Initialize Flask extensions
+db = SQLAlchemy()
+mail = Mail()
+login_manager = LoginManager()
+scheduler = BackgroundScheduler()
+
+def create_app():
+    app = Flask(__name__)
+    
+    # Load environment variables
+    load_dotenv()
+    
+    # Configure the app
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Initialize extensions with app
+    db.init_app(app)
+    mail.init_app(app)
+    login_manager.init_app(app)
+    
+    # Configure login manager
+    login_manager.login_view = 'login'
+    login_manager.login_message_category = 'info'
+    
+    # Register blueprints
+    from routes import main, auth, admin
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(admin.bp)
+    
+    # Create database tables
+    with app.app_context():
+        try:
+            db.create_all()
+            print("Database tables created")
+        except Exception as e:
+            print(f"Some tables may already exist: {str(e)}")
+    
+    return app
+
+app = create_app()
 CORS(app)  # Enable CORS for all routes
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
 
