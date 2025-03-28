@@ -181,7 +181,10 @@ class BirdSightingTracker:
             total_birds = 0
             for obs in observations:
                 species = obs['comName']
-                count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
+                try:
+                    count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
+                except (ValueError, TypeError):
+                    count = 1  # Default to 1 if conversion fails
                 species_freq[species] = species_freq.get(species, 0) + count
                 total_observations += 1
                 total_birds += count
@@ -214,7 +217,7 @@ Each observation in the dataset contains the following fields:
 - locId: A unique identifier for the observation location (starts with "L")
 - locName: The name of the location where the observation was made
 - obsDt: The date and time of the observation
-- howMany: The count of individuals observed
+- howMany: The count of individuals observed (defaults to 1 if not specified)
 - lat: Latitude coordinate of the observation
 - lng: Longitude coordinate of the observation
 - obsValid: Boolean indicating if the observation is valid
@@ -233,6 +236,9 @@ Raw Observation Data:
 {self.format_observations_for_analysis(observations)}"""
 
             try:
+                logger.info("Attempting to get AI analysis from Claude...")
+                logger.debug(f"Prompt length: {len(prompt)} characters")
+                
                 response = self.claude.messages.create(
                     model="claude-3-sonnet-20240229",
                     max_tokens=1000,
@@ -241,15 +247,23 @@ Raw Observation Data:
                     messages=[{"role": "user", "content": prompt}]
                 )
                 
+                logger.info("Successfully received response from Claude")
                 analysis = response.content[0].text
+                logger.debug(f"Analysis length: {len(analysis)} characters")
                 return self._format_ai_analysis(analysis)
                 
             except Exception as e:
-                logger.error(f"Error getting AI analysis: {e}")
+                logger.error(f"Error getting AI analysis: {str(e)}")
+                logger.error(f"Error type: {type(e)}")
+                import traceback
+                logger.error(f"Stack trace: {traceback.format_exc()}")
                 return self._generate_basic_analysis(observations, species_freq)
                 
         except Exception as e:
             logger.error(f"Error in analyze_observations: {e}")
+            logger.error(f"Error type: {type(e)}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
             return "<p>Error analyzing observations. Please try again later.</p>"
 
     def generate_ai_analysis(self, observations):
@@ -276,35 +290,65 @@ Raw Observation Data:
             return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
 
     def _generate_basic_analysis(self, observations, species_freq):
-        """Generate a basic analysis when Claude API fails"""
+        """Generate basic analysis of observations"""
         try:
-            # Calculate accurate counts
+            if not observations:
+                return "<p>No recent bird sightings found in this area.</p>"
+            
+            # Calculate statistics
             total_observations = len(observations)
-            total_birds = sum(int(obs.get('howMany', 1)) for obs in observations)
+            total_birds = sum(species_freq.values())
             species_count = len(species_freq)
             
-            # Get most common species with accurate counts
+            # Get most common species
             common_species = sorted(
-                [(species, count) for species, count in species_freq.items()],
-                key=lambda x: x[1],
+                [(species, count) for species, count in species_freq.items() if count > 2],
+                key=lambda x: x[1], 
                 reverse=True
             )[:5]
             
+            # Get birds of prey
+            raptors = [
+                (species, count) for species, count in species_freq.items()
+                if any(raptor in species.lower() for raptor in ['hawk', 'eagle', 'falcon', 'owl'])
+            ]
+            
+            # Get unusual sightings (species with count of 1)
+            unusual_species = [
+                species for species, count in species_freq.items()
+                if count == 1
+            ]
+            
+            # Generate HTML report
             html = f"""
-            <h3>Basic Analysis</h3>
-            <p>In the last 21 days around {self.active_location['name']}:</p>
-            
-            <p>{total_observations} total observations recorded<br>
-            {total_birds} total birds observed<br>
-            {species_count} different species observed</p>
-            
-            <p>Most Frequently Observed Species:<br>
-            {', '.join(f"{species} ({count} birds)" for species, count in common_species)}</p>
+            <div class="analysis-section">
+                <h3>Basic Statistics</h3>
+                <ul>
+                    <li>Total Observations: {total_observations}</li>
+                    <li>Total Birds: {total_birds}</li>
+                    <li>Species Count: {species_count}</li>
+                </ul>
+                
+                <h3>Most Common Species</h3>
+                <ul>
+                    {''.join(f'<li>{species}: {count} individuals</li>' for species, count in common_species)}
+                </ul>
+                
+                <h3>Birds of Prey</h3>
+                <ul>
+                    {''.join(f'<li>{species}: {count} individuals</li>' for species, count in raptors)}
+                </ul>
+                
+                <h3>Unusual Sightings</h3>
+                <ul>
+                    {''.join(f'<li>{species}</li>' for species in unusual_species)}
+                </ul>
+            </div>
             """
             return html
             
         except Exception as e:
-            logger.error(f"Error generating basic analysis: {e}")
+            logger.error(f"Error in _generate_basic_analysis: {e}")
             return "<p>Error generating basic analysis. Please try again later.</p>"
 
     def create_static_map(self, observations):
@@ -749,6 +793,48 @@ Raw Observation Data:
             formatted.append(f"- {obs['comName']} ({obs['sciName']}) - Count: {obs['howMany']} - Date: {obs['obsDt']}")
         
         return "\n".join(formatted)
+
+    def chat_with_ai(self, message, observations=None):
+        """Handle chat interactions with the AI"""
+        try:
+            if observations is None:
+                observations = self.get_recent_observations()
+            
+            # Format observations for context
+            observations_text = self.format_observations_for_analysis(observations)
+            
+            # Create the prompt
+            prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations in {self.active_location['name']}.
+
+Recent Observations:
+{observations_text}
+
+User Question: {message}
+
+Please provide a helpful response based on the observations and your expertise. If the question is about specific birds, use the observation data to support your answer."""
+
+            logger.info("Attempting to get chat response from Claude...")
+            logger.debug(f"Prompt length: {len(prompt)} characters")
+            
+            # Get response from Claude
+            response = self.claude.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=500,
+                temperature=0.7,
+                system="You are an expert ornithologist and birding guide. Provide helpful, accurate information about birds and birding.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            logger.info("Successfully received chat response from Claude")
+            logger.debug(f"Response length: {len(response.content[0].text)} characters")
+            return response.content[0].text
+            
+        except Exception as e:
+            logger.error(f"Error in chat_with_ai: {e}")
+            logger.error(f"Error type: {type(e)}")
+            import traceback
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            return "I apologize, but I encountered an error while processing your question. Please try again later."
 
     def send_daily_report(self):
         """Send daily report email"""
