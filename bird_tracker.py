@@ -179,15 +179,27 @@ class BirdSightingTracker:
             species_freq = {}
             total_observations = 0
             total_birds = 0
+            
+            # Log the first observation to verify structure
+            if observations:
+                logger.debug(f"First observation structure: {json.dumps(observations[0], indent=2)}")
+            
             for obs in observations:
-                species = obs['comName']
                 try:
-                    count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
-                except (ValueError, TypeError):
-                    count = 1  # Default to 1 if conversion fails
-                species_freq[species] = species_freq.get(species, 0) + count
-                total_observations += 1
-                total_birds += count
+                    species = obs.get('comName', 'Unknown Species')
+                    try:
+                        count = int(obs.get('howMany', 1))  # Default to 1 if howMany is not specified
+                    except (ValueError, TypeError):
+                        count = 1  # Default to 1 if conversion fails
+                        logger.warning(f"Could not convert howMany to int for {species}, defaulting to 1")
+                    
+                    species_freq[species] = species_freq.get(species, 0) + count
+                    total_observations += 1
+                    total_birds += count
+                except Exception as e:
+                    logger.error(f"Error processing observation: {e}")
+                    logger.error(f"Observation data: {json.dumps(obs, indent=2)}")
+                    continue
             
             species_count = len(species_freq)
             common_species = sorted(
@@ -195,6 +207,9 @@ class BirdSightingTracker:
                 key=lambda x: x[1], 
                 reverse=True
             )[:5]
+            
+            # Log summary statistics
+            logger.info(f"Analysis summary: {total_observations} observations, {total_birds} birds, {species_count} species")
             
             prompt = f"""Create a weekly bird observation report using eBird API data for {self.active_location['name']}. The report should include:
 
@@ -790,9 +805,19 @@ Raw Observation Data:
         
         formatted = []
         for obs in observations:
-            formatted.append(f"- {obs['comName']} ({obs['sciName']}) - Count: {obs['howMany']} - Date: {obs['obsDt']}")
+            try:
+                # Safely get values with defaults
+                com_name = obs.get('comName', 'Unknown Species')
+                sci_name = obs.get('sciName', 'Unknown Scientific Name')
+                count = obs.get('howMany', 1)
+                date = obs.get('obsDt', 'Unknown Date')
+                
+                formatted.append(f"- {com_name} ({sci_name}) - Count: {count} - Date: {date}")
+            except Exception as e:
+                logger.error(f"Error formatting observation: {e}")
+                continue
         
-        return "\n".join(formatted)
+        return "\n".join(formatted) if formatted else "No valid observations available"
 
     def chat_with_ai(self, message, observations=None):
         """Handle chat interactions with the AI"""
