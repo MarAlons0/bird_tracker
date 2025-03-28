@@ -65,7 +65,14 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
-    cors = CORS(app)
+    cors = CORS(app, resources={
+        r"/*": {
+            "origins": ["https://mario-bird-tracker.herokuapp.com", "https://www.herokucdn.com"],
+            "supports_credentials": True,
+            "allow_headers": ["Content-Type", "Authorization"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        }
+    })
     
     # Configure login manager
     login_manager.login_view = 'auth.login'
