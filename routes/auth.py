@@ -33,11 +33,20 @@ def login():
         logger.info(f"Login attempt for email: {email}")
         
         # Check if email is in allowed list
-        allowed_emails = os.getenv('ALLOWED_EMAILS', '').split(',')
-        logger.info(f"Allowed emails: {allowed_emails}")
+        allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+        logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
+        
+        if not allowed_emails_str:
+            logger.error("ALLOWED_EMAILS environment variable is not set!")
+            return render_template('login.html', 
+                error="System configuration error. Please contact support.")
+        
+        allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
+        logger.info(f"Processed allowed emails: {allowed_emails}")
         
         if email not in allowed_emails:
             logger.warning(f"Unauthorized login attempt for email: {email}")
+            logger.warning(f"Email not found in allowed list: {allowed_emails}")
             return render_template('login.html', 
                 error="Sorry, this email is not authorized to access this application.")
         
