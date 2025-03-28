@@ -37,34 +37,22 @@ scheduler = BackgroundScheduler()
 def create_app():
     app = Flask(__name__)
     
-    # Load environment variables
-    load_dotenv()
+    # Load configuration
+    app.config.from_object('config.Config')
     
-    # Configure the app
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
-    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Configure Flask-Mail
+    app.config['MAIL_SERVER'] = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.getenv('SMTP_PORT', '587'))
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = os.getenv('SMTP_USER')
+    app.config['MAIL_PASSWORD'] = os.getenv('SMTP_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('SMTP_USER')
     
-    # Email configuration
-    app.config.update(
-        MAIL_SERVER=os.getenv('MAIL_SERVER', 'smtp.gmail.com'),
-        MAIL_PORT=int(os.getenv('MAIL_PORT', '587')),
-        MAIL_USE_TLS=os.getenv('MAIL_USE_TLS', 'True').lower() == 'true',
-        MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
-        MAIL_PASSWORD=os.getenv('MAIL_PASSWORD'),
-        MAIL_DEFAULT_SENDER=os.getenv('MAIL_USERNAME')
-    )
-    
-    # Initialize extensions with app
+    # Initialize extensions
     db.init_app(app)
-    mail.init_app(app)
     login_manager.init_app(app)
-    
-    # Configure login manager
-    login_manager.login_view = 'auth.login'
-    login_manager.login_message_category = 'info'
+    mail.init_app(app)
+    cors = CORS(app)
     
     # Register blueprints
     from routes import main, auth, admin
@@ -77,6 +65,37 @@ def create_app():
         try:
             db.create_all()
             print("Database tables created")
+            
+            # Create admin user if it doesn't exist
+            admin_email = os.getenv('ADMIN_EMAIL')
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            if admin_email and admin_password:
+                admin = User.query.filter_by(email=admin_email).first()
+                if not admin:
+                    admin = User(email=admin_email, is_admin=True)
+                    admin.set_password(admin_password)
+                    db.session.add(admin)
+                    db.session.commit()
+                    logger.info(f"Created admin user: {admin_email}")
+                else:
+                    logger.info(f"Updated admin user: {admin_email}")
+            
+            # Create default users if they don't exist
+            allowed_emails = os.getenv('ALLOWED_EMAILS', '').split(',')
+            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+            
+            for email in allowed_emails:
+                email = email.strip()
+                if email and email != admin_email:
+                    user = User.query.filter_by(email=email).first()
+                    if not user:
+                        user = User(email=email)
+                        user.set_password(default_password)
+                        db.session.add(user)
+                        db.session.commit()
+                        logger.info(f"Created user: {email}")
+                    else:
+                        logger.info(f"Updated  user: {email}")
         except Exception as e:
             print(f"Some tables may already exist: {str(e)}")
     
