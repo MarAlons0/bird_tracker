@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User
@@ -137,33 +137,38 @@ This link will expire in 1 hour.'''
 
 @bp.route('/auth/verify/<token>')
 def verify_login(token):
-    logger.info(f"Verifying login token: {token}")
-    
-    # Check if token exists
-    user = User.query.filter_by(login_token=token).first()
-    if not user:
-        logger.warning(f"Token not found in database: {token}")
-        flash("Invalid login link. Please request a new one.", "error")
-        return redirect(url_for('auth.login'))
-    
-    # Check if token is expired
-    if user.token_expiry <= datetime.utcnow():
-        logger.warning(f"Token expired for user: {user.email}")
-        user.login_token = None  # Clear expired token
+    try:
+        logger.info(f"Verifying login token: {token}")
+        
+        # Check if token exists
+        user = User.query.filter_by(login_token=token).first()
+        if not user:
+            logger.warning(f"Token not found in database: {token}")
+            flash("Invalid login link. Please request a new one.", "error")
+            return redirect(url_for('auth.login'))
+        
+        # Check if token is expired
+        if user.token_expiry <= datetime.utcnow():
+            logger.warning(f"Token expired for user: {user.email}")
+            user.login_token = None  # Clear expired token
+            db.session.commit()
+            flash("Login link has expired. Please request a new one.", "error")
+            return redirect(url_for('auth.login'))
+        
+        # Token is valid, log user in
+        logger.info(f"Token valid for user: {user.email}")
+        login_user(user)
+        user.login_token = None  # Invalidate token after use
         db.session.commit()
-        flash("Login link has expired. Please request a new one.", "error")
+        
+        # Log successful login
+        logger.info(f"User logged in successfully: {user.email}")
+        flash("Successfully logged in!", "success")
+        return redirect(url_for('main.index'))
+    except Exception as e:
+        logger.error(f"Error in verify_login: {str(e)}", exc_info=True)
+        flash("An error occurred while verifying your login. Please try again.", "error")
         return redirect(url_for('auth.login'))
-    
-    # Token is valid, log user in
-    logger.info(f"Token valid for user: {user.email}")
-    login_user(user)
-    user.login_token = None  # Invalidate token after use
-    db.session.commit()
-    
-    # Log successful login
-    logger.info(f"User logged in successfully: {user.email}")
-    flash("Successfully logged in!", "success")
-    return redirect(url_for('main.index'))
 
 @bp.route('/logout')
 @login_required
