@@ -276,7 +276,7 @@ class BirdSightingTracker:
             species_counts = {}
             for obs in observations:
                 species = obs['comName']
-                count = obs.get('howMany', 1)
+                count = obs.get('howMany', 1)  # Default to 1 if howMany is missing
                 species_counts[species] = species_counts.get(species, 0) + count
             
             common_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)[:5]
