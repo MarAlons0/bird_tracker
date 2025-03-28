@@ -275,6 +275,18 @@ Raw Observation Data:
                 logger.info("Attempting to get AI analysis from Claude...")
                 logger.debug(f"Prompt length: {len(prompt)} characters")
                 
+                # Log the API key status (first few characters only)
+                api_key = os.getenv('ANTHROPIC_API_KEY')
+                if api_key:
+                    logger.info(f"Using Anthropic API key starting with: {api_key[:8]}...")
+                else:
+                    logger.error("No Anthropic API key found in environment variables")
+                    raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
+                
+                # Log the full prompt for debugging
+                logger.debug("Full prompt for Claude:")
+                logger.debug(prompt)
+                
                 response = self.claude.messages.create(
                     model="claude-3-sonnet-20240229",
                     max_tokens=1000,
@@ -286,13 +298,28 @@ Raw Observation Data:
                 logger.info("Successfully received response from Claude")
                 analysis = response.content[0].text
                 logger.debug(f"Analysis length: {len(analysis)} characters")
-                return self._format_ai_analysis(analysis)
+                logger.debug(f"Analysis preview: {analysis[:200]}...")
+                
+                if not analysis or len(analysis.strip()) < 100:
+                    logger.error("Received empty or very short analysis from Claude")
+                    raise ValueError("Invalid response from Claude API")
+                
+                # Log the full analysis for debugging
+                logger.debug("Full analysis from Claude:")
+                logger.debug(analysis)
+                
+                formatted_analysis = self._format_ai_analysis(analysis)
+                logger.debug("Formatted analysis preview:")
+                logger.debug(formatted_analysis[:200] + "...")
+                
+                return formatted_analysis
                 
             except Exception as e:
                 logger.error(f"Error getting AI analysis: {str(e)}")
                 logger.error(f"Error type: {type(e)}")
                 import traceback
                 logger.error(f"Stack trace: {traceback.format_exc()}")
+                logger.info("Falling back to basic analysis")
                 return self._generate_basic_analysis(observations, species_freq)
                 
         except Exception as e:
