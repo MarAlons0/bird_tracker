@@ -814,11 +814,8 @@ class BirdSightingTracker:
                     model="claude-3-opus-20240229",
                     max_tokens=500,
                     temperature=0.7,
+                    system=f"You are a helpful bird expert assistant. Use this observation history for context:\n\n{observations_text}",
                     messages=[
-                        {
-                            "role": "system",
-                            "content": f"You are a helpful bird expert assistant. Use this observation history for context:\n\n{observations_text}"
-                        },
                         {
                             "role": "user",
                             "content": message
