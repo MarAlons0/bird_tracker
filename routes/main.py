@@ -39,6 +39,19 @@ def index():
         logger.error(f"Error in index route: {e}")
         return render_template('error.html', error=str(e))
 
+@bp.route('/map')
+@login_required
+def map():
+    google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+    if not google_places_key:
+        return render_template('error.html', error="Google Places API key not configured")
+        
+    observations = current_app.tracker.get_recent_observations()
+    return render_template('map.html', 
+                         observations=observations,
+                         location=current_app.tracker.active_location,
+                         google_maps_key=google_places_key)
+
 @bp.route('/report')
 @login_required
 def report():
