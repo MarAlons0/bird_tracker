@@ -100,7 +100,7 @@ def login():
         # Send magic link email
         try:
             # Get the host URL from environment or use the request host
-            host_url = os.getenv('HOST_URL', 'https://mario-bird-tracker.herokuapp.com')
+            host_url = os.getenv('HOST_URL', 'https://bird-tracker-app-9af5a4fb26d3.herokuapp.com')
             logger.info(f"Using host URL: {host_url}")
             
             login_url = f"{host_url}/auth/verify/{token}"
@@ -177,6 +177,6 @@ def google_login():
     # Generate login URL with state parameter
     state = secrets.token_urlsafe(16)
     session['oauth_state'] = state
-    login_url = f"{os.getenv('HOST_URL', 'https://mario-bird-tracker.herokuapp.com')}/auth/callback"
+    login_url = f"{os.getenv('HOST_URL', 'https://bird-tracker-app-9af5a4fb26d3.herokuapp.com')}/auth/callback"
     auth_url = f"{os.getenv('GOOGLE_AUTH_URL')}?client_id={os.getenv('GOOGLE_CLIENT_ID')}&response_type=code&redirect_uri={login_url}&scope=openid%20email%20profile&state={state}"
     return redirect(auth_url) 
