@@ -377,39 +377,25 @@ def chat():
         if not message:
             return jsonify({'error': 'No message provided'}), 400
 
-        # Get current observations and analysis for context
-        observations = app.tracker.get_recent_observations()
+        # Use the tracker's chat_with_ai method
+        response = app.tracker.chat_with_ai(message)
         
-        # Create prompt with context
-        prompt = f"""You are a helpful bird expert assistant. Use the following context to answer the user's question:
-
-Current Location: {app.tracker.active_location['name']}
-Recent Observations: {len(observations)} birds observed
-Observation Period: Last 21 days
-
-The user asks: {message}
-
-Please provide a concise, informative response focusing on the bird-related aspects of the question.
-"""
-
-        # Get response from Claude
-        response = app.tracker.claude.messages.create(
-            model="claude-3-opus-20240229",
-            max_tokens=500,
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }]
-        )
-
-        return jsonify({
-            'response': response.content[0].text
-        })
+        if not response:
+            return jsonify({
+                'error': 'No response generated',
+                'response': 'Sorry, I was unable to process your question.'
+            }), 500
+        
+        return jsonify({'response': response})
 
     except Exception as e:
-        print(f"Chat error: {str(e)}")
+        logger.error(f"Chat error: {str(e)}")
+        logger.error(f"Error type: {type(e)}")
+        import traceback
+        logger.error(f"Stack trace: {traceback.format_exc()}")
         return jsonify({
-            'error': 'Error processing chat request'
+            'error': str(e),
+            'response': 'Sorry, there was an error processing your request.'
         }), 500
 
 @app.route('/api/email-schedule', methods=['POST'])
