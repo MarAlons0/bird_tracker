@@ -52,20 +52,34 @@ class BirdSightingTracker:
     def _load_config(self):
         config = ConfigParser()
         config_path = 'config.ini'  # Changed to relative path
-        print(f"DEBUG: Loading config from: {config_path}")
+        logger.info(f"Loading config from: {config_path}")
+        
+        # Try to load from config file first
         if config.read(config_path):
-            print("DEBUG: Config file loaded successfully")
-            print(f"DEBUG: Sections found: {config.sections()}")
+            logger.info("Config file loaded successfully")
+            logger.info(f"Sections found: {config.sections()}")
             return config
-        else:
-            # Fall back to environment variables if config file not found
-            print("DEBUG: Config file not found, using environment variables")
-            config.add_section('locations')
-            config.add_section('email_schedule')
-            config['locations']['active_location'] = 'cincinnati'
-            config['email_schedule']['hour'] = '7'
-            config['email_schedule']['minute'] = '0'
-            return config
+            
+        # If no config file, use environment variables
+        logger.info("Config file not found, using environment variables")
+        config.add_section('locations')
+        config.add_section('email_schedule')
+        
+        # Get values from environment with defaults
+        config['locations']['active_location'] = os.getenv('DEFAULT_LOCATION', 'cincinnati')
+        config['email_schedule']['hour'] = os.getenv('EMAIL_SCHEDULE_HOUR', '7')
+        config['email_schedule']['minute'] = os.getenv('EMAIL_SCHEDULE_MINUTE', '0')
+        
+        # Add location section with default values
+        location_section = f"location_{config['locations']['active_location']}"
+        config.add_section(location_section)
+        config[location_section]['name'] = os.getenv('DEFAULT_LOCATION_NAME', 'Cincinnati')
+        config[location_section]['latitude'] = os.getenv('DEFAULT_LATITUDE', '39.1031')
+        config[location_section]['longitude'] = os.getenv('DEFAULT_LONGITUDE', '-84.5120')
+        config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
+        
+        logger.info("Created config from environment variables")
+        return config
     
     def _get_active_location(self):
         """Get location from environment or use default"""
