@@ -4,6 +4,7 @@ import logging
 from sqlalchemy import text
 import os
 from werkzeug.security import generate_password_hash
+from sqlalchemy.exc import IntegrityError
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -47,27 +48,31 @@ def init_db():
 
         # Create or update users
         for user_data in users_data:
-            user = User.query.filter_by(email=user_data['email']).first()
-            
-            if user is None:
-                # Create new user
-                user = User(
-                    email=user_data['email'],
-                    password=generate_password_hash(user_data['password']),
-                    is_admin=user_data['is_admin'],
-                    is_active=user_data['is_active']
-                )
-                db.session.add(user)
-                print(f"Created {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
-            else:
-                # Update existing user
-                user.password = generate_password_hash(user_data['password'])
-                user.is_admin = user_data['is_admin']
-                user.is_active = user_data['is_active']
-                print(f"Updated {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
-
             try:
+                with db.session.begin_nested():
+                    user = User.query.filter_by(email=user_data['email']).with_for_update().first()
+                    
+                    if user is None:
+                        # Create new user
+                        user = User(
+                            email=user_data['email'],
+                            password=generate_password_hash(user_data['password']),
+                            is_admin=user_data['is_admin'],
+                            is_active=user_data['is_active']
+                        )
+                        db.session.add(user)
+                        print(f"Created {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
+                    else:
+                        # Update existing user
+                        user.password = generate_password_hash(user_data['password'])
+                        user.is_admin = user_data['is_admin']
+                        user.is_active = user_data['is_active']
+                        print(f"Updated {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
+
                 db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                print(f"User {user_data['email']} already exists")
             except Exception as e:
                 db.session.rollback()
                 print(f"Error creating/updating user {user_data['email']}: {e}")
