@@ -161,4 +161,32 @@ def register():
         flash("Registration successful! Welcome to Bird Tracker.", "success")
         return redirect(url_for('main.index'))
     
-    return render_template('register.html') 
+    return render_template('register.html')
+
+@bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Validate inputs
+        if not current_password or not new_password or not confirm_password:
+            return render_template('change_password.html', error="All fields are required")
+        
+        if new_password != confirm_password:
+            return render_template('change_password.html', error="New passwords do not match")
+        
+        # Verify current password
+        if not current_user.check_password(current_password):
+            return render_template('change_password.html', error="Current password is incorrect")
+        
+        # Update password
+        current_user.set_password(new_password)
+        db.session.commit()
+        
+        flash("Password updated successfully!", "success")
+        return redirect(url_for('main.index'))
+    
+    return render_template('change_password.html') 
