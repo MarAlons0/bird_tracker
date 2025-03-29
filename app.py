@@ -82,7 +82,7 @@ def create_app():
     from routes import main, auth, admin
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
-    app.register_blueprint(admin.bp)
+    app.register_blueprint(admin.bp, url_prefix='/admin')
     
     # Create database tables
     with app.app_context():
