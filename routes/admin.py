@@ -9,13 +9,16 @@ bp = Blueprint('admin', __name__)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
+        if not current_user.is_authenticated:
+            flash('Please log in to access this page.', 'error')
+            return redirect(url_for('auth.login'))
+        if not current_user.is_admin:
             flash('You do not have permission to access this page.', 'error')
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
 
-@bp.route('/admin', methods=['GET', 'POST'])
+@bp.route('/', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_panel():
