@@ -258,6 +258,10 @@ Observations:
             # Get AI analysis using the existing analyze_observations method
             analysis = self.analyze_observations()
             
+            # Ensure analysis is properly formatted HTML
+            if not analysis or not isinstance(analysis, str):
+                analysis = "<div class='alert alert-warning'>Unable to generate AI analysis.</div>"
+            
             # Format the analysis with additional styling
             formatted_analysis = f"""
             <div class="analysis-section">

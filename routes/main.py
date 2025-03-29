@@ -96,17 +96,15 @@ def ai_analysis():
         
         if not analysis:
             return jsonify({
-                'error': 'No analysis generated',
                 'analysis': '<div class="alert alert-warning">Unable to generate AI analysis.</div>'
-            }), 500
+            })
         
         return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Error in AI analysis: {e}")
         return jsonify({
-            'error': str(e),
-            'analysis': '<div class="alert alert-danger">Error generating AI analysis.</div>'
-        }), 500
+            'analysis': '<div class="alert alert-danger">Error generating AI analysis. Please try again later.</div>'
+        })
 
 @bp.route('/api/chat', methods=['POST'])
 @login_required
