@@ -195,6 +195,10 @@ class BirdSightingTracker:
             observations_text = self.format_observations_for_analysis(self.get_recent_observations())
             logging.info(f"Formatted observations for analysis: {observations_text[:100]}...")
 
+            # Get location information
+            location_name = self.active_location['name']
+            location_radius = self.active_location['radius']
+            
             try:
                 response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
@@ -203,12 +207,12 @@ class BirdSightingTracker:
                     messages=[
                         {
                             "role": "user",
-                            "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings and provide a concise summary in the following format:
+                            "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
 
-1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns.
-2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts.
-3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem.
-4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity.
+1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
+2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts in this geographic area.
+3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem of {location_name}.
+4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity in this region.
 
 Observations:
 {observations_text}"""
