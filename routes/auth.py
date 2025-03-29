@@ -105,7 +105,9 @@ def login():
 @login_required
 def logout():
     logger.info(f"User logged out: {current_user.email}")
+    session.clear()  # Clear all session data
     logout_user()
+    flash("You have been logged out.", "success")
     return redirect(url_for('auth.login'))
 
 @bp.route('/google-login')
