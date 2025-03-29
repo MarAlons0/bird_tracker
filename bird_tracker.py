@@ -723,6 +723,9 @@ Observations:
     def _format_ai_analysis(self, analysis):
         """Format AI analysis with proper HTML structure"""
         try:
+            if not analysis or not isinstance(analysis, str):
+                return "<div class='alert alert-warning'>Unable to format analysis.</div>"
+            
             # Split the analysis into sections based on numbered sections
             sections = []
             current_section = []
@@ -790,13 +793,15 @@ Observations:
                     else:
                         formatted_sections.extend(formatted_paragraphs)
             
+            if not formatted_sections:
+                return "<div class='alert alert-warning'>No formatted content available.</div>"
+            
             return '\n'.join(formatted_sections)
             
         except Exception as e:
             logger.error(f"Error formatting AI analysis: {e}")
             logger.error(f"Analysis content: {analysis}")
-            # Fallback to simple formatting if there's an error
-            return f'<div class="analysis-content">{analysis}</div>'
+            return "<div class='alert alert-danger'>Error formatting analysis.</div>"
 
     @staticmethod
     def format_observations_for_analysis(observations):
