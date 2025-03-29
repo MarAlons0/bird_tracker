@@ -42,7 +42,7 @@ class RegistrationRequest(db.Model):
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     processed_at = db.Column(db.DateTime)
-    processed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     notes = db.Column(db.Text)
 
     def __repr__(self):
