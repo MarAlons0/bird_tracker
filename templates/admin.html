@@ -14,7 +14,7 @@
                     <h5 class="mb-0">Add New User</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('admin') }}">
+                    <form method="POST" action="{{ url_for('admin.admin_panel') }}">
                         <input type="hidden" name="action" value="add_user">
                         <div class="row">
                             <div class="col-md-4">
@@ -79,14 +79,14 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                        <form method="POST" action="{{ url_for('admin.admin_panel') }}" style="display: inline;">
                                             <input type="hidden" name="action" value="toggle_status">
                                             <input type="hidden" name="user_id" value="{{ user.id }}">
                                             <button type="submit" class="btn btn-sm {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
                                                 {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                        <form method="POST" action="{{ url_for('admin.admin_panel') }}" style="display: inline;">
                                             <input type="hidden" name="action" value="delete_user">
                                             <input type="hidden" name="user_id" value="{{ user.id }}">
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
