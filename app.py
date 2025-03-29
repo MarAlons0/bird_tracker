@@ -152,53 +152,6 @@ def admin_required(f):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.route('/admin', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def admin():
-    if request.method == 'POST':
-        action = request.form.get('action')
-        
-        if action == 'add_user':
-            email = request.form.get('email')
-            password = request.form.get('password')
-            is_admin = bool(int(request.form.get('is_admin', 0)))
-            
-            if User.query.filter_by(email=email).first():
-                flash('User with this email already exists.', 'error')
-                return redirect(url_for('admin'))
-            
-            user = User(
-                email=email,
-                password=generate_password_hash(password),
-                is_admin=is_admin
-            )
-            db.session.add(user)
-            db.session.commit()
-            flash('User added successfully.', 'success')
-            
-        elif action == 'toggle_status':
-            user_id = request.form.get('user_id')
-            user = User.query.get_or_404(user_id)
-            user.is_active = not user.is_active
-            db.session.commit()
-            flash(f'User {"activated" if user.is_active else "deactivated"} successfully.', 'success')
-            
-        elif action == 'delete_user':
-            user_id = request.form.get('user_id')
-            user = User.query.get_or_404(user_id)
-            if user.id == current_user.id:
-                flash('You cannot delete your own account.', 'error')
-            else:
-                db.session.delete(user)
-                db.session.commit()
-                flash('User deleted successfully.', 'success')
-        
-        return redirect(url_for('admin'))
-    
-    users = User.query.all()
-    return render_template('admin.html', users=users)
-
 def load_locations():
     try:
         with open('locations.json', 'r') as f:
@@ -377,13 +330,21 @@ def chat():
         if not message:
             return jsonify({'error': 'No message provided'}), 400
 
+        logger.info(f"Processing chat message: {message}")
+        
+        # Get recent observations for context
+        observations = app.tracker.get_recent_observations()
+        logger.info(f"Retrieved {len(observations)} observations for context")
+        
         # Use the tracker's chat_with_ai method
-        response = app.tracker.chat_with_ai(message)
+        response = app.tracker.chat_with_ai(message, observations)
+        logger.info(f"Received response from chat_with_ai, length: {len(response) if response else 0}")
         
         if not response:
+            logger.warning("No response generated from chat_with_ai")
             return jsonify({
                 'error': 'No response generated',
-                'response': 'Sorry, I was unable to process your question.'
+                'response': 'I apologize, but I was unable to process your question. Please try again.'
             }), 500
         
         return jsonify({'response': response})
@@ -395,7 +356,7 @@ def chat():
         logger.error(f"Stack trace: {traceback.format_exc()}")
         return jsonify({
             'error': str(e),
-            'response': 'Sorry, there was an error processing your request.'
+            'response': 'I apologize, but I encountered an error while processing your question. Please try again later.'
         }), 500
 
 @app.route('/api/email-schedule', methods=['POST'])
