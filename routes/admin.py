@@ -51,7 +51,7 @@ def admin_panel():
                 db.session.commit()
                 flash(f'User status updated successfully.', 'success')
                 
-        elif action == 'delete':
+        elif action == 'delete_user':
             user = User.query.get(user_id)
             if user:
                 db.session.delete(user)
