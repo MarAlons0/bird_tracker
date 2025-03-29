@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Registration Requests</h2>
+    
+    {% if requests %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Message</th>
+                    <th>Submitted</th>
+                    <th>Processed</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                <tr>
+                    <td>{{ request.email }}</td>
+                    <td>
+                        <span class="badge {% if request.status == 'pending' %}bg-warning
+                                          {% elif request.status == 'approved' %}bg-success
+                                          {% elif request.status == 'rejected' %}bg-danger
+                                          {% else %}bg-secondary{% endif %}">
+                            {{ request.status }}
+                        </span>
+                    </td>
+                    <td>{{ request.notes or 'No message' }}</td>
+                    <td>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ request.processed_at.strftime('%Y-%m-%d %H:%M') if request.processed_at else '-' }}</td>
+                    <td>
+                        {% if request.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin.process_registration_request', request_id=request.id, action='approve') }}" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.process_registration_request', request_id=request.id, action='reject') }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No registration requests found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

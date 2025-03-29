@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, RegistrationRequest
 from datetime import datetime, timedelta
 import secrets
 from flask_mail import Message
@@ -119,41 +119,100 @@ def google_login():
     auth_url = f"{os.getenv('GOOGLE_AUTH_URL')}?client_id={os.getenv('GOOGLE_CLIENT_ID')}&response_type=code&redirect_uri={login_url}&scope=openid%20email%20profile&state={state}"
     return redirect(auth_url)
 
-@bp.route('/register', methods=['GET', 'POST'])
-def register():
+@bp.route('/request-registration', methods=['GET', 'POST'])
+def request_registration():
     if request.method == 'POST':
         email = request.form.get('email')
+        message = request.form.get('message')
+        
+        # Check if email is already registered
+        if User.query.filter_by(email=email).first():
+            return render_template('request_registration.html', 
+                error="This email is already registered.")
+        
+        # Check if there's already a pending request
+        if RegistrationRequest.query.filter_by(email=email, status='pending').first():
+            return render_template('request_registration.html', 
+                error="A registration request for this email is already pending.")
+        
+        # Create new registration request
+        request = RegistrationRequest(email=email, notes=message)
+        db.session.add(request)
+        db.session.commit()
+        
+        # Send email to admin
+        admin_email = os.getenv('ADMIN_EMAIL')
+        if admin_email:
+            msg = Message(
+                'New Registration Request',
+                sender=os.getenv('SMTP_USER'),
+                recipients=[admin_email]
+            )
+            msg.body = f"""
+            A new registration request has been submitted:
+            
+            Email: {email}
+            Message: {message}
+            
+            To approve or reject this request, please visit:
+            {url_for('admin.registration_requests', _external=True)}
+            """
+            mail.send(msg)
+        
+        # Send confirmation email to user
+        msg = Message(
+            'Registration Request Received',
+            sender=os.getenv('SMTP_USER'),
+            recipients=[email]
+        )
+        msg.body = f"""
+        Thank you for your interest in Bird Tracker!
+        
+        We have received your registration request and will review it shortly.
+        You will receive an email once your request has been processed.
+        
+        Best regards,
+        The Bird Tracker Team
+        """
+        mail.send(msg)
+        
+        return render_template('request_registration.html', 
+            success="Your registration request has been submitted successfully.")
+    
+    return render_template('request_registration.html')
+
+@bp.route('/register/<token>', methods=['GET', 'POST'])
+def register(token):
+    # Verify token and get registration request
+    request = RegistrationRequest.query.filter_by(
+        status='approved',
+        email=token
+    ).first()
+    
+    if not request:
+        flash("Invalid or expired registration link.", "error")
+        return redirect(url_for('auth.request_registration'))
+    
+    if request.method == 'POST':
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
         
         # Validate inputs
-        if not email or not password or not confirm_password:
+        if not password or not confirm_password:
             return render_template('register.html', error="All fields are required")
         
         if password != confirm_password:
             return render_template('register.html', error="Passwords do not match")
         
-        # Check if email is in allowed list
-        allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
-        if not allowed_emails_str:
-            logger.error("ALLOWED_EMAILS environment variable is not set!")
-            return render_template('register.html', 
-                error="System configuration error. Please contact support.")
-        
-        allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
-        if email not in allowed_emails:
-            return render_template('register.html', 
-                error="Sorry, this email is not authorized to access this application.")
-        
-        # Check if user already exists
-        if User.query.filter_by(email=email).first():
-            return render_template('register.html', 
-                error="An account with this email already exists")
-        
         # Create new user
-        user = User(email=email)
+        user = User(email=request.email)
         user.set_password(password)
         db.session.add(user)
+        
+        # Update registration request
+        request.status = 'completed'
+        request.processed_at = datetime.utcnow()
+        
         db.session.commit()
         
         # Log user in
@@ -161,7 +220,7 @@ def register():
         flash("Registration successful! Welcome to Bird Tracker.", "success")
         return redirect(url_for('main.index'))
     
-    return render_template('register.html')
+    return render_template('register.html', email=request.email)
 
 @bp.route('/change-password', methods=['GET', 'POST'])
 @login_required

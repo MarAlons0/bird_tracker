@@ -34,4 +34,16 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         """Check if the provided password matches"""
-        return check_password_hash(self.password, password) 
+        return check_password_hash(self.password, password)
+
+class RegistrationRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    processed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    notes = db.Column(db.Text)
+
+    def __repr__(self):
+        return f'<RegistrationRequest {self.email}>' 
