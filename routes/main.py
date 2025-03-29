@@ -99,6 +99,10 @@ def ai_analysis():
                 'analysis': '<div class="alert alert-warning">Unable to generate AI analysis.</div>'
             })
         
+        # Ensure the analysis is properly formatted HTML
+        if not isinstance(analysis, str) or not analysis.strip().startswith('<'):
+            analysis = f'<div class="alert alert-warning">{analysis}</div>'
+        
         return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Error in AI analysis: {e}")

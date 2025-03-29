@@ -153,6 +153,11 @@
             console.log('Fetching AI analysis...');
             const response = await fetch('/api/analysis');
             console.log('AI analysis response received:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+            
             const data = await response.json();
             console.log('AI analysis data:', {
                 hasAnalysis: !!data.analysis,
@@ -160,21 +165,15 @@
                 content: data.analysis
             });
             
-            if (response.status !== 200) {
-                throw new Error(data.error || `Failed to load analysis (Status: ${response.status})`);
-            }
-            
             if (!data.analysis) {
                 throw new Error('No analysis content received');
             }
             
             const analysisContent = document.getElementById('analysisContent');
-            console.log('Analysis container before update:', analysisContent.innerHTML);
             analysisContent.innerHTML = data.analysis;
-            console.log('Analysis container after update:', analysisContent.innerHTML);
             console.log('Analysis displayed successfully');
         } catch (error) {
-            console.error('Error loading analysis:', error.message, error.stack);
+            console.error('Error loading analysis:', error);
             document.getElementById('analysisContent').innerHTML = `
                 <div class="alert alert-danger">
                     <h4>Error Loading Analysis</h4>
