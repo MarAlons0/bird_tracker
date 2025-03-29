@@ -65,14 +65,19 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
-    cors = CORS(app, resources={
-        r"/*": {
-            "origins": ["https://mario-bird-tracker.herokuapp.com", "https://www.herokucdn.com"],
-            "supports_credentials": True,
-            "allow_headers": ["Content-Type", "Authorization"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-        }
-    })
+    
+    # Configure CORS
+    if os.getenv('FLASK_ENV') == 'production':
+        cors = CORS(app, resources={
+            r"/*": {
+                "origins": ["https://bird-tracker-app-9af5a4fb26d3.herokuapp.com"],
+                "supports_credentials": True,
+                "allow_headers": ["Content-Type", "Authorization"],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+            }
+        })
+    else:
+        cors = CORS(app, supports_credentials=True)
     
     # Configure login manager
     login_manager.login_view = 'auth.login'
