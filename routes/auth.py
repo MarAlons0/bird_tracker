@@ -245,7 +245,9 @@ def change_password():
         current_user.set_password(new_password)
         db.session.commit()
         
-        flash("Password updated successfully!", "success")
-        return redirect(url_for('main.index'))
+        # Log out the user to force them to log in with the new password
+        logout_user()
+        flash("Password updated successfully! Please log in with your new password.", "success")
+        return redirect(url_for('auth.login'))
     
     return render_template('change_password.html') 

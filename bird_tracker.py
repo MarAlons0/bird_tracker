@@ -203,7 +203,15 @@ class BirdSightingTracker:
                     messages=[
                         {
                             "role": "user",
-                            "content": f"As a bird expert, analyze these bird sightings and provide a detailed report in a naturalist newsletter style:\n\n{observations_text}"
+                            "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings and provide a concise summary in the following format:
+
+1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns.
+2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts.
+3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem.
+4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity.
+
+Observations:
+{observations_text}"""
                         }
                     ]
                 )
@@ -717,7 +725,7 @@ class BirdSightingTracker:
                     continue
                     
                 # Check if this is a new numbered section
-                if line.startswith(('1.', '2.', '3.')):
+                if line.startswith(('1.', '2.', '3.', '4.')):
                     if current_section:
                         sections.append('\n'.join(current_section))
                     current_section = [line]
@@ -730,7 +738,7 @@ class BirdSightingTracker:
             
             # Format each section
             formatted_sections = []
-            for section in sections:
+            for i, section in enumerate(sections):
                 if not section.strip():
                     continue
                 
@@ -755,15 +763,18 @@ class BirdSightingTracker:
                                 '\n</ul>'
                             )
                     else:
-                        # Format regular paragraph
-                        formatted_paragraphs.append(f'<p class="mb-3">{paragraph.strip()}</p>')
+                        # Format regular paragraph with indentation for sections 2-4
+                        if i > 0:  # Skip indentation for the overview section
+                            formatted_paragraphs.append(f'<p class="mb-3 ms-4">{paragraph.strip()}</p>')
+                        else:
+                            formatted_paragraphs.append(f'<p class="mb-3">{paragraph.strip()}</p>')
                 
                 # Add section title if it exists
                 if formatted_paragraphs:
                     first_paragraph = formatted_paragraphs[0]
                     if first_paragraph.startswith('<p class="mb-3">') and first_paragraph.endswith('</p>'):
                         section_title = first_paragraph[15:-4].strip()  # Remove <p> tags
-                        if section_title.startswith(('1.', '2.', '3.')):
+                        if section_title.startswith(('1.', '2.', '3.', '4.')):
                             formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_title}</h3>')
                             formatted_sections.extend(formatted_paragraphs[1:])
                         else:
