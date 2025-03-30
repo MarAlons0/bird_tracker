@@ -715,11 +715,11 @@ Please provide a helpful response based on the recent observations and your expe
                 return analysis
             
             # Otherwise, wrap it in HTML tags
-            return f"""
-            <div class="analysis-content">
-                {analysis.replace('\n', '<br>')}
-            </div>
-            """
+            formatted = '<div class="analysis-content">'
+            formatted += analysis.replace('\n', '<br>')
+            formatted += '</div>'
+            return formatted
+            
         except Exception as e:
             logging.error(f"Error formatting analysis: {str(e)}")
             return f"<div class='alert alert-danger'>Error formatting analysis: {str(e)}</div>" 
