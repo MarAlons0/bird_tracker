@@ -232,7 +232,7 @@ class BirdSightingTracker:
                         time.sleep(random_delay)
                     
                     response = self.claude.messages.create(
-                        model="claude-3-sonnet-20240307",
+                        model="claude-3-7-sonnet-20250219",
                         max_tokens=1000,
                         temperature=0.7,
                         messages=[
@@ -578,7 +578,7 @@ Please provide a well-structured analysis that would be helpful for both casual 
             for attempt in range(max_retries):
                 try:
                     response = self.claude.messages.create(
-                        model="claude-3-sonnet-20240307",
+                        model="claude-3-7-sonnet-20250219",
                         max_tokens=1000,
                         temperature=0.7,
                         messages=[{
@@ -702,7 +702,7 @@ Please provide a helpful response based on the recent observations and your expe
             for attempt in range(max_retries):
                 try:
                     response = self.claude.messages.create(
-                        model="claude-3-sonnet-20240307",
+                        model="claude-3-7-sonnet-20250219",
                         max_tokens=1000,
                         temperature=0.7,
                         messages=[{
