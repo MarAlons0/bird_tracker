@@ -20,6 +20,7 @@ import httpx
 from anthropic import Anthropic
 import json
 import time
+import random
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -63,9 +64,9 @@ class BirdSightingTracker:
         self.scheduler = self.start_daily_reports()
     
     def _load_config(self):
+        """Load configuration from file or environment variables"""
         config = ConfigParser()
-        config_path = 'config.ini'  # Changed to relative path
-        logger.info(f"Loading config from: {config_path}")
+        config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
         
         # Try to load from config file first
         if config.read(config_path):
@@ -75,8 +76,8 @@ class BirdSightingTracker:
             
         # If no config file, use environment variables
         logger.info("Config file not found, using environment variables")
-            config.add_section('locations')
-            config.add_section('email_schedule')
+        config.add_section('locations')
+        config.add_section('email_schedule')
         
         # Get values from environment with defaults
         config['locations']['active_location'] = os.getenv('DEFAULT_LOCATION', 'cincinnati')
@@ -92,7 +93,7 @@ class BirdSightingTracker:
         config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
         
         logger.info("Created config from environment variables")
-            return config
+        return config
     
     def _get_active_location(self):
         """Get location from environment or use default"""
@@ -202,17 +203,22 @@ class BirdSightingTracker:
             
             # Try up to 3 times with exponential backoff
             max_retries = 3
-            base_delay = 1
+            base_delay = 2  # Increased base delay to 2 seconds
             
             for attempt in range(max_retries):
-            try:
-                response = self.claude.messages.create(
-                    model="claude-3-opus-20240229",
+                try:
+                    # Add a small random delay between attempts to avoid thundering herd
+                    if attempt > 0:
+                        random_delay = random.uniform(0.5, 1.5)
+                        time.sleep(random_delay)
+                    
+                    response = self.claude.messages.create(
+                        model="claude-3-opus-20240229",
                         max_tokens=1000,
                         temperature=0.7,
                         messages=[
                             {
-                        "role": "user",
+                                "role": "user",
                                 "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
 
 1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
@@ -245,7 +251,7 @@ Observations:
                     logging.error(f"Rate limit exceeded: {str(e)}")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt)  # Exponential backoff
-                        logging.info(f"Retrying in {delay} seconds...")
+                        logging.info(f"Rate limit hit, retrying in {delay} seconds...")
                         time.sleep(delay)
                         continue
                     return self._generate_basic_analysis()
@@ -253,7 +259,7 @@ Observations:
                     logging.error(f"API error: {str(e)}")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt)  # Exponential backoff
-                        logging.info(f"Retrying in {delay} seconds...")
+                        logging.info(f"API error, retrying in {delay} seconds...")
                         time.sleep(delay)
                         continue
                     return self._generate_basic_analysis()
@@ -261,685 +267,14 @@ Observations:
                     logging.error(f"Error calling Claude API: {str(e)}")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt)  # Exponential backoff
-                        logging.info(f"Retrying in {delay} seconds...")
+                        logging.info(f"Unexpected error, retrying in {delay} seconds...")
                         time.sleep(delay)
                         continue
                     return self._generate_basic_analysis()
             
+            logging.warning("All retry attempts failed, returning basic analysis")
             return self._generate_basic_analysis()
                 
         except Exception as e:
             logging.error(f"Error in analyze_observations: {str(e)}")
-            return self._generate_basic_analysis()
-
-    def generate_ai_analysis(self, observations):
-        """Generate AI analysis for the observations"""
-        try:
-            if not observations:
-                return "<div class='alert alert-info'>No recent observations found.</div>"
-            
-            # Get AI analysis using the existing analyze_observations method
-            analysis = self.analyze_observations()
-            
-            # Ensure analysis is properly formatted HTML
-            if not analysis or not isinstance(analysis, str):
-                analysis = "<div class='alert alert-warning'>Unable to generate AI analysis.</div>"
-            
-            # Format the analysis with additional styling
-            formatted_analysis = f"""
-            <div class="analysis-section">
-                <h3 class="mb-4">AI Analysis</h3>
-                {analysis}
-            </div>
-            """
-            
-            return formatted_analysis
-            
-        except Exception as e:
-            logger.error(f"Error generating AI analysis: {e}")
-            return "<div class='alert alert-danger'>Error generating AI analysis. Please try again later.</div>"
-
-    def _generate_basic_analysis(self):
-        """Format the basic analysis of bird observations."""
-        try:
-            observations = self.get_recent_observations()
-            if not observations:
-                return "No recent observations found."
-
-            # Calculate statistics
-            total_observations = len(observations)
-            total_birds = sum(obs.get('howMany', 1) for obs in observations)  # Default to 1 if howMany is missing
-            species_count = len(set(obs['comName'] for obs in observations))
-            
-            # Get common species (top 5)
-            species_counts = {}
-            for obs in observations:
-                species = obs['comName']
-                count = obs.get('howMany', 1)  # Default to 1 if howMany is missing
-                species_counts[species] = species_counts.get(species, 0) + count
-            
-            common_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-            
-            # Get birds of prey
-            birds_of_prey = [obs for obs in observations if any(prey in obs['comName'].lower() for prey in ['hawk', 'eagle', 'owl', 'falcon', 'osprey'])]
-            
-            # Get unusual sightings (species seen only once)
-            unusual_species = [species for species, count in species_counts.items() if count == 1]
-            
-            # Generate HTML report
-            html = f"""
-            <div class="analysis-section">
-                <h2>Basic Analysis</h2>
-                <p>Total Observations: {total_observations}</p>
-                <p>Total Birds: {total_birds}</p>
-                <p>Species Count: {species_count}</p>
-                
-                <h3>Common Species</h3>
-                <ul>
-                    {''.join(f'<li>{species}: {count} birds</li>' for species, count in common_species)}
-                </ul>
-                
-                <h3>Birds of Prey</h3>
-                <ul>
-                    {''.join(f'<li>{obs["comName"]}</li>' for obs in birds_of_prey)}
-            </ul>
-                
-                <h3>Unusual Sightings</h3>
-            <ul>
-                    {''.join(f'<li>{species}</li>' for species in unusual_species)}
-            </ul>
-        </div>
-        """
-            return html
-        except Exception as e:
-            logging.error(f"Error in basic analysis: {str(e)}")
-            return "Error generating basic analysis."
-
-    def create_static_map(self, observations):
-        """Create a static map of bird observations using Google Maps"""
-        try:
-            base_url = "https://maps.googleapis.com/maps/api/staticmap"
-            
-            # Set map parameters
-            params = {
-                'center': f"{self.active_location['latitude']},{self.active_location['longitude']}",
-                'zoom': '11',
-                'size': '800x600',
-                'maptype': 'roadmap',
-                'key': os.getenv('GOOGLE_MAPS_API_KEY')
-            }
-            
-            # Add markers for each observation
-            markers = []
-            for obs in observations:
-                try:
-                    lat = None
-                    lng = None
-                    
-                    # Extract coordinates from location string
-                    if '(' in obs['locName'] and ')' in obs['locName']:
-                        coords_text = obs['locName'].split('(')[-1].split(')')[0]
-                        try:
-                            lat, lng = map(float, coords_text.split(','))
-                            # Color code by bird type
-                            color = 'red' if any(term in obs['comName'].lower() 
-                                              for term in ['hawk', 'eagle', 'owl', 'falcon']) else 'blue'
-                            markers.append(f"color:{color}|{lat},{lng}")
-                        except:
-                            continue
-                
-                except Exception as e:
-                    print(f"DEBUG: Error processing observation for map: {str(e)}")
-                    continue
-            
-            if markers:
-                params['markers'] = markers
-            
-            print("DEBUG: Making map request...")
-            response = requests.get(base_url, params=params)
-            
-            if response.status_code == 200:
-                print("DEBUG: Map generated successfully")
-                return base64.b64encode(response.content).decode()
-            else:
-                raise Exception(f"Map API returned status code {response.status_code}")
-                
-        except Exception as e:
-            print(f"DEBUG: Error creating map: {str(e)}")
-            return None
-
-    def send_email(self, subject, header, ai_analysis, raw_data, map_path=None):
-        """Send email with report sections and embedded static map"""
-        try:
-            print("DEBUG: Setting up email...")
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['recipient']
-
-            # Create static map
-            map_image = self.create_static_map(self.get_recent_observations())
-
-            # Create HTML version with embedded static map
-            html_content = f"""
-            <html>
-            <head>
-                <style>
-                    body {{ 
-                        font-family: Arial, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                    }}
-                    .header {{
-                        text-align: center;
-                        margin-bottom: 30px;
-                    }}
-                    .main-title {{
-                        font-size: 24px;
-                        font-weight: bold;
-                        margin-bottom: 5px;
-                    }}
-                    .subtitle {{
-                        font-size: 16px;
-                        color: #666;
-                        margin-bottom: 20px;
-                    }}
-                    .analysis {{
-                        margin: 20px 0;
-                        padding: 0 20px;
-                    }}
-                    .analysis ol {{
-                        margin-bottom: 20px;
-                    }}
-                    .analysis li {{
-                        margin-bottom: 10px;
-                    }}
-                    .analysis ul {{
-                        margin-top: 5px;
-                        margin-left: 20px;
-                    }}
-                    pre {{ 
-                        white-space: pre-wrap;
-                        font-family: monospace;
-                        margin: 10px 0;
-                        padding: 10px;
-                        background-color: #f8f9fa;
-                        border-radius: 4px;
-                    }}
-                    .map-container {{
-                        margin: 20px 0;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 4px;
-                        text-align: center;
-                        background-color: #f8f9fa;
-                    }}
-                    .map-image {{
-                        max-width: 100%;
-                        height: auto;
-                        border-radius: 4px;
-                    }}
-                    .map-legend {{
-                        font-size: 14px;
-                        color: #666;
-                        margin-top: 10px;
-                    }}
-                    .raw-data {{
-                        margin-top: 30px;
-                        border-top: 1px solid #ddd;
-                        padding-top: 20px;
-                    }}
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <div class="main-title">Mario's Bird Tracker</div>
-                    <div class="subtitle">(powered by eBird)</div>
-                </div>
-                
-                <div class="analysis">
-                    {self._format_ai_analysis(ai_analysis)}
-                </div>
-
-                <div class="map-container">
-                    <h2>Bird Observation Map</h2>
-                    <img src="data:image/png;base64,{map_image}" class="map-image" alt="Bird Observation Map">
-                    <p class="map-legend">Map Legend: Red = Birds of Prey, Blue = Other Birds</p>
-                </div>
-
-                <div class="raw-data">
-                    <h3>Raw Observation Data</h3>
-                    <pre>{raw_data}</pre>
-                </div>
-            </body>
-            </html>
-            """
-
-            # Create plain text version
-            text_content = f"""
-            MARIO'S BIRD TRACKER
-            (powered by eBird)
-
-            {ai_analysis}
-
-            {raw_data}
-            """
-
-            # Attach both versions
-            part1 = MIMEText(text_content, 'plain')
-            part2 = MIMEText(html_content, 'html')
-            msg.attach(part1)
-            msg.attach(part2)
-
-            print("DEBUG: Connecting to SMTP server...")
-            with smtplib.SMTP(self.email_config['smtp_server'], 
-                            int(self.email_config['smtp_port'])) as server:
-                server.starttls()
-                server.login(self.email_config['sender_email'], 
-                            self.email_config['sender_password'])
-                server.send_message(msg)
-
-            print("Email sent successfully!")
-            return True
-
-        except Exception as e:
-            print(f"DEBUG: Error sending email: {str(e)}")
-            print(f"DEBUG: Error type: {type(e)}")
-            import traceback
-            print(f"DEBUG: Stack trace: {traceback.format_exc()}")
-            return False
-
-    def generate_daily_report(self, species_list=None):
-        observations = self.get_recent_observations()
-        
-        if not observations:
-            return "No observations found in the last 14 days."
-        
-        # Build report sections
-        header = f"Bird Sighting Report\n"
-        header += f"Date: {datetime.now().strftime('%Y-%m-%d')}\n"
-        header += f"Location: {self.active_location['name']} ({self.active_location['radius']} mile radius)\n\n"
-
-        # AI Analysis section
-        ai_analysis = "AI Analysis and Insights\n"
-        ai_analysis += "=====================\n"
-        ai_analysis += self.analyze_observations() + "\n\n"
-
-        # Raw observations section
-        raw_data = "Raw Observations\n"
-        raw_data += "===============\n"
-        for obs in observations:
-            raw_data += f"Species: {obs['comName']}\n"
-            raw_data += f"Location: {obs['locName']}\n"
-            raw_data += f"Date/Time: {obs['obsDt']}\n"
-            raw_data += f"Count: {obs.get('howMany', 'Not specified')}\n"
-            raw_data += "-" * 40 + "\n"
-
-        # Send email with map
-        subject = f"Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
-        self.send_email(subject, header, ai_analysis, raw_data)
-
-        return header + ai_analysis + raw_data
-
-    def set_location(self, name, latitude, longitude, radius):
-        """Update the active location and save to config"""
-        self.active_location = {
-            'name': name,
-            'latitude': float(latitude),
-            'longitude': float(longitude),
-            'radius': float(radius)
-        }
-        
-        # Save to config file
-        config = self._load_config()
-        
-        # Create new location section if it doesn't exist
-        location_name = name.lower().replace(' ', '_')
-        section_name = f'location_{location_name}'
-        
-        if not config.has_section(section_name):
-            config.add_section(section_name)
-        
-        config[section_name]['name'] = name
-        config[section_name]['latitude'] = str(latitude)
-        config[section_name]['longitude'] = str(longitude)
-        config[section_name]['radius'] = str(radius)
-        
-        # Update active location
-        config['locations']['active_location'] = location_name
-        
-        # Save config
-        with open('config.ini', 'w') as f:
-            config.write(f)
-
-    def start_daily_reports(self):
-        """Start the scheduler for daily reports with error handling"""
-        try:
-            scheduler = BackgroundScheduler()
-            
-            # Get email schedule from config
-            hour = self.config.getint('email_schedule', 'hour', fallback=7)
-            minute = self.config.getint('email_schedule', 'minute', fallback=0)
-            
-            # Schedule daily report
-            scheduler.add_job(
-                self._send_daily_report,
-                trigger=CronTrigger(hour=hour, minute=minute),
-                id='daily_report',
-                name='Generate daily bird report',
-                replace_existing=True,
-                misfire_grace_time=3600  # Allow job to run up to 1 hour late
-            )
-            
-            # Add error listener
-            scheduler.add_listener(
-                self._handle_scheduler_error,
-                EVENT_JOB_ERROR | EVENT_JOB_MISSED
-            )
-            
-            scheduler.start()
-            logging.info(f"Scheduler started. Daily reports will be sent at {hour:02d}:{minute:02d}")
-            return scheduler
-        
-        except Exception as e:
-            logging.error(f"Failed to start scheduler: {str(e)}")
-            return None
-
-    def _handle_scheduler_error(self, event):
-        """Handle scheduler errors and missed jobs"""
-        if event.code == EVENT_JOB_ERROR:
-            logging.error(f"Error in scheduled job: {event.job_id}")
-            logging.error(f"Exception: {event.exception}")
-            
-            # Attempt to notify admin
-            self.send_error_notification(
-                f"Bird Tracker Scheduler Error: {event.job_id}",
-                str(event.exception)
-            )
-        
-        elif event.code == EVENT_JOB_MISSED:
-            logging.warning(f"Missed scheduled job: {event.job_id}")
-            # Attempt to run missed job if within last 24 hours
-            if datetime.now() - event.scheduled_run_time < timedelta(days=1):
-                self._send_daily_report()
-
-    def _send_daily_report(self):
-        """Wrapper for generate_daily_report with error handling"""
-        try:
-            self.generate_daily_report()
-            logging.info("Daily report sent successfully")
-        except Exception as e:
-            logging.error(f"Error sending daily report: {str(e)}")
-            self.send_error_notification(
-                "Bird Tracker Daily Report Error",
-                f"Failed to send daily report: {str(e)}"
-            )
-
-    def send_error_notification(self, subject, error_message):
-        """Send error notification email to admin"""
-        try:
-            msg = MIMEText(f"Error occurred in Bird Tracker:\n\n{error_message}")
-            msg['Subject'] = subject
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['admin_email']  # Add admin_email to config
-            
-            with smtplib.SMTP(self.email_config['smtp_server'], 
-                             int(self.email_config['smtp_port'])) as server:
-                server.starttls()
-                server.login(self.email_config['sender_email'], 
-                            self.email_config['sender_password'])
-                server.send_message(msg)
-        except Exception as e:
-            logging.error(f"Failed to send error notification: {str(e)}")
-
-    def update_email_schedule(self, hour, minute):
-        """Update the email schedule in config and restart scheduler"""
-        try:
-            # Validate input
-            hour = int(hour)
-            minute = int(minute)
-            if not (0 <= hour <= 23 and 0 <= minute <= 59):
-                raise ValueError("Invalid time")
-            
-            # Update config
-            if not self.config.has_section('email_schedule'):
-                self.config.add_section('email_schedule')
-            
-            self.config['email_schedule']['hour'] = str(hour)
-            self.config['email_schedule']['minute'] = str(minute)
-            
-            # Save config
-            with open('config.ini', 'w') as f:
-                self.config.write(f)
-            
-            # Restart scheduler
-            if hasattr(self, 'scheduler') and self.scheduler:
-                self.scheduler.shutdown()
-            self.scheduler = self.start_daily_reports()
-            
-            return True
-        except Exception as e:
-            logging.error(f"Failed to update email schedule: {str(e)}")
-            return False
-
-    def test_email_configuration(self):
-        """Test email configuration by sending a test email"""
-        try:
-            msg = MIMEText("This is a test email from your Bird Tracker application.")
-            msg['Subject'] = 'Bird Tracker Email Test'
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['recipient']
-            
-            with smtplib.SMTP(self.email_config['smtp_server'], 
-                             self.email_config['smtp_port']) as server:
-                server.starttls()
-                server.login(self.email_config['sender_email'], 
-                            self.email_config['sender_password'])
-                server.send_message(msg)
-            
-            print("Test email sent successfully!")
-            return True
-        except Exception as e:
-            print(f"Error sending test email: {str(e)}")
-            return False
-
-    def _format_ai_analysis(self, analysis):
-        """Format AI analysis with proper HTML structure"""
-        try:
-            if not analysis or not isinstance(analysis, str):
-                return "<div class='alert alert-warning'>Unable to format analysis.</div>"
-            
-            # Split the analysis into sections based on numbered sections
-            sections = []
-            current_section = []
-            
-            for line in analysis.split('\n'):
-                line = line.strip()
-                if not line:
-                    continue
-                    
-                # Check if this is a new section
-                if line.startswith(('Overview:', '1.', '2.', '3.', '4.')):
-                    if current_section:
-                        sections.append('\n'.join(current_section))
-                    current_section = [line]
-                else:
-                    current_section.append(line)
-            
-            # Add the last section
-            if current_section:
-                sections.append('\n'.join(current_section))
-            
-            # Format each section
-            formatted_sections = []
-            for i, section in enumerate(sections):
-                if not section.strip():
-                    continue
-                
-                # Split into paragraphs
-                paragraphs = section.split('\n\n')
-                formatted_paragraphs = []
-                
-                for paragraph in paragraphs:
-                    if not paragraph.strip():
-                        continue
-                    
-                    # Check if this is a bullet point section
-                    if paragraph.strip().startswith('-'):
-                        # Format bullet points
-                        bullets = [f'<li class="mb-2">{line.strip("- ")}</li>' 
-                                 for line in paragraph.split('\n') 
-                                 if line.strip().startswith('-')]
-            if bullets:
-                            formatted_paragraphs.append(
-                                '<ul class="list-group list-group-flush mb-4">\n' + 
-                               '\n'.join(bullets) + 
-                                '\n</ul>'
-                            )
-                    else:
-                        # Format regular paragraph with indentation for sections 2-4
-                        if i > 0:  # Skip indentation for the overview section
-                            formatted_paragraphs.append(f'<p class="mb-3 ms-4">{paragraph.strip()}</p>')
-                        else:
-                            formatted_paragraphs.append(f'<p class="mb-3">{paragraph.strip()}</p>')
-                
-                # Add section title if it exists
-                if formatted_paragraphs:
-                    first_paragraph = formatted_paragraphs[0]
-                    if first_paragraph.startswith('<p class="mb-3">') and first_paragraph.endswith('</p>'):
-                        section_title = first_paragraph[15:-4].strip()  # Remove <p> tags
-                        if section_title.startswith(('Overview:', '1.', '2.', '3.')):
-                            # Remove numbering from Overview section
-                            if section_title.startswith('Overview:'):
-                                formatted_sections.append(f'<h3 class="mt-4 mb-3">Overview</h3>')
-                            else:
-                                # Adjust numbering for other sections
-                                section_number = int(section_title[0]) - 1 if section_title.startswith('1.') else int(section_title[0])
-                                formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_number}. {section_title[2:].strip()}</h3>')
-                            formatted_sections.extend(formatted_paragraphs[1:])
-                        else:
-                            formatted_sections.extend(formatted_paragraphs)
-                    else:
-                        formatted_sections.extend(formatted_paragraphs)
-            
-            if not formatted_sections:
-                return "<div class='alert alert-warning'>No formatted content available.</div>"
-            
-            return '\n'.join(formatted_sections)
-            
-        except Exception as e:
-            logger.error(f"Error formatting AI analysis: {e}")
-            logger.error(f"Analysis content: {analysis}")
-            return "<div class='alert alert-danger'>Error formatting analysis.</div>"
-
-    @staticmethod
-    def format_observations_for_analysis(observations):
-        """Format observations for Claude analysis"""
-        if not observations:
-            return "No observations available"
-        
-        # Add field explanations at the top
-        formatted = ["Field Explanations:"]
-        formatted.append("- Count: Number of birds reported by observer")
-        formatted.append("- Date: Date and time in YYYY-MM-DD HH:MM format")
-        formatted.append("- locName: Location name where the observation was made")
-        formatted.append("- lat: Latitude coordinate of the observation location")
-        formatted.append("- lng: Longitude coordinate of the observation location")
-        formatted.append("\nObservations:")
-        
-        for obs in observations:
-            try:
-                # Safely get values with defaults
-                com_name = obs.get('comName', 'Unknown Species')
-                sci_name = obs.get('sciName', 'Unknown Scientific Name')
-                count = obs.get('howMany', 1)
-                date = obs.get('obsDt', 'Unknown Date')
-                loc_name = obs.get('locName', 'Unknown Location')
-                lat = obs.get('lat', 'Unknown')
-                lng = obs.get('lng', 'Unknown')
-                
-                formatted.append(f"- {com_name} ({sci_name})")
-                formatted.append(f"  Count: {count}")
-                formatted.append(f"  Date: {date}")
-                formatted.append(f"  Location: {loc_name}")
-                formatted.append(f"  Coordinates: {lat}, {lng}")
-                formatted.append("")  # Add blank line between observations
-            except Exception as e:
-                logger.error(f"Error formatting observation: {e}")
-                continue
-        
-        return "\n".join(formatted) if formatted else "No valid observations available"
-
-    def chat_with_ai(self, message):
-        try:
-            logging.info("Starting chat with AI")
-            logging.info(f"User message: {message}")
-            
-            # Get the observation history
-            observations_text = self.format_observations_for_analysis(self.get_recent_observations())
-            
-            try:
-                response = self.claude.messages.create(
-                    model="claude-3-opus-20240229",
-                    max_tokens=500,
-                    temperature=0.7,
-                    system=f"You are a helpful bird expert assistant. Use this observation history for context:\n\n{observations_text}",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": message
-                        }
-                    ]
-                )
-                logging.info("Successfully received chat response from Claude API")
-                logging.debug(f"Raw chat response: {response}")
-                
-                return response.content[0].text
-                
-            except Exception as e:
-                logging.error(f"Error in chat_with_ai API call: {str(e)}")
-                return "I apologize, but I encountered an error while processing your question. Please try again later."
-                
-        except Exception as e:
-            logging.error(f"Error in chat_with_ai: {str(e)}")
-            return "I apologize, but I encountered an error while processing your question. Please try again later."
-
-    def send_daily_report(self):
-        """Send daily report email"""
-        try:
-            report = self.generate_daily_report()
-            
-            msg = MIMEText(report)
-            msg['Subject'] = f'Bird Tracker Daily Report - {datetime.now().strftime("%Y-%m-%d")}'
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['admin_email']  # Use admin_email for recipient
-            
-            with smtplib.SMTP(self.email_config['smtp_server'], 
-                             self.email_config['smtp_port']) as server:
-                server.starttls()
-                server.login(self.email_config['sender_email'], 
-                           self.email_config['sender_password'])
-                server.send_message(msg)
-        except Exception as e:
-            print(f"Error sending daily report: {str(e)}")
-
-if __name__ == "__main__":
-    try:
-        print("DEBUG: Starting program...")
-        print("DEBUG: Creating tracker instance...")
-        tracker = BirdSightingTracker()
-        
-        print("DEBUG: Loading config...")
-        print(f"DEBUG: Active location: {tracker.active_location}")
-        
-        print("\nGenerating bird sighting report...")
-        report = tracker.generate_daily_report()
-        print("\nReport Contents:")
-        print(report)
-        
-    except Exception as e:
-        print(f"ERROR: An error occurred: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-    finally:
-        input("Press Enter to close this window...")
+            return self._generate_basic_analysis() 
