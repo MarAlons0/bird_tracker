@@ -176,14 +176,27 @@ class BirdSightingTracker:
 
             response = requests.get(endpoint, params=params, headers=headers)
             logging.info(f"API Response Status Code: {response.status_code}")
-            logging.info(f"API Response Headers: {dict(response.headers)}")
             
             if response.status_code == 200:
                 observations = response.json()
                 logging.info(f"Number of observations retrieved: {len(observations)}")
-                if observations:
-                    logging.info(f"First observation: {json.dumps(observations[0], indent=2)}")
-                return observations
+                
+                # Validate and log coordinates
+                valid_observations = []
+                for obs in observations:
+                    try:
+                        lat = float(obs.get('lat'))
+                        lng = float(obs.get('lng'))
+                        if -90 <= lat <= 90 and -180 <= lng <= 180:
+                            valid_observations.append(obs)
+                            logging.info(f"Valid observation: {obs.get('comName', 'Unknown')} at {lat}, {lng}")
+                        else:
+                            logging.warning(f"Invalid coordinates for observation: {obs.get('comName', 'Unknown')}")
+                    except (ValueError, TypeError) as e:
+                        logging.warning(f"Error processing coordinates for observation: {str(e)}")
+                
+                logging.info(f"Number of valid observations: {len(valid_observations)}")
+                return valid_observations
             else:
                 logging.error(f"Error from eBird API: {response.status_code} - {response.text}")
                 return []
@@ -349,23 +362,53 @@ Observations:
     def create_static_map(self, observations):
         """Create a static map with observation markers"""
         try:
+            logging.info(f"Creating static map with {len(observations)} observations")
+            
             # Create map centered on active location
             map_size = (800, 600)
             center_lat = self.active_location['latitude']
             center_lon = self.active_location['longitude']
-            m = StaticMap(*map_size, url_template='http://a.tile.osm.org/{z}/{x}/{y}.png')
+            
+            # Log the center coordinates
+            logging.info(f"Map center: {center_lat}, {center_lon}")
+            
+            # Create the map with a more detailed tile source
+            m = StaticMap(
+                *map_size,
+                url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                zoom=10  # Set a default zoom level
+            )
             
             # Add markers for each observation
-            for obs in observations:
-                marker = CircleMarker((obs['lng'], obs['lat']), 'red', 6)
-                m.add_marker(marker)
+            for i, obs in enumerate(observations):
+                try:
+                    lat = float(obs.get('lat'))
+                    lng = float(obs.get('lng'))
+                    
+                    # Log each observation's coordinates
+                    logging.info(f"Adding marker {i+1}: {lat}, {lng} for {obs.get('comName', 'Unknown species')}")
+                    
+                    # Create a marker with a distinct color
+                    marker = CircleMarker(
+                        (lng, lat),
+                        'red',
+                        6,
+                        outline_color='white',
+                        outline_width=2
+                    )
+                    m.add_marker(marker)
+                except (ValueError, TypeError) as e:
+                    logging.error(f"Error processing observation {i+1}: {str(e)}")
+                    continue
             
             # Render map
+            logging.info("Rendering map...")
             image = m.render()
             
             # Convert to base64 for email
             buffered = io.BytesIO()
             image.save(buffered, format="PNG")
+            logging.info("Map successfully created and encoded")
             return base64.b64encode(buffered.getvalue()).decode()
             
         except Exception as e:
