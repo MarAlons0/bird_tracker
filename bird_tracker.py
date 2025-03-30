@@ -23,6 +23,7 @@ import time
 import random
 import tempfile
 import staticmaps
+import math
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -367,20 +368,47 @@ Observations:
             context = staticmaps.Context()
             context.set_tile_provider(staticmaps.tile_provider_OSM)
 
+            # Calculate center and bounds
+            if not observations:
+                return None
+
+            lats = []
+            lngs = []
             for obs in observations:
                 try:
-                    lat = float(obs['latitude'])
-                    lng = float(obs['longitude'])
-                    location = staticmaps.create_latlng(lat, lng)
-                    marker = CircleMarker(
-                        location,
-                        'red',  # color
-                        5      # size
-                    )
-                    context.add_object(marker)
+                    lat = float(obs.get('lat', 0))
+                    lng = float(obs.get('lng', 0))
+                    if -90 <= lat <= 90 and -180 <= lng <= 180:
+                        lats.append(lat)
+                        lngs.append(lng)
+                        location = staticmaps.create_latlng(lat, lng)
+                        marker = CircleMarker(
+                            location,
+                            'red',  # color
+                            5      # size
+                        )
+                        context.add_object(marker)
                 except Exception as e:
                     logging.warning(f"Error adding marker for observation: {str(e)}")
                     continue
+
+            if not lats or not lngs:
+                logging.error("No valid coordinates found in observations")
+                return None
+
+            # Set center to the average of coordinates
+            center_lat = sum(lats) / len(lats)
+            center_lng = sum(lngs) / len(lngs)
+            center = staticmaps.create_latlng(center_lat, center_lng)
+
+            # Calculate zoom based on coordinate spread
+            lat_spread = max(lats) - min(lats)
+            lng_spread = max(lngs) - min(lngs)
+            max_spread = max(lat_spread, lng_spread)
+            zoom = min(15, max(1, int(-1.5 * math.log2(max_spread))))
+
+            context.set_center(center)
+            context.set_zoom(zoom)
 
             # Render the map
             image = context.render_pillow(800, 600)
