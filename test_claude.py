@@ -17,7 +17,7 @@ def test_claude():
         # Simple test message
         print("Sending test message to Claude...")
         message = client.messages.create(
-            model="claude-3-opus-20240229",
+            model="claude-3-sonnet-20240229",
             max_tokens=1000,
             messages=[{
                 "role": "user",
