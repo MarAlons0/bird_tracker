@@ -382,10 +382,10 @@ Observations:
                         lats.append(lat)
                         lngs.append(lng)
                         location = staticmaps.create_latlng(lat, lng)
-                        marker = CircleMarker(
+                        marker = staticmaps.Marker(
                             location,
-                            'red',  # color
-                            5      # size
+                            color=staticmaps.RED,
+                            size=5
                         )
                         context.add_object(marker)
                 except Exception as e:
