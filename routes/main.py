@@ -120,9 +120,12 @@ def chat():
         if not message:
             return jsonify({'error': 'No message provided'}), 400
         
+        logger.info(f"Processing chat message: {message}")
         response = current_app.tracker.chat_with_ai(message)
+        logger.info(f"Chat response received: {response[:100] if response else 'None'}")
         
         if not response:
+            logger.warning("No response generated from chat_with_ai")
             return jsonify({
                 'error': 'No response generated',
                 'response': 'Sorry, I was unable to process your question.'
@@ -130,7 +133,10 @@ def chat():
         
         return jsonify({'response': response})
     except Exception as e:
-        logger.error(f"Error in chat: {e}")
+        logger.error(f"Error in chat: {str(e)}")
+        logger.error(f"Error type: {type(e)}")
+        import traceback
+        logger.error(f"Stack trace: {traceback.format_exc()}")
         return jsonify({
             'error': str(e),
             'response': 'Sorry, there was an error processing your request.'

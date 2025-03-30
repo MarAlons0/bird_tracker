@@ -130,7 +130,10 @@
 
     async function loadAnalysis() {
         try {
-            document.getElementById('analysisContent').innerHTML = `
+            const analysisContent = document.getElementById('analysisContent');
+            
+            // Show loading state
+            analysisContent.innerHTML = `
                 <div class="alert alert-info">
                     <div class="spinner-border spinner-border-sm" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -143,11 +146,12 @@
                 </div>`;
             
             // First get basic stats
+            console.log('Fetching basic analysis...');
             const basicResponse = await fetch('/api/analysis/basic');
             const basicData = await basicResponse.json();
             
             // Show basic stats while waiting for AI
-            document.getElementById('analysisContent').innerHTML = basicData.analysis;
+            analysisContent.innerHTML = basicData.analysis;
             
             // Then get AI analysis
             console.log('Fetching AI analysis...');
@@ -169,7 +173,7 @@
                 throw new Error('No analysis content received');
             }
             
-            const analysisContent = document.getElementById('analysisContent');
+            // Update the content with the AI analysis
             analysisContent.innerHTML = data.analysis;
             console.log('Analysis displayed successfully');
         } catch (error) {
