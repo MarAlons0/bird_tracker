@@ -428,7 +428,7 @@ Observations:
             msg['To'] = self.email_config['recipient']
             
             # Read and encode the banner image
-            banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'banner.png')
+            banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
             try:
                 with open(banner_path, 'rb') as f:
                     banner_data = f.read()
@@ -471,7 +471,7 @@ Observations:
                 </head>
                 <body>
                     <div class="banner-container">
-                        {"<img src='data:image/png;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
+                        {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
                         <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
                     </div>
                     <div class="content">
