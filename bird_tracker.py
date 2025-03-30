@@ -21,6 +21,8 @@ from anthropic import Anthropic
 import json
 import time
 import random
+import tempfile
+import staticmaps
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -360,38 +362,34 @@ Observations:
             logging.error(f"Error sending daily report: {str(e)}")
             
     def create_static_map(self, observations):
-        """Create a static map with observation markers"""
+        """Create a static map with markers for bird observations."""
         try:
-            # Create a map centered on the active location
-            m = StaticMap(300, 300, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
-            
-            # Add markers for each observation
+            context = staticmaps.Context()
+            context.set_tile_provider(staticmaps.tile_provider_OSM)
+
             for obs in observations:
                 try:
-                    lat = float(obs.get('lat'))
-                    lng = float(obs.get('lng'))
-                    if -90 <= lat <= 90 and -180 <= lng <= 180:
-                        marker = CircleMarker(
-                            (lng, lat),
-                            'red',  # color
-                            5,      # radius
-                            stroke_width=1,
-                            stroke_color='white'
-                        )
-                        m.add_marker(marker)
-                except (ValueError, TypeError) as e:
+                    lat = float(obs['latitude'])
+                    lng = float(obs['longitude'])
+                    location = staticmaps.create_latlng(lat, lng)
+                    marker = CircleMarker(
+                        location,
+                        'red',  # color
+                        5      # size
+                    )
+                    context.add_object(marker)
+                except Exception as e:
                     logging.warning(f"Error adding marker for observation: {str(e)}")
                     continue
-            
+
             # Render the map
-            image = m.render()
+            image = context.render_pillow(800, 600)
             
-            # Convert to base64
-            buffered = io.BytesIO()
-            image.save(buffered, format="PNG")
-            logging.info("Map successfully created and encoded")
-            return base64.b64encode(buffered.getvalue()).decode()
-            
+            # Save to a temporary file
+            temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+            image.save(temp_file.name)
+            return temp_file.name
+
         except Exception as e:
             logging.error(f"Error creating map: {str(e)}")
             return None
