@@ -1,1 +1,2 @@
-web: gunicorn wsgi:app --timeout 60 
+web: gunicorn app:app
+scheduler: python send_report.py 
