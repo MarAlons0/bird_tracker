@@ -152,17 +152,16 @@ class BirdSightingTracker:
     def get_recent_observations(self):
         """Get recent bird observations from eBird API."""
         try:
-            # Get the active location
-            active_location = self.get_current_location()
-            if not active_location:
+            # Use active_location directly instead of get_current_location
+            if not self.active_location:
                 logging.error("No active location found")
                 return []
 
             # Construct the API request
             endpoint = f"{self.base_url}/data/obs/geo/recent"
             params = {
-                'lat': active_location['latitude'],
-                'lng': active_location['longitude'],
+                'lat': self.active_location['latitude'],
+                'lng': self.active_location['longitude'],
                 'dist': 50,  # 50km radius
                 'back': 7,   # Last 7 days
                 'maxResults': 100
@@ -170,6 +169,7 @@ class BirdSightingTracker:
             headers = {'X-eBirdApiToken': self.api_key}
 
             logging.info(f"Making eBird API request to {endpoint}")
+            logging.info(f"Using coordinates: {self.active_location['latitude']}, {self.active_location['longitude']}")
             logging.info(f"API Key present: {'Yes' if self.api_key else 'No'}")
             if self.api_key:
                 logging.info(f"API Key starts with: {self.api_key[:8]}...")
@@ -578,6 +578,11 @@ Observations:
                 self.config.write(f)
             
             logging.info(f"Location updated to {name} ({latitude}, {longitude}) with radius {radius} miles")
+            logging.info(f"Active location is now: {self.active_location}")
+            
+            # Force a refresh of observations for the new location
+            self.get_recent_observations()
+            
             return True
             
         except Exception as e:
