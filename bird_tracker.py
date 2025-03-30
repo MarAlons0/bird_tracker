@@ -302,20 +302,16 @@ Observations:
             return self._generate_basic_analysis()
     
     def start_daily_reports(self):
-        """Start the scheduler for daily reports"""
+        """Start the scheduler for weekly reports"""
         try:
             scheduler = BackgroundScheduler()
             
-            # Get schedule from config
-            hour = self.config['email_schedule'].get('hour', '7')
-            minute = self.config['email_schedule'].get('minute', '0')
-            
-            # Add the job
+            # Schedule for every Friday at 12:00 GMT
             scheduler.add_job(
                 func=self.send_daily_report,
-                trigger=CronTrigger(hour=hour, minute=minute),
-                id='daily_report',
-                name='Send daily bird report',
+                trigger=CronTrigger(day_of_week='fri', hour='12', minute='0', timezone='GMT'),
+                id='weekly_report',
+                name='Send weekly bird report',
                 replace_existing=True
             )
             
@@ -325,7 +321,7 @@ Observations:
             
             # Start the scheduler
             scheduler.start()
-            logging.info(f"Scheduler started. Daily report scheduled for {hour}:{minute}")
+            logging.info("Scheduler started. Weekly report scheduled for Fridays at 12:00 GMT")
             return scheduler
             
         except Exception as e:
@@ -431,13 +427,63 @@ Observations:
             msg['From'] = self.email_config['sender_email']
             msg['To'] = self.email_config['recipient']
             
-            # Add analysis text
-            msg.attach(MIMEText(analysis, 'html'))
+            # Read and encode the banner image
+            banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'banner.png')
+            try:
+                with open(banner_path, 'rb') as f:
+                    banner_data = f.read()
+                banner_base64 = base64.b64encode(banner_data).decode('utf-8')
+            except Exception as e:
+                logging.error(f"Error reading banner image: {str(e)}")
+                banner_base64 = None
             
-            # Add map if available
-            if map_image:
-                map_part = MIMEText(f'<img src="data:image/png;base64,{map_image}">', 'html')
-                msg.attach(map_part)
+            # Create HTML content with banner and header
+            html_content = f"""
+            <html>
+                <head>
+                    <style>
+                        .banner-container {{
+                            position: relative;
+                            width: 100%;
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }}
+                        .banner-image {{
+                            width: 100%;
+                            height: auto;
+                        }}
+                        .header-text {{
+                            position: absolute;
+                            left: 20px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: white;
+                            font-size: 24px;
+                            font-weight: bold;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                        }}
+                        .content {{
+                            padding: 20px;
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="banner-container">
+                        {"<img src='data:image/png;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
+                        <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
+                    </div>
+                    <div class="content">
+                        {analysis}
+                        {"<br><br><h3>Observation Map</h3><img src='data:image/png;base64,{}' alt='Bird Observations Map'>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
+                    </div>
+                </body>
+            </html>
+            """
+            
+            # Attach the HTML content
+            msg.attach(MIMEText(html_content, 'html'))
             
             # Send email
             with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
