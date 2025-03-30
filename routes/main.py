@@ -92,7 +92,7 @@ def ai_analysis():
             })
         
         # Get AI analysis from the tracker
-        analysis = current_app.tracker.generate_ai_analysis(observations)
+        analysis = current_app.tracker.generate_ai_analysis()
         
         if not analysis:
             return jsonify({
