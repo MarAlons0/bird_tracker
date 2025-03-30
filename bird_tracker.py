@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 import httpx
 from anthropic import Anthropic
 import json
+import time
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -74,8 +75,8 @@ class BirdSightingTracker:
             
         # If no config file, use environment variables
         logger.info("Config file not found, using environment variables")
-        config.add_section('locations')
-        config.add_section('email_schedule')
+            config.add_section('locations')
+            config.add_section('email_schedule')
         
         # Get values from environment with defaults
         config['locations']['active_location'] = os.getenv('DEFAULT_LOCATION', 'cincinnati')
@@ -91,7 +92,7 @@ class BirdSightingTracker:
         config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
         
         logger.info("Created config from environment variables")
-        return config
+            return config
     
     def _get_active_location(self):
         """Get location from environment or use default"""
@@ -169,7 +170,7 @@ class BirdSightingTracker:
             response = requests.get(endpoint, params=params, headers=headers)
             logging.info(f"API Response Status Code: {response.status_code}")
             logging.info(f"API Response Headers: {dict(response.headers)}")
-
+            
             if response.status_code == 200:
                 observations = response.json()
                 logging.info(f"Number of observations retrieved: {len(observations)}")
@@ -199,15 +200,20 @@ class BirdSightingTracker:
             location_name = self.active_location['name']
             location_radius = self.active_location['radius']
             
+            # Try up to 3 times with exponential backoff
+            max_retries = 3
+            base_delay = 1
+            
+            for attempt in range(max_retries):
             try:
                 response = self.claude.messages.create(
                     model="claude-3-opus-20240229",
-                    max_tokens=1000,
-                    temperature=0.7,
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
+                        max_tokens=1000,
+                        temperature=0.7,
+                        messages=[
+                            {
+                        "role": "user",
+                                "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
 
 1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
 2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts in this geographic area.
@@ -216,34 +222,51 @@ class BirdSightingTracker:
 
 Observations:
 {observations_text}"""
-                        }
-                    ]
-                )
-                logging.info("Successfully received response from Claude API")
-                logging.debug(f"Raw response: {response}")
-                
-                analysis = response.content[0].text
-                if not analysis or len(analysis.strip()) < 50:
-                    logging.warning("Received empty or very short analysis from Claude API")
+                            }
+                        ]
+                    )
+                    logging.info("Successfully received response from Claude API")
+                    logging.debug(f"Raw response: {response}")
+                    
+                    analysis = response.content[0].text
+                    if not analysis or len(analysis.strip()) < 50:
+                        logging.warning("Received empty or very short analysis from Claude API")
+                        return self._generate_basic_analysis()
+                    
+                    return self._format_ai_analysis(analysis)
+                    
+                except anthropic.NotFoundError as e:
+                    logging.error(f"Model not found: {str(e)}")
                     return self._generate_basic_analysis()
-                
-                return self._format_ai_analysis(analysis)
-                
-            except anthropic.NotFoundError as e:
-                logging.error(f"Model not found: {str(e)}")
-                return self._generate_basic_analysis()
-            except anthropic.AuthenticationError as e:
-                logging.error(f"Authentication error: {str(e)}")
-                return self._generate_basic_analysis()
-            except anthropic.RateLimitError as e:
-                logging.error(f"Rate limit exceeded: {str(e)}")
-                return self._generate_basic_analysis()
-            except anthropic.APIError as e:
-                logging.error(f"API error: {str(e)}")
-                return self._generate_basic_analysis()
-            except Exception as e:
-                logging.error(f"Error calling Claude API: {str(e)}")
-                return self._generate_basic_analysis()
+                except anthropic.AuthenticationError as e:
+                    logging.error(f"Authentication error: {str(e)}")
+                    return self._generate_basic_analysis()
+                except anthropic.RateLimitError as e:
+                    logging.error(f"Rate limit exceeded: {str(e)}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)  # Exponential backoff
+                        logging.info(f"Retrying in {delay} seconds...")
+                        time.sleep(delay)
+                        continue
+                    return self._generate_basic_analysis()
+                except anthropic.APIError as e:
+                    logging.error(f"API error: {str(e)}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)  # Exponential backoff
+                        logging.info(f"Retrying in {delay} seconds...")
+                        time.sleep(delay)
+                        continue
+                    return self._generate_basic_analysis()
+                except Exception as e:
+                    logging.error(f"Error calling Claude API: {str(e)}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)  # Exponential backoff
+                        logging.info(f"Retrying in {delay} seconds...")
+                        time.sleep(delay)
+                        continue
+                    return self._generate_basic_analysis()
+            
+            return self._generate_basic_analysis()
                 
         except Exception as e:
             logging.error(f"Error in analyze_observations: {str(e)}")
@@ -319,14 +342,14 @@ Observations:
                 <h3>Birds of Prey</h3>
                 <ul>
                     {''.join(f'<li>{obs["comName"]}</li>' for obs in birds_of_prey)}
-                </ul>
+            </ul>
                 
                 <h3>Unusual Sightings</h3>
-                <ul>
+            <ul>
                     {''.join(f'<li>{species}</li>' for species in unusual_species)}
-                </ul>
-            </div>
-            """
+            </ul>
+        </div>
+        """
             return html
         except Exception as e:
             logging.error(f"Error in basic analysis: {str(e)}")
@@ -735,8 +758,8 @@ Observations:
                 if not line:
                     continue
                     
-                # Check if this is a new numbered section
-                if line.startswith(('1.', '2.', '3.', '4.')):
+                # Check if this is a new section
+                if line.startswith(('Overview:', '1.', '2.', '3.', '4.')):
                     if current_section:
                         sections.append('\n'.join(current_section))
                     current_section = [line]
@@ -767,10 +790,10 @@ Observations:
                         bullets = [f'<li class="mb-2">{line.strip("- ")}</li>' 
                                  for line in paragraph.split('\n') 
                                  if line.strip().startswith('-')]
-                        if bullets:
+            if bullets:
                             formatted_paragraphs.append(
                                 '<ul class="list-group list-group-flush mb-4">\n' + 
-                                '\n'.join(bullets) + 
+                               '\n'.join(bullets) + 
                                 '\n</ul>'
                             )
                     else:
@@ -785,8 +808,14 @@ Observations:
                     first_paragraph = formatted_paragraphs[0]
                     if first_paragraph.startswith('<p class="mb-3">') and first_paragraph.endswith('</p>'):
                         section_title = first_paragraph[15:-4].strip()  # Remove <p> tags
-                        if section_title.startswith(('1.', '2.', '3.', '4.')):
-                            formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_title}</h3>')
+                        if section_title.startswith(('Overview:', '1.', '2.', '3.')):
+                            # Remove numbering from Overview section
+                            if section_title.startswith('Overview:'):
+                                formatted_sections.append(f'<h3 class="mt-4 mb-3">Overview</h3>')
+                            else:
+                                # Adjust numbering for other sections
+                                section_number = int(section_title[0]) - 1 if section_title.startswith('1.') else int(section_title[0])
+                                formatted_sections.append(f'<h3 class="mt-4 mb-3">{section_number}. {section_title[2:].strip()}</h3>')
                             formatted_sections.extend(formatted_paragraphs[1:])
                         else:
                             formatted_sections.extend(formatted_paragraphs)
@@ -809,7 +838,15 @@ Observations:
         if not observations:
             return "No observations available"
         
-        formatted = []
+        # Add field explanations at the top
+        formatted = ["Field Explanations:"]
+        formatted.append("- Count: Number of birds reported by observer")
+        formatted.append("- Date: Date and time in YYYY-MM-DD HH:MM format")
+        formatted.append("- locName: Location name where the observation was made")
+        formatted.append("- lat: Latitude coordinate of the observation location")
+        formatted.append("- lng: Longitude coordinate of the observation location")
+        formatted.append("\nObservations:")
+        
         for obs in observations:
             try:
                 # Safely get values with defaults
@@ -817,8 +854,16 @@ Observations:
                 sci_name = obs.get('sciName', 'Unknown Scientific Name')
                 count = obs.get('howMany', 1)
                 date = obs.get('obsDt', 'Unknown Date')
+                loc_name = obs.get('locName', 'Unknown Location')
+                lat = obs.get('lat', 'Unknown')
+                lng = obs.get('lng', 'Unknown')
                 
-                formatted.append(f"- {com_name} ({sci_name}) - Count: {count} - Date: {date}")
+                formatted.append(f"- {com_name} ({sci_name})")
+                formatted.append(f"  Count: {count}")
+                formatted.append(f"  Date: {date}")
+                formatted.append(f"  Location: {loc_name}")
+                formatted.append(f"  Coordinates: {lat}, {lng}")
+                formatted.append("")  # Add blank line between observations
             except Exception as e:
                 logger.error(f"Error formatting observation: {e}")
                 continue
