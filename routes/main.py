@@ -106,6 +106,7 @@ def ai_analysis():
         return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Error in AI analysis: {e}")
+        # Don't return 503 status code, just return error message
         return jsonify({
             'analysis': '<div class="alert alert-danger">Error generating AI analysis. Please try again later.</div>'
         })
@@ -133,4 +134,31 @@ def chat():
         return jsonify({
             'error': str(e),
             'response': 'Sorry, there was an error processing your request.'
-        }), 500 
+        }), 500
+
+@bp.route('/api/location', methods=['POST'])
+@login_required
+def update_location():
+    try:
+        name = request.form.get('name')
+        lat = float(request.form.get('lat'))
+        lng = float(request.form.get('lng'))
+        radius = int(request.form.get('radius'))
+        
+        # Validate inputs
+        if not all([name, lat, lng, radius]):
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+            return jsonify({"error": "Invalid coordinates"}), 400
+        
+        if not (1 <= radius <= 50):
+            return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
+
+        # Update tracker location
+        current_app.tracker.set_location(name, lat, lng, radius)
+        return jsonify({"success": True})
+
+    except Exception as e:
+        logger.error(f"Error updating location: {str(e)}")
+        return jsonify({"error": str(e)}), 500 

@@ -546,4 +546,40 @@ Observations:
             
         except Exception as e:
             logging.error(f"Error formatting observations: {str(e)}")
-            return "Error formatting observations for analysis." 
+            return "Error formatting observations for analysis."
+
+    def set_location(self, name, latitude, longitude, radius):
+        """Update the active location"""
+        try:
+            # Update the active location
+            self.active_location = {
+                'name': name,
+                'latitude': float(latitude),
+                'longitude': float(longitude),
+                'radius': float(radius)
+            }
+            
+            # Update the config file
+            section_name = f"location_{name.lower().replace(' ', '_')}"
+            if not self.config.has_section(section_name):
+                self.config.add_section(section_name)
+            
+            self.config[section_name]['name'] = name
+            self.config[section_name]['latitude'] = str(latitude)
+            self.config[section_name]['longitude'] = str(longitude)
+            self.config[section_name]['radius'] = str(radius)
+            
+            # Update the active location in the locations section
+            self.config['locations']['active_location'] = name.lower().replace(' ', '_')
+            
+            # Save the config file
+            config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+            with open(config_path, 'w') as f:
+                self.config.write(f)
+            
+            logging.info(f"Location updated to {name} ({latitude}, {longitude}) with radius {radius} miles")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error updating location: {str(e)}")
+            return False 
