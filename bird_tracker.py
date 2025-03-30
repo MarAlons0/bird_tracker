@@ -373,8 +373,8 @@ Observations:
                     if -90 <= lat <= 90 and -180 <= lng <= 180:
                         marker = CircleMarker(
                             (lng, lat),
-                            fill='red',
-                            radius=5,
+                            'red',  # color
+                            5,      # radius
                             stroke_width=1,
                             stroke_color='white'
                         )
