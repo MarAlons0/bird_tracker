@@ -551,7 +551,7 @@ Observations:
             # Get recent observations
             observations = self.get_recent_observations()
             if not observations:
-                return "No recent observations found."
+                return '<div class="alert alert-info">No recent observations found.</div>'
             
             # Format observations for analysis
             formatted_observations = self.format_observations_for_analysis(observations)
@@ -569,7 +569,7 @@ Here are the observations:
 
 {formatted_observations}
 
-Please provide a well-structured analysis that would be helpful for both casual birders and experienced ornithologists."""
+Please provide a well-structured analysis that would be helpful for both casual birders and experienced ornithologists. Format your response in HTML with appropriate tags for better readability."""
 
             # Generate analysis using Claude
             max_retries = 3
@@ -589,16 +589,45 @@ Please provide a well-structured analysis that would be helpful for both casual 
                     
                     # Extract the analysis from the response
                     analysis = response.content[0].text
+                    
+                    # Ensure the analysis is properly formatted HTML
+                    if not analysis.strip().startswith('<'):
+                        analysis = f'<div class="analysis-content">{analysis}</div>'
+                    
                     return analysis
                     
-                except Exception as e:
+                except anthropic.NotFoundError as e:
+                    logger.error(f"Model not found: {str(e)}")
+                    return self._generate_basic_analysis()
+                except anthropic.AuthenticationError as e:
+                    logger.error(f"Authentication error: {str(e)}")
+                    return self._generate_basic_analysis()
+                except anthropic.RateLimitError as e:
+                    logger.error(f"Rate limit exceeded: {str(e)}")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
-                        logger.warning(f"Attempt {attempt + 1} failed: {str(e)}. Retrying in {delay:.1f} seconds...")
+                        logger.warning(f"Rate limit hit, retrying in {delay:.1f} seconds...")
                         time.sleep(delay)
-                    else:
-                        logger.error(f"All {max_retries} attempts failed. Last error: {str(e)}")
-                        return self._generate_basic_analysis()
+                        continue
+                    return self._generate_basic_analysis()
+                except anthropic.APIError as e:
+                    logger.error(f"API error: {str(e)}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                        logger.warning(f"API error, retrying in {delay:.1f} seconds...")
+                        time.sleep(delay)
+                        continue
+                    return self._generate_basic_analysis()
+                except Exception as e:
+                    logger.error(f"Error calling Claude API: {str(e)}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                        logger.warning(f"Unexpected error, retrying in {delay:.1f} seconds...")
+                        time.sleep(delay)
+                        continue
+                    return self._generate_basic_analysis()
+            
+            return self._generate_basic_analysis()
             
         except Exception as e:
             logger.error(f"Error in AI analysis: {str(e)}")
@@ -643,4 +672,57 @@ Please provide a well-structured analysis that would be helpful for both casual 
             
         except Exception as e:
             logging.error(f"Error updating location: {str(e)}")
-            return False 
+            return False
+
+    def chat_with_ai(self, message):
+        """Handle chat interactions with Claude"""
+        try:
+            # Get recent observations for context
+            observations = self.get_recent_observations()
+            if not observations:
+                return "I don't have any recent bird observations to analyze. Please try again later."
+            
+            # Format observations for context
+            formatted_observations = self.format_observations_for_analysis(observations)
+            
+            # Prepare the prompt for Claude
+            prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations from {self.active_location['name']} (within a {self.active_location['radius']}-mile radius).
+
+Recent observations:
+{formatted_observations}
+
+User question: {message}
+
+Please provide a helpful response based on the recent observations and your expertise. If the question is about specific species or behaviors not mentioned in the observations, you can still provide general information about those topics."""
+
+            # Generate response using Claude
+            max_retries = 3
+            base_delay = 2
+            
+            for attempt in range(max_retries):
+                try:
+                    response = self.claude.messages.create(
+                        model="claude-3-sonnet-20240229",
+                        max_tokens=1000,
+                        temperature=0.7,
+                        messages=[{
+                            "role": "user",
+                            "content": prompt
+                        }]
+                    )
+                    
+                    # Extract the response
+                    return response.content[0].text
+                    
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                        logger.warning(f"Attempt {attempt + 1} failed: {str(e)}. Retrying in {delay:.1f} seconds...")
+                        time.sleep(delay)
+                    else:
+                        logger.error(f"All {max_retries} attempts failed. Last error: {str(e)}")
+                        return "I apologize, but I encountered an error while processing your question. Please try again later."
+            
+        except Exception as e:
+            logger.error(f"Error in chat_with_ai: {str(e)}")
+            return "I apologize, but I encountered an error while processing your question. Please try again later." 
