@@ -362,50 +362,31 @@ Observations:
     def create_static_map(self, observations):
         """Create a static map with observation markers"""
         try:
-            logging.info(f"Creating static map with {len(observations)} observations")
-            
-            # Create map centered on active location
-            map_size = (800, 600)
-            center_lat = self.active_location['latitude']
-            center_lon = self.active_location['longitude']
-            
-            # Log the center coordinates
-            logging.info(f"Map center: {center_lat}, {center_lon}")
-            
-            # Create the map with a more detailed tile source
-            m = StaticMap(
-                *map_size,
-                url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                zoom=10  # Set a default zoom level
-            )
+            # Create a map centered on the active location
+            m = StaticMap(300, 300, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
             
             # Add markers for each observation
-            for i, obs in enumerate(observations):
+            for obs in observations:
                 try:
                     lat = float(obs.get('lat'))
                     lng = float(obs.get('lng'))
-                    
-                    # Log each observation's coordinates
-                    logging.info(f"Adding marker {i+1}: {lat}, {lng} for {obs.get('comName', 'Unknown species')}")
-                    
-                    # Create a marker with a distinct color
-                    marker = CircleMarker(
-                        (lng, lat),
-                        'red',
-                        6,
-                        outline_color='white',
-                        outline_width=2
-                    )
-                    m.add_marker(marker)
+                    if -90 <= lat <= 90 and -180 <= lng <= 180:
+                        marker = CircleMarker(
+                            (lng, lat),
+                            fill='red',
+                            radius=5,
+                            stroke_width=1,
+                            stroke_color='white'
+                        )
+                        m.add_marker(marker)
                 except (ValueError, TypeError) as e:
-                    logging.error(f"Error processing observation {i+1}: {str(e)}")
+                    logging.warning(f"Error adding marker for observation: {str(e)}")
                     continue
             
-            # Render map
-            logging.info("Rendering map...")
+            # Render the map
             image = m.render()
             
-            # Convert to base64 for email
+            # Convert to base64
             buffered = io.BytesIO()
             image.save(buffered, format="PNG")
             logging.info("Map successfully created and encoded")
@@ -559,11 +540,10 @@ Observations:
             # Prepare the prompt for Claude
             prompt = f"""You are an expert ornithologist and birding guide. Please analyze these recent bird observations and provide a detailed report that includes:
 
-1. A summary of the total number of species and individuals observed
-2. Notable species or unusual sightings
-3. Patterns in bird distribution and behavior
-4. Any interesting ecological observations
-5. Recommendations for birders in this area
+1. A general summary of the observations
+2. Notable species or unexpected sightings based on location and time of year
+3. A recount of birds of prey observed
+4. Recommendations for birders in this area
 
 Here are the observations:
 
@@ -725,4 +705,21 @@ Please provide a helpful response based on the recent observations and your expe
             
         except Exception as e:
             logger.error(f"Error in chat_with_ai: {str(e)}")
-            return "I apologize, but I encountered an error while processing your question. Please try again later." 
+            return "I apologize, but I encountered an error while processing your question. Please try again later."
+
+    def _format_ai_analysis(self, analysis):
+        """Format the AI analysis into HTML"""
+        try:
+            # If the analysis is already HTML, return it
+            if analysis.strip().startswith('<'):
+                return analysis
+            
+            # Otherwise, wrap it in HTML tags
+            return f"""
+            <div class="analysis-content">
+                {analysis.replace('\n', '<br>')}
+            </div>
+            """
+        except Exception as e:
+            logging.error(f"Error formatting analysis: {str(e)}")
+            return f"<div class='alert alert-danger'>Error formatting analysis: {str(e)}</div>" 
