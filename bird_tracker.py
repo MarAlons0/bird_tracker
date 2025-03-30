@@ -508,21 +508,21 @@ Observations:
         """Format observations for AI analysis"""
         try:
             if not observations:
-                return "No observations found in the past week."
-                
-            formatted_text = []
+                return "No recent observations found."
+            
+            formatted_observations = []
             for obs in observations:
-                # Format date
-                obs_date = datetime.strptime(obs['obsDt'], '%Y-%m-%d %H:%M')
+                # Format the date
+                obs_date = datetime.strptime(obs.get('obsDt', ''), '%Y-%m-%d %H:%M')
                 date_str = obs_date.strftime('%B %d, %Y at %I:%M %p')
                 
                 # Get location details
-                location = f"{obs.get('locName', 'Unknown location')} ({obs.get('lat', '?')}°N, {obs.get('lng', '?')}°W)"
+                lat = obs.get('lat', 'N/A')
+                lng = obs.get('lng', 'N/A')
+                location = f"{lat}, {lng}"
                 
-                # Format count
-                count = obs.get('howMany', 'Unknown number of')
-                
-                # Format observation details
+                # Get count and details
+                count = obs.get('howMany', 1)
                 details = []
                 if obs.get('behavior'):
                     details.append(f"Behavior: {obs['behavior']}")
@@ -530,23 +530,79 @@ Observations:
                     details.append(f"Age: {obs['age']}")
                 if obs.get('sex'):
                     details.append(f"Sex: {obs['sex']}")
-                details_str = "; ".join(details) if details else "No additional details"
                 
-                # Combine all information
-                entry = f"""
-                Species: {obs['comName']} ({obs['sciName']})
-                Date: {date_str}
-                Location: {location}
-                Count: {count}
-                Details: {details_str}
-                """
-                formatted_text.append(entry)
+                # Format the observation
+                obs_str = f"{obs.get('comName', 'Unknown species')} ({count})"
+                if details:
+                    obs_str += f" - {', '.join(details)}"
+                obs_str += f" at {location} on {date_str}"
+                
+                formatted_observations.append(obs_str)
             
-            return "\n\n".join(formatted_text)
+            return "\n".join(formatted_observations)
             
         except Exception as e:
-            logging.error(f"Error formatting observations: {str(e)}")
+            logger.error(f"Error formatting observations: {str(e)}")
             return "Error formatting observations for analysis."
+
+    def generate_ai_analysis(self):
+        """Generate AI analysis of recent bird observations"""
+        try:
+            # Get recent observations
+            observations = self.get_recent_observations()
+            if not observations:
+                return "No recent observations found."
+            
+            # Format observations for analysis
+            formatted_observations = self.format_observations_for_analysis(observations)
+            
+            # Prepare the prompt for Claude
+            prompt = f"""You are an expert ornithologist and birding guide. Please analyze these recent bird observations and provide a detailed report that includes:
+
+1. A summary of the total number of species and individuals observed
+2. Notable species or unusual sightings
+3. Patterns in bird distribution and behavior
+4. Any interesting ecological observations
+5. Recommendations for birders in this area
+
+Here are the observations:
+
+{formatted_observations}
+
+Please provide a well-structured analysis that would be helpful for both casual birders and experienced ornithologists."""
+
+            # Generate analysis using Claude
+            max_retries = 3
+            base_delay = 2  # Base delay in seconds
+            
+            for attempt in range(max_retries):
+                try:
+                    response = self.claude.messages.create(
+                        model="claude-3-sonnet-20240229",
+                        max_tokens=1000,
+                        temperature=0.7,
+                        messages=[{
+                            "role": "user",
+                            "content": prompt
+                        }]
+                    )
+                    
+                    # Extract the analysis from the response
+                    analysis = response.content[0].text
+                    return analysis
+                    
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                        logger.warning(f"Attempt {attempt + 1} failed: {str(e)}. Retrying in {delay:.1f} seconds...")
+                        time.sleep(delay)
+                    else:
+                        logger.error(f"All {max_retries} attempts failed. Last error: {str(e)}")
+                        return self._generate_basic_analysis()
+            
+        except Exception as e:
+            logger.error(f"Error in AI analysis: {str(e)}")
+            return self._generate_basic_analysis()
 
     def set_location(self, name, latitude, longitude, radius):
         """Update the active location"""
