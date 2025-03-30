@@ -283,4 +283,224 @@ Observations:
                 
         except Exception as e:
             logging.error(f"Error in analyze_observations: {str(e)}")
-            return self._generate_basic_analysis() 
+            return self._generate_basic_analysis()
+    
+    def start_daily_reports(self):
+        """Start the scheduler for daily reports"""
+        try:
+            scheduler = BackgroundScheduler()
+            
+            # Get schedule from config
+            hour = self.config['email_schedule'].get('hour', '7')
+            minute = self.config['email_schedule'].get('minute', '0')
+            
+            # Add the job
+            scheduler.add_job(
+                func=self.send_daily_report,
+                trigger=CronTrigger(hour=hour, minute=minute),
+                id='daily_report',
+                name='Send daily bird report',
+                replace_existing=True
+            )
+            
+            # Add error listeners
+            scheduler.add_listener(self._handle_job_error, EVENT_JOB_ERROR)
+            scheduler.add_listener(self._handle_job_missed, EVENT_JOB_MISSED)
+            
+            # Start the scheduler
+            scheduler.start()
+            logging.info(f"Scheduler started. Daily report scheduled for {hour}:{minute}")
+            return scheduler
+            
+        except Exception as e:
+            logging.error(f"Error starting scheduler: {str(e)}")
+            return None
+            
+    def _handle_job_error(self, event):
+        """Handle job execution errors"""
+        logging.error(f"Error executing job {event.job_id}: {str(event.exception)}")
+        
+    def _handle_job_missed(self, event):
+        """Handle missed job executions"""
+        logging.warning(f"Job {event.job_id} was missed!") 
+    
+    def send_daily_report(self):
+        """Send daily bird sighting report via email"""
+        try:
+            # Get recent observations
+            observations = self.get_recent_observations()
+            if not observations:
+                logging.warning("No observations to report")
+                return
+                
+            # Generate AI analysis
+            analysis = self.analyze_observations()
+            
+            # Create static map
+            map_image = self.create_static_map(observations)
+            
+            # Send email with report
+            self.send_email(analysis, map_image)
+            logging.info("Daily report sent successfully")
+            
+        except Exception as e:
+            logging.error(f"Error sending daily report: {str(e)}")
+            
+    def create_static_map(self, observations):
+        """Create a static map with observation markers"""
+        try:
+            # Create map centered on active location
+            map_size = (800, 600)
+            center_lat = self.active_location['latitude']
+            center_lon = self.active_location['longitude']
+            m = StaticMap(*map_size, url_template='http://a.tile.osm.org/{z}/{x}/{y}.png')
+            
+            # Add markers for each observation
+            for obs in observations:
+                marker = CircleMarker((obs['lng'], obs['lat']), 'red', 6)
+                m.add_marker(marker)
+            
+            # Render map
+            image = m.render()
+            
+            # Convert to base64 for email
+            buffered = io.BytesIO()
+            image.save(buffered, format="PNG")
+            return base64.b64encode(buffered.getvalue()).decode()
+            
+        except Exception as e:
+            logging.error(f"Error creating map: {str(e)}")
+            return None
+            
+    def send_email(self, analysis, map_image=None):
+        """Send email with analysis and optional map"""
+        try:
+            # Create message
+            msg = MIMEMultipart()
+            msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
+            msg['From'] = self.email_config['sender_email']
+            msg['To'] = self.email_config['recipient']
+            
+            # Add analysis text
+            msg.attach(MIMEText(analysis, 'html'))
+            
+            # Add map if available
+            if map_image:
+                map_part = MIMEText(f'<img src="data:image/png;base64,{map_image}">', 'html')
+                msg.attach(map_part)
+            
+            # Send email
+            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['sender_email'], self.email_config['sender_password'])
+                server.send_message(msg)
+                
+            logging.info("Email sent successfully")
+            
+        except Exception as e:
+            logging.error(f"Error sending email: {str(e)}")
+            
+    def _generate_basic_analysis(self):
+        """Generate a basic analysis when AI analysis fails"""
+        try:
+            observations = self.get_recent_observations()
+            if not observations:
+                return "<div class='alert alert-warning'>No observations found in the past week.</div>"
+                
+            # Count total observations and birds
+            total_observations = len(observations)
+            total_birds = sum(obs.get('howMany', 1) for obs in observations)
+            
+            # Count unique species
+            species = set(obs['speciesCode'] for obs in observations)
+            species_count = len(species)
+            
+            # Find most common species
+            species_counts = defaultdict(int)
+            for obs in observations:
+                species_counts[obs['comName']] += obs.get('howMany', 1)
+            common_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+            
+            # Count birds of prey
+            raptors = [obs for obs in observations if any(term in obs.get('sciName', '').lower() 
+                      for term in ['buteo', 'accipiter', 'falco', 'aquila', 'haliaeetus'])]
+            
+            # Find unusual sightings (single observations of species)
+            unusual = [obs['comName'] for obs in observations 
+                      if list(obs['comName'] for obs in observations).count(obs['comName']) == 1]
+            
+            # Format the analysis as HTML
+            analysis = f"""
+            <h3>Bird Sighting Report for {self.active_location['name']}</h3>
+            <p>In the past week:</p>
+            <ul>
+                <li>Total observations: {total_observations}</li>
+                <li>Total birds counted: {total_birds}</li>
+                <li>Unique species: {species_count}</li>
+            </ul>
+            
+            <h4>Most Common Species:</h4>
+            <ul>
+                {"".join(f"<li>{name}: {count}</li>" for name, count in common_species)}
+            </ul>
+            
+            <h4>Birds of Prey:</h4>
+            <ul>
+                {"".join(f"<li>{obs['comName']}</li>" for obs in raptors) if raptors else "<li>No raptors observed</li>"}
+            </ul>
+            
+            <h4>Unusual Sightings:</h4>
+            <ul>
+                {"".join(f"<li>{name}</li>" for name in unusual) if unusual else "<li>No unusual sightings</li>"}
+            </ul>
+            """
+            
+            return analysis
+            
+        except Exception as e:
+            logging.error(f"Error generating basic analysis: {str(e)}")
+            return "<div class='alert alert-danger'>Error generating analysis.</div>"
+
+    def format_observations_for_analysis(self, observations):
+        """Format observations for AI analysis"""
+        try:
+            if not observations:
+                return "No observations found in the past week."
+                
+            formatted_text = []
+            for obs in observations:
+                # Format date
+                obs_date = datetime.strptime(obs['obsDt'], '%Y-%m-%d %H:%M')
+                date_str = obs_date.strftime('%B %d, %Y at %I:%M %p')
+                
+                # Get location details
+                location = f"{obs.get('locName', 'Unknown location')} ({obs.get('lat', '?')}°N, {obs.get('lng', '?')}°W)"
+                
+                # Format count
+                count = obs.get('howMany', 'Unknown number of')
+                
+                # Format observation details
+                details = []
+                if obs.get('behavior'):
+                    details.append(f"Behavior: {obs['behavior']}")
+                if obs.get('age'):
+                    details.append(f"Age: {obs['age']}")
+                if obs.get('sex'):
+                    details.append(f"Sex: {obs['sex']}")
+                details_str = "; ".join(details) if details else "No additional details"
+                
+                # Combine all information
+                entry = f"""
+                Species: {obs['comName']} ({obs['sciName']})
+                Date: {date_str}
+                Location: {location}
+                Count: {count}
+                Details: {details_str}
+                """
+                formatted_text.append(entry)
+            
+            return "\n\n".join(formatted_text)
+            
+        except Exception as e:
+            logging.error(f"Error formatting observations: {str(e)}")
+            return "Error formatting observations for analysis." 
