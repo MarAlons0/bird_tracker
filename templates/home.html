@@ -34,7 +34,7 @@
         <div class="carousel-inner">
             {% for image in carousel_images %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
-                <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" 
+                <img src="{{ url_for('static', filename='images/birds/' + image.filename) }}" 
                      class="d-block w-100" alt="{{ image.title }}" style="height: 500px; object-fit: cover;">
                 {% if image.title or image.description %}
                 <div class="carousel-caption d-none d-md-block">
