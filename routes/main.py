@@ -187,4 +187,25 @@ def locations():
         return render_template('locations.html', locations=locations)
     except Exception as e:
         logger.error(f"Error in locations route: {e}")
+        return render_template('error.html', error=str(e))
+
+@bp.route('/sightings')
+@login_required
+def sightings():
+    try:
+        # Get recent observations from the tracker
+        observations = current_app.tracker.get_recent_observations()
+        
+        # Get Google Places API key
+        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        if not google_places_key:
+            logger.error("Google Places API key not found!")
+            return render_template('error.html', error="Google Places API key not configured")
+        
+        return render_template('sightings.html',
+                             observations=observations,
+                             location=current_app.tracker.active_location,
+                             google_maps_api_key=google_places_key)
+    except Exception as e:
+        logger.error(f"Error in sightings route: {e}")
         return render_template('error.html', error=str(e)) 

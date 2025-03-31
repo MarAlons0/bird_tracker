@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Recent Sightings - Bird Tracker{% endblock %}
+
+{% block head %}
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .table-responsive {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Recent Bird Sightings</h2>
+    
+    <!-- Map Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Sightings Map</h5>
+            <div id="map"></div>
+        </div>
+    </div>
+    
+    <!-- Observations Table -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Recent Observations</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Species</th>
+                            <th>Count</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obs in observations %}
+                        <tr>
+                            <td>{{ obs.comName }}</td>
+                            <td>{{ obs.howMany }}</td>
+                            <td>{{ obs.locName }}</td>
+                            <td>{{ obs.obsDt }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function initMap() {
+    const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 12,
+        center: { lat: {{ location.latitude }}, lng: {{ location.longitude }} },
+        mapTypeId: 'terrain'
+    });
+
+    // Add markers for each observation
+    {% for obs in observations %}
+    new google.maps.Marker({
+        position: { lat: {{ obs.lat }}, lng: {{ obs.lng }} },
+        map: map,
+        title: '{{ obs.comName }}',
+        label: '{{ obs.howMany }}'
+    });
+    {% endfor %}
+}
+</script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap">
+</script>
+{% endblock %} 
