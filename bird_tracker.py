@@ -353,63 +353,60 @@ Observations:
         except Exception as e:
             logging.error(f"Error sending daily report: {str(e)}")
             
+    def _get_banner_image(self):
+        """Get the banner image as base64 string"""
+        try:
+            banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
+            with open(banner_path, 'rb') as f:
+                banner_data = f.read()
+            return base64.b64encode(banner_data).decode('utf-8')
+        except Exception as e:
+            logging.error(f"Error reading banner image: {str(e)}")
+            return None
+
     def send_email(self, analysis):
-        """Send email with analysis"""
+        """Send email with bird report analysis"""
         try:
             # Get all subscribed users
-            from models import User
-            from app import create_app, db
-            
-            app = create_app()
-            with app.app_context():
+            with create_app().app_context():
                 subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
+                
                 if not subscribed_users:
                     logging.warning("No subscribed users found")
                     return
-                    
+                
                 # Create message
                 msg = MIMEMultipart()
-                msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
+                msg['Subject'] = 'Weekly Bird Report'
                 msg['From'] = self.email_config['sender_email']
-                msg['To'] = self.email_config['sender_email']  # Use BCC for privacy
                 
-                # Read and encode the banner image
-                banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
-                try:
-                    with open(banner_path, 'rb') as f:
-                        banner_data = f.read()
-                    banner_base64 = base64.b64encode(banner_data).decode('utf-8')
-                except Exception as e:
-                    logging.error(f"Error reading banner image: {str(e)}")
-                    banner_base64 = None
+                # Get banner image
+                banner_base64 = self._get_banner_image()
                 
-                # Create HTML content with banner and header
+                # Create HTML content
                 html_content = f"""
                 <html>
                     <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <style>
-                            @media (prefers-color-scheme: dark) {{
-                                body {{
-                                    background-color: #1a1a1a;
-                                    color: #ffffff;
-                                }}
-                                .content {{
-                                    background-color: #1a1a1a;
-                                    color: #ffffff;
-                                }}
+                            body {{
+                                font-family: Arial, sans-serif;
+                                line-height: 1.6;
+                                color: #333;
+                                max-width: 600px;
+                                margin: 0 auto;
+                                padding: 20px;
                             }}
                             .banner-container {{
                                 position: relative;
                                 width: 100%;
-                                max-width: 800px;
-                                margin: 0 auto;
+                                height: 200px;
                                 overflow: hidden;
+                                margin-bottom: 20px;
                             }}
                             .banner-image {{
                                 width: 100%;
-                                height: auto;
-                                display: block;
+                                height: 100%;
+                                object-fit: cover;
                             }}
                             .banner-overlay {{
                                 position: absolute;
@@ -417,82 +414,63 @@ Observations:
                                 left: 0;
                                 right: 0;
                                 bottom: 0;
-                                background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+                                background: rgba(0, 0, 0, 0.5);
                                 display: flex;
                                 align-items: center;
-                                padding: 0 20px;
+                                justify-content: center;
                             }}
                             .header-text {{
                                 color: white;
-                                font-size: 18px;
+                                font-size: 24px;
                                 font-weight: bold;
-                                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                                margin: 0;
-                                line-height: 1.2;
-                            }}
-                            @media (min-width: 768px) {{
-                                .header-text {{
-                                    font-size: 24px;
-                                }}
+                                text-align: center;
                             }}
                             .subheader {{
                                 text-align: center;
                                 color: #666;
-                                font-size: 14px;
-                                margin: 10px 0;
-                                font-style: italic;
-                            }}
-                            @media (prefers-color-scheme: dark) {{
-                                .subheader {{
-                                    color: #999;
-                                }}
+                                margin-bottom: 20px;
                             }}
                             .app-link {{
                                 text-align: center;
-                                margin: 10px 0;
-                                padding: 10px;
-                                background-color: #f8f9fa;
-                                border-radius: 5px;
-                            }}
-                            @media (prefers-color-scheme: dark) {{
-                                .app-link {{
-                                    background-color: #2d2d2d;
-                                }}
+                                margin-bottom: 20px;
                             }}
                             .app-link a {{
-                                color: #007bff;
+                                display: inline-block;
+                                padding: 10px 20px;
+                                background-color: #4CAF50;
+                                color: white;
                                 text-decoration: none;
-                                font-weight: bold;
-                            }}
-                            .app-link a:hover {{
-                                text-decoration: underline;
+                                border-radius: 5px;
                             }}
                             .content {{
+                                background-color: #f9f9f9;
                                 padding: 20px;
-                                max-width: 800px;
-                                margin: 0 auto;
-                                background-color: #ffffff;
+                                border-radius: 5px;
+                                margin-bottom: 20px;
                             }}
                             .footer {{
                                 text-align: center;
-                                margin-top: 20px;
-                                padding-top: 20px;
-                                border-top: 1px solid #eee;
-                                font-size: 12px;
                                 color: #666;
-                            }}
-                            @media (prefers-color-scheme: dark) {{
-                                .footer {{
-                                    border-top-color: #333;
-                                    color: #999;
-                                }}
+                                font-size: 12px;
                             }}
                             .unsubscribe-link {{
-                                color: #dc3545;
+                                color: #666;
                                 text-decoration: none;
                             }}
-                            .unsubscribe-link:hover {{
-                                text-decoration: underline;
+                            @media (prefers-color-scheme: dark) {{
+                                body {{
+                                    background-color: #1a1a1a;
+                                    color: #ffffff;
+                                }}
+                                .content {{
+                                    background-color: #2d2d2d;
+                                }}
+                                .subheader, .footer {{
+                                    color: #999;
+                                }}
+                                .unsubscribe-link {{
+                                    color: #999;
+                                }}
                             }}
                         </style>
                     </head>
