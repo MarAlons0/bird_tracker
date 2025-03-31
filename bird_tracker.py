@@ -414,7 +414,7 @@ Observations:
                     (float(obs['lng']), float(obs['lat'])),
                     color=color,
                     width=2,
-                    radius=5
+                    size=5
                 )
                 m.add_marker(marker)
             
