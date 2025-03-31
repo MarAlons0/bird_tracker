@@ -86,16 +86,6 @@
                                  alt="{{ image.title }}"
                                  style="width: 300px; height: 300px; object-fit: contain;">
                         </div>
-                        {% if image.title or image.description %}
-                        <div class="carousel-caption d-none d-md-block">
-                            {% if image.title %}
-                            <h5>{{ image.title }}</h5>
-                            {% endif %}
-                            {% if image.description %}
-                            <p>{{ image.description }}</p>
-                            {% endif %}
-                        </div>
-                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
