@@ -136,8 +136,8 @@ def request_registration():
                 error="A registration request for this email is already pending.")
         
         # Create new registration request
-        request = RegistrationRequest(email=email, notes=message)
-        db.session.add(request)
+        registration_request = RegistrationRequest(email=email, notes=message)
+        db.session.add(registration_request)
         db.session.commit()
         
         # Send email to admin
