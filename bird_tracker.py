@@ -359,33 +359,34 @@ Observations:
     def create_static_map(self, observations):
         """Create a static map with observation markers"""
         try:
-            # Create a new map centered on the active location
-            center_lat = self.active_location['latitude']
-            center_lon = self.active_location['longitude']
-            
-            # Calculate the spread of observations to determine zoom level
+            # Get the bounds of all observations
             lats = [float(obs['lat']) for obs in observations]
             lons = [float(obs['lng']) for obs in observations]
             
-            lat_spread = max(lats) - min(lats) if lats else 0
-            lon_spread = max(lons) - min(lons) if lons else 0
+            # Calculate center and zoom level
+            center_lat = sum(lats) / len(lats)
+            center_lon = sum(lons) / len(lons)
+            
+            # Calculate spread to determine zoom level
+            lat_spread = max(lats) - min(lats)
+            lon_spread = max(lons) - min(lons)
             max_spread = max(lat_spread, lon_spread)
             
-            # Set zoom level based on spread
-            if max_spread < 0.1:  # Very close observations
-                zoom = 15
-            elif max_spread < 0.5:  # Local area
-                zoom = 13
-            elif max_spread < 1.0:  # Regional area
-                zoom = 11
-            else:  # Larger area
-                zoom = 9
+            # Adjust zoom based on spread
+            if max_spread < 0.1:
+                zoom = 15  # Very close observations
+            elif max_spread < 0.5:
+                zoom = 13  # Local area
+            elif max_spread < 1.0:
+                zoom = 11  # Regional area
+            else:
+                zoom = 9   # Larger area
             
-            # Create the map with a larger size for better quality
-            map = StaticMap(800, 600, padding_x=50, padding_y=50)
+            # Create map with larger size for better quality
+            m = StaticMap(800, 600, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
             
             # Define colors for different bird types
-            colors = {
+            bird_colors = {
                 'raptor': '#FF0000',      # Red for raptors
                 'waterfowl': '#0000FF',   # Blue for waterfowl
                 'songbird': '#00FF00',    # Green for songbirds
@@ -395,41 +396,54 @@ Observations:
             
             # Add markers for each observation
             for obs in observations:
-                # Determine bird type and color
-                bird_type = 'other'
-                sci_name = obs.get('sciName', '').lower()
+                # Determine bird type based on scientific name
+                scientific_name = obs['scientific_name'].lower()
+                if any(raptor in scientific_name for raptor in ['accipiter', 'buteo', 'haliaeetus', 'falco']):
+                    color = bird_colors['raptor']
+                elif any(waterfowl in scientific_name for waterfowl in ['anas', 'branta', 'aix', 'mergus']):
+                    color = bird_colors['waterfowl']
+                elif any(songbird in scientific_name for songbird in ['cardinalis', 'melospiza', 'setophaga', 'passerina']):
+                    color = bird_colors['songbird']
+                elif any(shorebird in scientific_name for shorebird in ['calidris', 'charadrius', 'tringa', 'limosa']):
+                    color = bird_colors['shorebird']
+                else:
+                    color = bird_colors['other']
                 
-                if any(term in sci_name for term in ['buteo', 'accipiter', 'falco', 'aquila', 'haliaeetus']):
-                    bird_type = 'raptor'
-                elif any(term in sci_name for term in ['anas', 'branta', 'aix', 'mergus', 'bucephala']):
-                    bird_type = 'waterfowl'
-                elif any(term in sci_name for term in ['passer', 'cardinalis', 'turdus', 'parus', 'setophaga']):
-                    bird_type = 'songbird'
-                elif any(term in sci_name for term in ['charadrius', 'calidris', 'tringa', 'recurvirostra']):
-                    bird_type = 'shorebird'
-                
-                # Create a marker with the appropriate color
+                # Add marker with color
                 marker = CircleMarker(
-                    (float(obs['lng']), float(obs['lat'])), 
-                    colors[bird_type], 
-                    12,
-                    title=obs.get('comName', 'Unknown species')  # Add tooltip with bird name
+                    (float(obs['lng']), float(obs['lat'])),
+                    color=color,
+                    width=2,
+                    fill=True,
+                    fill_color=color,
+                    fill_opacity=0.7,
+                    radius=5
                 )
-                map.add_marker(marker)
+                m.add_marker(marker)
             
             # Render the map
-            image = map.render()
+            img = m.render(zoom=zoom, center=(center_lon, center_lat))
             
             # Save as JPEG with high quality
-            output_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'observations_map.jpg')
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            image.save(output_path, 'JPEG', quality=95)
+            img.save('static/images/map.jpg', 'JPEG', quality=95)
             
-            return output_path
+            # Create legend HTML
+            legend_html = """
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                <strong>Bird Types:</strong><br>
+                <span style="color: #FF0000;">●</span> Raptors<br>
+                <span style="color: #0000FF;">●</span> Waterfowl<br>
+                <span style="color: #00FF00;">●</span> Songbirds<br>
+                <span style="color: #FFA500;">●</span> Shorebirds<br>
+                <span style="color: #800080;">●</span> Others
+            </div>
+            """
+            
+            return legend_html
             
         except Exception as e:
             logging.error(f"Error creating map: {str(e)}")
-            return None
+            return ""
             
     def send_email(self, analysis, map_image=None):
         """Send email with analysis and optional map"""
