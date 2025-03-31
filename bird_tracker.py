@@ -22,8 +22,6 @@ import time
 import random
 import tempfile
 from math import cos, sin
-from app import create_app
-from models import User
 
 # Setup logging
 logger = logging.getLogger(__name__)
