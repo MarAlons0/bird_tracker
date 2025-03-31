@@ -18,4 +18,5 @@ flask-login==0.6.3
 flask-sqlalchemy==3.1.1
 flask-mail==0.10.0
 py-staticmaps==0.4.0
-Pillow==9.5.0 
+Pillow==9.5.0
+flask-migrate==4.0.5 
