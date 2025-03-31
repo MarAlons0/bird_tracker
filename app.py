@@ -107,6 +107,9 @@ def create_app():
                     db.session.commit()
                     logger.info(f"Created admin user: {admin_email}")
                 else:
+                    # Only update is_admin status, don't change password
+                    admin.is_admin = True
+                    db.session.commit()
                     logger.info(f"Updated admin user: {admin_email}")
             
             # Create default users if they don't exist
