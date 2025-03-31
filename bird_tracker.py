@@ -9,7 +9,7 @@ import anthropic
 import os
 import folium
 import base64
-from staticmap import StaticMap, CircleMarker
+from staticmap import StaticMap, CircleMarker, Line
 import io
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -22,6 +22,7 @@ import json
 import time
 import random
 import tempfile
+from math import cos, sin
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -346,104 +347,15 @@ Observations:
             # Generate AI analysis
             analysis = self.analyze_observations()
             
-            # Create static map
-            map_image = self.create_static_map(observations)
-            
             # Send email with report
-            self.send_email(analysis, map_image)
+            self.send_email(analysis)
             logging.info("Daily report sent successfully")
             
         except Exception as e:
             logging.error(f"Error sending daily report: {str(e)}")
             
-    def create_static_map(self, observations):
-        """Create a static map with observation markers"""
-        try:
-            # Get the bounds of all observations
-            lats = [float(obs['lat']) for obs in observations]
-            lons = [float(obs['lng']) for obs in observations]
-            
-            # Calculate center and zoom level
-            center_lat = sum(lats) / len(lats)
-            center_lon = sum(lons) / len(lons)
-            
-            # Calculate spread to determine zoom level
-            lat_spread = max(lats) - min(lats)
-            lon_spread = max(lons) - min(lons)
-            max_spread = max(lat_spread, lon_spread)
-            
-            # Adjust zoom based on spread
-            if max_spread < 0.1:
-                zoom = 15  # Very close observations
-            elif max_spread < 0.5:
-                zoom = 13  # Local area
-            elif max_spread < 1.0:
-                zoom = 11  # Regional area
-            else:
-                zoom = 9   # Larger area
-            
-            # Create map with larger size for better quality
-            m = StaticMap(800, 600, url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
-            
-            # Define colors for different bird types
-            bird_colors = {
-                'raptor': '#FF0000',      # Red for raptors
-                'waterfowl': '#0000FF',   # Blue for waterfowl
-                'songbird': '#00FF00',    # Green for songbirds
-                'shorebird': '#FFA500',   # Orange for shorebirds
-                'other': '#800080'        # Purple for others
-            }
-            
-            # Add markers for each observation
-            for obs in observations:
-                # Determine bird type based on scientific name
-                sci_name = obs.get('sciName', '').lower()  # Use sciName instead of scientific_name
-                if any(raptor in sci_name for raptor in ['accipiter', 'buteo', 'haliaeetus', 'falco']):
-                    color = bird_colors['raptor']
-                elif any(waterfowl in sci_name for waterfowl in ['anas', 'branta', 'aix', 'mergus']):
-                    color = bird_colors['waterfowl']
-                elif any(songbird in sci_name for songbird in ['cardinalis', 'melospiza', 'setophaga', 'passerina']):
-                    color = bird_colors['songbird']
-                elif any(shorebird in sci_name for shorebird in ['calidris', 'charadrius', 'tringa', 'limosa']):
-                    color = bird_colors['shorebird']
-                else:
-                    color = bird_colors['other']
-                
-                # Add marker with color
-                marker = CircleMarker(
-                    (float(obs['lng']), float(obs['lat'])),
-                    color=color,
-                    width=2,
-                    size=5
-                )
-                m.add_marker(marker)
-            
-            # Render the map
-            img = m.render(zoom=zoom, center=(center_lon, center_lat))
-            
-            # Save as JPEG with high quality
-            img.save('static/images/map.jpg', 'JPEG', quality=95)
-            
-            # Create legend HTML
-            legend_html = """
-            <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                <strong>Bird Types:</strong><br>
-                <span style="color: #FF0000;">●</span> Raptors<br>
-                <span style="color: #0000FF;">●</span> Waterfowl<br>
-                <span style="color: #00FF00;">●</span> Songbirds<br>
-                <span style="color: #FFA500;">●</span> Shorebirds<br>
-                <span style="color: #800080;">●</span> Others
-            </div>
-            """
-            
-            return legend_html
-            
-        except Exception as e:
-            logging.error(f"Error creating map: {str(e)}")
-            return ""
-            
-    def send_email(self, analysis, map_image=None):
-        """Send email with analysis and optional map"""
+    def send_email(self, analysis):
+        """Send email with analysis"""
         try:
             # Create message
             msg = MIMEMultipart()
@@ -551,26 +463,6 @@ Observations:
                             margin: 0 auto;
                             background-color: #ffffff;
                         }}
-                        .map-container {{
-                            margin: 20px 0;
-                            text-align: center;
-                        }}
-                        .map-image {{
-                            max-width: 100%;
-                            height: auto;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        }}
-                        .map-legend {{
-                            margin-top: 10px;
-                            font-size: 12px;
-                            color: #666;
-                        }}
-                        @media (prefers-color-scheme: dark) {{
-                            .map-legend {{
-                                color: #999;
-                            }}
-                        }}
                     </style>
                 </head>
                 <body>
@@ -588,7 +480,6 @@ Observations:
                     </div>
                     <div class="content">
                         {analysis}
-                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/jpeg;base64,{}' class='map-image' alt='Bird Observations Map'><div class='map-legend'>Red: Raptors | Blue: Waterfowl | Green: Songbirds | Orange: Shorebirds | Purple: Other Birds</div></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
                     </div>
                 </body>
             </html>
