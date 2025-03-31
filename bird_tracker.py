@@ -364,8 +364,8 @@ Observations:
             center_lon = self.active_location['longitude']
             
             # Calculate the spread of observations to determine zoom level
-            lats = [obs['latitude'] for obs in observations]
-            lons = [obs['longitude'] for obs in observations]
+            lats = [float(obs['lat']) for obs in observations]
+            lons = [float(obs['lng']) for obs in observations]
             
             lat_spread = max(lats) - min(lats) if lats else 0
             lon_spread = max(lons) - min(lons) if lons else 0
@@ -384,24 +384,36 @@ Observations:
             # Create the map with a larger size for better quality
             map = StaticMap(800, 600, padding_x=50, padding_y=50)
             
-            # Add the background layer
-            map.add_layer(BackgroundLayer())
-            
-            # Add the tile layer with a different style
-            map.add_layer(TileLayer(
-                url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                max_zoom=19,
-                attribution='© OpenStreetMap contributors'
-            ))
+            # Define colors for different bird types
+            colors = {
+                'raptor': '#FF0000',      # Red for raptors
+                'waterfowl': '#0000FF',   # Blue for waterfowl
+                'songbird': '#00FF00',    # Green for songbirds
+                'shorebird': '#FFA500',   # Orange for shorebirds
+                'other': '#800080'        # Purple for others
+            }
             
             # Add markers for each observation
             for obs in observations:
-                # Create a marker with a custom color based on the bird type
-                marker = Marker(
-                    (obs['longitude'], obs['latitude']),
-                    color='#FF0000',  # Red color for better visibility
-                    width=12,
-                    height=12
+                # Determine bird type and color
+                bird_type = 'other'
+                sci_name = obs.get('sciName', '').lower()
+                
+                if any(term in sci_name for term in ['buteo', 'accipiter', 'falco', 'aquila', 'haliaeetus']):
+                    bird_type = 'raptor'
+                elif any(term in sci_name for term in ['anas', 'branta', 'aix', 'mergus', 'bucephala']):
+                    bird_type = 'waterfowl'
+                elif any(term in sci_name for term in ['passer', 'cardinalis', 'turdus', 'parus', 'setophaga']):
+                    bird_type = 'songbird'
+                elif any(term in sci_name for term in ['charadrius', 'calidris', 'tringa', 'recurvirostra']):
+                    bird_type = 'shorebird'
+                
+                # Create a marker with the appropriate color
+                marker = CircleMarker(
+                    (float(obs['lng']), float(obs['lat'])), 
+                    colors[bird_type], 
+                    12,
+                    title=obs.get('comName', 'Unknown species')  # Add tooltip with bird name
                 )
                 map.add_marker(marker)
             
@@ -410,6 +422,7 @@ Observations:
             
             # Save as JPEG with high quality
             output_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'observations_map.jpg')
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
             image.save(output_path, 'JPEG', quality=95)
             
             return output_path
@@ -501,6 +514,26 @@ Observations:
                                 color: #999;
                             }}
                         }}
+                        .app-link {{
+                            text-align: center;
+                            margin: 10px 0;
+                            padding: 10px;
+                            background-color: #f8f9fa;
+                            border-radius: 5px;
+                        }}
+                        @media (prefers-color-scheme: dark) {{
+                            .app-link {{
+                                background-color: #2d2d2d;
+                            }}
+                        }}
+                        .app-link a {{
+                            color: #007bff;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }}
+                        .app-link a:hover {{
+                            text-decoration: underline;
+                        }}
                         .content {{
                             padding: 20px;
                             max-width: 800px;
@@ -517,6 +550,16 @@ Observations:
                             border-radius: 8px;
                             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                         }}
+                        .map-legend {{
+                            margin-top: 10px;
+                            font-size: 12px;
+                            color: #666;
+                        }}
+                        @media (prefers-color-scheme: dark) {{
+                            .map-legend {{
+                                color: #999;
+                            }}
+                        }}
                     </style>
                 </head>
                 <body>
@@ -529,9 +572,12 @@ Observations:
                     <div class="subheader">
                         Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
                     </div>
+                    <div class="app-link">
+                        <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
+                    </div>
                     <div class="content">
                         {analysis}
-                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/jpeg;base64,{}' class='map-image' alt='Bird Observations Map'></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
+                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/jpeg;base64,{}' class='map-image' alt='Bird Observations Map'><div class='map-legend'>Red: Raptors | Blue: Waterfowl | Green: Songbirds | Orange: Shorebirds | Purple: Other Birds</div></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
                     </div>
                 </body>
             </html>
