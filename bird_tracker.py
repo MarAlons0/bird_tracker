@@ -356,11 +356,20 @@ Observations:
     def send_email(self, analysis):
         """Send email with analysis"""
         try:
+            # Get all subscribed users
+            from models import User
+            from app import db
+            
+            subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
+            if not subscribed_users:
+                logging.warning("No subscribed users found")
+                return
+                
             # Create message
             msg = MIMEMultipart()
             msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
             msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['recipient']
+            msg['To'] = self.email_config['sender_email']  # Use BCC for privacy
             
             # Read and encode the banner image
             banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
@@ -462,6 +471,27 @@ Observations:
                             margin: 0 auto;
                             background-color: #ffffff;
                         }}
+                        .footer {{
+                            text-align: center;
+                            margin-top: 20px;
+                            padding-top: 20px;
+                            border-top: 1px solid #eee;
+                            font-size: 12px;
+                            color: #666;
+                        }}
+                        @media (prefers-color-scheme: dark) {{
+                            .footer {{
+                                border-top-color: #333;
+                                color: #999;
+                            }}
+                        }}
+                        .unsubscribe-link {{
+                            color: #dc3545;
+                            text-decoration: none;
+                        }}
+                        .unsubscribe-link:hover {{
+                            text-decoration: underline;
+                        }}
                     </style>
                 </head>
                 <body>
@@ -480,6 +510,9 @@ Observations:
                     <div class="content">
                         {analysis}
                     </div>
+                    <div class="footer">
+                        <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
+                    </div>
                 </body>
             </html>
             """
@@ -487,13 +520,18 @@ Observations:
             # Attach the HTML content
             msg.attach(MIMEText(html_content, 'html'))
             
-            # Send email
+            # Send email to all subscribed users using BCC
             with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
                 server.starttls()
                 server.login(self.email_config['sender_email'], self.email_config['sender_password'])
-                server.send_message(msg)
                 
-            logging.info("Email sent successfully")
+                # Send to each user individually to maintain privacy
+                for user in subscribed_users:
+                    msg['Bcc'] = user.email
+                    server.send_message(msg)
+                    msg['Bcc'] = None  # Clear Bcc for next iteration
+                
+            logging.info(f"Email sent successfully to {len(subscribed_users)} subscribers")
             
         except Exception as e:
             logging.error(f"Error sending email: {str(e)}")

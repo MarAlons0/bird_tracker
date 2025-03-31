@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
+    newsletter_subscription = db.Column(db.Boolean, default=True)  # Users are subscribed by default
 
     def set_password(self, password):
         """Set the user's password"""

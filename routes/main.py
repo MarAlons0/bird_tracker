@@ -167,4 +167,17 @@ def update_location():
 
     except Exception as e:
         logger.error(f"Error updating location: {str(e)}")
-        return jsonify({"error": str(e)}), 500 
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/newsletter-preferences', methods=['GET', 'POST'])
+@login_required
+def newsletter_preferences():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'toggle':
+            current_user.newsletter_subscription = not current_user.newsletter_subscription
+            db.session.commit()
+            flash(f"Newsletter subscription {'enabled' if current_user.newsletter_subscription else 'disabled'}.", 'success')
+            return redirect(url_for('main.newsletter_preferences'))
+    
+    return render_template('newsletter_preferences.html') 

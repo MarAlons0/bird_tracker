@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Newsletter Preferences</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Weekly Bird Report</h5>
+                            <p class="text-muted mb-0">Receive weekly updates about bird sightings in your area</p>
+                        </div>
+                        <form method="POST" style="display: inline;">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn {% if current_user.newsletter_subscription %}btn-success{% else %}btn-secondary{% endif %}">
+                                {% if current_user.newsletter_subscription %}Subscribed{% else %}Unsubscribed{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
