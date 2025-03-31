@@ -369,6 +369,10 @@ Observations:
     def send_email(self, analysis):
         """Send email with bird report analysis"""
         try:
+            # Import here to avoid circular import
+            from app import create_app
+            from models import User
+            
             # Get all subscribed users
             with create_app().app_context():
                 subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
