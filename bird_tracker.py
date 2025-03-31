@@ -9,7 +9,7 @@ import anthropic
 import os
 import folium
 import base64
-from staticmap import StaticMap, CircleMarker
+from staticmap import StaticMap, CircleMarker, BackgroundLayer, TileLayer
 import io
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
