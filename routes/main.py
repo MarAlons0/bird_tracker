@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from models import db, User, CarouselImage
+from models import db, User, CarouselImage, Location
 from bird_tracker import BirdSightingTracker
 import os
 import logging
@@ -176,4 +176,15 @@ def newsletter_preferences():
             flash(f"Newsletter subscription {'enabled' if current_user.newsletter_subscription else 'disabled'}.", 'success')
             return redirect(url_for('main.newsletter_preferences'))
     
-    return render_template('newsletter_preferences.html') 
+    return render_template('newsletter_preferences.html')
+
+@bp.route('/locations')
+@login_required
+def locations():
+    try:
+        # Get all active locations
+        locations = Location.query.filter_by(is_active=True).all()
+        return render_template('locations.html', locations=locations)
+    except Exception as e:
+        logger.error(f"Error in locations route: {e}")
+        return render_template('error.html', error=str(e)) 
