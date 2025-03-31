@@ -26,11 +26,11 @@ def index():
             logger.error("Google Places API key not found!")
             return render_template('error.html', error="Google Places API key not configured")
         
-        return render_template('index.html',
+        return render_template('home.html',
                              location=current_app.tracker.active_location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
-                             google_maps_key=google_places_key)
+                             google_maps_api_key=google_places_key)
     except Exception as e:
         logger.error(f"Error in index route: {e}")
         return render_template('error.html', error=str(e))
