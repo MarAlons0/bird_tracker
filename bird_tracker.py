@@ -431,14 +431,10 @@ Observations:
         """Send email with analysis and optional map"""
         try:
             # Create message
-            msg = MIMEMultipart('related')
+            msg = MIMEMultipart()
             msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
             msg['From'] = self.email_config['sender_email']
             msg['To'] = self.email_config['recipient']
-            
-            # Create alternative part for the email body
-            msg_alternative = MIMEMultipart('alternative')
-            msg.attach(msg_alternative)
             
             # Read and encode the banner image
             banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
@@ -446,29 +442,9 @@ Observations:
                 with open(banner_path, 'rb') as f:
                     banner_data = f.read()
                 banner_base64 = base64.b64encode(banner_data).decode('utf-8')
-                
-                # Create banner image part
-                banner_img = MIMEText(f'<img src="cid:banner-image" alt="Banner">', 'html')
-                banner_img.add_header('Content-ID', '<banner-image>')
-                msg.attach(banner_img)
             except Exception as e:
                 logging.error(f"Error reading banner image: {str(e)}")
                 banner_base64 = None
-            
-            # Create map image part if available
-            if map_image:
-                try:
-                    with open(map_image, 'rb') as f:
-                        map_data = f.read()
-                    map_base64 = base64.b64encode(map_data).decode('utf-8')
-                    
-                    # Create map image part
-                    map_img = MIMEText(f'<img src="cid:map-image" alt="Bird Observations Map">', 'html')
-                    map_img.add_header('Content-ID', '<map-image>')
-                    msg.attach(map_img)
-                except Exception as e:
-                    logging.error(f"Error processing map image: {str(e)}")
-                    map_base64 = None
             
             # Create HTML content with banner and header
             html_content = f"""
@@ -538,30 +514,25 @@ Observations:
                             border-radius: 8px;
                             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                         }}
-                        .fallback-text {{
-                            color: #666;
-                            font-style: italic;
-                            margin: 10px 0;
-                        }}
                     </style>
                 </head>
                 <body>
                     <div class="banner-container">
-                        {"<img src='cid:banner-image' class='banner-image' alt='Banner'>" if banner_base64 else ""}
+                        {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
                         <div class="banner-overlay">
                             <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
                         </div>
                     </div>
                     <div class="content">
                         {analysis}
-                        {"<div class='map-container'><h3>Observation Map</h3><img src='cid:map-image' class='map-image' alt='Bird Observations Map'><p class='fallback-text'>If you cannot see the map, please enable images in your email client.</p></div>" if map_image else ""}
+                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/png;base64,{}' class='map-image' alt='Bird Observations Map'></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
                     </div>
                 </body>
             </html>
             """
             
             # Attach the HTML content
-            msg_alternative.attach(MIMEText(html_content, 'html'))
+            msg.attach(MIMEText(html_content, 'html'))
             
             # Send email
             with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
