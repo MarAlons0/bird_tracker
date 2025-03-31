@@ -401,7 +401,16 @@ Observations:
             lat_spread = max(lats) - min(lats)
             lng_spread = max(lngs) - min(lngs)
             max_spread = max(lat_spread, lng_spread)
-            zoom = min(15, max(1, int(-1.5 * math.log2(max_spread))))
+            
+            # Adjust zoom calculation for better focus
+            if max_spread < 0.1:  # Very close observations
+                zoom = 15
+            elif max_spread < 0.5:  # Local area
+                zoom = 13
+            elif max_spread < 1.0:  # Regional area
+                zoom = 11
+            else:  # Larger area
+                zoom = 9
 
             context.set_center(center)
             context.set_zoom(zoom)
@@ -441,42 +450,82 @@ Observations:
             html_content = f"""
             <html>
                 <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
+                        @media (prefers-color-scheme: dark) {{
+                            body {{
+                                background-color: #1a1a1a;
+                                color: #ffffff;
+                            }}
+                            .content {{
+                                background-color: #1a1a1a;
+                                color: #ffffff;
+                            }}
+                        }}
                         .banner-container {{
                             position: relative;
                             width: 100%;
                             max-width: 800px;
                             margin: 0 auto;
+                            overflow: hidden;
                         }}
                         .banner-image {{
                             width: 100%;
                             height: auto;
+                            display: block;
+                        }}
+                        .banner-overlay {{
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+                            display: flex;
+                            align-items: center;
+                            padding: 0 20px;
                         }}
                         .header-text {{
-                            position: absolute;
-                            left: 20px;
-                            top: 50%;
-                            transform: translateY(-50%);
                             color: white;
-                            font-size: 24px;
+                            font-size: 18px;
                             font-weight: bold;
                             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                            margin: 0;
+                            line-height: 1.2;
+                        }}
+                        @media (min-width: 768px) {{
+                            .header-text {{
+                                font-size: 24px;
+                            }}
                         }}
                         .content {{
                             padding: 20px;
                             max-width: 800px;
                             margin: 0 auto;
+                            background-color: #ffffff;
+                        }}
+                        .map-container {{
+                            margin: 20px 0;
+                            text-align: center;
+                        }}
+                        .map-image {{
+                            max-width: 100%;
+                            height: auto;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                         }}
                     </style>
                 </head>
                 <body>
                     <div class="banner-container">
                         {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
-                        <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
+                        <div class="banner-overlay">
+                            <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
+                        </div>
                     </div>
                     <div class="content">
                         {analysis}
-                        {"<br><br><h3>Observation Map</h3><img src='data:image/png;base64,{}' alt='Bird Observations Map'>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
+                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/png;base64,{}' class='map-image' alt='Bird Observations Map'></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
                     </div>
                 </body>
             </html>
