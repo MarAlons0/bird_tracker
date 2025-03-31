@@ -55,7 +55,24 @@ def login():
         password = request.form.get('password')
         logger.info(f"Login attempt for email: {email}")
         
-        # Check if email is in allowed list
+        # Check if user exists in database
+        user = User.query.filter_by(email=email).first()
+        
+        # If user exists, allow login regardless of ALLOWED_EMAILS
+        if user:
+            logger.info(f"User exists in database: {email}")
+            if not user.check_password(password):
+                logger.warning(f"Invalid password for user: {email}")
+                return render_template('login.html', 
+                    error="Invalid email or password")
+            
+            # Log user in
+            login_user(user)
+            logger.info(f"User logged in successfully: {email}")
+            flash("Successfully logged in!", "success")
+            return redirect(url_for('main.index'))
+        
+        # For new users, check ALLOWED_EMAILS
         allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
         logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
         
@@ -73,25 +90,15 @@ def login():
             return render_template('login.html', 
                 error="Sorry, this email is not authorized to access this application.")
         
-        logger.info(f"Email {email} is authorized")
-        
-        # Get or create user
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            logger.info(f"Creating new user for email: {email}")
-            user = User(email=email)
-            # Set default password for new users
-            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-            user.set_password(default_password)
-            db.session.add(user)
-            db.session.commit()
-            logger.info(f"Created new user with default password: {email}")
-        
-        # Check password
-        if not user.check_password(password):
-            logger.warning(f"Invalid password for user: {email}")
-            return render_template('login.html', 
-                error="Invalid email or password")
+        # Create new user
+        logger.info(f"Creating new user for email: {email}")
+        user = User(email=email)
+        # Set default password for new users
+        default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+        user.set_password(default_password)
+        db.session.add(user)
+        db.session.commit()
+        logger.info(f"Created new user with default password: {email}")
         
         # Log user in
         login_user(user)
@@ -125,8 +132,9 @@ def request_registration():
         email = request.form.get('email')
         message = request.form.get('message')
         
-        # Check if email is already registered
-        if User.query.filter_by(email=email).first():
+        # Check if email is already registered and active
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user and existing_user.is_active:
             return render_template('request_registration.html', 
                 error="This email is already registered.")
         
