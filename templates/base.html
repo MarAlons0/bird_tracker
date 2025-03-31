@@ -15,10 +15,41 @@
     <style>
         .navbar {
             background: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+            position: relative;
+            z-index: 1000; /* Ensure navbar is above other content */
         }
         .navbar-brand, .nav-link {
             color: white !important;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        /* Mobile menu styles */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background-color: rgba(0, 0, 0, 0.9);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                margin-top: 0.5rem;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+            .navbar-nav {
+                margin: 0;
+                padding: 0;
+            }
+            .nav-item {
+                margin: 0.5rem 0;
+            }
+            .nav-link {
+                color: white !important;
+                padding: 0.5rem 1rem;
+                border-radius: 0.25rem;
+            }
+            .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
         }
     </style>
     {% block head %}{% endblock %}
