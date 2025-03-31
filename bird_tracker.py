@@ -22,9 +22,6 @@ import json
 import time
 import random
 import tempfile
-import staticmaps
-import math
-from staticmap import StaticMap, CircleMarker, Marker, BackgroundLayer, TileLayer
 
 # Setup logging
 logger = logging.getLogger(__name__)
