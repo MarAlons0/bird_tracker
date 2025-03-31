@@ -358,180 +358,182 @@ Observations:
         try:
             # Get all subscribed users
             from models import User
-            from app import db
+            from app import create_app, db
             
-            subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
-            if not subscribed_users:
-                logging.warning("No subscribed users found")
-                return
+            app = create_app()
+            with app.app_context():
+                subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
+                if not subscribed_users:
+                    logging.warning("No subscribed users found")
+                    return
+                    
+                # Create message
+                msg = MIMEMultipart()
+                msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
+                msg['From'] = self.email_config['sender_email']
+                msg['To'] = self.email_config['sender_email']  # Use BCC for privacy
                 
-            # Create message
-            msg = MIMEMultipart()
-            msg['Subject'] = f"Bird Sighting Report for {self.active_location['name']}"
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = self.email_config['sender_email']  # Use BCC for privacy
-            
-            # Read and encode the banner image
-            banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
-            try:
-                with open(banner_path, 'rb') as f:
-                    banner_data = f.read()
-                banner_base64 = base64.b64encode(banner_data).decode('utf-8')
-            except Exception as e:
-                logging.error(f"Error reading banner image: {str(e)}")
-                banner_base64 = None
-            
-            # Create HTML content with banner and header
-            html_content = f"""
-            <html>
-                <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        @media (prefers-color-scheme: dark) {{
-                            body {{
-                                background-color: #1a1a1a;
-                                color: #ffffff;
+                # Read and encode the banner image
+                banner_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'Banner.jpeg')
+                try:
+                    with open(banner_path, 'rb') as f:
+                        banner_data = f.read()
+                    banner_base64 = base64.b64encode(banner_data).decode('utf-8')
+                except Exception as e:
+                    logging.error(f"Error reading banner image: {str(e)}")
+                    banner_base64 = None
+                
+                # Create HTML content with banner and header
+                html_content = f"""
+                <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            @media (prefers-color-scheme: dark) {{
+                                body {{
+                                    background-color: #1a1a1a;
+                                    color: #ffffff;
+                                }}
+                                .content {{
+                                    background-color: #1a1a1a;
+                                    color: #ffffff;
+                                }}
+                            }}
+                            .banner-container {{
+                                position: relative;
+                                width: 100%;
+                                max-width: 800px;
+                                margin: 0 auto;
+                                overflow: hidden;
+                            }}
+                            .banner-image {{
+                                width: 100%;
+                                height: auto;
+                                display: block;
+                            }}
+                            .banner-overlay {{
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+                                display: flex;
+                                align-items: center;
+                                padding: 0 20px;
+                            }}
+                            .header-text {{
+                                color: white;
+                                font-size: 18px;
+                                font-weight: bold;
+                                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                                margin: 0;
+                                line-height: 1.2;
+                            }}
+                            @media (min-width: 768px) {{
+                                .header-text {{
+                                    font-size: 24px;
+                                }}
+                            }}
+                            .subheader {{
+                                text-align: center;
+                                color: #666;
+                                font-size: 14px;
+                                margin: 10px 0;
+                                font-style: italic;
+                            }}
+                            @media (prefers-color-scheme: dark) {{
+                                .subheader {{
+                                    color: #999;
+                                }}
+                            }}
+                            .app-link {{
+                                text-align: center;
+                                margin: 10px 0;
+                                padding: 10px;
+                                background-color: #f8f9fa;
+                                border-radius: 5px;
+                            }}
+                            @media (prefers-color-scheme: dark) {{
+                                .app-link {{
+                                    background-color: #2d2d2d;
+                                }}
+                            }}
+                            .app-link a {{
+                                color: #007bff;
+                                text-decoration: none;
+                                font-weight: bold;
+                            }}
+                            .app-link a:hover {{
+                                text-decoration: underline;
                             }}
                             .content {{
-                                background-color: #1a1a1a;
-                                color: #ffffff;
+                                padding: 20px;
+                                max-width: 800px;
+                                margin: 0 auto;
+                                background-color: #ffffff;
                             }}
-                        }}
-                        .banner-container {{
-                            position: relative;
-                            width: 100%;
-                            max-width: 800px;
-                            margin: 0 auto;
-                            overflow: hidden;
-                        }}
-                        .banner-image {{
-                            width: 100%;
-                            height: auto;
-                            display: block;
-                        }}
-                        .banner-overlay {{
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
-                            display: flex;
-                            align-items: center;
-                            padding: 0 20px;
-                        }}
-                        .header-text {{
-                            color: white;
-                            font-size: 18px;
-                            font-weight: bold;
-                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                            margin: 0;
-                            line-height: 1.2;
-                        }}
-                        @media (min-width: 768px) {{
-                            .header-text {{
-                                font-size: 24px;
-                            }}
-                        }}
-                        .subheader {{
-                            text-align: center;
-                            color: #666;
-                            font-size: 14px;
-                            margin: 10px 0;
-                            font-style: italic;
-                        }}
-                        @media (prefers-color-scheme: dark) {{
-                            .subheader {{
-                                color: #999;
-                            }}
-                        }}
-                        .app-link {{
-                            text-align: center;
-                            margin: 10px 0;
-                            padding: 10px;
-                            background-color: #f8f9fa;
-                            border-radius: 5px;
-                        }}
-                        @media (prefers-color-scheme: dark) {{
-                            .app-link {{
-                                background-color: #2d2d2d;
-                            }}
-                        }}
-                        .app-link a {{
-                            color: #007bff;
-                            text-decoration: none;
-                            font-weight: bold;
-                        }}
-                        .app-link a:hover {{
-                            text-decoration: underline;
-                        }}
-                        .content {{
-                            padding: 20px;
-                            max-width: 800px;
-                            margin: 0 auto;
-                            background-color: #ffffff;
-                        }}
-                        .footer {{
-                            text-align: center;
-                            margin-top: 20px;
-                            padding-top: 20px;
-                            border-top: 1px solid #eee;
-                            font-size: 12px;
-                            color: #666;
-                        }}
-                        @media (prefers-color-scheme: dark) {{
                             .footer {{
-                                border-top-color: #333;
-                                color: #999;
+                                text-align: center;
+                                margin-top: 20px;
+                                padding-top: 20px;
+                                border-top: 1px solid #eee;
+                                font-size: 12px;
+                                color: #666;
                             }}
-                        }}
-                        .unsubscribe-link {{
-                            color: #dc3545;
-                            text-decoration: none;
-                        }}
-                        .unsubscribe-link:hover {{
-                            text-decoration: underline;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <div class="banner-container">
-                        {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
-                        <div class="banner-overlay">
-                            <div class="header-text">Mario's Birds Newsletter</div>
+                            @media (prefers-color-scheme: dark) {{
+                                .footer {{
+                                    border-top-color: #333;
+                                    color: #999;
+                                }}
+                            }}
+                            .unsubscribe-link {{
+                                color: #dc3545;
+                                text-decoration: none;
+                            }}
+                            .unsubscribe-link:hover {{
+                                text-decoration: underline;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="banner-container">
+                            {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
+                            <div class="banner-overlay">
+                                <div class="header-text">Mario's Birds Newsletter</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="subheader">
-                        Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
-                    </div>
-                    <div class="app-link">
-                        <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
-                    </div>
-                    <div class="content">
-                        {analysis}
-                    </div>
-                    <div class="footer">
-                        <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
-                    </div>
-                </body>
-            </html>
-            """
-            
-            # Attach the HTML content
-            msg.attach(MIMEText(html_content, 'html'))
-            
-            # Send email to all subscribed users using BCC
-            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
-                server.starttls()
-                server.login(self.email_config['sender_email'], self.email_config['sender_password'])
+                        <div class="subheader">
+                            Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
+                        </div>
+                        <div class="app-link">
+                            <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
+                        </div>
+                        <div class="content">
+                            {analysis}
+                        </div>
+                        <div class="footer">
+                            <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
+                        </div>
+                    </body>
+                </html>
+                """
                 
-                # Send to each user individually to maintain privacy
-                for user in subscribed_users:
-                    msg['Bcc'] = user.email
-                    server.send_message(msg)
-                    msg['Bcc'] = None  # Clear Bcc for next iteration
+                # Attach the HTML content
+                msg.attach(MIMEText(html_content, 'html'))
                 
-            logging.info(f"Email sent successfully to {len(subscribed_users)} subscribers")
+                # Send email to all subscribed users using BCC
+                with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                    server.starttls()
+                    server.login(self.email_config['sender_email'], self.email_config['sender_password'])
+                    
+                    # Send to each user individually to maintain privacy
+                    for user in subscribed_users:
+                        msg['Bcc'] = user.email
+                        server.send_message(msg)
+                        msg['Bcc'] = None  # Clear Bcc for next iteration
+                
+                logging.info(f"Email sent successfully to {len(subscribed_users)} subscribers")
             
         except Exception as e:
             logging.error(f"Error sending email: {str(e)}")
