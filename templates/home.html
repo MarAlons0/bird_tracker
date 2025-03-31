@@ -100,7 +100,7 @@
     </div>
 </div>
 
-<!-- Location Modal -->
+<!-- Location Change Modal -->
 <div class="modal fade" id="locationModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -109,25 +109,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="locationUpdateForm">
+                <form id="updateLocationForm">
                     <div class="mb-3">
                         <label for="locationSearch" class="form-label">Search Location</label>
-                        <input type="text" class="form-control" id="locationSearch" placeholder="Enter location name">
+                        <input type="text" class="form-control" id="locationSearch" placeholder="Enter a city or park name">
                     </div>
+                    <input type="hidden" id="latitude">
+                    <input type="hidden" id="longitude">
                     <div class="mb-3">
                         <label for="radius" class="form-label">Radius (miles)</label>
                         <select class="form-select" id="radius">
                             <option value="5">5 miles</option>
                             <option value="10">10 miles</option>
-                            <option value="25" selected>25 miles</option>
-                            <option value="50">50 miles</option>
+                            <option value="15">15 miles</option>
+                            <option value="20">20 miles</option>
+                            <option value="25">25 miles</option>
+                            <option value="30">30 miles</option>
                         </select>
                     </div>
+                    <button type="submit" class="btn btn-primary" id="updateLocationBtn">Update Location</button>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveLocation" disabled>Save Changes</button>
             </div>
         </div>
     </div>
@@ -150,68 +151,104 @@
 
 {% block scripts %}
 <script>
-let autocompleteInstance = null;
-
-// Initialize Google Places Autocomplete
-function initAutocomplete() {
-    const input = document.getElementById('locationSearch');
-    const options = {
-        types: ['(cities)'],
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Google Places Autocomplete
+    const locationInput = document.getElementById('locationSearch');
+    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+        types: ['(cities)', 'park'],
         componentRestrictions: { country: 'us' }
-    };
-    
-    autocompleteInstance = new google.maps.places.Autocomplete(input, options);
-    
-    autocompleteInstance.addListener('place_changed', function() {
-        const place = autocompleteInstance.getPlace();
+    });
+
+    // Handle place selection
+    autocomplete.addListener('place_changed', function() {
+        const place = autocomplete.getPlace();
         if (place.geometry) {
-            document.getElementById('saveLocation').disabled = false;
-        } else {
-            document.getElementById('saveLocation').disabled = true;
+            document.getElementById('latitude').value = place.geometry.location.lat();
+            document.getElementById('longitude').value = place.geometry.location.lng();
         }
     });
-}
 
-// Handle location update
-document.getElementById('saveLocation').addEventListener('click', function() {
-    const place = autocompleteInstance.getPlace();
-    const radius = document.getElementById('radius').value;
-    
-    if (place.geometry) {
-        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        loadingModal.show();
+    // Handle location update
+    document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        fetch('/update_location', {
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const radius = document.getElementById('radius').value;
+        
+        // Show loading state
+        document.getElementById('updateLocationBtn').disabled = true;
+        document.getElementById('updateLocationBtn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+        
+        // Send update request
+        fetch('{{ url_for("main.update_location") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                latitude: place.geometry.location.lat(),
-                longitude: place.geometry.location.lng(),
-                name: place.name,
-                radius: radius
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                radius: parseFloat(radius)
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.reload();
+                // Update the display
+                document.getElementById('currentLocation').textContent = 
+                    `${data.location.name} (${parseFloat(data.location.latitude).toFixed(4)}, ${parseFloat(data.location.longitude).toFixed(4)})`;
+                document.getElementById('currentRadius').textContent = `${data.location.radius} miles`;
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
+                modal.hide();
+                
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = `
+                    Location updated successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+                
+                // Fetch new sightings
+                fetch('{{ url_for("main.get_sightings") }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update sightings display
+                            const sightingsList = document.getElementById('sightingsList');
+                            sightingsList.innerHTML = '';
+                            data.sightings.forEach(sighting => {
+                                const item = document.createElement('li');
+                                item.className = 'list-group-item';
+                                item.textContent = `${sighting.species} (${sighting.count})`;
+                                sightingsList.appendChild(item);
+                            });
+                        }
+                    });
             } else {
-                alert('Error updating location: ' + data.error);
+                throw new Error(data.message || 'Failed to update location');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error updating location');
+            // Show error message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.innerHTML = `
+                Error: ${error.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
         })
         .finally(() => {
-            loadingModal.hide();
+            // Reset button state
+            document.getElementById('updateLocationBtn').disabled = false;
+            document.getElementById('updateLocationBtn').innerHTML = 'Update Location';
         });
-    }
+    });
 });
-
-// Initialize autocomplete when the page loads
-google.maps.event.addDomListener(window, 'load', initAutocomplete);
 </script>
 {% endblock %} 
