@@ -24,6 +24,7 @@ import random
 import tempfile
 import staticmaps
 import math
+from staticmap import StaticMap, CircleMarker, Marker, BackgroundLayer, TileLayer
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -359,50 +360,21 @@ Observations:
             logging.error(f"Error sending daily report: {str(e)}")
             
     def create_static_map(self, observations):
-        """Create a static map with markers for bird observations."""
+        """Create a static map with observation markers"""
         try:
-            context = staticmaps.Context()
-            context.set_tile_provider(staticmaps.tile_provider_OSM)
-
-            # Calculate center and bounds
-            if not observations:
-                return None
-
-            lats = []
-            lngs = []
-            for obs in observations:
-                try:
-                    lat = float(obs.get('lat', 0))
-                    lng = float(obs.get('lng', 0))
-                    if -90 <= lat <= 90 and -180 <= lng <= 180:
-                        lats.append(lat)
-                        lngs.append(lng)
-                        location = staticmaps.create_latlng(lat, lng)
-                        marker = staticmaps.Marker(
-                            location,
-                            color=staticmaps.RED,
-                            size=5
-                        )
-                        context.add_object(marker)
-                except Exception as e:
-                    logging.warning(f"Error adding marker for observation: {str(e)}")
-                    continue
-
-            if not lats or not lngs:
-                logging.error("No valid coordinates found in observations")
-                return None
-
-            # Set center to the average of coordinates
-            center_lat = sum(lats) / len(lats)
-            center_lng = sum(lngs) / len(lngs)
-            center = staticmaps.create_latlng(center_lat, center_lng)
-
-            # Calculate zoom based on coordinate spread
-            lat_spread = max(lats) - min(lats)
-            lng_spread = max(lngs) - min(lngs)
-            max_spread = max(lat_spread, lng_spread)
+            # Create a new map centered on the active location
+            center_lat = self.active_location['latitude']
+            center_lon = self.active_location['longitude']
             
-            # Adjust zoom calculation for better focus
+            # Calculate the spread of observations to determine zoom level
+            lats = [obs['latitude'] for obs in observations]
+            lons = [obs['longitude'] for obs in observations]
+            
+            lat_spread = max(lats) - min(lats) if lats else 0
+            lon_spread = max(lons) - min(lons) if lons else 0
+            max_spread = max(lat_spread, lon_spread)
+            
+            # Set zoom level based on spread
             if max_spread < 0.1:  # Very close observations
                 zoom = 15
             elif max_spread < 0.5:  # Local area
@@ -411,18 +383,40 @@ Observations:
                 zoom = 11
             else:  # Larger area
                 zoom = 9
-
-            context.set_center(center)
-            context.set_zoom(zoom)
-
-            # Render the map
-            image = context.render_pillow(800, 600)
             
-            # Save to a temporary file
-            temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-            image.save(temp_file.name)
-            return temp_file.name
-
+            # Create the map with a larger size for better quality
+            map = StaticMap(800, 600, padding_x=50, padding_y=50)
+            
+            # Add the background layer
+            map.add_layer(BackgroundLayer())
+            
+            # Add the tile layer with a different style
+            map.add_layer(TileLayer(
+                url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                max_zoom=19,
+                attribution='© OpenStreetMap contributors'
+            ))
+            
+            # Add markers for each observation
+            for obs in observations:
+                # Create a marker with a custom color based on the bird type
+                marker = Marker(
+                    (obs['longitude'], obs['latitude']),
+                    color='#FF0000',  # Red color for better visibility
+                    width=12,
+                    height=12
+                )
+                map.add_marker(marker)
+            
+            # Render the map
+            image = map.render()
+            
+            # Save as JPEG with high quality
+            output_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'observations_map.jpg')
+            image.save(output_path, 'JPEG', quality=95)
+            
+            return output_path
+            
         except Exception as e:
             logging.error(f"Error creating map: {str(e)}")
             return None
@@ -498,6 +492,18 @@ Observations:
                                 font-size: 24px;
                             }}
                         }}
+                        .subheader {{
+                            text-align: center;
+                            color: #666;
+                            font-size: 14px;
+                            margin: 10px 0;
+                            font-style: italic;
+                        }}
+                        @media (prefers-color-scheme: dark) {{
+                            .subheader {{
+                                color: #999;
+                            }}
+                        }}
                         .content {{
                             padding: 20px;
                             max-width: 800px;
@@ -520,12 +526,15 @@ Observations:
                     <div class="banner-container">
                         {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
                         <div class="banner-overlay">
-                            <div class="header-text">Bird Sighting Report for {self.active_location['name']}</div>
+                            <div class="header-text">Mario's Birds Newsletter</div>
                         </div>
+                    </div>
+                    <div class="subheader">
+                        Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
                     </div>
                     <div class="content">
                         {analysis}
-                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/png;base64,{}' class='map-image' alt='Bird Observations Map'></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
+                        {"<div class='map-container'><h3>Observation Map</h3><img src='data:image/jpeg;base64,{}' class='map-image' alt='Bird Observations Map'></div>".format(base64.b64encode(open(map_image, 'rb').read()).decode('utf-8')) if map_image else ""}
                     </div>
                 </body>
             </html>
