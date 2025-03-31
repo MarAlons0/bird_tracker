@@ -208,4 +208,15 @@ def sightings():
                              google_maps_api_key=google_places_key)
     except Exception as e:
         logger.error(f"Error in sightings route: {e}")
+        return render_template('error.html', error=str(e))
+
+@bp.route('/profile')
+@login_required
+def profile():
+    try:
+        return render_template('profile.html',
+                             user=current_user,
+                             location=current_app.tracker.active_location)
+    except Exception as e:
+        logger.error(f"Error in profile route: {e}")
         return render_template('error.html', error=str(e)) 
