@@ -2,9 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-
-# Initialize SQLAlchemy
-db = SQLAlchemy()
+from extensions import db
 
 class Location(db.Model):
     __tablename__ = 'locations'
@@ -47,4 +45,19 @@ class RegistrationRequest(db.Model):
     notes = db.Column(db.Text)
 
     def __repr__(self):
-        return f'<RegistrationRequest {self.email}>' 
+        return f'<RegistrationRequest {self.email}>'
+
+class CarouselImage(db.Model):
+    __tablename__ = 'carousel_images'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<CarouselImage {self.filename}>' 

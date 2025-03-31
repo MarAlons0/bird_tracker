@@ -1,11 +1,12 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from models import db, User, RegistrationRequest
+from models import db, User, RegistrationRequest, CarouselImage
 from flask_mail import Message
 from datetime import datetime
-from flask import current_app
+from utils.file_upload import save_image, delete_image
+import os
 
 bp = Blueprint('admin', __name__)
 
@@ -125,4 +126,100 @@ def process_registration_request(request_id, action):
         flash('Registration request rejected.', 'success')
     
     db.session.commit()
-    return redirect(url_for('admin.registration_requests')) 
+    return redirect(url_for('admin.registration_requests'))
+
+# Carousel Image Management
+@bp.route('/carousel')
+@login_required
+@admin_required
+def manage_carousel():
+    """Admin page for managing carousel images"""
+    images = CarouselImage.query.order_by(CarouselImage.order).all()
+    return render_template('admin/carousel.html', images=images)
+
+@bp.route('/carousel/add', methods=['POST'])
+@login_required
+@admin_required
+def add_carousel_image():
+    """Add a new carousel image"""
+    if 'image' not in request.files:
+        flash('No image file uploaded', 'error')
+        return redirect(url_for('admin.manage_carousel'))
+    
+    file = request.files['image']
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(url_for('admin.manage_carousel'))
+    
+    upload_folder = os.path.join(current_app.static_folder, 'images', 'carousel')
+    filename = save_image(file, upload_folder)
+    
+    if filename:
+        # Get the highest order value
+        max_order = db.session.query(db.func.max(CarouselImage.order)).scalar() or 0
+        
+        image = CarouselImage(
+            filename=filename,
+            title=request.form.get('title', ''),
+            description=request.form.get('description', ''),
+            order=max_order + 1
+        )
+        
+        db.session.add(image)
+        db.session.commit()
+        
+        flash('Image added successfully', 'success')
+    else:
+        flash('Invalid file type', 'error')
+    
+    return redirect(url_for('admin.manage_carousel'))
+
+@bp.route('/carousel/<int:id>/edit', methods=['POST'])
+@login_required
+@admin_required
+def edit_carousel_image(id):
+    """Edit a carousel image"""
+    image = CarouselImage.query.get_or_404(id)
+    
+    image.title = request.form.get('title', '')
+    image.description = request.form.get('description', '')
+    image.is_active = request.form.get('is_active') == 'true'
+    
+    db.session.commit()
+    flash('Image updated successfully', 'success')
+    
+    return redirect(url_for('admin.manage_carousel'))
+
+@bp.route('/carousel/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_carousel_image(id):
+    """Delete a carousel image"""
+    image = CarouselImage.query.get_or_404(id)
+    
+    # Delete the file
+    upload_folder = os.path.join(current_app.static_folder, 'images', 'carousel')
+    delete_image(image.filename, upload_folder)
+    
+    # Delete the database record
+    db.session.delete(image)
+    db.session.commit()
+    
+    flash('Image deleted successfully', 'success')
+    return redirect(url_for('admin.manage_carousel'))
+
+@bp.route('/carousel/reorder', methods=['POST'])
+@login_required
+@admin_required
+def reorder_carousel_images():
+    """Update the order of carousel images"""
+    new_order = request.json.get('order', [])
+    
+    # Update the order of each image
+    for index, image_id in enumerate(new_order):
+        image = CarouselImage.query.get(image_id)
+        if image:
+            image.order = index
+    
+    db.session.commit()
+    return jsonify({'status': 'success'}) 

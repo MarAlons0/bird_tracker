@@ -9,7 +9,7 @@ import logging
 from dotenv import load_dotenv
 from logging_config import setup_logging
 import anthropic
-from models import db, User
+from models import db, User, RegistrationRequest
 import secrets
 from flask_mail import Mail, Message
 import configparser
@@ -17,6 +17,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from apscheduler.schedulers.background import BackgroundScheduler
 from anthropic import Anthropic
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from extensions import migrate, scheduler, init_extensions, login_manager, mail
+from bird_tracker import BirdSightingTracker
 
 # Load environment variables
 load_dotenv()
@@ -27,18 +31,9 @@ logger = logging.getLogger(__name__)
 
 # Add parent directory to path so we can import bird_tracker
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from bird_tracker import BirdSightingTracker
-
-# Initialize Flask extensions
-mail = Mail()
-login_manager = LoginManager()
-scheduler = BackgroundScheduler()
 
 def create_app():
     app = Flask(__name__)
-    
-    # Load environment variables
-    load_dotenv()
     
     # Configure the app
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
@@ -62,9 +57,7 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('SMTP_USER')
     
     # Initialize extensions
-    db.init_app(app)
-    login_manager.init_app(app)
-    mail.init_app(app)
+    init_extensions(app)
     
     # Configure CORS
     if os.getenv('FLASK_ENV') == 'production':
@@ -79,17 +72,21 @@ def create_app():
     else:
         cors = CORS(app, supports_credentials=True)
     
-    # Configure login manager
-    login_manager.login_view = 'auth.login'
-    login_manager.session_protection = 'strong'
-    
     # Register blueprints
     from routes import main, auth, admin
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp, url_prefix='/admin')
     
-    # Create database tables
+    # Initialize bird tracker
+    app.tracker = BirdSightingTracker()
+    
+    return app
+
+app = create_app()
+CORS(app)  # Enable CORS for all routes
+
+def init_db():
     with app.app_context():
         try:
             db.create_all()
@@ -127,25 +124,11 @@ def create_app():
                         db.session.commit()
                         logger.info(f"Created user: {email}")
                     else:
-                        logger.info(f"Updated  user: {email}")
+                        logger.info(f"Updated user: {email}")
+            
         except Exception as e:
-            print(f"Some tables may already exist: {str(e)}")
-    
-    # Initialize bird tracker
-    try:
-        tracker = BirdSightingTracker()
-        logger.info("Bird tracker initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize bird tracker: {e}")
-        raise
-
-    # Make tracker available to routes
-    app.tracker = tracker
-    
-    return app
-
-app = create_app()
-CORS(app)  # Enable CORS for all routes
+            logger.error(f"Error during database initialization: {e}")
+            raise
 
 def admin_required(f):
     @wraps(f)
@@ -403,5 +386,6 @@ def internal_error(error):
     return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
+    init_db()
     print("Starting Flask server...")
     app.run(host='localhost', port=8000, debug=True) 

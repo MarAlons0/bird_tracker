@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} - Home{% endblock %}
+{% block title %}Bird Tracker{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
@@ -22,59 +22,83 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <h1>Bird Tracker</h1>
-        
-        <!-- Location Selection -->
-        <div class="location-section">
-            <h5>Select Location</h5>
-            <div class="mb-3">
-                <button class="btn btn-secondary" onclick="getCurrentLocation()">
-                    <i class="fas fa-location-arrow"></i> Use My Location
-                </button>
-            </div>
-            <div class="mb-3">
-                <input type="text" id="locationSearch" class="form-control" 
-                       placeholder="Search for a location...">
-            </div>
-            <div class="radius-selector">
-                <label for="radius">Search Radius (miles):</label>
-                <select id="radius" class="form-select" style="width: 200px">
-                    <option value="5">5 miles</option>
-                    <option value="10">10 miles</option>
-                    <option value="25" selected>25 miles</option>
-                    <option value="50">50 miles</option>
-                </select>
-            </div>
+<div class="container-fluid p-0">
+    <!-- Carousel -->
+    <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for image in carousel_images %}
+            <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="{{ loop.index0 }}" 
+                    {% if loop.first %}class="active"{% endif %}></button>
+            {% endfor %}
         </div>
-
-        <!-- Current Location Display -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Current Location</h5>
-                <p class="card-text">
-                    Tracking birds near {{ location.name }}<br>
-                    Coordinates: {{ location.latitude }}, {{ location.longitude }}<br>
-                    Radius: {{ location.radius }} miles
-                </p>
-                <a href="/report" class="btn btn-primary">View Latest Report</a>
-                <a href="/map" class="btn btn-secondary">View Map</a>
+        <div class="carousel-inner">
+            {% for image in carousel_images %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" 
+                     class="d-block w-100" alt="{{ image.title }}" style="height: 500px; object-fit: cover;">
+                {% if image.title or image.description %}
+                <div class="carousel-caption d-none d-md-block">
+                    {% if image.title %}
+                    <h5>{{ image.title }}</h5>
+                    {% endif %}
+                    {% if image.description %}
+                    <p>{{ image.description }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
+            {% endfor %}
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
 
-        <!-- Email Report Settings -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Email Report Settings</h5>
-                <div class="mb-3">
-                    <label for="emailTime" class="form-label">Daily Report Time</label>
-                    <div class="input-group" style="max-width: 200px;">
-                        <input type="time" class="form-control" id="emailTime" 
-                               value="{{ '%02d:%02d' % (email_schedule.hour, email_schedule.minute) }}">
-                        <button class="btn btn-primary" onclick="updateEmailSchedule()">Save</button>
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Welcome to Bird Tracker</h2>
+                <p>Track and monitor bird sightings in your favorite locations. Get real-time updates and weekly reports about the birds you're interested in.</p>
+                
+                {% if current_user.is_authenticated %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Your Locations</h5>
                     </div>
-                    <small class="text-muted">Reports will be sent daily at this time</small>
+                    <div class="card-body">
+                        <div id="map" style="height: 400px;"></div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <h4>Get Started</h4>
+                    <p>Sign up or log in to start tracking birds in your favorite locations.</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ url_for('auth.request_registration') }}" class="btn btn-outline-primary">Request Registration</a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Links</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li><a href="{{ url_for('main.locations') }}">View All Locations</a></li>
+                            <li><a href="{{ url_for('main.sightings') }}">Recent Sightings</a></li>
+                            {% if current_user.is_authenticated %}
+                            <li><a href="{{ url_for('main.profile') }}">Your Profile</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,81 +107,26 @@
 {% endblock %}
 
 {% block scripts %}
+{% if current_user.is_authenticated %}
 <script>
-    function searchLocation(query) {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const results = data.map(item => ({
-                    name: item.display_name,
-                    lat: parseFloat(item.lat),
-                    lon: parseFloat(item.lon)
-                }));
-                
-                // Update the datalist with results
-                const datalist = document.getElementById('locationResults');
-                datalist.innerHTML = '';
-                results.forEach(result => {
-                    const option = document.createElement('option');
-                    option.value = result.name;
-                    option.dataset.lat = result.lat;
-                    option.dataset.lon = result.lon;
-                    datalist.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Replace the Algolia autocomplete initialization with this
-    const locationInput = document.getElementById('locationSearch');
-    locationInput.addEventListener('input', (e) => {
-        if (e.target.value.length >= 3) {
-            searchLocation(e.target.value);
-        }
+function initMap() {
+    const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: { lat: 39.1031, lng: -84.5120 }  // Cincinnati coordinates
     });
 
-    locationInput.addEventListener('change', (e) => {
-        const datalist = document.getElementById('locationResults');
-        const selectedOption = Array.from(datalist.options).find(
-            option => option.value === e.target.value
-        );
-        
-        if (selectedOption) {
-            updateLocation({
-                name: selectedOption.value,
-                latitude: selectedOption.dataset.lat,
-                longitude: selectedOption.dataset.lon,
-                radius: document.getElementById('radius').value
-            });
-        }
+    // Add markers for user's locations
+    {% for location in current_user.locations %}
+    new google.maps.Marker({
+        position: { lat: {{ location.latitude }}, lng: {{ location.longitude }} },
+        map: map,
+        title: '{{ location.name }}'
     });
-
-    function updateEmailSchedule() {
-        const timeInput = document.getElementById('emailTime');
-        const [hours, minutes] = timeInput.value.split(':');
-        
-        const formData = new FormData();
-        formData.append('hour', hours);
-        formData.append('minute', minutes);
-        
-        fetch('/api/email-schedule', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Email schedule updated successfully');
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error updating email schedule');
-        });
-    }
+    {% endfor %}
+}
 </script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap">
+</script>
+{% endif %}
 {% endblock %} 

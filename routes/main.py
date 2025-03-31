@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from models import db, User
+from models import db, User, CarouselImage
 from bird_tracker import BirdSightingTracker
 import os
 import logging
@@ -17,12 +17,8 @@ def index():
             'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
         }
         
-        # Get carousel images
-        image_dir = os.path.join('static', 'images', 'birds')
-        carousel_images = []
-        if os.path.exists(image_dir):
-            carousel_images = [f for f in os.listdir(image_dir) 
-                             if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        # Get active carousel images, ordered by their order field
+        carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
         
         # Get Google Places API key
         google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
