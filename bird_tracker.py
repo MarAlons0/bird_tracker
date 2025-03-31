@@ -397,14 +397,14 @@ Observations:
             # Add markers for each observation
             for obs in observations:
                 # Determine bird type based on scientific name
-                scientific_name = obs['scientific_name'].lower()
-                if any(raptor in scientific_name for raptor in ['accipiter', 'buteo', 'haliaeetus', 'falco']):
+                sci_name = obs.get('sciName', '').lower()  # Use sciName instead of scientific_name
+                if any(raptor in sci_name for raptor in ['accipiter', 'buteo', 'haliaeetus', 'falco']):
                     color = bird_colors['raptor']
-                elif any(waterfowl in scientific_name for waterfowl in ['anas', 'branta', 'aix', 'mergus']):
+                elif any(waterfowl in sci_name for waterfowl in ['anas', 'branta', 'aix', 'mergus']):
                     color = bird_colors['waterfowl']
-                elif any(songbird in scientific_name for songbird in ['cardinalis', 'melospiza', 'setophaga', 'passerina']):
+                elif any(songbird in sci_name for songbird in ['cardinalis', 'melospiza', 'setophaga', 'passerina']):
                     color = bird_colors['songbird']
-                elif any(shorebird in scientific_name for shorebird in ['calidris', 'charadrius', 'tringa', 'limosa']):
+                elif any(shorebird in sci_name for shorebird in ['calidris', 'charadrius', 'tringa', 'limosa']):
                     color = bird_colors['shorebird']
                 else:
                     color = bird_colors['other']
