@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, RegistrationRequest
 from datetime import datetime, timedelta
 import secrets
-from flask_mail import Message
+from flask_mail import Message, current_app
 import os
 import logging
 import smtplib
@@ -157,7 +157,7 @@ def request_registration():
             To approve or reject this request, please visit:
             {url_for('admin.registration_requests', _external=True)}
             """
-            mail.send(msg)
+            current_app.mail.send(msg)
         
         # Send confirmation email to user
         msg = Message(
@@ -174,7 +174,7 @@ def request_registration():
         Best regards,
         The Bird Tracker Team
         """
-        mail.send(msg)
+        current_app.mail.send(msg)
         
         return render_template('request_registration.html', 
             success="Your registration request has been submitted successfully.")

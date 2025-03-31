@@ -96,7 +96,7 @@ def process_registration_request(request_id, action):
         Best regards,
         The Bird Tracker Team
         """
-        mail.send(msg)
+        current_app.mail.send(msg)
         
         flash('Registration request approved.', 'success')
     
@@ -120,7 +120,7 @@ def process_registration_request(request_id, action):
         Best regards,
         The Bird Tracker Team
         """
-        mail.send(msg)
+        current_app.mail.send(msg)
         
         flash('Registration request rejected.', 'success')
     
