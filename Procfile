@@ -1,2 +1,2 @@
 web: gunicorn app:app
-scheduler: python send_report.py 
+scheduler: python -c "from bird_tracker import BirdSightingTracker; tracker = BirdSightingTracker(); import time; time.sleep(1); tracker.scheduler.print_jobs()" 
