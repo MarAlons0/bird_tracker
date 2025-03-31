@@ -527,11 +527,12 @@ Observations:
                     server.starttls()
                     server.login(self.email_config['sender_email'], self.email_config['sender_password'])
                     
-                    # Send to each user individually to maintain privacy
-                    for user in subscribed_users:
-                        msg['Bcc'] = user.email
-                        server.send_message(msg)
-                        msg['Bcc'] = None  # Clear Bcc for next iteration
+                    # Set BCC recipients
+                    bcc_recipients = [user.email for user in subscribed_users]
+                    msg['Bcc'] = ', '.join(bcc_recipients)
+                    
+                    # Send the email once with all BCC recipients
+                    server.send_message(msg)
                 
                 logging.info(f"Email sent successfully to {len(subscribed_users)} subscribers")
             
