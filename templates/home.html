@@ -70,7 +70,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Featured Birds</h5>
-            <div id="featuredBirdsCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div id="featuredBirdsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                 <div class="carousel-indicators">
                     {% for image in carousel_images %}
                     <button type="button" data-bs-target="#featuredBirdsCarousel" data-bs-slide-to="{{ loop.index0 }}" 
