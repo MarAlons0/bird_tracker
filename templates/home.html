@@ -146,10 +146,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Google Places Autocomplete
+function initAutocomplete() {
     const locationInput = document.getElementById('locationSearch');
     if (locationInput && google.maps && google.maps.places) {
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
@@ -173,9 +171,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
                 document.getElementById('longitude').value = place.geometry.location.lng();
+                console.log('Place selected:', place.name);
             }
         });
+    } else {
+        console.error('Google Maps API not loaded properly');
     }
+}
+
+// Load Google Maps API
+function loadGoogleMapsAPI() {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadGoogleMapsAPI();
 
     // Handle location update
     document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
