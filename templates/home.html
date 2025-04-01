@@ -169,7 +169,7 @@ function initAutocomplete() {
 
 function loadGoogleMapsAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key={{ config.google_places_api_key }}&libraries=places&callback=initAutocomplete&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete&loading=async`;
     script.async = true;
     document.head.appendChild(script);
 }
