@@ -205,7 +205,7 @@ def sightings():
         return render_template('sightings.html',
                              observations=observations,
                              location=current_app.tracker.active_location,
-                             google_maps_api_key=google_places_key)
+                             google_places_api_key=google_places_key)
     except Exception as e:
         logger.error(f"Error in sightings route: {e}")
         return render_template('error.html', error=str(e))
