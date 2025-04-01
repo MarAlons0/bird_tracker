@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-MAX_IMAGE_SIZE = (1920, 1080)  # Maximum dimensions for uploaded images
+MAX_IMAGE_SIZE = (1500, 1500)  # Maximum dimensions for square images
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -59,15 +59,23 @@ def save_image(file, upload_folder):
         # Resize if larger than maximum dimensions while maintaining aspect ratio
         if image.size[0] > MAX_IMAGE_SIZE[0] or image.size[1] > MAX_IMAGE_SIZE[1]:
             try:
-                image.thumbnail(MAX_IMAGE_SIZE, Image.Resampling.LANCZOS)
-                logger.info(f"Resized image to: {image.size}")
+                # For square images, we want to maintain the square aspect ratio
+                if image.size[0] == image.size[1]:
+                    # Calculate the scaling factor to fit within MAX_IMAGE_SIZE
+                    scale = min(MAX_IMAGE_SIZE[0] / image.size[0], MAX_IMAGE_SIZE[1] / image.size[1])
+                    new_size = (int(image.size[0] * scale), int(image.size[1] * scale))
+                    image = image.resize(new_size, Image.Resampling.LANCZOS)
+                    logger.info(f"Resized square image to: {new_size}")
+                else:
+                    image.thumbnail(MAX_IMAGE_SIZE, Image.Resampling.LANCZOS)
+                    logger.info(f"Resized image to: {image.size}")
             except Exception as e:
                 logger.error(f"Error resizing image: {str(e)}")
                 return None
         
         # Save with optimization
         try:
-            image.save(filepath, optimize=True, quality=85)
+            image.save(filepath, optimize=True, quality=90)  # Increased quality for better image fidelity
             logger.info(f"Successfully saved image to: {filepath}")
             return filename
         except Exception as e:
