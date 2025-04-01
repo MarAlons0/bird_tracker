@@ -150,25 +150,20 @@
 function initAutocomplete() {
     const locationInput = document.getElementById('locationSearch');
     if (locationInput && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: [
-                'national_park',
-                'state_park',
-                'park',
-                'natural_feature',
-                'wildlife_refuge',
-                'wildlife_park',
-                'botanical_garden',
-                'locality',
-                'administrative_area_level_1',
-                'administrative_area_level_2'
-            ],
-            componentRestrictions: { country: 'us' }
+        // Create a new PlaceAutocompleteElement
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: locationInput,
+            fields: ['geometry', 'name'],
+            restrictions: {
+                country: 'us',
+                types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'park', 'natural_feature']
+            }
         });
 
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            if (place.geometry) {
+        // Handle place selection
+        autocomplete.addEventListener('place_changed', function() {
+            const place = autocomplete.value;
+            if (place && place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
                 document.getElementById('longitude').value = place.geometry.location.lng();
                 console.log('Place selected:', place.name);
@@ -182,7 +177,7 @@ function initAutocomplete() {
 // Load Google Maps API
 function loadGoogleMapsAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async&callback=initAutocomplete`;
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
