@@ -89,7 +89,7 @@ def admin_panel():
                 flash('User deleted successfully.', 'success')
     
     users = User.query.all()
-    return render_template('admin.html', users=users)
+    return render_template('admin/users.html', users=users)
 
 @bp.route('/registration-requests')
 @admin_required
