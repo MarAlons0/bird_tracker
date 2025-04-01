@@ -155,15 +155,20 @@
 function initializeAutocomplete() {
     const locationInput = document.getElementById('locationSearch');
     if (locationInput && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['(cities)'],  // Only allow cities
-            componentRestrictions: { country: 'us' }
+        // Create a new PlaceAutocompleteElement
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: locationInput,
+            fields: ['geometry', 'name'],
+            restrictions: {
+                country: 'us',
+                types: ['locality', 'administrative_area_level_1']
+            }
         });
 
         // Handle place selection
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            if (place.geometry) {
+        autocomplete.addEventListener('place_changed', function() {
+            const place = autocomplete.value;
+            if (place && place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
                 document.getElementById('longitude').value = place.geometry.location.lng();
             }
