@@ -298,8 +298,8 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
             `;
             document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
             
-            // Refresh the page to update all data
-            window.location.reload();
+            // Redirect to map page to refresh data
+            window.location.href = '{{ url_for("main.map") }}';
         } else {
             throw new Error(data.message || 'Failed to update location');
         }
