@@ -84,11 +84,21 @@
                 <div class="carousel-inner">
                     {% for image in carousel_images %}
                     <div class="carousel-item {% if loop.first %}active{% endif %}">
-                        <div class="d-flex justify-content-center">
+                        <div class="d-flex flex-column align-items-center">
                             <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" 
-                                 class="d-block" 
+                                 class="d-block mb-3" 
                                  alt="{{ image.title }}"
                                  style="width: 300px; height: 300px; object-fit: contain;">
+                            {% if image.title or image.description %}
+                            <div class="text-center" style="max-width: 500px;">
+                                {% if image.title %}
+                                <h5 class="mb-2">{{ image.title }}</h5>
+                                {% endif %}
+                                {% if image.description %}
+                                <p class="text-muted mb-0">{{ image.description }}</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
