@@ -163,6 +163,14 @@
 <script>
 let autocompleteInstance = null;
 
+// Initialize the carousel
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = new bootstrap.Carousel(document.getElementById('featuredBirdsCarousel'), {
+        interval: 3000,
+        ride: 'carousel'
+    });
+});
+
 // Initialize Google Places Autocomplete
 function initAutocomplete() {
     try {
