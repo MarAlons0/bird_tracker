@@ -148,113 +148,111 @@
 {% block scripts %}
 <script>
 function initAutocomplete() {
-    const locationInput = document.getElementById('locationSearch');
+    const locationInput = document.getElementById('location');
     if (locationInput && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: locationInput,
+            fields: ['geometry', 'name', 'formatted_address'],
             types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'park', 'natural_feature'],
             componentRestrictions: { country: 'us' }
         });
 
-        autocomplete.addListener('place_changed', function() {
+        autocomplete.addEventListener('place_changed', () => {
             const place = autocomplete.getPlace();
             if (place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
                 document.getElementById('longitude').value = place.geometry.location.lng();
-                console.log('Place selected:', place.name);
+                document.getElementById('location').value = place.formatted_address;
+                console.log('Place selected:', place);
             }
         });
-    } else {
-        console.error('Google Maps API not loaded properly');
     }
 }
 
-// Load Google Maps API
 function loadGoogleMapsAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key={{ config.google_places_api_key }}&libraries=places&callback=initAutocomplete&loading=async`;
     script.async = true;
-    script.defer = true;
     document.head.appendChild(script);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleMapsAPI();
+// Load Google Maps API when the page loads
+document.addEventListener('DOMContentLoaded', loadGoogleMapsAPI);
 
-    // Handle location update
-    document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const latitude = document.getElementById('latitude').value;
-        const longitude = document.getElementById('longitude').value;
-        const radius = document.getElementById('radius').value;
-        
-        if (!latitude || !longitude) {
-            alert('Please select a valid location from the dropdown suggestions.');
-            return;
+// Handle location update
+document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+    const radius = document.getElementById('radius').value;
+    
+    if (!latitude || !longitude) {
+        alert('Please select a valid location from the dropdown suggestions.');
+        return;
+    }
+    
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+    
+    // Send update request
+    fetch('{{ url_for("main.update_location") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+            radius: parseFloat(radius)
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-        
-        // Show loading modal
-        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        loadingModal.show();
-        
-        // Send update request
-        fetch('{{ url_for("main.update_location") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                latitude: parseFloat(latitude),
-                longitude: parseFloat(longitude),
-                radius: parseFloat(radius)
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Update the display
+            const locationDisplay = document.querySelector('.card-body strong');
+            if (locationDisplay) {
+                locationDisplay.textContent = data.location.name;
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update the display
-                const locationDisplay = document.querySelector('.card-body strong');
-                if (locationDisplay) {
-                    locationDisplay.textContent = data.location.name;
-                }
-                
-                // Close modals
-                bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
-                loadingModal.hide();
-                
-                // Show success message
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-success alert-dismissible fade show';
-                alert.innerHTML = `
-                    Location updated successfully!
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
-                
-                // Refresh the page to update all data
-                window.location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to update location');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+            
+            // Close modals
+            bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
             loadingModal.hide();
             
-            // Show error message
+            // Show success message
             const alert = document.createElement('div');
-            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.className = 'alert alert-success alert-dismissible fade show';
             alert.innerHTML = `
-                Error: ${error.message}
+                Location updated successfully!
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
-        });
+            
+            // Refresh the page to update all data
+            window.location.reload();
+        } else {
+            throw new Error(data.message || 'Failed to update location');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        loadingModal.hide();
+        
+        // Show error message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show';
+        alert.innerHTML = `
+            Error: ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
     });
 });
 </script>
