@@ -4,7 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <style>
     .location-section {
         background: #f8f9fa;
@@ -168,20 +168,19 @@ function initAutocomplete() {
             return;
         }
         
-        const options = {
-            types: ['geocode'],
-            fields: ['geometry', 'name', 'formatted_address'],
-            componentRestrictions: { country: 'us' }
-        };
-        
         // Clean up previous instance if it exists
         if (autocompleteInstance) {
             google.maps.event.clearInstanceListeners(autocompleteInstance);
             autocompleteInstance = null;
         }
         
-        // Create new autocomplete instance
-        autocompleteInstance = new google.maps.places.Autocomplete(input, options);
+        // Create new autocomplete instance using PlaceAutocompleteElement
+        autocompleteInstance = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: input,
+            fields: ['geometry', 'name', 'formatted_address'],
+            componentRestrictions: { country: 'us' }
+        });
+        
         input.setAttribute('autocomplete', 'off');  // Prevent browser autocomplete
         
         // Update placeholder text to be more descriptive
