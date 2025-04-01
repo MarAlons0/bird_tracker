@@ -4,6 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <style>
     .location-section {
         background: #f8f9fa;
@@ -150,12 +151,13 @@
 function initAutocomplete() {
     const locationInput = document.getElementById('location');
     if (locationInput && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement(locationInput, {
             types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'park', 'natural_feature'],
-            componentRestrictions: { country: 'us' }
+            componentRestrictions: { country: 'us' },
+            fields: ['geometry', 'formatted_address']
         });
 
-        autocomplete.addListener('place_changed', function() {
+        autocomplete.addEventListener('place_changed', function() {
             const place = autocomplete.getPlace();
             if (place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
@@ -167,16 +169,8 @@ function initAutocomplete() {
     }
 }
 
-function loadGoogleMapsAPI() {
-    const script = document.createElement('script');
-    console.log('API Key:', '{{ google_places_api_key }}');
-    script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete&loading=async`;
-    script.async = true;
-    document.head.appendChild(script);
-}
-
-// Load Google Maps API when the page loads
-document.addEventListener('DOMContentLoaded', loadGoogleMapsAPI);
+// Initialize autocomplete when the page loads
+document.addEventListener('DOMContentLoaded', initAutocomplete);
 
 // Handle location update
 document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
