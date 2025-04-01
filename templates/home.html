@@ -150,13 +150,13 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <script>
 function initializeAutocomplete() {
     const locationInput = document.getElementById('locationSearch');
     if (locationInput && google.maps && google.maps.places) {
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['(cities)', 'park'],
+            types: ['(cities)'],  // Only allow cities
             componentRestrictions: { country: 'us' }
         });
 

@@ -37,7 +37,5 @@ function initMaps() {
     {% endfor %}
 }
 </script>
-<script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&callback=initMaps">
-</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initMaps&loading=async"></script>
 {% endblock %} 
