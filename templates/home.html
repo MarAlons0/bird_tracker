@@ -4,7 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places"></script>
 <style>
     .location-section {
         background: #f8f9fa;
@@ -149,15 +149,25 @@
 {% block scripts %}
 <script>
 function initAutocomplete() {
+    console.log('Initializing autocomplete...');
     const locationInput = document.getElementById('location');
-    if (locationInput && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.PlaceAutocompleteElement(locationInput, {
+    if (!locationInput) {
+        console.error('Location input element not found');
+        return;
+    }
+    
+    if (!google.maps || !google.maps.places) {
+        console.error('Google Maps API not loaded');
+        return;
+    }
+    
+    try {
+        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
             types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'park', 'natural_feature'],
-            componentRestrictions: { country: 'us' },
-            fields: ['geometry', 'formatted_address']
+            componentRestrictions: { country: 'us' }
         });
 
-        autocomplete.addEventListener('place_changed', function() {
+        autocomplete.addListener('place_changed', function() {
             const place = autocomplete.getPlace();
             if (place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
@@ -166,6 +176,9 @@ function initAutocomplete() {
                 console.log('Place selected:', place);
             }
         });
+        console.log('Autocomplete initialized successfully');
+    } catch (error) {
+        console.error('Error initializing autocomplete:', error);
     }
 }
 
