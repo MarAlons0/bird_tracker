@@ -2,6 +2,7 @@ import os
 from werkzeug.utils import secure_filename
 from PIL import Image
 import logging
+from datetime import datetime
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_IMAGE_SIZE = (1920, 1080)  # Maximum dimensions for uploaded images
@@ -25,7 +26,11 @@ def save_image(file, upload_folder):
             logger.error(f"Invalid file type: {file.filename}")
             return None
             
-        filename = secure_filename(file.filename)
+        # Generate a unique filename with timestamp
+        original_filename = secure_filename(file.filename)
+        name, ext = os.path.splitext(original_filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{name}_{timestamp}{ext}"
         filepath = os.path.join(upload_folder, filename)
         
         # Ensure the upload folder exists
