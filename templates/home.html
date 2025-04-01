@@ -119,12 +119,8 @@
                     <div class="mb-3">
                         <label for="radius" class="form-label">Radius (miles)</label>
                         <select class="form-select" id="radius">
-                            <option value="5">5 miles</option>
-                            <option value="10">10 miles</option>
-                            <option value="15">15 miles</option>
-                            <option value="20">20 miles</option>
                             <option value="25">25 miles</option>
-                            <option value="30">30 miles</option>
+                            <option value="50">50 miles</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary" id="updateLocationBtn">Update Location</button>
@@ -152,33 +148,34 @@
 {% block scripts %}
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <script>
-function initializeAutocomplete() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Google Places Autocomplete
     const locationInput = document.getElementById('locationSearch');
     if (locationInput && google.maps && google.maps.places) {
-        // Create a new PlaceAutocompleteElement
-        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
-            inputElement: locationInput,
-            fields: ['geometry', 'name'],
-            restrictions: {
-                country: 'us',
-                types: ['locality', 'administrative_area_level_1']
-            }
+        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+            types: [
+                'national_park',
+                'state_park',
+                'park',
+                'natural_feature',
+                'wildlife_refuge',
+                'wildlife_park',
+                'botanical_garden',
+                'locality',
+                'administrative_area_level_1',
+                'administrative_area_level_2'
+            ],
+            componentRestrictions: { country: 'us' }
         });
 
-        // Handle place selection
-        autocomplete.addEventListener('place_changed', function() {
-            const place = autocomplete.value;
-            if (place && place.geometry) {
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
                 document.getElementById('latitude').value = place.geometry.location.lat();
                 document.getElementById('longitude').value = place.geometry.location.lng();
             }
         });
     }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Google Places Autocomplete
-    initializeAutocomplete();
 
     // Handle location update
     document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
@@ -188,9 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const longitude = document.getElementById('longitude').value;
         const radius = document.getElementById('radius').value;
         
-        // Show loading state
-        document.getElementById('updateLocationBtn').disabled = true;
-        document.getElementById('updateLocationBtn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+        if (!latitude || !longitude) {
+            alert('Please select a valid location from the dropdown suggestions.');
+            return;
+        }
+        
+        // Show loading modal
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
         
         // Send update request
         fetch('{{ url_for("main.update_location") }}', {
@@ -204,17 +206,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 radius: parseFloat(radius)
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Update the display
-                document.getElementById('currentLocation').textContent = 
-                    `${data.location.name} (${parseFloat(data.location.latitude).toFixed(4)}, ${parseFloat(data.location.longitude).toFixed(4)})`;
-                document.getElementById('currentRadius').textContent = `${data.location.radius} miles`;
+                const locationDisplay = document.querySelector('.card-body strong');
+                if (locationDisplay) {
+                    locationDisplay.textContent = data.location.name;
+                }
                 
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
-                modal.hide();
+                // Close modals
+                bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
+                loadingModal.hide();
                 
                 // Show success message
                 const alert = document.createElement('div');
@@ -223,29 +231,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     Location updated successfully!
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
-                document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+                document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
                 
-                // Fetch new sightings
-                fetch('{{ url_for("main.sightings") }}')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Update sightings display
-                            const sightingsList = document.getElementById('sightingsList');
-                            sightingsList.innerHTML = '';
-                            data.sightings.forEach(sighting => {
-                                const item = document.createElement('li');
-                                item.className = 'list-group-item';
-                                item.textContent = `${sighting.species} (${sighting.count})`;
-                                sightingsList.appendChild(item);
-                            });
-                        }
-                    });
+                // Refresh the page to update all data
+                window.location.reload();
             } else {
                 throw new Error(data.message || 'Failed to update location');
             }
         })
         .catch(error => {
+            console.error('Error:', error);
+            loadingModal.hide();
+            
             // Show error message
             const alert = document.createElement('div');
             alert.className = 'alert alert-danger alert-dismissible fade show';
@@ -253,12 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Error: ${error.message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-            document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
-        })
-        .finally(() => {
-            // Reset button state
-            document.getElementById('updateLocationBtn').disabled = false;
-            document.getElementById('updateLocationBtn').innerHTML = 'Update Location';
+            document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
         });
     });
 });
