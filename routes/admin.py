@@ -22,6 +22,32 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@bp.route('/dashboard')
+@login_required
+@admin_required
+def dashboard():
+    """Admin dashboard showing overview statistics"""
+    total_users = User.query.count()
+    active_users = User.query.filter_by(is_active=True).count()
+    pending_requests = RegistrationRequest.query.filter_by(status='pending').count()
+    total_carousel_images = CarouselImage.query.count()
+    active_carousel_images = CarouselImage.query.filter_by(is_active=True).count()
+    
+    return render_template('admin/dashboard.html',
+                         total_users=total_users,
+                         active_users=active_users,
+                         pending_requests=pending_requests,
+                         total_carousel_images=total_carousel_images,
+                         active_carousel_images=active_carousel_images)
+
+@bp.route('/users')
+@login_required
+@admin_required
+def users():
+    """Admin page for managing users"""
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
 @admin_required

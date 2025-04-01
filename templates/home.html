@@ -85,7 +85,7 @@
                     {% for image in carousel_images %}
                     <div class="carousel-item {% if loop.first %}active{% endif %}">
                         <div class="d-flex justify-content-center">
-                            <img src="{{ url_for('static', filename='images/birds/' + image.filename) }}" 
+                            <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" 
                                  class="d-block" 
                                  alt="{{ image.title }}"
                                  style="width: 300px; height: 300px; object-fit: contain;">
