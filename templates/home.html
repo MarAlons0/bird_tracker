@@ -150,23 +150,30 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
 <script>
+function initializeAutocomplete() {
+    const locationInput = document.getElementById('locationSearch');
+    if (locationInput && google.maps && google.maps.places) {
+        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+            types: ['(cities)', 'park'],
+            componentRestrictions: { country: 'us' }
+        });
+
+        // Handle place selection
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                document.getElementById('latitude').value = place.geometry.location.lat();
+                document.getElementById('longitude').value = place.geometry.location.lng();
+            }
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Google Places Autocomplete
-    const locationInput = document.getElementById('locationSearch');
-    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-        types: ['(cities)', 'park'],
-        componentRestrictions: { country: 'us' }
-    });
-
-    // Handle place selection
-    autocomplete.addListener('place_changed', function() {
-        const place = autocomplete.getPlace();
-        if (place.geometry) {
-            document.getElementById('latitude').value = place.geometry.location.lat();
-            document.getElementById('longitude').value = place.geometry.location.lng();
-        }
-    });
+    initializeAutocomplete();
 
     // Handle location update
     document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
