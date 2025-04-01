@@ -248,8 +248,9 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
     const latitude = document.getElementById('latitude').value;
     const longitude = document.getElementById('longitude').value;
     const radius = document.getElementById('radius').value;
+    const locationName = document.getElementById('location').value;
     
-    if (!latitude || !longitude) {
+    if (!latitude || !longitude || !locationName) {
         alert('Please select a valid location from the dropdown suggestions.');
         return;
     }
@@ -258,17 +259,17 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
     loadingModal.show();
     
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('name', locationName);
+    formData.append('lat', latitude);
+    formData.append('lng', longitude);
+    formData.append('radius', radius);
+    
     // Send update request
     fetch('{{ url_for("main.update_location") }}', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            latitude: parseFloat(latitude),
-            longitude: parseFloat(longitude),
-            radius: parseFloat(radius)
-        })
+        body: formData
     })
     .then(response => {
         if (!response.ok) {
@@ -281,7 +282,7 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
             // Update the display
             const locationDisplay = document.querySelector('.card-body strong');
             if (locationDisplay) {
-                locationDisplay.textContent = data.location.name;
+                locationDisplay.textContent = locationName;
             }
             
             // Close modals
