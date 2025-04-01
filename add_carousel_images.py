@@ -1,5 +1,5 @@
 import os
-from app import create_app
+from app import create_app, db
 from models import CarouselImage
 from werkzeug.utils import secure_filename
 
@@ -59,11 +59,11 @@ def add_carousel_images():
                 continue
                 
             # Add to database
-            CarouselImage.db.session.add(image)
+            db.session.add(image)
             print(f"Added image {filename} to database")
         
         # Commit changes
-        CarouselImage.db.session.commit()
+        db.session.commit()
         print(f"Added {len(images)} images to the carousel database")
 
 if __name__ == '__main__':
