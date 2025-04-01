@@ -19,6 +19,9 @@
     .radius-selector {
         margin-top: 10px;
     }
+    .pac-container {
+        z-index: 10000;  /* Ensure dropdown appears above modal */
+    }
 </style>
 {% endblock %}
 
@@ -148,42 +151,95 @@
 
 {% block scripts %}
 <script>
+let autocompleteInstance = null;
+
+// Initialize Google Places Autocomplete
 function initAutocomplete() {
-    console.log('Initializing autocomplete...');
-    const locationInput = document.getElementById('location');
-    if (!locationInput) {
-        console.error('Location input element not found');
-        return;
-    }
-    
-    if (!google.maps || !google.maps.places) {
-        console.error('Google Maps API not loaded');
-        return;
-    }
-    
     try {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'park', 'natural_feature'],
+        console.log("Initializing Google Places Autocomplete...");
+        const input = document.getElementById('location');
+        
+        if (!google || !google.maps || !google.maps.places) {
+            console.error("Google Maps API not loaded correctly");
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'Error: Google Maps API not available';
+            input.parentNode.appendChild(errorDiv);
+            return;
+        }
+        
+        const options = {
+            types: ['geocode'],
+            fields: ['geometry', 'name', 'formatted_address'],
             componentRestrictions: { country: 'us' }
+        };
+        
+        // Clean up previous instance if it exists
+        if (autocompleteInstance) {
+            google.maps.event.clearInstanceListeners(autocompleteInstance);
+            autocompleteInstance = null;
+        }
+        
+        // Create new autocomplete instance
+        autocompleteInstance = new google.maps.places.Autocomplete(input, options);
+        input.setAttribute('autocomplete', 'off');  // Prevent browser autocomplete
+        
+        // Update placeholder text to be more descriptive
+        input.placeholder = "Enter a city, park, or location name...";
+        
+        autocompleteInstance.addListener('place_changed', function() {
+            const place = autocompleteInstance.getPlace();
+            console.log("Place selected:", place);
+            
+            if (!place.geometry || !place.geometry.location) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-warning mt-2';
+                errorDiv.textContent = 'Please select a location from the dropdown suggestions';
+                input.parentNode.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
+                return;
+            }
+            
+            // Update hidden form fields
+            document.getElementById('latitude').value = place.geometry.location.lat();
+            document.getElementById('longitude').value = place.geometry.location.lng();
+            document.getElementById('location').value = place.formatted_address || place.name;
+            
+            // Show success feedback
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success mt-2';
+            successDiv.textContent = 'Location selected successfully';
+            input.parentNode.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
         });
 
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            if (place.geometry) {
-                document.getElementById('latitude').value = place.geometry.location.lat();
-                document.getElementById('longitude').value = place.geometry.location.lng();
-                document.getElementById('location').value = place.formatted_address;
-                console.log('Place selected:', place);
+        // Prevent form submission on enter
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
             }
         });
-        console.log('Autocomplete initialized successfully');
+
+        // Force dropdown to show when focusing on input
+        input.addEventListener('focus', function() {
+            this.value = '';  // Clear the input to force dropdown to show
+        });
+
     } catch (error) {
-        console.error('Error initializing autocomplete:', error);
+        console.error("Error initializing Places Autocomplete:", error);
     }
 }
 
-// Initialize autocomplete when the page loads
-document.addEventListener('DOMContentLoaded', initAutocomplete);
+// Initialize when modal is shown
+document.getElementById('locationModal').addEventListener('shown.bs.modal', function () {
+    console.log("Modal shown - initializing autocomplete");
+    initAutocomplete();
+    
+    // Clear previous values
+    document.getElementById('location').value = '';
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+});
 
 // Handle location update
 document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
