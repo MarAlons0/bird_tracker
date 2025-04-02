@@ -208,8 +208,8 @@ class BirdSightingTracker:
     def _save_prompt_to_log(self, prompt_type, prompt_content):
         """Save prompts to a log file for review"""
         try:
-            # Create logs directory if it doesn't exist
-            logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+            # Create logs directory in webapp folder if it doesn't exist
+            logs_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'webapp', 'logs')
             os.makedirs(logs_dir, exist_ok=True)
             
             # Create a timestamp for the filename
