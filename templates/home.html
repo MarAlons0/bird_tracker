@@ -226,9 +226,9 @@ async function initAutocomplete() {
             componentRestrictions: { country: 'us' }
         });
 
-        // Listen for place selection
-        autocomplete.addListener('place_changed', async function() {
-            const placeId = autocomplete.getPlaceId();
+        // Listen for place selection using the new event system
+        input.addEventListener('place_changed', async function() {
+            const placeId = input.getAttribute('data-place-id');
             if (!placeId) {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'alert alert-warning mt-2';
