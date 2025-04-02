@@ -22,6 +22,9 @@
     .pac-container {
         z-index: 10000;  /* Ensure dropdown appears above modal */
     }
+    .modal-backdrop {
+        z-index: 9999;
+    }
 </style>
 {% endblock %}
 
@@ -162,12 +165,30 @@
 {% block scripts %}
 <script>
 let autocompleteInstance = null;
+let locationModal = null;
+let loadingModal = null;
 
-// Initialize the carousel
+// Initialize modals and autocomplete when document is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the carousel
     const carousel = new bootstrap.Carousel(document.getElementById('featuredBirdsCarousel'), {
         interval: 3000,
         ride: 'carousel'
+    });
+
+    // Initialize modals
+    locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
+    loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+
+    // Initialize autocomplete when location modal is shown
+    document.getElementById('locationModal').addEventListener('shown.bs.modal', function () {
+        console.log("Modal shown - initializing autocomplete");
+        initAutocomplete();
+        
+        // Clear previous values
+        document.getElementById('location').value = '';
+        document.getElementById('latitude').value = '';
+        document.getElementById('longitude').value = '';
     });
 });
 
@@ -249,19 +270,8 @@ function initAutocomplete() {
     }
 }
 
-// Initialize when modal is shown
-document.getElementById('locationModal').addEventListener('shown.bs.modal', function () {
-    console.log("Modal shown - initializing autocomplete");
-    initAutocomplete();
-    
-    // Clear previous values
-    document.getElementById('location').value = '';
-    document.getElementById('latitude').value = '';
-    document.getElementById('longitude').value = '';
-});
-
 // Handle location update
-document.getElementById('updateLocationForm').addEventListener('submit', function(e) {
+document.getElementById('updateLocationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const latitude = document.getElementById('latitude').value;
@@ -274,29 +284,29 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
         return;
     }
     
-    // Show loading modal
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    loadingModal.show();
-    
-    // Create FormData object
-    const formData = new FormData();
-    formData.append('name', locationName);
-    formData.append('lat', latitude);
-    formData.append('lng', longitude);
-    formData.append('radius', radius);
-    
-    // Send update request
-    fetch('{{ url_for("main.update_location") }}', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
+    try {
+        // Show loading modal
+        loadingModal.show();
+        
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('name', locationName);
+        formData.append('lat', latitude);
+        formData.append('lng', longitude);
+        formData.append('radius', radius);
+        
+        // Send update request
+        const response = await fetch('{{ url_for("main.update_location") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json();
-    })
-    .then(data => {
+        
+        const data = await response.json();
+        
         if (data.success) {
             // Update the display
             const locationDisplay = document.querySelector('.card-body strong');
@@ -305,7 +315,7 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
             }
             
             // Close modals
-            bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
+            locationModal.hide();
             loadingModal.hide();
             
             // Show success message
@@ -322,8 +332,7 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
         } else {
             throw new Error(data.message || 'Failed to update location');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
         loadingModal.hide();
         
@@ -335,7 +344,7 @@ document.getElementById('updateLocationForm').addEventListener('submit', functio
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
-    });
+    }
 });
 </script>
 {% endblock %} 
