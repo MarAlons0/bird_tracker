@@ -142,12 +142,18 @@
             <div class="modal-body">
                 <form id="updateLocationForm">
                     <div class="mb-3">
-                        <label for="location" class="form-label">Search Location</label>
-                        <input type="text" 
-                               id="location" 
-                               class="form-control" 
-                               placeholder="Enter a city or park name"
-                               required>
+                        <label for="location" class="form-label">Enter Location</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="location" 
+                                   class="form-control" 
+                                   placeholder="Enter a city or park name"
+                                   required>
+                            <button type="button" class="btn btn-outline-secondary" id="searchLocationBtn">
+                                Search
+                            </button>
+                        </div>
+                        <div id="locationSuggestions" class="list-group mt-2" style="display: none;"></div>
                     </div>
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
@@ -184,7 +190,6 @@
 <script>
 let locationModal = null;
 let loadingModal = null;
-let autocomplete = null;
 
 // Initialize modals when document is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -198,66 +203,87 @@ document.addEventListener('DOMContentLoaded', function() {
     locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
     loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
 
-    // Initialize autocomplete when location modal is shown
-    document.getElementById('locationModal').addEventListener('shown.bs.modal', function () {
-        console.log("Modal shown - initializing autocomplete");
-        // Wait for Google Maps API to be fully loaded
-        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-            initAutocomplete();
-        } else {
-            // If API is not loaded yet, wait for it
-            window.initAutocomplete = initAutocomplete;
-        }
-    });
+    // Initialize location search
+    initLocationSearch();
 });
 
-// Initialize Google Places Autocomplete
-function initAutocomplete() {
-    try {
-        console.log("Initializing Google Places Autocomplete...");
-        const input = document.getElementById('location');
-        
-        if (!google || !google.maps || !google.maps.places) {
-            console.error("Google Maps API not loaded correctly");
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-danger';
-            errorDiv.textContent = 'Error: Google Maps API not available';
-            input.parentNode.appendChild(errorDiv);
-            return;
+// Initialize location search functionality
+function initLocationSearch() {
+    const searchBtn = document.getElementById('searchLocationBtn');
+    const locationInput = document.getElementById('location');
+    const suggestionsDiv = document.getElementById('locationSuggestions');
+    let searchTimeout = null;
+
+    // Handle search button click
+    searchBtn.addEventListener('click', function() {
+        const query = locationInput.value.trim();
+        if (query) {
+            searchLocation(query);
         }
+    });
 
-        // Create autocomplete instance
-        autocomplete = new google.maps.places.Autocomplete(input, {
-            componentRestrictions: { country: 'us' }
-        });
-
-        // Add listener for place selection
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            
-            if (place.geometry) {
-                // Update hidden form fields
-                document.getElementById('latitude').value = place.geometry.location.lat();
-                document.getElementById('longitude').value = place.geometry.location.lng();
-                document.getElementById('location').value = place.formatted_address || place.name;
-                
-                // Show success feedback
-                const successDiv = document.createElement('div');
-                successDiv.className = 'alert alert-success mt-2';
-                successDiv.textContent = 'Location selected successfully';
-                input.parentNode.appendChild(successDiv);
-                setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
-            } else {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'alert alert-warning mt-2';
-                errorDiv.textContent = 'Please select a location from the dropdown suggestions';
-                input.parentNode.appendChild(errorDiv);
-                setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
+    // Handle input changes
+    locationInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length >= 3) {
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
             }
-        });
+            // Set new timeout
+            searchTimeout = setTimeout(() => searchLocation(query), 500);
+        } else {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
 
+    // Handle suggestion selection
+    suggestionsDiv.addEventListener('click', function(e) {
+        if (e.target.classList.contains('list-group-item')) {
+            const location = JSON.parse(e.target.dataset.location);
+            locationInput.value = location.name;
+            document.getElementById('latitude').value = location.lat;
+            document.getElementById('longitude').value = location.lng;
+            suggestionsDiv.style.display = 'none';
+            
+            // Show success feedback
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success mt-2';
+            successDiv.textContent = 'Location selected successfully';
+            locationInput.parentNode.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 2000);
+        }
+    });
+}
+
+// Search location using OpenStreetMap Nominatim API
+async function searchLocation(query) {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const data = await response.json();
+        const suggestionsDiv = document.getElementById('locationSuggestions');
+        
+        if (data.length > 0) {
+            suggestionsDiv.innerHTML = data.map(location => `
+                <a href="#" class="list-group-item list-group-item-action" 
+                   data-location='{"name": "${location.display_name}", "lat": ${location.lat}, "lng": ${location.lon}}'>
+                    ${location.display_name}
+                </a>
+            `).join('');
+            suggestionsDiv.style.display = 'block';
+        } else {
+            suggestionsDiv.innerHTML = '<div class="list-group-item">No locations found</div>';
+            suggestionsDiv.style.display = 'block';
+        }
     } catch (error) {
-        console.error("Error initializing Places Autocomplete:", error);
+        console.error('Error searching location:', error);
+        const suggestionsDiv = document.getElementById('locationSuggestions');
+        suggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Error searching location</div>';
+        suggestionsDiv.style.display = 'block';
     }
 }
 
@@ -271,7 +297,7 @@ document.getElementById('updateLocationForm').addEventListener('submit', async f
     const locationName = document.getElementById('location').value;
     
     if (!latitude || !longitude || !locationName) {
-        alert('Please select a valid location from the dropdown suggestions.');
+        alert('Please select a valid location from the search results.');
         return;
     }
     
