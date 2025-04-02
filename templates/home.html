@@ -19,18 +19,36 @@
         margin-top: 10px;
     }
     .modal-backdrop {
-        z-index: 9999;
+        z-index: 1040;
+    }
+    .modal {
+        z-index: 1050;
     }
     #locationSuggestions {
+        position: absolute;
+        width: calc(100% - 30px);
         max-height: 300px;
         overflow-y: auto;
-        z-index: 10000;
+        z-index: 1060;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: none;
     }
     .list-group-item {
         cursor: pointer;
+        border: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .list-group-item:last-child {
+        border-bottom: none;
     }
     .list-group-item:hover {
         background-color: #f8f9fa;
+    }
+    .location-input-container {
+        position: relative;
     }
 </style>
 {% endblock %}
@@ -136,17 +154,19 @@
                 <form id="updateLocationForm">
                     <div class="mb-3">
                         <label for="location" class="form-label">Enter Location</label>
-                        <div class="input-group">
-                            <input type="text" 
-                                   id="location" 
-                                   class="form-control" 
-                                   placeholder="Enter a city or park name"
-                                   required>
-                            <button type="button" class="btn btn-outline-secondary" id="searchLocationBtn">
-                                Search
-                            </button>
+                        <div class="location-input-container">
+                            <div class="input-group">
+                                <input type="text" 
+                                       id="location" 
+                                       class="form-control" 
+                                       placeholder="Enter a city or park name"
+                                       required>
+                                <button type="button" class="btn btn-outline-secondary" id="searchLocationBtn">
+                                    Search
+                                </button>
+                            </div>
+                            <div id="locationSuggestions" class="list-group mt-2"></div>
                         </div>
-                        <div id="locationSuggestions" class="list-group mt-2" style="display: none;"></div>
                     </div>
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
@@ -233,6 +253,7 @@ function initLocationSearch() {
     // Handle suggestion selection
     suggestionsDiv.addEventListener('click', function(e) {
         if (e.target.classList.contains('list-group-item')) {
+            e.preventDefault();
             const location = JSON.parse(e.target.dataset.location);
             locationInput.value = location.name;
             document.getElementById('latitude').value = location.lat;
@@ -245,6 +266,13 @@ function initLocationSearch() {
             successDiv.textContent = 'Location selected successfully';
             locationInput.parentNode.appendChild(successDiv);
             setTimeout(() => successDiv.remove(), 2000);
+        }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!locationInput.contains(e.target) && !suggestionsDiv.contains(e.target) && !searchBtn.contains(e.target)) {
+            suggestionsDiv.style.display = 'none';
         }
     });
 }
