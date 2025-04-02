@@ -143,12 +143,11 @@
                 <form id="updateLocationForm">
                     <div class="mb-3">
                         <label for="location" class="form-label">Search Location</label>
-                        <gmp-autocomplete
-                            id="location"
-                            class="form-control"
-                            placeholder="Enter a city or park name"
-                            required
-                        ></gmp-autocomplete>
+                        <input type="text" 
+                               id="location" 
+                               class="form-control" 
+                               placeholder="Enter a city or park name"
+                               required>
                     </div>
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
@@ -202,7 +201,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize autocomplete when location modal is shown
     document.getElementById('locationModal').addEventListener('shown.bs.modal', function () {
         console.log("Modal shown - initializing autocomplete");
-        initAutocomplete();
+        // Wait for Google Maps API to be fully loaded
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            initAutocomplete();
+        } else {
+            // If API is not loaded yet, wait for it
+            window.initAutocomplete = initAutocomplete;
+        }
     });
 });
 
@@ -221,53 +226,34 @@ function initAutocomplete() {
             return;
         }
 
-        // Configure the autocomplete element
-        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
-            inputElement: input,
+        // Create autocomplete instance
+        autocomplete = new google.maps.places.Autocomplete(input, {
             componentRestrictions: { country: 'us' }
         });
 
-        // Listen for place selection using the new event system
-        input.addEventListener('place_changed', async function() {
-            const placeId = input.getAttribute('data-place-id');
-            if (!placeId) {
+        // Add listener for place selection
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            
+            if (place.geometry) {
+                // Update hidden form fields
+                document.getElementById('latitude').value = place.geometry.location.lat();
+                document.getElementById('longitude').value = place.geometry.location.lng();
+                document.getElementById('location').value = place.formatted_address || place.name;
+                
+                // Show success feedback
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success mt-2';
+                successDiv.textContent = 'Location selected successfully';
+                input.parentNode.appendChild(successDiv);
+                setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
+            } else {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'alert alert-warning mt-2';
                 errorDiv.textContent = 'Please select a location from the dropdown suggestions';
                 input.parentNode.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
-                return;
             }
-
-            // Get place details using the Places Service
-            const service = new google.maps.places.PlacesService(document.createElement('div'));
-            service.getDetails({
-                placeId: placeId,
-                fields: ['geometry', 'name', 'formatted_address']
-            }, (place, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    console.log("Place details:", place);
-                    
-                    // Update hidden form fields
-                    document.getElementById('latitude').value = place.geometry.location.lat();
-                    document.getElementById('longitude').value = place.geometry.location.lng();
-                    document.getElementById('location').value = place.formatted_address || place.name;
-                    
-                    // Show success feedback
-                    const successDiv = document.createElement('div');
-                    successDiv.className = 'alert alert-success mt-2';
-                    successDiv.textContent = 'Location selected successfully';
-                    input.parentNode.appendChild(successDiv);
-                    setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
-                } else {
-                    console.error("Error getting place details:", status);
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'alert alert-danger mt-2';
-                    errorDiv.textContent = 'Error getting location details';
-                    input.parentNode.appendChild(errorDiv);
-                    setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
-                }
-            });
         });
 
     } catch (error) {
