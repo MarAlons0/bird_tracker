@@ -60,4 +60,11 @@ class CarouselImage(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
-        return f'<CarouselImage {self.filename}>' 
+        return f'<CarouselImage {self.filename}>'
+
+class ClaudePromptLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    prompt_type = db.Column(db.String(50), nullable=False)  # 'AI Analysis' or 'Chatbot'
+    prompt_content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    response_length = db.Column(db.Integer)  # Length of the response in characters 

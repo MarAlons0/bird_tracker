@@ -22,9 +22,13 @@ import time
 import random
 import tempfile
 from math import cos, sin
+from flask_sqlalchemy import SQLAlchemy
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Initialize SQLAlchemy
+db = SQLAlchemy()
 
 class BirdSightingTracker:
     def __init__(self):
@@ -206,30 +210,23 @@ class BirdSightingTracker:
             return []
     
     def _save_prompt_to_log(self, prompt_type: str, prompt: str):
-        """Save the prompt to a log file"""
+        """Save the prompt to the database"""
         try:
-            # Get the absolute path to the project root directory
-            root_dir = os.path.dirname(os.path.abspath(__file__))
-            logs_dir = os.path.join(root_dir, 'logs')
+            # Import here to avoid circular import
+            from app import create_app
+            from models import ClaudePromptLog
             
-            # Create logs directory if it doesn't exist
-            os.makedirs(logs_dir, exist_ok=True)
-            
-            # Generate timestamp for the log filename
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            log_filename = f'claude_prompts_{timestamp}.log'
-            log_path = os.path.join(logs_dir, log_filename)
-            
-            # Format the log entry
-            log_entry = f"Prompt Type: {prompt_type}\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n{prompt}\n\n{'='*80}\n\n"
-            
-            # Write to file
-            with open(log_path, 'w', encoding='utf-8') as f:
-                f.write(log_entry)
-                
-            print(f"Saved prompt to {log_path}")
+            with create_app().app_context():
+                log_entry = ClaudePromptLog(
+                    prompt_type=prompt_type,
+                    prompt_content=prompt,
+                    timestamp=datetime.utcnow()
+                )
+                db.session.add(log_entry)
+                db.session.commit()
+                print(f"Saved prompt to database with ID: {log_entry.id}")
         except Exception as e:
-            print(f"Error saving prompt to log: {str(e)}")
+            print(f"Error saving prompt to database: {str(e)}")
 
     def analyze_observations(self):
         try:
@@ -248,13 +245,15 @@ class BirdSightingTracker:
             location_name = recent_obs.get('locName', 'Unknown Location')
             location_radius = self.active_location.get('radius', 10)  # Default to 10 miles if not set
             
-            # Prepare the prompt
+            # Prepare the prompt with word limit
             prompt = f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
 
 1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
 2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts in this geographic area.
 3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem of {location_name}.
 4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity in this region.
+
+Important: Please keep your response under 500 words to ensure it displays properly on the website.
 
 Observations:
 {observations_text}"""
@@ -291,6 +290,13 @@ Observations:
                     if not analysis or len(analysis.strip()) < 50:
                         logging.warning("Received empty or very short analysis from Claude API")
                         return self._generate_basic_analysis()
+                    
+                    # Save response length to database
+                    with create_app().app_context():
+                        log_entry = ClaudePromptLog.query.order_by(ClaudePromptLog.id.desc()).first()
+                        if log_entry:
+                            log_entry.response_length = len(analysis)
+                            db.session.commit()
                     
                     return self._format_ai_analysis(analysis)
                     
@@ -800,13 +806,15 @@ Please provide a well-structured analysis that would be helpful for both casual 
             location_name = recent_obs.get('locName', 'Unknown Location')
             location_radius = self.active_location.get('radius', 10)  # Default to 10 miles if not set
             
-            # Prepare the prompt
+            # Prepare the prompt with word limit
             prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations from {location_name} (within a {location_radius}-mile radius).
 
 Recent observations:
 {formatted_observations}
 
 User question: {message}
+
+Important: Please keep your response under 300 words to ensure it displays properly in the chat interface.
 
 Please provide a helpful response based on the recent observations and your expertise. If the question is about specific species or behaviors not mentioned in the observations, you can still provide general information about those topics. Make sure to focus on the specific location ({location_name}) and its unique characteristics when relevant to the question."""
 
@@ -830,7 +838,16 @@ Please provide a helpful response based on the recent observations and your expe
                     )
                     
                     # Extract the response
-                    return response.content[0].text
+                    response_text = response.content[0].text
+                    
+                    # Save response length to database
+                    with create_app().app_context():
+                        log_entry = ClaudePromptLog.query.order_by(ClaudePromptLog.id.desc()).first()
+                        if log_entry:
+                            log_entry.response_length = len(response_text)
+                            db.session.commit()
+                    
+                    return response_text
                     
                 except Exception as e:
                     if attempt < max_retries - 1:
