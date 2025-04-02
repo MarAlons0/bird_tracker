@@ -223,7 +223,6 @@ async function initAutocomplete() {
         // Configure the autocomplete element
         const autocomplete = new google.maps.places.PlaceAutocompleteElement({
             inputElement: input,
-            fields: ['geometry', 'name', 'formatted_address'],
             componentRestrictions: { country: 'us' }
         });
 
@@ -244,6 +243,7 @@ async function initAutocomplete() {
             // Update hidden form fields
             document.getElementById('latitude').value = place.geometry.location.lat();
             document.getElementById('longitude').value = place.geometry.location.lng();
+            document.getElementById('location').value = place.formatted_address || place.name;
             
             // Show success feedback
             const successDiv = document.createElement('div');
