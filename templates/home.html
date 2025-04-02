@@ -4,7 +4,6 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <style>
     .location-section {
         background: #f8f9fa;
@@ -19,25 +18,19 @@
     .radius-selector {
         margin-top: 10px;
     }
-    .pac-container {
-        z-index: 10000;  /* Ensure dropdown appears above modal */
-    }
     .modal-backdrop {
         z-index: 9999;
     }
-    /* Add styles for the new autocomplete element */
-    .gmp-autocomplete {
-        width: 100%;
-        height: 40px;
-        padding: 8px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 1rem;
+    #locationSuggestions {
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 10000;
     }
-    .gmp-autocomplete:focus {
-        border-color: #86b7fe;
-        outline: 0;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    .list-group-item {
+        cursor: pointer;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
     }
 </style>
 {% endblock %}
