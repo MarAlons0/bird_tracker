@@ -356,15 +356,6 @@ document.getElementById('updateLocationForm').addEventListener('submit', async f
             locationModal.hide();
             loadingModal.hide();
             
-            // Show success message
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success alert-dismissible fade show';
-            alert.innerHTML = `
-                Location updated successfully!
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
-            
             // Redirect to map page to refresh data
             window.location.href = '{{ url_for("main.map") }}';
         } else {
