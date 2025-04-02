@@ -205,38 +205,31 @@ class BirdSightingTracker:
             logging.error(f"Error getting recent observations: {str(e)}")
             return []
     
-    def _save_prompt_to_log(self, prompt_type, prompt_content):
-        """Save prompts to a log file for review"""
+    def _save_prompt_to_log(self, prompt_type: str, prompt: str):
+        """Save the prompt to a log file"""
         try:
-            # Create logs directory in root folder if it doesn't exist
-            logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+            # Get the absolute path to the project root directory
+            root_dir = os.path.dirname(os.path.abspath(__file__))
+            logs_dir = os.path.join(root_dir, 'logs')
+            
+            # Create logs directory if it doesn't exist
             os.makedirs(logs_dir, exist_ok=True)
             
-            # Create a timestamp for the filename
+            # Generate timestamp for the log filename
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"claude_prompts_{timestamp}.log"
-            filepath = os.path.join(logs_dir, filename)
+            log_filename = f'claude_prompts_{timestamp}.log'
+            log_path = os.path.join(logs_dir, log_filename)
             
             # Format the log entry
-            log_entry = f"""
-{'='*80}
-Prompt Type: {prompt_type}
-Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-{'='*80}
-
-{prompt_content}
-
-{'='*80}
-"""
+            log_entry = f"Prompt Type: {prompt_type}\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n{prompt}\n\n{'='*80}\n\n"
             
             # Write to file
-            with open(filepath, 'w') as f:
+            with open(log_path, 'w', encoding='utf-8') as f:
                 f.write(log_entry)
-            
-            logging.info(f"Saved prompt to {filepath}")
-            
+                
+            print(f"Saved prompt to {log_path}")
         except Exception as e:
-            logging.error(f"Error saving prompt to log: {str(e)}")
+            print(f"Error saving prompt to log: {str(e)}")
 
     def analyze_observations(self):
         try:
