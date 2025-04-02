@@ -205,6 +205,39 @@ class BirdSightingTracker:
             logging.error(f"Error getting recent observations: {str(e)}")
             return []
     
+    def _save_prompt_to_log(self, prompt_type, prompt_content):
+        """Save prompts to a log file for review"""
+        try:
+            # Create logs directory if it doesn't exist
+            logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+            os.makedirs(logs_dir, exist_ok=True)
+            
+            # Create a timestamp for the filename
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"claude_prompts_{timestamp}.log"
+            filepath = os.path.join(logs_dir, filename)
+            
+            # Format the log entry
+            log_entry = f"""
+{'='*80}
+Prompt Type: {prompt_type}
+Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+{'='*80}
+
+{prompt_content}
+
+{'='*80}
+"""
+            
+            # Write to file
+            with open(filepath, 'w') as f:
+                f.write(log_entry)
+            
+            logging.info(f"Saved prompt to {filepath}")
+            
+        except Exception as e:
+            logging.error(f"Error saving prompt to log: {str(e)}")
+
     def analyze_observations(self):
         try:
             logging.info("Starting AI analysis of observations")
@@ -217,13 +250,28 @@ class BirdSightingTracker:
             observations_text = self.format_observations_for_analysis(self.get_recent_observations())
             logging.info(f"Formatted observations for analysis: {observations_text[:100]}...")
 
-            # Get location information
-            location_name = self.active_location['name']
-            location_radius = self.active_location['radius']
+            # Get location information from the most recent observation
+            recent_obs = self.get_recent_observations()[0]  # Get the most recent observation
+            location_name = recent_obs.get('locName', 'Unknown Location')
+            location_radius = self.active_location.get('radius', 10)  # Default to 10 miles if not set
+            
+            # Prepare the prompt
+            prompt = f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
+
+1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
+2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts in this geographic area.
+3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem of {location_name}.
+4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity in this region.
+
+Observations:
+{observations_text}"""
+
+            # Save the prompt to log
+            self._save_prompt_to_log("AI Analysis", prompt)
             
             # Try up to 3 times with exponential backoff
             max_retries = 3
-            base_delay = 2  # Increased base delay to 2 seconds
+            base_delay = 2
             
             for attempt in range(max_retries):
                 try:
@@ -239,15 +287,7 @@ class BirdSightingTracker:
                         messages=[
                             {
                                 "role": "user",
-                                "content": f"""As an expert naturalist with extensive experience in avian ecology and behavior, analyze these bird sightings from {location_name} (within a {location_radius}-mile radius) and provide a concise summary in the following format:
-
-1. Overview: A brief summary of the most significant observations and patterns, focusing on ecological significance and behavioral patterns specific to this location.
-2. Trends: Compare with previous week's sightings, noting any notable changes in species composition, migration patterns, or behavioral shifts in this geographic area.
-3. Birds of Prey: Focus on raptor sightings, their hunting behaviors, and ecological roles in the local ecosystem of {location_name}.
-4. Notable Sightings: Highlight any rare or unusual species observed, with emphasis on their ecological significance and potential implications for local biodiversity in this region.
-
-Observations:
-{observations_text}"""
+                                "content": prompt
                             }
                         ]
                     )
@@ -762,15 +802,23 @@ Please provide a well-structured analysis that would be helpful for both casual 
             # Format observations for context
             formatted_observations = self.format_observations_for_analysis(observations)
             
-            # Prepare the prompt for Claude
-            prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations from {self.active_location['name']} (within a {self.active_location['radius']}-mile radius).
+            # Get location information from the most recent observation
+            recent_obs = observations[0]  # Get the most recent observation
+            location_name = recent_obs.get('locName', 'Unknown Location')
+            location_radius = self.active_location.get('radius', 10)  # Default to 10 miles if not set
+            
+            # Prepare the prompt
+            prompt = f"""You are an expert ornithologist and birding guide. You have access to recent bird observations from {location_name} (within a {location_radius}-mile radius).
 
 Recent observations:
 {formatted_observations}
 
 User question: {message}
 
-Please provide a helpful response based on the recent observations and your expertise. If the question is about specific species or behaviors not mentioned in the observations, you can still provide general information about those topics."""
+Please provide a helpful response based on the recent observations and your expertise. If the question is about specific species or behaviors not mentioned in the observations, you can still provide general information about those topics. Make sure to focus on the specific location ({location_name}) and its unique characteristics when relevant to the question."""
+
+            # Save the prompt to log
+            self._save_prompt_to_log("Chatbot", prompt)
 
             # Generate response using Claude
             max_retries = 3
