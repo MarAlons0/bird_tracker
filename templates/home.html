@@ -220,33 +220,53 @@ function initAutocomplete() {
             return;
         }
 
-        // Create autocomplete instance
-        autocomplete = new google.maps.places.Autocomplete(input, {
+        // Create autocomplete instance using the new API
+        autocomplete = new google.maps.places.PlaceAutocompleteElement({
+            inputElement: input,
             componentRestrictions: { country: 'us' }
         });
 
-        // Add listener for place selection
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            
-            if (place.geometry) {
-                // Update hidden form fields
-                document.getElementById('latitude').value = place.geometry.location.lat();
-                document.getElementById('longitude').value = place.geometry.location.lng();
-                
-                // Show success feedback
-                const successDiv = document.createElement('div');
-                successDiv.className = 'alert alert-success mt-2';
-                successDiv.textContent = 'Location selected successfully';
-                input.parentNode.appendChild(successDiv);
-                setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
-            } else {
+        // Listen for place selection using the new event system
+        input.addEventListener('place_changed', async function() {
+            const placeId = input.getAttribute('data-place-id');
+            if (!placeId) {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'alert alert-warning mt-2';
                 errorDiv.textContent = 'Please select a location from the dropdown suggestions';
                 input.parentNode.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
+                return;
             }
+
+            // Get place details using the Places Service
+            const service = new google.maps.places.PlacesService(document.createElement('div'));
+            service.getDetails({
+                placeId: placeId,
+                fields: ['geometry', 'name', 'formatted_address']
+            }, (place, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    console.log("Place details:", place);
+                    
+                    // Update hidden form fields
+                    document.getElementById('latitude').value = place.geometry.location.lat();
+                    document.getElementById('longitude').value = place.geometry.location.lng();
+                    document.getElementById('location').value = place.formatted_address || place.name;
+                    
+                    // Show success feedback
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'alert alert-success mt-2';
+                    successDiv.textContent = 'Location selected successfully';
+                    input.parentNode.appendChild(successDiv);
+                    setTimeout(() => successDiv.remove(), 2000);  // Remove after 2 seconds
+                } else {
+                    console.error("Error getting place details:", status);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger mt-2';
+                    errorDiv.textContent = 'Error getting location details';
+                    input.parentNode.appendChild(errorDiv);
+                    setTimeout(() => errorDiv.remove(), 3000);  // Remove after 3 seconds
+                }
+            });
         });
 
     } catch (error) {
