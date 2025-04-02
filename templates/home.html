@@ -143,11 +143,12 @@
                 <form id="updateLocationForm">
                     <div class="mb-3">
                         <label for="location" class="form-label">Search Location</label>
-                        <input type="text" 
-                               id="location" 
-                               class="form-control" 
-                               placeholder="Enter a city or park name"
-                               required>
+                        <gmp-autocomplete
+                            id="location"
+                            class="form-control"
+                            placeholder="Enter a city or park name"
+                            required
+                        ></gmp-autocomplete>
                     </div>
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
@@ -220,8 +221,8 @@ function initAutocomplete() {
             return;
         }
 
-        // Create autocomplete instance using the new API
-        autocomplete = new google.maps.places.PlaceAutocompleteElement({
+        // Configure the autocomplete element
+        const autocomplete = new google.maps.places.PlaceAutocompleteElement({
             inputElement: input,
             componentRestrictions: { country: 'us' }
         });
