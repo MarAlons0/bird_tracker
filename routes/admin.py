@@ -41,10 +41,10 @@ def dashboard():
     pending_requests = result[0] if result else 0
     
     # Get carousel images counts using raw SQL
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_images")).fetchone()
     total_carousel_images = result[0] if result else 0
     
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image WHERE is_active = true")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_images WHERE is_active = true")).fetchone()
     active_carousel_images = result[0] if result else 0
     
     return render_template('admin/dashboard.html',
@@ -387,7 +387,7 @@ def edit_carousel_image(id):
     
     image.title = request.form.get('title', '')
     image.description = request.form.get('description', '')
-    image.active = request.form.get('active') == 'true'
+    image.is_active = request.form.get('active') == 'true'
     
     db.session.commit()
     flash('Image updated successfully', 'success')
