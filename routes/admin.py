@@ -33,7 +33,7 @@ def dashboard():
     total_users = result[0] if result else 0
     
     # Get active users count using raw SQL
-    result = db.session.execute(text("SELECT COUNT(*) FROM users WHERE active = true")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM users WHERE is_active = true")).fetchone()
     active_users = result[0] if result else 0
     
     # Get pending requests count using raw SQL
@@ -44,7 +44,7 @@ def dashboard():
     result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image")).fetchone()
     total_carousel_images = result[0] if result else 0
     
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image WHERE active = true")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image WHERE is_active = true")).fetchone()
     active_carousel_images = result[0] if result else 0
     
     return render_template('admin/dashboard.html',
