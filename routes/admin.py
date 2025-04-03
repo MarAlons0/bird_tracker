@@ -364,9 +364,11 @@ def add_carousel_image():
         
         image = CarouselImage(
             filename=public_id,  # Store the Cloudinary public_id
-            title=request.form.get('title', ''),
-            description=request.form.get('description', ''),
-            order=max_order + 1
+            filepath=f"https://res.cloudinary.com/{current_app.config['CLOUDINARY_CLOUD_NAME']}/image/upload/carousel/{public_id}",
+            upload_date=datetime.utcnow(),
+            user_id=current_user.id,
+            order=max_order + 1,
+            is_active=True
         )
         
         db.session.add(image)
@@ -385,8 +387,6 @@ def edit_carousel_image(id):
     """Edit a carousel image"""
     image = CarouselImage.query.get_or_404(id)
     
-    image.title = request.form.get('title', '')
-    image.description = request.form.get('description', '')
     image.is_active = request.form.get('active') == 'true'
     
     db.session.commit()

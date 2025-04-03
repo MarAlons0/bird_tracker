@@ -40,8 +40,8 @@
                 {% for image in images %}
                 <div class="col-md-4 mb-4" data-id="{{ image.id }}">
                     <div class="card h-100">
-                        <img src="https://res.cloudinary.com/{{ config.CLOUDINARY_CLOUD_NAME }}/image/upload/carousel/{{ image.filename }}" 
-                             class="card-img-top" alt="{{ image.title }}" style="height: 200px; object-fit: cover;">
+                        <img src="{{ image.filepath }}" 
+                             class="card-img-top" alt="Carousel Image" style="height: 200px; object-fit: cover;">
                         <div class="card-body">
                             <form action="{{ url_for('admin.edit_carousel_image', id=image.id) }}" method="post">
                                 <div class="mb-3">

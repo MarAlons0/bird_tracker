@@ -81,17 +81,7 @@
         <div class="carousel-inner">
             {% for image in carousel_images %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
-                <img src="https://res.cloudinary.com/{{ config.CLOUDINARY_CLOUD_NAME }}/image/upload/carousel/{{ image.filename }}" class="d-block w-100" alt="{{ image.title }}">
-                {% if image.title or image.description %}
-                <div class="carousel-caption d-none d-md-block">
-                    {% if image.title %}
-                    <h5>{{ image.title }}</h5>
-                    {% endif %}
-                    {% if image.description %}
-                    <p>{{ image.description }}</p>
-                    {% endif %}
-                </div>
-                {% endif %}
+                <img src="{{ image.filepath }}" class="d-block w-100" alt="Carousel Image">
             </div>
             {% endfor %}
         </div>
