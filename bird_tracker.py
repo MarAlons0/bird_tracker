@@ -198,4 +198,162 @@ class BirdSightingTracker:
             if self.email_config['admin_email']:
                 subject = "Bird Tracker Daily Report Error"
                 body = f"Failed to send daily reports:\n\n{str(e)}"
-                self.send_email(body, self.email_config['admin_email'], subject=subject) 
+                self.send_email(body, self.email_config['admin_email'], subject=subject)
+
+    def send_email(self, body, recipient, subject=None):
+        """Send an email using the configured SMTP settings"""
+        try:
+            if not subject:
+                subject = f"Bird Sighting Report for {self.active_location['name']}"
+            
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = self.email_config['sender_email']
+            msg['To'] = recipient
+            msg['Subject'] = subject
+            
+            # Add body
+            msg.attach(MIMEText(body, 'plain'))
+            
+            # Connect to SMTP server
+            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['sender_email'], self.email_config['sender_password'])
+                server.send_message(msg)
+                
+            logger.info(f"Email sent to {recipient}")
+            
+        except Exception as e:
+            logger.error(f"Error sending email: {str(e)}")
+            raise
+
+    def analyze_recent_sightings(self):
+        """Analyze recent bird sightings and generate a report"""
+        try:
+            # Get recent observations
+            observations = self.get_recent_observations()
+            if not observations:
+                return "No recent observations found."
+            
+            # Format observations for display
+            formatted_observations = self._format_observations(observations)
+            
+            # If Claude is available, get AI analysis
+            if self.claude:
+                return self._get_ai_analysis(observations, formatted_observations)
+            else:
+                return self._generate_basic_analysis(observations, formatted_observations)
+            
+        except Exception as e:
+            logger.error(f"Error analyzing sightings: {str(e)}")
+            return f"Error analyzing sightings: {str(e)}"
+
+    def _format_observations(self, observations):
+        """Format observations for display in email"""
+        formatted = []
+        for obs in observations:
+            formatted.append(
+                f"- {obs['comName']} ({obs['sciName']})\n"
+                f"  Location: {obs['locName']}\n"
+                f"  Date: {obs['obsDt']}\n"
+                f"  Count: {obs['howMany'] if 'howMany' in obs else 'X'}\n"
+            )
+        return "\n".join(formatted)
+
+    def _get_ai_analysis(self, observations, formatted_observations):
+        """Get AI analysis of bird sightings using Claude"""
+        try:
+            # Prepare prompt for Claude
+            prompt = f"""You are an expert ornithologist analyzing recent bird sightings in the {self.active_location['name']} area.
+
+Here are the observations:
+
+{formatted_observations}
+
+Please provide a well-structured analysis that would be helpful for both casual birders and experienced ornithologists."""
+            
+            # Get response from Claude
+            response = self.claude.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1000,
+                temperature=0.7,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            return response.content
+            
+        except Exception as e:
+            logger.error(f"Error getting AI analysis: {str(e)}")
+            return self._generate_basic_analysis(observations, formatted_observations)
+
+    def _generate_basic_analysis(self, observations, formatted_observations):
+        """Generate a basic analysis without AI"""
+        try:
+            # Count species
+            species_count = len(set(obs['comName'] for obs in observations))
+            
+            # Find unusual sightings (single observations of species)
+            unusual = [obs['comName'] for obs in observations 
+                      if list(obs['comName'] for o in observations).count(obs['comName']) == 1]
+            
+            # Generate report
+            report = f"""Bird Sighting Report for {self.active_location['name']}
+
+Summary:
+- Total species observed: {species_count}
+- Total observations: {len(observations)}
+- Unusual sightings: {len(unusual)}
+
+Observations:
+{formatted_observations}
+
+Unusual Sightings:
+{"- " + "\\n- ".join(unusual) if unusual else "None"}
+"""
+            return report
+            
+        except Exception as e:
+            logger.error(f"Error generating basic analysis: {str(e)}")
+            return f"Error generating analysis: {str(e)}"
+
+    def get_recent_observations(self):
+        """Get recent bird observations from eBird API"""
+        try:
+            if not self.api_key:
+                raise ValueError("eBird API key not found")
+            
+            if not self.active_location:
+                raise ValueError("No active location configured")
+            
+            # Set up request parameters
+            headers = {
+                'X-eBirdApiToken': self.api_key
+            }
+            
+            params = {
+                'lat': self.active_location['latitude'],
+                'lng': self.active_location['longitude'],
+                'dist': self.active_location['radius'],
+                'back': 7,  # Get observations from last 7 days
+                'maxResults': 100
+            }
+            
+            # Make request to eBird API
+            url = f"{self.base_url}/data/obs/geo/recent"
+            response = requests.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            
+            # Parse response
+            observations = response.json()
+            
+            # Sort observations by date (most recent first)
+            observations.sort(key=lambda x: x['obsDt'], reverse=True)
+            
+            return observations
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error getting observations from eBird API: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Error getting observations: {str(e)}")
+            return None 
