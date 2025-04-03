@@ -60,7 +60,7 @@ def login():
         result = db.session.execute(
             text("""
                 SELECT id, username, email, password_hash, is_admin, is_approved,
-                       registration_date, is_active, login_token, token_expiry,
+                       registration_date, active, login_token, token_expiry,
                        newsletter_subscription
                 FROM users
                 WHERE email = :email
@@ -79,7 +79,7 @@ def login():
             user.is_admin = result[4]
             user.is_approved = result[5]
             user.registration_date = result[6]
-            user.is_active = result[7]
+            user.active = result[7]
             user.login_token = result[8]
             user.token_expiry = result[9]
             user.newsletter_subscription = result[10]
@@ -132,8 +132,8 @@ def login():
         default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
         db.session.execute(
             text("""
-                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
-                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
+                INSERT INTO users (email, username, password_hash, is_admin, is_approved, active, newsletter_subscription)
+                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :active, :newsletter_subscription)
             """),
             {
                 "email": email,
@@ -141,7 +141,7 @@ def login():
                 "password_hash": generate_password_hash(default_password),
                 "is_admin": False,
                 "is_approved": True,
-                "is_active": True,
+                "active": True,
                 "newsletter_subscription": True
             }
         )
@@ -152,7 +152,7 @@ def login():
         result = db.session.execute(
             text("""
                 SELECT id, username, email, password_hash, is_admin, is_approved,
-                       registration_date, is_active, login_token, token_expiry,
+                       registration_date, active, login_token, token_expiry,
                        newsletter_subscription
                 FROM users
                 WHERE email = :email
@@ -168,7 +168,7 @@ def login():
         user.is_admin = result[4]
         user.is_approved = result[5]
         user.registration_date = result[6]
-        user.is_active = result[7]
+        user.active = result[7]
         user.login_token = result[8]
         user.token_expiry = result[9]
         user.newsletter_subscription = result[10]
@@ -207,11 +207,11 @@ def request_registration():
         
         # Check if email is already registered and active using raw SQL
         result = db.session.execute(
-            text("SELECT id, is_active FROM users WHERE email = :email"),
+            text("SELECT id, active FROM users WHERE email = :email"),
             {"email": email}
         ).fetchone()
         
-        if result and result[1]:  # is_active is True
+        if result and result[1]:  # active is True
             return render_template('request_registration.html', 
                 error="This email is already registered.")
         

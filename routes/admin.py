@@ -33,7 +33,7 @@ def dashboard():
     total_users = result[0] if result else 0
     
     # Get active users count using raw SQL
-    result = db.session.execute(text("SELECT COUNT(*) FROM users WHERE is_active = true")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM users WHERE active = true")).fetchone()
     active_users = result[0] if result else 0
     
     # Get pending requests count using raw SQL
@@ -44,7 +44,7 @@ def dashboard():
     result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image")).fetchone()
     total_carousel_images = result[0] if result else 0
     
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image WHERE is_active = true")).fetchone()
+    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_image WHERE active = true")).fetchone()
     active_carousel_images = result[0] if result else 0
     
     return render_template('admin/dashboard.html',
@@ -62,7 +62,7 @@ def users():
     # Get all users using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
+            SELECT id, username, email, is_admin, is_approved, registration_date, active,
                    login_token, token_expiry, newsletter_subscription
             FROM users
             ORDER BY id
@@ -78,7 +78,7 @@ def users():
         user.is_admin = row[3]
         user.is_approved = row[4]
         user.registration_date = row[5]
-        user.is_active = row[6]
+        user.active = row[6]
         user.login_token = row[7]
         user.token_expiry = row[8]
         user.newsletter_subscription = row[9]
@@ -123,14 +123,14 @@ def admin_panel():
                 # Create user using raw SQL
                 db.session.execute(
                     text("""
-                        INSERT INTO users (email, username, password_hash, is_active, is_admin, is_approved, newsletter_subscription)
-                        VALUES (:email, :username, :password_hash, :is_active, :is_admin, :is_approved, :newsletter_subscription)
+                        INSERT INTO users (email, username, password_hash, active, is_admin, is_approved, newsletter_subscription)
+                        VALUES (:email, :username, :password_hash, :active, :is_admin, :is_approved, :newsletter_subscription)
                     """),
                     {
                         "email": email,
                         "username": username,
                         "password_hash": generate_password_hash(password),
-                        "is_active": True,
+                        "active": True,
                         "is_admin": is_admin,
                         "is_approved": True,
                         "newsletter_subscription": True
@@ -144,7 +144,7 @@ def admin_panel():
             db.session.execute(
                 text("""
                     UPDATE users
-                    SET is_active = NOT is_active
+                    SET active = NOT active
                     WHERE id = :user_id
                 """),
                 {"user_id": user_id}
@@ -164,7 +164,7 @@ def admin_panel():
     # Get all users using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
+            SELECT id, username, email, is_admin, is_approved, registration_date, active,
                    login_token, token_expiry, newsletter_subscription
             FROM users
             ORDER BY id
@@ -180,7 +180,7 @@ def admin_panel():
         user.is_admin = row[3]
         user.is_approved = row[4]
         user.registration_date = row[5]
-        user.is_active = row[6]
+        user.active = row[6]
         user.login_token = row[7]
         user.token_expiry = row[8]
         user.newsletter_subscription = row[9]
@@ -370,7 +370,7 @@ def edit_carousel_image(id):
     
     image.title = request.form.get('title', '')
     image.description = request.form.get('description', '')
-    image.is_active = request.form.get('is_active') == 'true'
+    image.active = request.form.get('active') == 'true'
     
     db.session.commit()
     flash('Image updated successfully', 'success')
