@@ -82,6 +82,16 @@
             {% for image in carousel_images %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <img src="{{ image['filepath'] }}" class="d-block w-100" alt="Carousel Image">
+                {% if image['title'] or image['description'] %}
+                <div class="carousel-caption d-none d-md-block">
+                    {% if image['title'] %}
+                    <h5>{{ image['title'] }}</h5>
+                    {% endif %}
+                    {% if image['description'] %}
+                    <p>{{ image['description'] }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
