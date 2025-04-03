@@ -95,6 +95,8 @@ class CarouselImage(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     order = db.Column(db.Integer, nullable=False, default=0)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+    title = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return f'<CarouselImage {self.filename}>'

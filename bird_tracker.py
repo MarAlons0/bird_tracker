@@ -215,31 +215,37 @@ This report was generated automatically by the Bird Tracker application.
             self.logger.error(f"Error sending daily report: {str(e)}")
             raise
 
-    def send_email(self, body, recipient, subject=None):
-        """Send an email using the configured SMTP settings"""
+    def send_email(self, subject, body):
+        """Send an email using configured SMTP settings."""
         try:
-            if not subject:
-                subject = f"Bird Sighting Report for {self.active_location['name']}"
-            
+            # Check if email configuration exists
+            if not self.config.has_section('email'):
+                self.logger.error("Email configuration not found")
+                raise ValueError("Email configuration not found")
+
+            # Get email configuration
+            smtp_server = self.config.get('email', 'smtp_server')
+            smtp_port = self.config.getint('email', 'smtp_port')
+            sender_email = self.config.get('email', 'sender_email')
+            sender_password = self.config.get('email', 'sender_password')
+            recipient_email = self.config.get('email', 'recipient_email')
+
             # Create message
-            msg = MIMEMultipart()
-            msg['From'] = self.email_config['sender_email']
-            msg['To'] = recipient
+            msg = MIMEText(body)
             msg['Subject'] = subject
-            
-            # Add body
-            msg.attach(MIMEText(body, 'plain'))
-            
-            # Connect to SMTP server
-            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+            msg['From'] = sender_email
+            msg['To'] = recipient_email
+
+            # Send email
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.starttls()
-                server.login(self.email_config['sender_email'], self.email_config['sender_password'])
+                server.login(sender_email, sender_password)
                 server.send_message(msg)
-                
-            logger.info(f"Email sent to {recipient}")
-            
+
+            self.logger.info(f"Email sent successfully to {recipient_email}")
+
         except Exception as e:
-            logger.error(f"Error sending email: {str(e)}")
+            self.logger.error(f"Error sending email: {str(e)}")
             raise
 
     def analyze_recent_sightings(self, observations):
