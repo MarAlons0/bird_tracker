@@ -65,6 +65,7 @@
 {% block content %}
 <div class="container mt-4">
     <!-- Carousel -->
+    {% if carousel_images %}
     <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-indicators">
             {% for image in carousel_images %}
@@ -75,10 +76,16 @@
             {% for image in carousel_images %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" class="d-block w-100" alt="{{ image.title }}">
-                <div class="carousel-caption">
+                {% if image.title or image.description %}
+                <div class="carousel-caption d-none d-md-block">
+                    {% if image.title %}
                     <h5>{{ image.title }}</h5>
+                    {% endif %}
+                    {% if image.description %}
                     <p>{{ image.description }}</p>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -91,6 +98,7 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
+    {% endif %}
 
     <!-- Welcome Section -->
     <div class="row mb-4">
@@ -143,6 +151,9 @@
             <p><strong>Name:</strong> {{ location.name }}</p>
             <p><strong>Coordinates:</strong> {{ location.latitude }}, {{ location.longitude }}</p>
             <p><strong>Radius:</strong> {{ location.radius }} miles</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                Change Location
+            </button>
         </div>
     </div>
 
@@ -249,20 +260,20 @@
 {% if google_places_api_key %}
 <script>
 function initMap() {
-    const location = {
+    const mapLocation = {
         lat: {{ location.latitude }},
         lng: {{ location.longitude }}
     };
     
     const map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
-        center: location,
+        center: mapLocation,
         mapTypeId: 'terrain'
     });
     
     // Add a marker for the location
     new google.maps.Marker({
-        position: location,
+        position: mapLocation,
         map: map,
         title: '{{ location.name }}'
     });
