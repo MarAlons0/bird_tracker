@@ -59,6 +59,12 @@
         padding: 20px;
         border-radius: 10px;
     }
+    .version-info {
+        font-size: 0.8em;
+        color: #6c757d;
+        text-align: center;
+        margin-top: 20px;
+    }
 </style>
 {% endblock %}
 
@@ -100,43 +106,23 @@
     </div>
     {% endif %}
 
-    <!-- Welcome Section -->
+    <!-- Site Description -->
     <div class="row mb-4">
-        <div class="col-md-12 text-center">
-            <h1>Welcome to Mario's Bird Tracker</h1>
-            <p class="lead">Track and discover bird sightings in your area</p>
-        </div>
-    </div>
-
-    <!-- Features Section -->
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
-                    <h5 class="card-title">Interactive Map</h5>
-                    <p class="card-text">Explore bird sightings in your area with our interactive map.</p>
-                    <a href="{{ url_for('main.map') }}" class="btn btn-primary">View Map</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-3x mb-3"></i>
-                    <h5 class="card-title">AI Analysis</h5>
-                    <p class="card-text">Get insights about bird populations and trends in your area.</p>
-                    <a href="{{ url_for('main.report') }}" class="btn btn-primary">View Analysis</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-bell fa-3x mb-3"></i>
-                    <h5 class="card-title">Notifications</h5>
-                    <p class="card-text">Stay updated with the latest bird sightings in your area.</p>
-                    <a href="{{ url_for('main.newsletter_preferences') }}" class="btn btn-primary">Manage Preferences</a>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Welcome to Mario's Bird Tracker</h2>
+                    <p class="card-text">
+                        This application helps you track and discover bird sightings in your area. Here's how it works:
+                    </p>
+                    <ul>
+                        <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
+                        <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
+                        <li><strong>Notifications:</strong> Receive email updates about new bird sightings in your area.</li>
+                    </ul>
+                    <p class="card-text">
+                        To get started, make sure your location is set correctly below. You can change it at any time.
+                    </p>
                 </div>
             </div>
         </div>
@@ -198,6 +184,11 @@
             <p>You currently receive bird sighting reports at {{ email_schedule.hour }}:{{ '%02d' % email_schedule.minute }} UTC.</p>
             <a href="{{ url_for('main.newsletter_preferences') }}" class="btn btn-primary">Manage Preferences</a>
         </div>
+    </div>
+
+    <!-- Version Info -->
+    <div class="version-info">
+        Version 1.3.1
     </div>
 </div>
 
