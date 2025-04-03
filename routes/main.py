@@ -18,7 +18,11 @@ def index():
         }
         
         # Get active carousel images, ordered by their order field
-        carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        try:
+            carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        except Exception as e:
+            logger.error(f"Error fetching carousel images: {e}")
+            carousel_images = []
         
         # Get Google Places API key
         google_places_api_key = os.getenv('GOOGLE_PLACES_API_KEY')
