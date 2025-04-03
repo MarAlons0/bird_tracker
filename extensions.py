@@ -42,7 +42,7 @@ def init_extensions(app):
                 result = db.session.execute(
                     text("""
                         SELECT id, username, email, password_hash, is_admin, is_approved,
-                               registration_date, active, login_token, token_expiry,
+                               registration_date, is_active, login_token, token_expiry,
                                newsletter_subscription
                         FROM users
                         WHERE id = :user_id
@@ -60,12 +60,12 @@ def init_extensions(app):
                     user.is_admin = result[4]
                     user.is_approved = result[5]
                     user.registration_date = result[6]
-                    user.active = result[7]
+                    user._is_active = result[7]
                     user.login_token = result[8]
                     user.token_expiry = result[9]
                     user.newsletter_subscription = result[10]
                     return user
                 return None
             except Exception as e:
-                db.session.rollback()  # Rollback any failed transaction
+                current_app.logger.error(f"Error loading user {user_id}: {str(e)}")
                 return None 

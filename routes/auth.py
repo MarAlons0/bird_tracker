@@ -56,21 +56,119 @@ def login():
         password = request.form.get('password')
         logger.info(f"Login attempt for email: {email}")
         
-        # Check if user exists in database using raw SQL
-        result = db.session.execute(
-            text("""
-                SELECT id, username, email, password_hash, is_admin, is_approved,
-                       registration_date, is_active, login_token, token_expiry,
-                       newsletter_subscription
-                FROM users
-                WHERE email = :email
-            """),
-            {"email": email}
-        ).fetchone()
-        
-        # If user exists, allow login regardless of ALLOWED_EMAILS
-        if result:
-            logger.info(f"User exists in database: {email}")
+        try:
+            # Check if user exists in database using raw SQL
+            result = db.session.execute(
+                text("""
+                    SELECT id, username, email, password_hash, is_admin, is_approved,
+                           registration_date, is_active, login_token, token_expiry,
+                           newsletter_subscription
+                    FROM users
+                    WHERE email = :email
+                """),
+                {"email": email}
+            ).fetchone()
+            
+            # If user exists, allow login regardless of ALLOWED_EMAILS
+            if result:
+                logger.info(f"User exists in database: {email}")
+                user = User()
+                user.id = result[0]
+                user.username = result[1]
+                user.email = result[2]
+                user.password_hash = result[3]
+                user.is_admin = result[4]
+                user.is_approved = result[5]
+                user.registration_date = result[6]
+                user._is_active = result[7]  # Use _is_active instead of is_active
+                user.login_token = result[8]
+                user.token_expiry = result[9]
+                user.newsletter_subscription = result[10]
+                
+                if not user.check_password(password):
+                    logger.warning(f"Invalid password for user: {email}")
+                    return render_template('login.html', 
+                        error="Invalid email or password")
+                
+                # Log user in
+                login_user(user, remember=True)
+                logger.info(f"User logged in successfully: {email}")
+                flash("Successfully logged in!", "success")
+                
+                # Set session as permanent
+                session.permanent = True
+                
+                # Redirect to the next page or home
+                next_page = request.args.get('next')
+                if not next_page or not next_page.startswith('/'):
+                    next_page = url_for('main.index')
+                return redirect(next_page)
+            
+            # For new users, check ALLOWED_EMAILS
+            allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+            logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
+            
+            if not allowed_emails_str:
+                logger.error("ALLOWED_EMAILS environment variable is not set!")
+                return render_template('login.html', 
+                    error="System configuration error. Please contact support.")
+            
+            allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
+            logger.info(f"Processed allowed emails: {allowed_emails}")
+            
+            if email not in allowed_emails:
+                logger.warning(f"Unauthorized login attempt for email: {email}")
+                logger.warning(f"Email not found in allowed list: {allowed_emails}")
+                return render_template('login.html', 
+                    error="Sorry, this email is not authorized to access this application.")
+            
+            # Create new user
+            logger.info(f"Creating new user for email: {email}")
+            
+            # Generate username from email
+            username = email.split('@')[0]
+            # Ensure username is unique using raw SQL
+            base_username = username
+            counter = 1
+            while db.session.execute(
+                text("SELECT id FROM users WHERE username = :username"),
+                {"username": username}
+            ).fetchone():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            # Create user using raw SQL
+            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+            db.session.execute(
+                text("""
+                    INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                    VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
+                """),
+                {
+                    "email": email,
+                    "username": username,
+                    "password_hash": generate_password_hash(default_password),
+                    "is_admin": False,
+                    "is_approved": True,
+                    "is_active": True,
+                    "newsletter_subscription": True
+                }
+            )
+            db.session.commit()
+            logger.info(f"Created new user with default password: {email}")
+            
+            # Get the newly created user
+            result = db.session.execute(
+                text("""
+                    SELECT id, username, email, password_hash, is_admin, is_approved,
+                           registration_date, is_active, login_token, token_expiry,
+                           newsletter_subscription
+                    FROM users
+                    WHERE email = :email
+                """),
+                {"email": email}
+            ).fetchone()
+            
             user = User()
             user.id = result[0]
             user.username = result[1]
@@ -79,113 +177,26 @@ def login():
             user.is_admin = result[4]
             user.is_approved = result[5]
             user.registration_date = result[6]
-            user.is_active = result[7]  # Changed from active to is_active
+            user._is_active = result[7]  # Use _is_active instead of is_active
             user.login_token = result[8]
             user.token_expiry = result[9]
             user.newsletter_subscription = result[10]
             
-            if not user.check_password(password):
-                logger.warning(f"Invalid password for user: {email}")
-                return render_template('login.html', 
-                    error="Invalid email or password")
-            
             # Log user in
-            login_user(user, remember=True)  # Added remember=True to maintain session
+            login_user(user, remember=True)
             logger.info(f"User logged in successfully: {email}")
             flash("Successfully logged in!", "success")
             
             # Set session as permanent
             session.permanent = True
             
-            # Redirect to the next page or home
-            next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
-                next_page = url_for('main.index')
-            return redirect(next_page)
-        
-        # For new users, check ALLOWED_EMAILS
-        allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
-        logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
-        
-        if not allowed_emails_str:
-            logger.error("ALLOWED_EMAILS environment variable is not set!")
+            return redirect(url_for('main.index'))
+            
+        except Exception as e:
+            logger.error(f"Error during login: {str(e)}")
+            db.session.rollback()
             return render_template('login.html', 
-                error="System configuration error. Please contact support.")
-        
-        allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
-        logger.info(f"Processed allowed emails: {allowed_emails}")
-        
-        if email not in allowed_emails:
-            logger.warning(f"Unauthorized login attempt for email: {email}")
-            logger.warning(f"Email not found in allowed list: {allowed_emails}")
-            return render_template('login.html', 
-                error="Sorry, this email is not authorized to access this application.")
-        
-        # Create new user
-        logger.info(f"Creating new user for email: {email}")
-        
-        # Generate username from email
-        username = email.split('@')[0]
-        # Ensure username is unique using raw SQL
-        base_username = username
-        counter = 1
-        while db.session.execute(
-            text("SELECT id FROM users WHERE username = :username"),
-            {"username": username}
-        ).fetchone():
-            username = f"{base_username}{counter}"
-            counter += 1
-        
-        # Create user using raw SQL
-        default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-        db.session.execute(
-            text("""
-                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
-                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
-            """),
-            {
-                "email": email,
-                "username": username,
-                "password_hash": generate_password_hash(default_password),
-                "is_admin": False,
-                "is_approved": True,
-                "is_active": True,
-                "newsletter_subscription": True
-            }
-        )
-        db.session.commit()
-        logger.info(f"Created new user with default password: {email}")
-        
-        # Get the newly created user
-        result = db.session.execute(
-            text("""
-                SELECT id, username, email, password_hash, is_admin, is_approved,
-                       registration_date, is_active, login_token, token_expiry,
-                       newsletter_subscription
-                FROM users
-                WHERE email = :email
-            """),
-            {"email": email}
-        ).fetchone()
-        
-        user = User()
-        user.id = result[0]
-        user.username = result[1]
-        user.email = result[2]
-        user.password_hash = result[3]
-        user.is_admin = result[4]
-        user.is_approved = result[5]
-        user.registration_date = result[6]
-        user.is_active = result[7]  # Changed from active to is_active
-        user.login_token = result[8]
-        user.token_expiry = result[9]
-        user.newsletter_subscription = result[10]
-        
-        # Log user in
-        login_user(user)
-        logger.info(f"User logged in successfully: {email}")
-        flash("Successfully logged in!", "success")
-        return redirect(url_for('main.index'))
+                error="An error occurred during login. Please try again.")
         
     return render_template('login.html')
 
