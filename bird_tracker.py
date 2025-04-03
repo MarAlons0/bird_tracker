@@ -240,81 +240,102 @@ class BirdSightingTracker:
             
             # If Claude is available, get AI analysis
             if self.claude:
-                return self._get_ai_analysis(observations, formatted_observations)
+                return self._get_ai_analysis(observations)
             else:
-                return self._generate_basic_analysis(observations, formatted_observations)
+                return self._generate_basic_analysis(observations)
             
         except Exception as e:
             logger.error(f"Error analyzing sightings: {str(e)}")
             return f"Error analyzing sightings: {str(e)}"
 
     def _format_observations(self, observations):
-        """Format observations for display in email"""
-        formatted = []
+        """Format bird observations into a readable string."""
+        if not observations:
+            return "No bird sightings found in the last 7 days."
+        
+        formatted_text = "Recent Bird Sightings:\n\n"
         for obs in observations:
-            formatted.append(
-                f"- {obs['comName']} ({obs['sciName']})\n"
-                f"  Location: {obs['locName']}\n"
-                f"  Date: {obs['obsDt']}\n"
-                f"  Count: {obs['howMany'] if 'howMany' in obs else 'X'}\n"
-            )
-        return "\n".join(formatted)
+            date = datetime.fromisoformat(obs['obsDt']).strftime('%Y-%m-%d')
+            formatted_text += f"- {obs['comName']} (Scientific name: {obs['sciName']})\n"
+            formatted_text += f"  Observed on: {date}\n"
+            formatted_text += f"  Location: {obs['locName']}\n"
+            if obs.get('howMany'):
+                formatted_text += f"  Count: {obs['howMany']}\n"
+            formatted_text += "\n"
+        return formatted_text
 
-    def _get_ai_analysis(self, observations, formatted_observations):
-        """Get AI analysis of bird sightings using Claude"""
+    def _get_ai_analysis(self, observations):
+        """Generate AI analysis of bird observations using Claude."""
         try:
-            # Prepare prompt for Claude
-            prompt = f"""You are an expert ornithologist analyzing recent bird sightings in the {self.active_location['name']} area.
-
-Here are the observations:
-
-{formatted_observations}
-
-Please provide a well-structured analysis that would be helpful for both casual birders and experienced ornithologists."""
+            if not observations:
+                return "No observations to analyze."
             
-            # Get response from Claude
-            response = self.claude.messages.create(
+            if not self.config.has_option('api', 'anthropic_api_key'):
+                self.logger.warning("Anthropic API key not found in config, skipping AI analysis")
+                return None
+
+            api_key = self.config.get('api', 'anthropic_api_key')
+            client = anthropic.Anthropic(api_key=api_key)
+
+            # Prepare the observation data for analysis
+            observation_text = self._format_observations(observations)
+            
+            prompt = f"""Please analyze these bird observations and provide insights:
+            {observation_text}
+            
+            Consider:
+            1. Unusual or rare species
+            2. Patterns in species distribution
+            3. Notable counts or behaviors
+            4. Seasonal context
+            
+            Format your response in clear, concise paragraphs."""
+
+            message = client.messages.create(
                 model="claude-3-sonnet-20240229",
                 max_tokens=1000,
                 temperature=0.7,
+                system="You are an expert ornithologist analyzing bird sighting data.",
                 messages=[{"role": "user", "content": prompt}]
             )
-            
-            return response.content
-            
+
+            return message.content
+
         except Exception as e:
-            logger.error(f"Error getting AI analysis: {str(e)}")
-            return self._generate_basic_analysis(observations, formatted_observations)
+            self.logger.error(f"Error generating AI analysis: {str(e)}")
+            return None
 
-    def _generate_basic_analysis(self, observations, formatted_observations):
-        """Generate a basic analysis without AI"""
-        try:
-            # Count species
-            species_count = len(set(obs['comName'] for obs in observations))
-            
-            # Find unusual sightings (single observations of species)
-            unusual = [obs['comName'] for obs in observations 
-                      if list(obs['comName'] for o in observations).count(obs['comName']) == 1]
-            
-            # Generate report
-            report = f"""Bird Sighting Report for {self.active_location['name']}
+    def _generate_basic_analysis(self, observations):
+        """Generate a basic analysis of bird observations without AI."""
+        if not observations:
+            return "No observations to analyze."
 
-Summary:
-- Total species observed: {species_count}
-- Total observations: {len(observations)}
-- Unusual sightings: {len(unusual)}
-
-Observations:
-{formatted_observations}
-
-Unusual Sightings:
-{"- " + "\\n- ".join(unusual) if unusual else "None"}
-"""
-            return report
-            
-        except Exception as e:
-            logger.error(f"Error generating basic analysis: {str(e)}")
-            return f"Error generating analysis: {str(e)}"
+        analysis = []
+        species_count = len({obs['comName'] for obs in observations})
+        total_birds = sum(obs.get('howMany', 1) for obs in observations)
+        
+        analysis.append(f"Summary of Bird Activity:")
+        analysis.append(f"- Total unique species observed: {species_count}")
+        analysis.append(f"- Total individual birds counted: {total_birds}")
+        
+        # Most frequently observed species
+        species_frequency = {}
+        for obs in observations:
+            species = obs['comName']
+            count = obs.get('howMany', 1)
+            species_frequency[species] = species_frequency.get(species, 0) + count
+        
+        if species_frequency:
+            most_common = max(species_frequency.items(), key=lambda x: x[1])
+            analysis.append(f"- Most frequently observed species: {most_common[0]} ({most_common[1]} individuals)")
+        
+        # Date range
+        dates = [datetime.fromisoformat(obs['obsDt']) for obs in observations]
+        if dates:
+            date_range = f"- Observation period: {min(dates).strftime('%Y-%m-%d')} to {max(dates).strftime('%Y-%m-%d')}"
+            analysis.append(date_range)
+        
+        return "\n".join(analysis)
 
     def get_recent_observations(self):
         """Get recent bird observations from eBird API"""
