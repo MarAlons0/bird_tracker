@@ -23,11 +23,19 @@ def index():
         # Get Google Places API key
         google_places_api_key = os.getenv('GOOGLE_PLACES_API_KEY')
         if not google_places_api_key:
-            logger.error("Google Places API key not found!")
-            return render_template('error.html', error="Google Places API key not configured"), 500
+            logger.warning("Google Places API key not found, maps will be disabled")
+            google_places_api_key = ""
+        
+        # Get location from tracker
+        location = current_app.tracker.active_location if hasattr(current_app, 'tracker') else {
+            'name': 'Default Location',
+            'latitude': 39.1031,
+            'longitude': -84.5120,
+            'radius': 25
+        }
         
         return render_template('home.html',
-                             location=current_app.tracker.active_location,
+                             location=location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
                              google_places_api_key=google_places_api_key)
@@ -63,6 +71,11 @@ def report():
 @login_required
 def basic_analysis():
     try:
+        if not hasattr(current_app, 'tracker'):
+            return jsonify({
+                'analysis': '<div class="alert alert-warning">Bird tracker is not initialized. Please try again later.</div>'
+            })
+        
         analysis = current_app.tracker._generate_basic_analysis()
         if not analysis:
             return jsonify({
@@ -74,8 +87,8 @@ def basic_analysis():
         logger.error(f"Error in basic analysis: {e}")
         return jsonify({
             'error': str(e),
-            'analysis': '<div class="alert alert-danger">Error generating basic analysis.</div>'
-        }), 500
+            'analysis': '<div class="alert alert-danger">Error generating basic analysis. Please try again later.</div>'
+        })
 
 @bp.route('/api/analysis')
 @login_required

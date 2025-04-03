@@ -85,6 +85,13 @@
                                     </button>
                                 </form>
                                 <form method="POST" action="{{ url_for('admin.admin_panel') }}" class="d-inline">
+                                    <input type="hidden" name="action" value="reset_password">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <button type="submit" class="btn btn-sm btn-info" onclick="return confirm('Are you sure you want to reset this user\'s password to default?')">
+                                        Reset Password
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('admin.admin_panel') }}" class="d-inline">
                                     <input type="hidden" name="action" value="delete_user">
                                     <input type="hidden" name="user_id" value="{{ user.id }}">
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">

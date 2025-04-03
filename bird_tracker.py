@@ -36,42 +36,49 @@ class BirdSightingTracker:
     def __init__(self):
         load_dotenv()
         self.config = self._load_config()
+        
+        # Initialize with default values if environment variables are missing
         self.api_key = os.getenv('EBIRD_API_KEY')
         self.base_url = "https://api.ebird.org/v2"
+        
+        # Email config with defaults
         self.email_config = {
-            'smtp_server': os.getenv('SMTP_SERVER'),
+            'smtp_server': os.getenv('SMTP_SERVER', 'smtp.gmail.com'),
             'smtp_port': int(os.getenv('SMTP_PORT', '587')),
-            'sender_email': os.getenv('SMTP_USER'),
-            'sender_password': os.getenv('SMTP_PASSWORD'),
-            'admin_email': os.getenv('ADMIN_EMAIL'),
-            'recipient': os.getenv('RECIPIENT_EMAIL')
+            'sender_email': os.getenv('SMTP_USER', ''),
+            'sender_password': os.getenv('SMTP_PASSWORD', ''),
+            'admin_email': os.getenv('ADMIN_EMAIL', ''),
+            'recipient': os.getenv('RECIPIENT_EMAIL', '')
         }
+        
+        # Set active location with defaults
         self.active_location = self._get_active_location()
         
         # Initialize Claude with the latest API version
         anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
-        if not anthropic_api_key:
-            raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
-        
-        # Ensure API key starts with 'sk-ant'
-        if not anthropic_api_key.startswith('sk-ant'):
-            anthropic_api_key = f"sk-ant-{anthropic_api_key}"
-        
-        logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
-        
-        # Create a custom httpx client without proxies
-        http_client = httpx.Client(
-            base_url="https://api.anthropic.com",
-            headers={
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json"
-            }
-        )
-        
-        self.claude = Anthropic(
-            api_key=anthropic_api_key,
-            http_client=http_client
-        )
+        if anthropic_api_key:
+            # Ensure API key starts with 'sk-ant'
+            if not anthropic_api_key.startswith('sk-ant'):
+                anthropic_api_key = f"sk-ant-{anthropic_api_key}"
+            
+            logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
+            
+            # Create a custom httpx client without proxies
+            http_client = httpx.Client(
+                base_url="https://api.anthropic.com",
+                headers={
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                }
+            )
+            
+            self.claude = Anthropic(
+                api_key=anthropic_api_key,
+                http_client=http_client
+            )
+        else:
+            logging.warning("ANTHROPIC_API_KEY not found, AI analysis will be limited")
+            self.claude = None
         
         # Start daily report scheduler
         self.scheduler = self.start_daily_reports()
