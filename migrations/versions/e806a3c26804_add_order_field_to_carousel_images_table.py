@@ -1,7 +1,7 @@
 """Add order field to carousel_images table
 
 Revision ID: e806a3c26804
-Revises: 06dec18182e7
+Revises: 85683a6bb3a7
 Create Date: 2025-04-03 19:13:06.592583
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e806a3c26804'
-down_revision = '06dec18182e7'
+down_revision = '85683a6bb3a7'
 branch_labels = None
 depends_on = None
 
