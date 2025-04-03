@@ -8,6 +8,8 @@ from datetime import datetime
 from utils.file_upload import save_image, delete_image
 import os
 from sqlalchemy import text
+from werkzeug.utils import secure_filename
+from utils.image_processing import process_image, upload_to_cloudinary
 
 bp = Blueprint('admin', __name__)
 
@@ -346,52 +348,122 @@ def manage_carousel():
 @login_required
 @admin_required
 def add_carousel_image():
-    """Add a new carousel image"""
     if 'image' not in request.files:
         flash('No image file uploaded', 'error')
         return redirect(url_for('admin.manage_carousel'))
-    
-    file = request.files['image']
-    if file.filename == '':
+
+    image_file = request.files['image']
+    if image_file.filename == '':
         flash('No selected file', 'error')
         return redirect(url_for('admin.manage_carousel'))
-    
-    # Upload to Cloudinary
-    public_id = save_image(file, 'carousel')
-    
-    if public_id:
-        # Get the highest order value using db.func.max()
+
+    title = request.form.get('title')
+    description = request.form.get('description')
+
+    try:
+        # Process and upload image to Cloudinary
+        filename = secure_filename(image_file.filename)
+        base_filename = os.path.splitext(filename)[0]
+        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        new_filename = f"{base_filename}_{timestamp}"
+        
+        # Process the image
+        processed_image = process_image(image_file)
+        
+        # Upload to Cloudinary with text overlays if title or description is provided
+        transformation = []
+        if title:
+            transformation.append({
+                'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': title},
+                'color': '#FFFFFF',
+                'y': 20,
+                'x': 20
+            })
+        if description:
+            transformation.append({
+                'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': description},
+                'color': '#FFFFFF',
+                'y': 100,
+                'x': 20
+            })
+        
+        upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
+        
+        # Get the highest order value
         max_order = db.session.query(db.func.max(CarouselImage.order)).scalar() or 0
         
-        image = CarouselImage(
-            filename=public_id,  # Store the Cloudinary public_id
-            filepath=f"https://res.cloudinary.com/{current_app.config['CLOUDINARY_CLOUD_NAME']}/image/upload/carousel/{public_id}",
-            upload_date=datetime.utcnow(),
-            user_id=current_user.id,
+        # Create new carousel image
+        new_image = CarouselImage(
+            filepath=upload_result['secure_url'],
+            title=title,
+            description=description,
             order=max_order + 1,
-            is_active=True
+            active=True
         )
         
-        db.session.add(image)
+        db.session.add(new_image)
         db.session.commit()
         
         flash('Image added successfully', 'success')
-    else:
-        flash('Invalid file type or upload failed', 'error')
+    except Exception as e:
+        flash(f'Error adding image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
-@bp.route('/carousel/<int:id>/edit', methods=['POST'])
+@bp.route('/carousel/edit/<int:id>', methods=['POST'])
 @login_required
 @admin_required
 def edit_carousel_image(id):
-    """Edit a carousel image"""
     image = CarouselImage.query.get_or_404(id)
     
-    image.is_active = request.form.get('active') == 'true'
+    # Update title and description
+    image.title = request.form.get('title')
+    image.description = request.form.get('description')
     
-    db.session.commit()
-    flash('Image updated successfully', 'success')
+    # Update active status
+    image.active = 'active' in request.form
+    
+    # If a new image is uploaded
+    if 'image' in request.files and request.files['image'].filename:
+        try:
+            image_file = request.files['image']
+            filename = secure_filename(image_file.filename)
+            base_filename = os.path.splitext(filename)[0]
+            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+            new_filename = f"{base_filename}_{timestamp}"
+            
+            # Process the image
+            processed_image = process_image(image_file)
+            
+            # Upload to Cloudinary with text overlays if title or description is provided
+            transformation = []
+            if image.title:
+                transformation.append({
+                    'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': image.title},
+                    'color': '#FFFFFF',
+                    'y': 20,
+                    'x': 20
+                })
+            if image.description:
+                transformation.append({
+                    'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': image.description},
+                    'color': '#FFFFFF',
+                    'y': 100,
+                    'x': 20
+                })
+            
+            upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
+            image.filepath = upload_result['secure_url']
+            
+        except Exception as e:
+            flash(f'Error updating image: {str(e)}', 'error')
+            return redirect(url_for('admin.manage_carousel'))
+    
+    try:
+        db.session.commit()
+        flash('Image updated successfully', 'success')
+    except Exception as e:
+        flash(f'Error saving changes: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
