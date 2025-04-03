@@ -37,7 +37,7 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     is_approved = db.Column(db.Boolean, default=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=True)  # Changed from active to is_active
+    _is_active = db.Column('is_active', db.Boolean, default=True)  # Changed to use _is_active as the backing field
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)  # Users are subscribed by default
@@ -46,7 +46,7 @@ class User(UserMixin, db.Model):
     __mapper_args__ = {
         'include_properties': [
             'id', 'username', 'email', 'password_hash', 'is_admin', 'is_approved',
-            'registration_date', 'is_active', 'login_token', 'token_expiry',
+            'registration_date', '_is_active', 'login_token', 'token_expiry',
             'newsletter_subscription'
         ]
     }
@@ -54,7 +54,12 @@ class User(UserMixin, db.Model):
     @property
     def is_active(self):
         """Return whether the user is active."""
-        return self.is_active
+        return self._is_active
+
+    @is_active.setter
+    def is_active(self, value):
+        """Set whether the user is active."""
+        self._is_active = value
 
     def __repr__(self):
         return f'<User {self.username}>'
