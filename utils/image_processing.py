@@ -4,6 +4,7 @@ import cloudinary
 import cloudinary.uploader
 from flask import current_app
 from dotenv import load_dotenv
+import io
 
 # Load environment variables
 load_dotenv()
@@ -35,6 +36,11 @@ def upload_to_cloudinary(image, public_id, transformations=None):
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
     
+    # Convert PIL Image to bytes
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format='JPEG')
+    img_byte_arr = img_byte_arr.getvalue()
+    
     # Prepare upload parameters
     upload_params = {
         'public_id': public_id,
@@ -46,7 +52,7 @@ def upload_to_cloudinary(image, public_id, transformations=None):
         upload_params['transformation'] = transformations
     
     # Upload the image
-    result = cloudinary.uploader.upload(image, **upload_params)
+    result = cloudinary.uploader.upload(img_byte_arr, **upload_params)
     
     current_app.logger.info(f"Successfully uploaded image to Cloudinary: {public_id}")
     return result 
