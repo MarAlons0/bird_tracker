@@ -79,7 +79,7 @@ def login():
             user.is_admin = result[4]
             user.is_approved = result[5]
             user.registration_date = result[6]
-            user.active = result[7]  # This will be mapped to is_active in the database
+            user.is_active = result[7]  # Changed from active to is_active
             user.login_token = result[8]
             user.token_expiry = result[9]
             user.newsletter_subscription = result[10]
@@ -168,7 +168,7 @@ def login():
         user.is_admin = result[4]
         user.is_approved = result[5]
         user.registration_date = result[6]
-        user.active = result[7]
+        user.is_active = result[7]  # Changed from active to is_active
         user.login_token = result[8]
         user.token_expiry = result[9]
         user.newsletter_subscription = result[10]
