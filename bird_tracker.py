@@ -133,4 +133,69 @@ class BirdSightingTracker:
                 return None
         except Exception as e:
             logger.error(f"Error getting active location: {str(e)}")
-            return None 
+            return None
+
+    def start_daily_reports(self):
+        """Start the daily report scheduler"""
+        try:
+            scheduler = BackgroundScheduler()
+            
+            # Get schedule from config
+            hour = int(self.config['email_schedule']['hour'])
+            minute = int(self.config['email_schedule']['minute'])
+            
+            # Add job for daily reports
+            scheduler.add_job(
+                func=self.send_daily_report,
+                trigger=CronTrigger(hour=hour, minute=minute),
+                id='daily_report',
+                name='Send daily bird sighting report',
+                replace_existing=True
+            )
+            
+            # Add error listener
+            scheduler.add_listener(
+                self._handle_job_error,
+                EVENT_JOB_ERROR | EVENT_JOB_MISSED
+            )
+            
+            scheduler.start()
+            logger.info(f"Started daily report scheduler (runs at {hour:02d}:{minute:02d})")
+            return scheduler
+            
+        except Exception as e:
+            logger.error(f"Error starting daily reports: {str(e)}")
+            return None
+
+    def _handle_job_error(self, event):
+        """Handle scheduler job errors"""
+        if event.exception:
+            logger.error(f"Job {event.job_id} failed: {str(event.exception)}")
+            
+            # Notify admin of failure
+            if self.email_config['admin_email']:
+                subject = f"Bird Tracker Job Error: {event.job_id}"
+                body = f"The following error occurred:\n\n{str(event.exception)}"
+                self.send_email(body, self.email_config['admin_email'], subject=subject)
+
+    def send_daily_report(self):
+        """Send daily bird sighting report to subscribed users"""
+        try:
+            # Get all active users
+            users = User.query.filter_by(is_active=True).all()
+            
+            for user in users:
+                # Generate report for user's location
+                analysis = self.analyze_recent_sightings()
+                
+                # Send email to user
+                self.send_email(analysis, user.email)
+                logger.info(f"Daily report sent to {user.email}")
+                
+        except Exception as e:
+            logger.error(f"Error sending daily reports: {str(e)}")
+            # Notify admin of failure
+            if self.email_config['admin_email']:
+                subject = "Bird Tracker Daily Report Error"
+                body = f"Failed to send daily reports:\n\n{str(e)}"
+                self.send_email(body, self.email_config['admin_email'], subject=subject) 
