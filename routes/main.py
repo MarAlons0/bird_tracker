@@ -19,7 +19,7 @@ def index():
         
         # Get active carousel images, ordered by their order field
         try:
-            carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+            carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order.asc()).all()
         except Exception as e:
             logger.error(f"Error fetching carousel images: {e}")
             carousel_images = []
