@@ -355,15 +355,15 @@ def add_carousel_image():
         flash('No selected file', 'error')
         return redirect(url_for('admin.manage_carousel'))
     
-    upload_folder = os.path.join(current_app.static_folder, 'images', 'carousel')
-    filename = save_image(file, upload_folder)
+    # Upload to Cloudinary
+    public_id = save_image(file, 'carousel')
     
-    if filename:
+    if public_id:
         # Get the highest order value
         max_order = db.session.query(db.func.max(CarouselImage.order)).scalar() or 0
         
         image = CarouselImage(
-            filename=filename,
+            filename=public_id,  # Store the Cloudinary public_id
             title=request.form.get('title', ''),
             description=request.form.get('description', ''),
             order=max_order + 1
@@ -374,7 +374,7 @@ def add_carousel_image():
         
         flash('Image added successfully', 'success')
     else:
-        flash('Invalid file type', 'error')
+        flash('Invalid file type or upload failed', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
@@ -401,15 +401,15 @@ def delete_carousel_image(id):
     """Delete a carousel image"""
     image = CarouselImage.query.get_or_404(id)
     
-    # Delete the file
-    upload_folder = os.path.join(current_app.static_folder, 'images', 'carousel')
-    delete_image(image.filename, upload_folder)
+    # Delete from Cloudinary
+    if delete_image(image.filename, 'carousel'):
+        # Delete the database record
+        db.session.delete(image)
+        db.session.commit()
+        flash('Image deleted successfully', 'success')
+    else:
+        flash('Error deleting image file', 'error')
     
-    # Delete the database record
-    db.session.delete(image)
-    db.session.commit()
-    
-    flash('Image deleted successfully', 'success')
     return redirect(url_for('admin.manage_carousel'))
 
 @bp.route('/carousel/reorder', methods=['POST'])

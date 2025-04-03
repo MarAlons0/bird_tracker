@@ -96,8 +96,8 @@ class BirdSightingTracker:
             
         # If no config file, use environment variables
         logger.info("Config file not found, using environment variables")
-        config.add_section('locations')
-        config.add_section('email_schedule')
+            config.add_section('locations')
+            config.add_section('email_schedule')
         
         # Get values from environment with defaults
         config['locations']['active_location'] = os.getenv('DEFAULT_LOCATION', 'cincinnati')
@@ -113,7 +113,7 @@ class BirdSightingTracker:
         config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
         
         logger.info("Created config from environment variables")
-        return config
+            return config
     
     def _get_active_location(self):
         """Get location from environment or use default"""
@@ -282,14 +282,14 @@ Observations:
                         random_delay = random.uniform(0.5, 1.5)
                         time.sleep(random_delay)
                     
-                    response = self.claude.messages.create(
+                response = self.claude.messages.create(
                         model="claude-3-7-sonnet-20250219",
                         max_tokens=1000,
                         temperature=0.7,
                         messages=[
                             {
-                                "role": "user",
-                                "content": prompt
+                        "role": "user",
+                        "content": prompt
                             }
                         ]
                     )
@@ -370,11 +370,11 @@ Observations:
             scheduler.start()
             logging.info("Scheduler started. Weekly report scheduled for Fridays at 12:00 GMT")
             return scheduler
-            
+                
         except Exception as e:
             logging.error(f"Error starting scheduler: {str(e)}")
             return None
-            
+
     def _handle_job_error(self, event):
         """Handle job execution errors"""
         logging.error(f"Error executing job {event.job_id}: {str(event.exception)}")
@@ -427,7 +427,7 @@ Observations:
                 except Exception as e:
                     logger.error(f"Failed to send report to {user.email}: {str(e)}")
                     continue
-                
+            
         except Exception as e:
             logger.error(f"Error in send_daily_report: {str(e)}")
             raise
@@ -453,19 +453,19 @@ Observations:
             msg = MIMEMultipart()
             msg['Subject'] = 'Weekly Bird Report'
             msg['From'] = self.email_config['sender_email']
-            
+
             # Get banner image
             banner_base64 = self._get_banner_image()
-            
+
             # Create HTML content
             html_content = f"""
             <html>
-                <head>
-                    <style>
-                        body {{
-                            font-family: Arial, sans-serif;
-                            line-height: 1.6;
-                            color: #333;
+            <head>
+                <style>
+                    body {{ 
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
                             max-width: 600px;
                             margin: 0 auto;
                             padding: 20px;
@@ -495,15 +495,15 @@ Observations:
                         }}
                         .header-text {{
                             color: white;
-                            font-size: 24px;
-                            font-weight: bold;
+                        font-size: 24px;
+                        font-weight: bold;
                             text-align: center;
-                        }}
+                    }}
                         .subheader {{
                             text-align: center;
-                            color: #666;
-                            margin-bottom: 20px;
-                        }}
+                        color: #666;
+                        margin-bottom: 20px;
+                    }}
                         .app-link {{
                             text-align: center;
                             margin-bottom: 20px;
@@ -520,8 +520,8 @@ Observations:
                             background-color: #f9f9f9;
                             padding: 20px;
                             border-radius: 5px;
-                            margin-bottom: 20px;
-                        }}
+                        margin-bottom: 20px;
+                    }}
                         .footer {{
                             text-align: center;
                             color: #666;
@@ -545,10 +545,10 @@ Observations:
                             .unsubscribe-link {{
                                 color: #999;
                             }}
-                        }}
-                    </style>
-                </head>
-                <body>
+                    }}
+                </style>
+            </head>
+            <body>
                     <div class="banner-container">
                         {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
                         <div class="banner-overlay">
@@ -557,20 +557,20 @@ Observations:
                     </div>
                     <div class="subheader">
                         Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
-                    </div>
+                </div>
                     <div class="app-link">
                         <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
-                    </div>
+                </div>
                     <div class="content">
                         {analysis}
-                    </div>
+                </div>
                     <div class="footer">
                         <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
-                    </div>
-                </body>
+                </div>
+            </body>
             </html>
             """
-            
+
             # Attach the HTML content
             msg.attach(MIMEText(html_content, 'html'))
             
@@ -583,17 +583,17 @@ Observations:
                 
                 # Send the email
                 server.send_message(msg)
-            
+
             logging.info(f"Email sent successfully to {recipient}")
-            
+
         except Exception as e:
             logging.error(f"Error sending email: {str(e)}")
             
     def _generate_basic_analysis(self):
         """Generate a basic analysis when AI analysis fails"""
         try:
-            observations = self.get_recent_observations()
-            if not observations:
+        observations = self.get_recent_observations()
+        if not observations:
                 return "<div class='alert alert-warning'>No observations found in the past week.</div>"
                 
             # Count total observations and birds
@@ -606,7 +606,7 @@ Observations:
             
             # Find most common species
             species_counts = defaultdict(int)
-            for obs in observations:
+        for obs in observations:
                 species_counts[obs['comName']] += obs.get('howMany', 1)
             common_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)[:5]
             
@@ -686,7 +686,7 @@ Observations:
                 formatted_observations.append(obs_str)
             
             return "\n".join(formatted_observations)
-            
+        
         except Exception as e:
             logger.error(f"Error formatting observations: {str(e)}")
             return "Error formatting observations for analysis."
@@ -763,7 +763,7 @@ Please provide a well-structured analysis that would be helpful for both casual 
                         time.sleep(delay)
                         continue
                     return self._generate_basic_analysis()
-                except Exception as e:
+        except Exception as e:
                     logger.error(f"Error calling Claude API: {str(e)}")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
