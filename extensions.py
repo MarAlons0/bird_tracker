@@ -33,31 +33,39 @@ def init_extensions(app):
     @login_manager.user_loader
     def load_user(user_id):
         from models import User  # Import here to avoid circular import
-        # Use raw SQL to load user
-        result = db.session.execute(
-            text("""
-                SELECT id, username, email, password_hash, is_admin, is_approved,
-                       registration_date, active, login_token, token_expiry,
-                       newsletter_subscription
-                FROM users
-                WHERE id = :user_id
-            """),
-            {"user_id": int(user_id)}
-        ).fetchone()
+        from flask import current_app
         
-        if result:
-            # Create a User instance with the raw data
-            user = User()
-            user.id = result[0]
-            user.username = result[1]
-            user.email = result[2]
-            user.password_hash = result[3]
-            user.is_admin = result[4]
-            user.is_approved = result[5]
-            user.registration_date = result[6]
-            user.active = result[7]
-            user.login_token = result[8]
-            user.token_expiry = result[9]
-            user.newsletter_subscription = result[10]
-            return user
-        return None 
+        # Create a new session for this operation
+        with current_app.app_context():
+            try:
+                # Use raw SQL to load user
+                result = db.session.execute(
+                    text("""
+                        SELECT id, username, email, password_hash, is_admin, is_approved,
+                               registration_date, active, login_token, token_expiry,
+                               newsletter_subscription
+                        FROM users
+                        WHERE id = :user_id
+                    """),
+                    {"user_id": int(user_id)}
+                ).fetchone()
+                
+                if result:
+                    # Create a User instance with the raw data
+                    user = User()
+                    user.id = result[0]
+                    user.username = result[1]
+                    user.email = result[2]
+                    user.password_hash = result[3]
+                    user.is_admin = result[4]
+                    user.is_approved = result[5]
+                    user.registration_date = result[6]
+                    user.active = result[7]
+                    user.login_token = result[8]
+                    user.token_expiry = result[9]
+                    user.newsletter_subscription = result[10]
+                    return user
+                return None
+            except Exception as e:
+                db.session.rollback()  # Rollback any failed transaction
+                return None 
