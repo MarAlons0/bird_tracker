@@ -62,7 +62,7 @@ def users():
     # Get all users using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, active,
+            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
                    login_token, token_expiry, newsletter_subscription
             FROM users
             ORDER BY id
@@ -78,7 +78,7 @@ def users():
         user.is_admin = row[3]
         user.is_approved = row[4]
         user.registration_date = row[5]
-        user.active = row[6]
+        user.is_active = row[6]
         user.login_token = row[7]
         user.token_expiry = row[8]
         user.newsletter_subscription = row[9]
@@ -181,7 +181,7 @@ def admin_panel():
     # Get all users using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, active,
+            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
                    login_token, token_expiry, newsletter_subscription
             FROM users
             ORDER BY id
@@ -197,7 +197,7 @@ def admin_panel():
         user.is_admin = row[3]
         user.is_approved = row[4]
         user.registration_date = row[5]
-        user.active = row[6]
+        user.is_active = row[6]
         user.login_token = row[7]
         user.token_expiry = row[8]
         user.newsletter_subscription = row[9]

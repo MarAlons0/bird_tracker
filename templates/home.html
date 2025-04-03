@@ -50,13 +50,21 @@
     .location-input-container {
         position: relative;
     }
+    .carousel-item img {
+        height: 400px;
+        object-fit: cover;
+    }
+    .carousel-caption {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <!-- Carousel -->
-    {% if carousel_images %}
     <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-indicators">
             {% for image in carousel_images %}
@@ -67,21 +75,64 @@
             {% for image in carousel_images %}
             <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <img src="{{ url_for('static', filename='images/carousel/' + image.filename) }}" class="d-block w-100" alt="{{ image.title }}">
-                {% if image.title or image.description %}
-                <div class="carousel-caption d-none d-md-block">
-                    {% if image.title %}
+                <div class="carousel-caption">
                     <h5>{{ image.title }}</h5>
-                    {% endif %}
-                    {% if image.description %}
                     <p>{{ image.description }}</p>
-                    {% endif %}
                 </div>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-    {% endif %}
+
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h1>Welcome to Mario's Bird Tracker</h1>
+            <p class="lead">Track and discover bird sightings in your area</p>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                    <h5 class="card-title">Interactive Map</h5>
+                    <p class="card-text">Explore bird sightings in your area with our interactive map.</p>
+                    <a href="{{ url_for('main.map') }}" class="btn btn-primary">View Map</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                    <h5 class="card-title">AI Analysis</h5>
+                    <p class="card-text">Get insights about bird populations and trends in your area.</p>
+                    <a href="{{ url_for('main.report') }}" class="btn btn-primary">View Analysis</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-bell fa-3x mb-3"></i>
+                    <h5 class="card-title">Notifications</h5>
+                    <p class="card-text">Stay updated with the latest bird sightings in your area.</p>
+                    <a href="{{ url_for('main.newsletter_preferences') }}" class="btn btn-primary">Manage Preferences</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Location Info -->
     <div class="card mb-4">
