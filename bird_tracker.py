@@ -179,26 +179,41 @@ class BirdSightingTracker:
                 self.send_email(body, self.email_config['admin_email'], subject=subject)
 
     def send_daily_report(self):
-        """Send daily bird sighting report to subscribed users"""
+        """Send daily report of bird sightings."""
         try:
-            # Get all active users
-            users = User.query.filter_by(is_active=True).all()
+            self.logger.info("Starting daily report generation")
             
-            for user in users:
-                # Generate report for user's location
-                analysis = self.analyze_recent_sightings()
-                
-                # Send email to user
-                self.send_email(analysis, user.email)
-                logger.info(f"Daily report sent to {user.email}")
-                
+            # Get recent observations
+            observations = self.get_recent_observations()
+            if not observations:
+                self.logger.info("No observations to report")
+                return
+            
+            # Format observations
+            formatted_observations = self._format_observations(observations)
+            
+            # Get analysis
+            analysis = self.analyze_recent_sightings(observations)
+            
+            # Prepare email content
+            subject = f"Daily Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
+            body = f"""Bird Sighting Report for {self.active_location['name']}
+
+{formatted_observations}
+
+Analysis:
+{analysis}
+
+This report was generated automatically by the Bird Tracker application.
+"""
+            
+            # Send email
+            self.send_email(subject, body)
+            self.logger.info("Daily report sent successfully")
+            
         except Exception as e:
-            logger.error(f"Error sending daily reports: {str(e)}")
-            # Notify admin of failure
-            if self.email_config['admin_email']:
-                subject = "Bird Tracker Daily Report Error"
-                body = f"Failed to send daily reports:\n\n{str(e)}"
-                self.send_email(body, self.email_config['admin_email'], subject=subject)
+            self.logger.error(f"Error sending daily report: {str(e)}")
+            raise
 
     def send_email(self, body, recipient, subject=None):
         """Send an email using the configured SMTP settings"""
@@ -227,14 +242,9 @@ class BirdSightingTracker:
             logger.error(f"Error sending email: {str(e)}")
             raise
 
-    def analyze_recent_sightings(self):
+    def analyze_recent_sightings(self, observations):
         """Analyze recent bird sightings and generate a report"""
         try:
-            # Get recent observations
-            observations = self.get_recent_observations()
-            if not observations:
-                return "No recent observations found."
-            
             # Format observations for display
             formatted_observations = self._format_observations(observations)
             
