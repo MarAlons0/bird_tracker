@@ -113,4 +113,24 @@ class BirdSightingTracker:
         config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
         
         logger.info("Created config from environment variables")
-        return config 
+        return config
+
+    def _get_active_location(self):
+        """Get the active location from the config"""
+        try:
+            active_location = self.config['locations']['active_location']
+            location_section = f"location_{active_location}"
+            
+            if location_section in self.config:
+                return {
+                    'name': self.config[location_section]['name'],
+                    'latitude': float(self.config[location_section]['latitude']),
+                    'longitude': float(self.config[location_section]['longitude']),
+                    'radius': float(self.config[location_section]['radius'])
+                }
+            else:
+                logger.warning(f"Location section {location_section} not found in config")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting active location: {str(e)}")
+            return None 
