@@ -133,7 +133,7 @@
             <h5 class="mb-0">Newsletter Preferences</h5>
         </div>
         <div class="card-body">
-            <p>You currently receive bird sighting reports at {{ email_schedule.hour }}:{{ email_schedule.minute|stringformat:"02d" }} UTC.</p>
+            <p>You currently receive bird sighting reports at {{ email_schedule.hour }}:{{ '%02d' % email_schedule.minute }} UTC.</p>
             <a href="{{ url_for('main.newsletter_preferences') }}" class="btn btn-primary">Manage Preferences</a>
         </div>
     </div>
