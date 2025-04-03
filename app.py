@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, url_for, redirect, flash
+from flask import Flask, render_template, jsonify, request, url_for, redirect, flash, send_file
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
@@ -9,7 +9,6 @@ import logging
 from dotenv import load_dotenv
 from logging_config import setup_logging
 import anthropic
-from models import db, User, RegistrationRequest
 import secrets
 from flask_mail import Mail, Message
 import configparser
@@ -21,6 +20,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from extensions import migrate, scheduler, init_extensions, login_manager, mail
 from bird_tracker import BirdSightingTracker
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from io import BytesIO
+import base64
+from sqlalchemy.orm import clear_mappers
+from sqlalchemy.sql import text
+import psycopg2
 
 # Load environment variables
 load_dotenv()
@@ -41,6 +48,9 @@ def create_app():
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Clear SQLAlchemy mapper
+    clear_mappers()
     
     # Configure session settings for Safari
     app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
@@ -81,6 +91,13 @@ def create_app():
     # Initialize bird tracker
     app.tracker = BirdSightingTracker()
     
+    # Configure Cloudinary
+    cloudinary.config(
+        cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.getenv('CLOUDINARY_API_KEY'),
+        api_secret=os.getenv('CLOUDINARY_API_SECRET')
+    )
+    
     return app
 
 app = create_app()
@@ -89,46 +106,154 @@ CORS(app)  # Enable CORS for all routes
 def init_db():
     with app.app_context():
         try:
-            db.create_all()
-            print("Database tables created")
+            # Get database URL from app config
+            db_url = app.config['SQLALCHEMY_DATABASE_URI']
             
-            # Create admin user if it doesn't exist
-            admin_email = os.getenv('ADMIN_EMAIL')
-            admin_password = os.getenv('ADMIN_PASSWORD')
-            if admin_email and admin_password:
-                admin = User.query.filter_by(email=admin_email).first()
-                if not admin:
-                    admin = User(email=admin_email, is_admin=True)
-                    admin.set_password(admin_password)
-                    db.session.add(admin)
-                    db.session.commit()
-                    logger.info(f"Created admin user: {admin_email}")
-                else:
-                    # Only update is_admin status, don't change password
-                    admin.is_admin = True
-                    db.session.commit()
-                    logger.info(f"Updated admin user: {admin_email}")
+            # Connect to database
+            conn = psycopg2.connect(db_url)
+            cur = conn.cursor()
             
-            # Create default users if they don't exist
-            allowed_emails = os.getenv('ALLOWED_EMAILS', '').split(',')
-            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-            
-            for email in allowed_emails:
-                email = email.strip()
-                if email and email != admin_email:
-                    user = User.query.filter_by(email=email).first()
-                    if not user:
-                        user = User(email=email)
-                        user.set_password(default_password)
-                        db.session.add(user)
-                        db.session.commit()
-                        logger.info(f"Created user: {email}")
-                    else:
-                        logger.info(f"Updated user: {email}")
-            
+            try:
+                # Drop all tables
+                cur.execute("""
+                    DROP TABLE IF EXISTS users CASCADE;
+                    DROP TABLE IF EXISTS location CASCADE;
+                """)
+                
+                # Create users table
+                cur.execute("""
+                    CREATE TABLE users (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(80) UNIQUE NOT NULL,
+                        email VARCHAR(120) UNIQUE NOT NULL,
+                        password_hash VARCHAR(255) NOT NULL,
+                        is_admin BOOLEAN DEFAULT FALSE,
+                        is_approved BOOLEAN DEFAULT FALSE,
+                        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        is_active BOOLEAN DEFAULT TRUE,
+                        login_token VARCHAR(100) UNIQUE,
+                        token_expiry TIMESTAMP,
+                        newsletter_subscription BOOLEAN DEFAULT TRUE
+                    )
+                """)
+                
+                # Create location table
+                cur.execute("""
+                    CREATE TABLE location (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(120),
+                        latitude FLOAT,
+                        longitude FLOAT,
+                        radius FLOAT,
+                        is_active BOOLEAN DEFAULT FALSE
+                    )
+                """)
+
+                print("Database tables created")
+
+                # Create admin user
+                admin_email = os.getenv('ADMIN_EMAIL')
+                admin_password = os.getenv('ADMIN_PASSWORD')
+                if admin_email and admin_password:
+                    # Create admin user using raw SQL
+                    cur.execute("""
+                        INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        admin_email,
+                        "admin",
+                        generate_password_hash(admin_password),
+                        True,
+                        True,
+                        True,
+                        True
+                    ))
+                    print(f"Created admin user: {admin_email}")
+                
+                # Create default locations
+                default_locations = [
+                    {
+                        "name": "Cincinnati",
+                        "latitude": 39.1031,
+                        "longitude": -84.5120,
+                        "radius": 50.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Zion National Park",
+                        "latitude": 37.2982,
+                        "longitude": -113.0263,
+                        "radius": 50.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Cincinnati Nature Center",
+                        "latitude": 39.1753,
+                        "longitude": -84.2747,
+                        "radius": 5.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Moab",
+                        "latitude": 38.5733,
+                        "longitude": -109.5498,
+                        "radius": 50.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Zion Nat'l Pk Entrance",
+                        "latitude": 37.2017,
+                        "longitude": -112.9872,
+                        "radius": 5.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Bryce Canyon Visitor Ctr",
+                        "latitude": 37.6283,
+                        "longitude": -112.1687,
+                        "radius": 5.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Denver",
+                        "latitude": 39.7392,
+                        "longitude": -104.9903,
+                        "radius": 50.0,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Baton Rouge",
+                        "latitude": 30.4515,
+                        "longitude": -91.1871,
+                        "radius": 50.0,
+                        "is_active": True
+                    }
+                ]
+
+                for location_data in default_locations:
+                    # Create location using raw SQL
+                    cur.execute("""
+                        INSERT INTO location (name, latitude, longitude, radius, is_active)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (
+                        location_data["name"],
+                        location_data["latitude"],
+                        location_data["longitude"],
+                        location_data["radius"],
+                        location_data["is_active"]
+                    ))
+                    print(f"Created location: {location_data['name']}")
+
+                conn.commit()
+                print("Database initialization completed")
+            except Exception as e:
+                print(f"Error during database initialization: {str(e)}")
+                conn.rollback()
+            finally:
+                cur.close()
+                conn.close()
         except Exception as e:
-            logger.error(f"Error during database initialization: {e}")
-            raise
+            print(f"Error connecting to database: {str(e)}")
 
 def admin_required(f):
     @wraps(f)
@@ -138,10 +263,6 @@ def admin_required(f):
             return redirect(url_for('home'))
         return f(*args, **kwargs)
     return decorated_function
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 def load_locations():
     try:
@@ -374,6 +495,77 @@ def update_email_schedule():
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file provided'}), 400
+        
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file and allowed_file(file.filename):
+            # Upload to Cloudinary
+            upload_result = cloudinary.uploader.upload(file)
+            
+            # Create new image record
+            new_image = Image(
+                filename=file.filename,
+                filepath=upload_result['secure_url'],  # Store Cloudinary URL
+                upload_date=datetime.utcnow(),
+                user_id=current_user.id
+            )
+            
+            db.session.add(new_image)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Image uploaded successfully',
+                'image_url': upload_result['secure_url']
+            })
+        else:
+            return jsonify({'error': 'Invalid file type'}), 400
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get_images')
+@login_required
+def get_images():
+    try:
+        images = Image.query.filter_by(user_id=current_user.id).order_by(Image.upload_date.desc()).all()
+        return jsonify([{
+            'id': img.id,
+            'filename': img.filename,
+            'filepath': img.filepath,  # This will now be the Cloudinary URL
+            'upload_date': img.upload_date.strftime('%Y-%m-%d %H:%M:%S')
+        } for img in images])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/delete_image/<int:image_id>', methods=['DELETE'])
+@login_required
+def delete_image(image_id):
+    try:
+        image = Image.query.get_or_404(image_id)
+        
+        # Delete from Cloudinary
+        if image.filepath:
+            public_id = image.filepath.split('/')[-1].split('.')[0]  # Extract public_id from URL
+            cloudinary.uploader.destroy(public_id)
+        
+        db.session.delete(image)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Image deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 # Add error handlers
 @app.errorhandler(404)

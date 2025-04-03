@@ -10,6 +10,7 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from sqlalchemy import text
 
 bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
@@ -55,12 +56,34 @@ def login():
         password = request.form.get('password')
         logger.info(f"Login attempt for email: {email}")
         
-        # Check if user exists in database
-        user = User.query.filter_by(email=email).first()
+        # Check if user exists in database using raw SQL
+        result = db.session.execute(
+            text("""
+                SELECT id, username, email, password_hash, is_admin, is_approved,
+                       registration_date, is_active, login_token, token_expiry,
+                       newsletter_subscription
+                FROM users
+                WHERE email = :email
+            """),
+            {"email": email}
+        ).fetchone()
         
         # If user exists, allow login regardless of ALLOWED_EMAILS
-        if user:
+        if result:
             logger.info(f"User exists in database: {email}")
+            user = User()
+            user.id = result[0]
+            user.username = result[1]
+            user.email = result[2]
+            user.password_hash = result[3]
+            user.is_admin = result[4]
+            user.is_approved = result[5]
+            user.registration_date = result[6]
+            user.is_active = result[7]
+            user.login_token = result[8]
+            user.token_expiry = result[9]
+            user.newsletter_subscription = result[10]
+            
             if not user.check_password(password):
                 logger.warning(f"Invalid password for user: {email}")
                 return render_template('login.html', 
@@ -92,13 +115,63 @@ def login():
         
         # Create new user
         logger.info(f"Creating new user for email: {email}")
-        user = User(email=email)
-        # Set default password for new users
+        
+        # Generate username from email
+        username = email.split('@')[0]
+        # Ensure username is unique using raw SQL
+        base_username = username
+        counter = 1
+        while db.session.execute(
+            text("SELECT id FROM users WHERE username = :username"),
+            {"username": username}
+        ).fetchone():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        # Create user using raw SQL
         default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-        user.set_password(default_password)
-        db.session.add(user)
+        db.session.execute(
+            text("""
+                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
+            """),
+            {
+                "email": email,
+                "username": username,
+                "password_hash": generate_password_hash(default_password),
+                "is_admin": False,
+                "is_approved": True,
+                "is_active": True,
+                "newsletter_subscription": True
+            }
+        )
         db.session.commit()
         logger.info(f"Created new user with default password: {email}")
+        
+        # Get the newly created user
+        result = db.session.execute(
+            text("""
+                SELECT id, username, email, password_hash, is_admin, is_approved,
+                       registration_date, is_active, login_token, token_expiry,
+                       newsletter_subscription
+                FROM users
+                WHERE email = :email
+            """),
+            {"email": email}
+        ).fetchone()
+        
+        user = User()
+        user.id = result[0]
+        user.username = result[1]
+        user.email = result[2]
+        user.password_hash = result[3]
+        user.is_admin = result[4]
+        user.is_approved = result[5]
+        user.registration_date = result[6]
+        user.is_active = result[7]
+        user.login_token = result[8]
+        user.token_expiry = result[9]
+        user.newsletter_subscription = result[10]
         
         # Log user in
         login_user(user)
@@ -132,20 +205,39 @@ def request_registration():
         email = request.form.get('email')
         message = request.form.get('message')
         
-        # Check if email is already registered and active
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user and existing_user.is_active:
+        # Check if email is already registered and active using raw SQL
+        result = db.session.execute(
+            text("SELECT id, is_active FROM users WHERE email = :email"),
+            {"email": email}
+        ).fetchone()
+        
+        if result and result[1]:  # is_active is True
             return render_template('request_registration.html', 
                 error="This email is already registered.")
         
-        # Check if there's already a pending request
-        if RegistrationRequest.query.filter_by(email=email, status='pending').first():
+        # Check if there's already a pending request using raw SQL
+        result = db.session.execute(
+            text("SELECT id FROM registration_requests WHERE email = :email AND status = 'pending'"),
+            {"email": email}
+        ).fetchone()
+        
+        if result:
             return render_template('request_registration.html', 
                 error="A registration request for this email is already pending.")
         
-        # Create new registration request
-        registration_request = RegistrationRequest(email=email, notes=message)
-        db.session.add(registration_request)
+        # Create new registration request using raw SQL
+        db.session.execute(
+            text("""
+                INSERT INTO registration_requests (email, notes, status, request_date)
+                VALUES (:email, :notes, :status, :request_date)
+            """),
+            {
+                "email": email,
+                "notes": message,
+                "status": "pending",
+                "request_date": datetime.utcnow()
+            }
+        )
         db.session.commit()
         
         # Send email to admin
@@ -185,8 +277,8 @@ def request_registration():
         current_app.mail.send(msg)
         
         return render_template('request_registration.html', 
-            success="Your registration request has been submitted successfully.")
-    
+            success="Your registration request has been submitted. You will receive an email once it has been processed.")
+            
     return render_template('request_registration.html')
 
 @bp.route('/register/<token>', methods=['GET', 'POST'])

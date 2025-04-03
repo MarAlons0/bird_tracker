@@ -1,5 +1,6 @@
 import os
-from app import create_app, db
+from app import create_app
+from extensions import db
 from init_db import init_db
 
 app = create_app()

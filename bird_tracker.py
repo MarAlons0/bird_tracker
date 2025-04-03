@@ -23,6 +23,8 @@ import random
 import tempfile
 from math import cos, sin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+from models import User
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -198,15 +200,16 @@ class BirdSightingTracker:
                         else:
                             logging.warning(f"Invalid coordinates for observation: {obs.get('comName', 'Unknown')}")
                     except (ValueError, TypeError) as e:
-                        logging.warning(f"Error processing coordinates for observation: {str(e)}")
+                        logging.error(f"Error validating coordinates: {str(e)}")
+                        continue
                 
-                logging.info(f"Number of valid observations: {len(valid_observations)}")
                 return valid_observations
             else:
-                logging.error(f"Error from eBird API: {response.status_code} - {response.text}")
+                logging.error(f"eBird API request failed with status code: {response.status_code}")
                 return []
+                
         except Exception as e:
-            logging.error(f"Error getting recent observations: {str(e)}")
+            logging.error(f"Error getting observations: {str(e)}")
             return []
     
     def _save_prompt_to_log(self, prompt_type: str, prompt: str):
@@ -374,23 +377,53 @@ Observations:
         logging.warning(f"Job {event.job_id} was missed!") 
     
     def send_daily_report(self):
-        """Send daily bird sighting report via email"""
+        """Send daily bird report to subscribed users."""
         try:
+            # Get subscribed users using raw SQL
+            result = db.session.execute(
+                text("""
+                    SELECT id, username, email
+                    FROM users
+                    WHERE newsletter_subscription = true AND is_active = true
+                """)
+            ).fetchall()
+            
+            subscribed_users = []
+            for row in result:
+                user = User()
+                user.id = row[0]
+                user.username = row[1]
+                user.email = row[2]
+                subscribed_users.append(user)
+            
+            if not subscribed_users:
+                logger.info("No subscribed users found")
+                return
+            
             # Get recent observations
             observations = self.get_recent_observations()
             if not observations:
-                logging.warning("No observations to report")
+                logger.info("No recent observations found")
                 return
-                
-            # Generate AI analysis
+            
+            # Generate analysis
             analysis = self.analyze_observations()
+            if not analysis:
+                logger.warning("Failed to generate analysis")
+                return
             
-            # Send email with report
-            self.send_email(analysis)
-            logging.info("Daily report sent successfully")
-            
+            # Send email to each subscribed user
+            for user in subscribed_users:
+                try:
+                    self.send_email(analysis, user.email)
+                    logger.info(f"Daily report sent to {user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send report to {user.email}: {str(e)}")
+                    continue
+                
         except Exception as e:
-            logging.error(f"Error sending daily report: {str(e)}")
+            logger.error(f"Error in send_daily_report: {str(e)}")
+            raise
             
     def _get_banner_image(self):
         """Get the banner image as base64 string"""
@@ -403,159 +436,148 @@ Observations:
             logging.error(f"Error reading banner image: {str(e)}")
             return None
 
-    def send_email(self, analysis):
+    def send_email(self, analysis, recipient):
         """Send email with bird report analysis"""
         try:
             # Import here to avoid circular import
             from app import create_app
-            from models import User
             
-            # Get all subscribed users
-            with create_app().app_context():
-                subscribed_users = User.query.filter_by(newsletter_subscription=True, is_active=True).all()
-                
-                if not subscribed_users:
-                    logging.warning("No subscribed users found")
-                    return
-                
-                # Create message
-                msg = MIMEMultipart()
-                msg['Subject'] = 'Weekly Bird Report'
-                msg['From'] = self.email_config['sender_email']
-                
-                # Get banner image
-                banner_base64 = self._get_banner_image()
-                
-                # Create HTML content
-                html_content = f"""
-                <html>
-                    <head>
-                        <style>
+            # Create message
+            msg = MIMEMultipart()
+            msg['Subject'] = 'Weekly Bird Report'
+            msg['From'] = self.email_config['sender_email']
+            
+            # Get banner image
+            banner_base64 = self._get_banner_image()
+            
+            # Create HTML content
+            html_content = f"""
+            <html>
+                <head>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }}
+                        .banner-container {{
+                            position: relative;
+                            width: 100%;
+                            height: 200px;
+                            overflow: hidden;
+                            margin-bottom: 20px;
+                        }}
+                        .banner-image {{
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }}
+                        .banner-overlay {{
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }}
+                        .header-text {{
+                            color: white;
+                            font-size: 24px;
+                            font-weight: bold;
+                            text-align: center;
+                        }}
+                        .subheader {{
+                            text-align: center;
+                            color: #666;
+                            margin-bottom: 20px;
+                        }}
+                        .app-link {{
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }}
+                        .app-link a {{
+                            display: inline-block;
+                            padding: 10px 20px;
+                            background-color: #4CAF50;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                        }}
+                        .content {{
+                            background-color: #f9f9f9;
+                            padding: 20px;
+                            border-radius: 5px;
+                            margin-bottom: 20px;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            color: #666;
+                            font-size: 12px;
+                        }}
+                        .unsubscribe-link {{
+                            color: #666;
+                            text-decoration: none;
+                        }}
+                        @media (prefers-color-scheme: dark) {{
                             body {{
-                                font-family: Arial, sans-serif;
-                                line-height: 1.6;
-                                color: #333;
-                                max-width: 600px;
-                                margin: 0 auto;
-                                padding: 20px;
-                            }}
-                            .banner-container {{
-                                position: relative;
-                                width: 100%;
-                                height: 200px;
-                                overflow: hidden;
-                                margin-bottom: 20px;
-                            }}
-                            .banner-image {{
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                            }}
-                            .banner-overlay {{
-                                position: absolute;
-                                top: 0;
-                                left: 0;
-                                right: 0;
-                                bottom: 0;
-                                background: rgba(0, 0, 0, 0.5);
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            }}
-                            .header-text {{
-                                color: white;
-                                font-size: 24px;
-                                font-weight: bold;
-                                text-align: center;
-                            }}
-                            .subheader {{
-                                text-align: center;
-                                color: #666;
-                                margin-bottom: 20px;
-                            }}
-                            .app-link {{
-                                text-align: center;
-                                margin-bottom: 20px;
-                            }}
-                            .app-link a {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                background-color: #4CAF50;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
+                                background-color: #1a1a1a;
+                                color: #ffffff;
                             }}
                             .content {{
-                                background-color: #f9f9f9;
-                                padding: 20px;
-                                border-radius: 5px;
-                                margin-bottom: 20px;
+                                background-color: #2d2d2d;
                             }}
-                            .footer {{
-                                text-align: center;
-                                color: #666;
-                                font-size: 12px;
+                            .subheader, .footer {{
+                                color: #999;
                             }}
                             .unsubscribe-link {{
-                                color: #666;
-                                text-decoration: none;
+                                color: #999;
                             }}
-                            @media (prefers-color-scheme: dark) {{
-                                body {{
-                                    background-color: #1a1a1a;
-                                    color: #ffffff;
-                                }}
-                                .content {{
-                                    background-color: #2d2d2d;
-                                }}
-                                .subheader, .footer {{
-                                    color: #999;
-                                }}
-                                .unsubscribe-link {{
-                                    color: #999;
-                                }}
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="banner-container">
-                            {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
-                            <div class="banner-overlay">
-                                <div class="header-text">Mario's Birds Newsletter</div>
-                            </div>
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="banner-container">
+                        {"<img src='data:image/jpeg;base64,{}' class='banner-image' alt='Banner'>".format(banner_base64) if banner_base64 else ""}
+                        <div class="banner-overlay">
+                            <div class="header-text">Mario's Birds Newsletter</div>
                         </div>
-                        <div class="subheader">
-                            Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
-                        </div>
-                        <div class="app-link">
-                            <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
-                        </div>
-                        <div class="content">
-                            {analysis}
-                        </div>
-                        <div class="footer">
-                            <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
-                        </div>
-                    </body>
-                </html>
-                """
+                    </div>
+                    <div class="subheader">
+                        Based on eBird reports for the Cincinnati Area. AI summarization generated by Claude.ai
+                    </div>
+                    <div class="app-link">
+                        <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/" target="_blank">Visit Mario's Bird Tracker Web App</a>
+                    </div>
+                    <div class="content">
+                        {analysis}
+                    </div>
+                    <div class="footer">
+                        <p>To manage your newsletter preferences, visit <a href="https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/newsletter-preferences" class="unsubscribe-link">Newsletter Preferences</a></p>
+                    </div>
+                </body>
+            </html>
+            """
+            
+            # Attach the HTML content
+            msg.attach(MIMEText(html_content, 'html'))
+            
+            # Send email to the recipient
+            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['sender_email'], self.email_config['sender_password'])
                 
-                # Attach the HTML content
-                msg.attach(MIMEText(html_content, 'html'))
+                msg['To'] = recipient
                 
-                # Send email to all subscribed users using BCC
-                with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
-                    server.starttls()
-                    server.login(self.email_config['sender_email'], self.email_config['sender_password'])
-                    
-                    # Set BCC recipients
-                    bcc_recipients = [user.email for user in subscribed_users]
-                    msg['Bcc'] = ', '.join(bcc_recipients)
-                    
-                    # Send the email once with all BCC recipients
-                    server.send_message(msg)
-                
-                logging.info(f"Email sent successfully to {len(subscribed_users)} subscribers")
+                # Send the email
+                server.send_message(msg)
+            
+            logging.info(f"Email sent successfully to {recipient}")
             
         except Exception as e:
             logging.error(f"Error sending email: {str(e)}")

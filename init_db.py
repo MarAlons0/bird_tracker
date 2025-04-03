@@ -1,81 +1,95 @@
-from app import app, db
-from models import User
-import logging
-from sqlalchemy import text
-import os
+from app import create_app
 from werkzeug.security import generate_password_hash
-from sqlalchemy.exc import IntegrityError
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+import psycopg2
+import os
+import logging
 
 def init_db():
+    app = create_app()
     with app.app_context():
-        # Create tables
+        # Get database URL from app config
+        db_url = app.config['SQLALCHEMY_DATABASE_URI']
+        
+        # Connect to database
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+        
         try:
-            db.create_all()
+            # Drop all tables
+            cur.execute("""
+                DROP TABLE IF EXISTS users CASCADE;
+                DROP TABLE IF EXISTS location CASCADE;
+            """)
+            
+            # Create users table
+            cur.execute("""
+                CREATE TABLE users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(80) UNIQUE NOT NULL,
+                    email VARCHAR(120) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    is_admin BOOLEAN DEFAULT FALSE,
+                    is_approved BOOLEAN DEFAULT FALSE,
+                    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    login_token VARCHAR(100) UNIQUE,
+                    token_expiry TIMESTAMP,
+                    newsletter_subscription BOOLEAN DEFAULT TRUE
+                )
+            """)
+            
+            # Create location table
+            cur.execute("""
+                CREATE TABLE location (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(120),
+                    latitude FLOAT,
+                    longitude FLOAT,
+                    radius FLOAT,
+                    is_active BOOLEAN DEFAULT FALSE
+                )
+            """)
+
             print("Database tables created")
+
+            # Create default users
+            default_users = [
+                ("alonsoencinci@gmail.com", "admin123"),
+                ("sasandrap@gmail.com", "user123"),
+                ("jalonso91@gmail.com", "user123"),
+                ("nunualonso96@gmail.com", "user123")
+            ]
+
+            for email, password in default_users:
+                username = email.split('@')[0]
+                # Check if user already exists
+                cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+                if not cur.fetchone():
+                    cur.execute("""
+                        INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        email,
+                        username,
+                        generate_password_hash(password),
+                        email == "alonsoencinci@gmail.com",  # Only first user is admin
+                        True,  # All users are approved
+                        True,  # All users are active
+                        True   # All users are subscribed to newsletter
+                    ))
+                    print(f"Created user: {email}")
+
+            # Commit the transaction
+            conn.commit()
+            print("Database initialized successfully")
+
         except Exception as e:
-            print(f"Note: Some tables may already exist: {e}")
+            print(f"Error initializing database: {e}")
+            conn.rollback()
+            raise
+        finally:
+            cur.close()
+            conn.close()
 
-        # User data
-        users_data = [
-            {
-                'email': 'alonsoencinci@gmail.com',
-                'password': os.environ.get('ADMIN_PASSWORD', 'admin123'),
-                'is_admin': True,
-                'is_active': True
-            },
-            {
-                'email': 'sasandrap@gmail.com',
-                'password': os.environ.get('DEFAULT_USER_PASSWORD', 'user123'),
-                'is_admin': False,
-                'is_active': True
-            },
-            {
-                'email': 'jalonso91@gmail.com',
-                'password': os.environ.get('DEFAULT_USER_PASSWORD', 'user123'),
-                'is_admin': False,
-                'is_active': True
-            },
-            {
-                'email': 'nunualonso96@gmail.com',
-                'password': os.environ.get('DEFAULT_USER_PASSWORD', 'user123'),
-                'is_admin': False,
-                'is_active': True
-            }
-        ]
-
-        # Create or update users
-        for user_data in users_data:
-            try:
-                with db.session.begin_nested():
-                    user = User.query.filter_by(email=user_data['email']).with_for_update().first()
-                    
-                    if user is None:
-                        # Create new user
-                        user = User(
-                            email=user_data['email'],
-                            password=generate_password_hash(user_data['password']),
-                            is_admin=user_data['is_admin'],
-                            is_active=user_data['is_active']
-                        )
-                        db.session.add(user)
-                        print(f"Created {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
-                    else:
-                        # Update existing user
-                        user.password = generate_password_hash(user_data['password'])
-                        user.is_admin = user_data['is_admin']
-                        user.is_active = user_data['is_active']
-                        print(f"Updated {'admin' if user_data['is_admin'] else ''} user: {user_data['email']}")
-
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-                print(f"User {user_data['email']} already exists")
-            except Exception as e:
-                db.session.rollback()
-                print(f"Error creating/updating user {user_data['email']}: {e}")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_db() 
