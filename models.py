@@ -93,8 +93,8 @@ class CarouselImage(db.Model):
     filepath = db.Column(db.String(255), nullable=True)
     upload_date = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    order = db.Column(db.Integer, default=0)
-    is_active = db.Column(db.Boolean, default=True)
+    order = db.Column(db.Integer, nullable=False, default=0)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     def __repr__(self):
         return f'<CarouselImage {self.filename}>'

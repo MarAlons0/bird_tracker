@@ -359,7 +359,7 @@ def add_carousel_image():
     public_id = save_image(file, 'carousel')
     
     if public_id:
-        # Get the highest order value
+        # Get the highest order value using db.func.max()
         max_order = db.session.query(db.func.max(CarouselImage.order)).scalar() or 0
         
         image = CarouselImage(

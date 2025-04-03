@@ -17,14 +17,6 @@
                     <label for="image" class="form-label">Image File</label>
                     <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
                 </div>
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="title" name="title">
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                </div>
                 <button type="submit" class="btn btn-primary">Add Image</button>
             </form>
         </div>
@@ -45,19 +37,11 @@
                         <div class="card-body">
                             <form action="{{ url_for('admin.edit_carousel_image', id=image.id) }}" method="post">
                                 <div class="mb-3">
-                                    <label for="title-{{ image.id }}" class="form-label">Title</label>
-                                    <input type="text" class="form-control" id="title-{{ image.id }}" 
-                                           name="title" value="{{ image.title }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="description-{{ image.id }}" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description-{{ image.id }}" 
-                                              name="description" rows="3">{{ image.description }}</textarea>
-                                </div>
-                                <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="is_active-{{ image.id }}" 
-                                           name="active" value="true" {% if image.is_active %}checked{% endif %}>
-                                    <label class="form-check-label" for="is_active-{{ image.id }}">Active</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="is_active-{{ image.id }}" 
+                                               name="active" value="true" {% if image.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_active-{{ image.id }}">Active</label>
+                                    </div>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <button type="submit" class="btn btn-primary">Update</button>
