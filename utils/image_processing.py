@@ -3,6 +3,10 @@ from PIL import Image
 import cloudinary
 import cloudinary.uploader
 from flask import current_app
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def process_image(image_file):
     """Process an uploaded image file."""
@@ -26,9 +30,9 @@ def upload_to_cloudinary(image, public_id, transformations=None):
     """Upload an image to Cloudinary."""
     # Configure Cloudinary
     cloudinary.config(
-        cloud_name=current_app.config['CLOUDINARY_CLOUD_NAME'],
-        api_key=current_app.config['CLOUDINARY_API_KEY'],
-        api_secret=current_app.config['CLOUDINARY_API_SECRET']
+        cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.getenv('CLOUDINARY_API_KEY'),
+        api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
     
     # Prepare upload parameters
