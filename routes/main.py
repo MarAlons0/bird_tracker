@@ -4,6 +4,7 @@ from models import db, User, CarouselImage, Location
 from bird_tracker import BirdSightingTracker
 import os
 import logging
+from sqlalchemy import text
 
 bp = Blueprint('main', __name__)
 logger = logging.getLogger(__name__)
@@ -19,8 +20,8 @@ def index():
         
         # Get active carousel images, ordered by their order field
         try:
-            stmt = db.select(CarouselImage).where(CarouselImage.is_active == True).order_by(CarouselImage.order)
-            carousel_images = db.session.execute(stmt).scalars().all()
+            result = db.session.execute(text("SELECT * FROM carousel_images WHERE is_active = true ORDER BY \"order\""))
+            carousel_images = [dict(row) for row in result]
         except Exception as e:
             logger.error(f"Error fetching carousel images: {e}")
             carousel_images = []
