@@ -40,14 +40,14 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def create_app():
-app = Flask(__name__)
+    app = Flask(__name__)
     
     # Configure the app
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
+    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Clear SQLAlchemy mapper
     clear_mappers()
@@ -578,6 +578,7 @@ def internal_error(error):
     return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
+    app = create_app()
     init_db()
     print("Starting Flask server...")
     app.run(host='localhost', port=8000, debug=True) 
