@@ -90,10 +90,18 @@ def login():
                     error="Invalid email or password")
             
             # Log user in
-            login_user(user)
+            login_user(user, remember=True)  # Added remember=True to maintain session
             logger.info(f"User logged in successfully: {email}")
             flash("Successfully logged in!", "success")
-            return redirect(url_for('main.index'))
+            
+            # Set session as permanent
+            session.permanent = True
+            
+            # Redirect to the next page or home
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('main.index')
+            return redirect(next_page)
         
         # For new users, check ALLOWED_EMAILS
         allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
@@ -132,8 +140,8 @@ def login():
         default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
         db.session.execute(
             text("""
-                INSERT INTO users (email, username, password_hash, is_admin, is_approved, active, newsletter_subscription)
-                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :active, :newsletter_subscription)
+                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
             """),
             {
                 "email": email,
@@ -141,7 +149,7 @@ def login():
                 "password_hash": generate_password_hash(default_password),
                 "is_admin": False,
                 "is_approved": True,
-                "active": True,
+                "is_active": True,
                 "newsletter_subscription": True
             }
         )
