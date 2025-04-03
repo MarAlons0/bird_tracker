@@ -1,7 +1,7 @@
 """Add title and description to carousel_images table
 
 Revision ID: 85683a6bb3a7
-Revises: 300986abd491
+Revises: 3b7a73d1f4b1
 Create Date: 2025-04-03 17:37:12.952442
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '85683a6bb3a7'
-down_revision = '300986abd491'
+down_revision = '3b7a73d1f4b1'
 branch_labels = None
 depends_on = None
 
