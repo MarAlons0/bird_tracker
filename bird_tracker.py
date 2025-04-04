@@ -135,6 +135,43 @@ class BirdSightingTracker:
             logger.error(f"Error getting active location: {str(e)}")
             return None
 
+    def set_location(self, name, latitude, longitude, radius):
+        """Set a new active location"""
+        try:
+            # Create a new location section
+            location_section = f"location_{name.lower().replace(' ', '_')}"
+            if not self.config.has_section(location_section):
+                self.config.add_section(location_section)
+            
+            # Update location details
+            self.config[location_section]['name'] = name
+            self.config[location_section]['latitude'] = str(latitude)
+            self.config[location_section]['longitude'] = str(longitude)
+            self.config[location_section]['radius'] = str(radius)
+            
+            # Set as active location
+            self.config['locations']['active_location'] = name.lower().replace(' ', '_')
+            
+            # Save config
+            config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+            with open(config_path, 'w') as configfile:
+                self.config.write(configfile)
+            
+            # Update active location in memory
+            self.active_location = {
+                'name': name,
+                'latitude': float(latitude),
+                'longitude': float(longitude),
+                'radius': float(radius)
+            }
+            
+            logger.info(f"Location updated to: {name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error setting location: {str(e)}")
+            return False
+
     def start_daily_reports(self):
         """Start the daily report scheduler"""
         try:
