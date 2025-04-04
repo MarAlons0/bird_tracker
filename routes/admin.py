@@ -341,7 +341,7 @@ def process_registration_request(request_id, action):
 def manage_carousel():
     """Admin page for managing carousel images"""
     result = db.session.execute(text("SELECT * FROM carousel_images ORDER BY \"order\""))
-    images = [dict(row) for row in result]
+    images = [dict(zip(result.keys(), row)) for row in result]
     return render_template('admin/carousel.html', images=images)
 
 @bp.route('/carousel/add', methods=['POST'])
