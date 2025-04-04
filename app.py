@@ -18,17 +18,16 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from anthropic import Anthropic
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from extensions import migrate, scheduler, init_extensions, login_manager, mail
+from extensions import migrate, scheduler, init_extensions, login_manager, mail, db
 from bird_tracker import BirdSightingTracker
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from io import BytesIO
 import base64
-from sqlalchemy.orm import clear_mappers
 from sqlalchemy.sql import text
 import psycopg2
-from models import CarouselImage
+from models import User, CarouselImage, Location, RegistrationRequest, ClaudePromptLog, Image
 
 # Load environment variables
 load_dotenv()
