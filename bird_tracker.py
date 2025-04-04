@@ -323,12 +323,9 @@ This report was generated automatically by the Bird Tracker application.
             if not observations:
                 return "No observations to analyze."
             
-            if not self.config.has_option('api', 'anthropic_api_key'):
-                self.logger.warning("Anthropic API key not found in config, skipping AI analysis")
+            if not self.claude:
+                self.logger.warning("Claude client not initialized, skipping AI analysis")
                 return None
-
-            api_key = self.config.get('api', 'anthropic_api_key')
-            client = anthropic.Anthropic(api_key=api_key)
 
             # Prepare the observation data for analysis
             observation_text = self._format_observations(observations)
@@ -344,7 +341,7 @@ This report was generated automatically by the Bird Tracker application.
             
             Format your response in clear, concise paragraphs."""
 
-            message = client.messages.create(
+            message = self.claude.messages.create(
                 model="claude-3-sonnet-20240229",
                 max_tokens=1000,
                 temperature=0.7,

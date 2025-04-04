@@ -107,7 +107,7 @@ def ai_analysis():
             })
         
         # Get AI analysis from the tracker
-        analysis = current_app.tracker.generate_ai_analysis()
+        analysis = current_app.tracker.analyze_recent_sightings(observations)
         
         if not analysis:
             return jsonify({
