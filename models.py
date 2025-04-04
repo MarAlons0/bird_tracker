@@ -86,7 +86,8 @@ class RegistrationRequest(db.Model):
         return f'<RegistrationRequest {self.username}>'
 
 class CarouselImage(db.Model):
-    __tablename__ = 'carouselimage'
+    """Model for carousel images displayed on the home page."""
+    __tablename__ = 'carousel_images'
     
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
