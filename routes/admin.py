@@ -395,10 +395,11 @@ def add_carousel_image():
         # Create new carousel image
         new_image = CarouselImage(
             filepath=upload_result['secure_url'],
+            filename=new_filename,
             title=title,
             description=description,
             order=max_order + 1,
-            active=True
+            is_active=True
         )
         
         db.session.add(new_image)
@@ -421,7 +422,7 @@ def edit_carousel_image(id):
     image.description = request.form.get('description')
     
     # Update active status
-    image.active = 'active' in request.form
+    image.is_active = 'active' in request.form
     
     # If a new image is uploaded
     if 'image' in request.files and request.files['image'].filename:
