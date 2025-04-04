@@ -395,7 +395,7 @@ def add_carousel_image():
         
         # Create new carousel image
         new_image = CarouselImage(
-            file_path=upload_result['secure_url'],
+            filepath=upload_result['secure_url'],
             filename=new_filename,
             title=title,
             description=description,
@@ -455,7 +455,7 @@ def edit_carousel_image(id):
                 })
             
             upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
-            image.file_path = upload_result['secure_url']
+            image.filepath = upload_result['secure_url']
             
         except Exception as e:
             flash(f'Error updating image: {str(e)}', 'error')
