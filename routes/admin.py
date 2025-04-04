@@ -485,7 +485,7 @@ def edit_carousel_image(id):
                     """),
                     {
                         'id': id,
-                        'filename': new_filename,
+                        'filename': upload_result.get("secure_url"),  # Store the full Cloudinary URL
                         'title': title,
                         'description': description,
                         'is_active': is_active
