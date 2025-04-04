@@ -485,8 +485,6 @@ def edit_carousel_image(id):
             flash(f'Error updating image: {str(e)}', 'error')
             return redirect(url_for('admin.manage_carousel'))
     
-    image.updated_at = datetime.utcnow()
-    
     try:
         db.session.commit()
         current_app.logger.info(f'Successfully updated carousel image ID: {id}')
