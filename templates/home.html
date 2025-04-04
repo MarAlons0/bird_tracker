@@ -65,11 +65,14 @@
         text-align: center;
         margin-top: 20px;
     }
+    .main-content {
+        margin-top: 2rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container main-content">
     <!-- Carousel -->
     {% if carousel_images %}
     <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">

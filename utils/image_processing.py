@@ -38,13 +38,19 @@ def upload_to_cloudinary(image, public_id, transformations=None):
     
     # Convert PIL Image to bytes
     img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format='JPEG')
+    # Determine format from public_id extension
+    format = os.path.splitext(public_id)[1][1:].upper() if os.path.splitext(public_id)[1] else 'JPEG'
+    image.save(img_byte_arr, format=format)
     img_byte_arr = img_byte_arr.getvalue()
+    
+    # Remove extension from public_id if it exists
+    public_id = os.path.splitext(public_id)[0]
     
     # Prepare upload parameters
     upload_params = {
         'public_id': public_id,
-        'overwrite': True
+        'overwrite': True,
+        'format': format.lower()
     }
     
     # Add transformations if provided
