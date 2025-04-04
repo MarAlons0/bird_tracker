@@ -402,20 +402,20 @@ def add_carousel_image():
         max_order = result[0]
         current_app.logger.info(f'Current max order: {max_order}')
         
-        # Create new carousel image
+        # Create new carousel image using raw SQL to avoid the created_at/updated_at fields
         current_app.logger.info('Creating new CarouselImage record')
-        new_image = CarouselImage()
-        new_image.filename = new_filename
-        new_image.title = title
-        new_image.description = description
-        new_image.order = max_order + 1
-        new_image.is_active = True
-        
-        current_app.logger.info(f'New image details: {new_image.__dict__}')
-        
-        db.session.add(new_image)
+        db.session.execute(
+            text("INSERT INTO carousel_images (filename, title, description, \"order\", is_active) VALUES (:filename, :title, :description, :order, :is_active)"),
+            {
+                'filename': new_filename,
+                'title': title,
+                'description': description,
+                'order': max_order + 1,
+                'is_active': True
+            }
+        )
         db.session.commit()
-        current_app.logger.info(f'Successfully added carousel image with ID: {new_image.id}')
+        current_app.logger.info('Successfully added carousel image')
         
         flash('Image added successfully', 'success')
     except Exception as e:
