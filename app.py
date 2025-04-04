@@ -28,6 +28,7 @@ import base64
 from sqlalchemy.orm import clear_mappers
 from sqlalchemy.sql import text
 import psycopg2
+from models import CarouselImage
 
 # Load environment variables
 load_dotenv()
