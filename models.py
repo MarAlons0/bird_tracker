@@ -98,9 +98,6 @@ class CarouselImage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def __init__(self, **kwargs):
-        super(CarouselImage, self).__init__(**kwargs)
-
     def __repr__(self):
         return f'<CarouselImage {self.filename}>'
 
