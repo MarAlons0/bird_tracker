@@ -70,68 +70,100 @@
         zoom: 11
     };
     
-    const birdMap = L.map('map').setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
+    let birdMap = null;
+    let markers = [];
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(birdMap);
+    function initMap() {
+        try {
+            // Initialize map if not already initialized
+            if (!birdMap) {
+                birdMap = L.map('map').setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(birdMap);
+            } else {
+                // Update center if map exists
+                birdMap.setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
+            }
+            
+            // Clear existing markers
+            markers.forEach(marker => marker.remove());
+            markers = [];
+            
+            // Add observations to map
+            const observations = JSON.parse('{{ observations|tojson|safe }}');
+            
+            // Bird type colors
+            const birdColors = {
+                raptor: '#ff0000',
+                waterfowl: '#0000ff',
+                songbird: '#00ff00',
+                other: '#808080'
+            };
 
-    // Add observations to map
-    const observations = JSON.parse('{{ observations|tojson|safe }}');
-    
-    // Bird type colors
-    const birdColors = {
-        raptor: '#ff0000',
-        waterfowl: '#0000ff',
-        songbird: '#00ff00',
-        other: '#808080'
-    };
+            // Add markers for each observation
+            observations.forEach(obs => {
+                let color = birdColors.other;
+                const species = obs.comName.toLowerCase();
+                
+                if (['hawk', 'eagle', 'owl', 'falcon', 'kite', 'osprey'].some(term => species.includes(term))) {
+                    color = birdColors.raptor;
+                } else if (['duck', 'goose', 'swan', 'merganser', 'teal'].some(term => species.includes(term))) {
+                    color = birdColors.waterfowl;
+                } else if (['warbler', 'sparrow', 'finch', 'thrush'].some(term => species.includes(term))) {
+                    color = birdColors.songbird;
+                }
 
-    // Add markers for each observation
-    observations.forEach(obs => {
-        let color = birdColors.other;
-        const species = obs.comName.toLowerCase();
-        
-        if (['hawk', 'eagle', 'owl', 'falcon', 'kite', 'osprey'].some(term => species.includes(term))) {
-            color = birdColors.raptor;
-        } else if (['duck', 'goose', 'swan', 'merganser', 'teal'].some(term => species.includes(term))) {
-            color = birdColors.waterfowl;
-        } else if (['warbler', 'sparrow', 'finch', 'thrush'].some(term => species.includes(term))) {
-            color = birdColors.songbird;
+                const marker = L.circleMarker([obs.lat, obs.lng], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(`
+                    <strong>${obs.comName}</strong><br>
+                    Count: ${obs.howMany || 'Not specified'}<br>
+                    Location: ${obs.locName}<br>
+                    Date: ${obs.obsDt}
+                `);
+
+                marker.addTo(birdMap);
+                markers.push(marker);
+            });
+
+            // Add legend
+            const legend = L.control({position: 'bottomright'});
+            legend.onAdd = function(map) {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4>Bird Types</h4>
+                    <i style="background: ${birdColors.raptor}"></i> Raptors<br>
+                    <i style="background: ${birdColors.waterfowl}"></i> Waterfowl<br>
+                    <i style="background: ${birdColors.songbird}"></i> Songbirds<br>
+                    <i style="background: ${birdColors.other}"></i> Other
+                `;
+                return div;
+            };
+            legend.addTo(birdMap);
+            
+        } catch (error) {
+            console.error('Error initializing map:', error);
+            document.getElementById('map').innerHTML = '<div class="alert alert-danger">Error loading map. Please try refreshing the page.</div>';
         }
+    }
 
-        const marker = L.circleMarker([obs.lat, obs.lng], {
-            radius: 8,
-            fillColor: color,
-            color: '#000',
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        });
+    // Initialize map when page loads
+    initMap();
 
-        marker.bindPopup(`
-            <strong>${obs.comName}</strong><br>
-            Count: ${obs.howMany || 'Not specified'}<br>
-            Location: ${obs.locName}<br>
-            Date: ${obs.obsDt}
-        `);
-
-        marker.addTo(birdMap);
+    // Add event listener for location changes
+    window.addEventListener('locationChanged', function(e) {
+        mapConfig.lat = e.detail.latitude;
+        mapConfig.lng = e.detail.longitude;
+        initMap();
     });
-
-    // Add legend
-    const legend = L.control({position: 'bottomright'});
-    legend.onAdd = function() {
-        const div = L.DomUtil.create('div', 'legend');
-        div.innerHTML = `
-            <h6>Bird Types</h6>
-            <i style="background: ${birdColors.raptor}"></i> Raptors<br>
-            <i style="background: ${birdColors.waterfowl}"></i> Waterfowl<br>
-            <i style="background: ${birdColors.songbird}"></i> Songbirds<br>
-            <i style="background: ${birdColors.other}"></i> Other Birds
-        `;
-        return div;
-    };
-    legend.addTo(birdMap);
 </script>
 {% endblock %} 

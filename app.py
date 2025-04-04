@@ -365,11 +365,11 @@ def get_analysis():
         
         try:
             logger.info("Starting AI analysis...")
-            analysis = app.tracker.analyze_observations(observations)
+            analysis = app.tracker.analyze_recent_sightings(observations)
             logger.info(f"AI analysis completed, length: {len(analysis) if analysis else 0}")
             
             if not analysis:
-                logger.warning("No analysis returned from analyze_observations")
+                logger.warning("No analysis returned from analyze_recent_sightings")
                 return jsonify({
                     'analysis': '<p class="alert alert-warning">Unable to generate analysis at this time.</p>'
                 })

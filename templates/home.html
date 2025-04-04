@@ -317,6 +317,15 @@ document.getElementById('saveLocation').addEventListener('click', async function
         });
         
         if (response.ok) {
+            // Dispatch location change event
+            const event = new CustomEvent('locationChanged', {
+                detail: {
+                    latitude: parseFloat(formData.get('lat')),
+                    longitude: parseFloat(formData.get('lng'))
+                }
+            });
+            window.dispatchEvent(event);
+            
             window.location.reload();
         } else {
             const error = await response.json();
