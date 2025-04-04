@@ -21,7 +21,7 @@ def index():
         # Get active carousel images, ordered by their order field
         try:
             result = db.session.execute(text("SELECT * FROM carousel_images WHERE is_active = true ORDER BY \"order\""))
-            carousel_images = [dict(row) for row in result]
+            carousel_images = [dict(zip(result.keys(), row)) for row in result]
         except Exception as e:
             logger.error(f"Error fetching carousel images: {e}")
             carousel_images = []
