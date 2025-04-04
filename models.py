@@ -89,7 +89,7 @@ class CarouselImage(db.Model):
     __tablename__ = 'carousel_images'
     
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(255), nullable=True)
+    filename = db.Column(db.String(255), nullable=False)
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
     order = db.Column(db.Integer, nullable=False, default=0)
