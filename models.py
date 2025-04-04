@@ -95,6 +95,11 @@ class CarouselImage(db.Model):
     description = db.Column(db.Text, nullable=True)
     order = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    
+    # Explicitly tell SQLAlchemy not to track created_at and updated_at
+    __mapper_args__ = {
+        'include_properties': ['id', 'filename', 'title', 'description', 'order', 'is_active']
+    }
 
     def __repr__(self):
         return f'<CarouselImage {self.filename}>'
