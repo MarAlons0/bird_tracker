@@ -40,10 +40,10 @@
                 {% for image in images %}
                 <div class="col-md-4 mb-4" data-id="{{ image['id'] }}">
                     <div class="card h-100">
-                        <img src="{{ image['filepath'] }}" class="d-block w-100" alt="{{ image['title'] or 'Carousel Image' }}">
+                        <img src="{{ url_for('static', filename='images/carousel/' + image['filename']) }}" class="d-block w-100" alt="{{ image['title'] or 'Carousel Image' }}">
                         <div class="card-body">
                             <div class="carousel-image" data-id="{{ image['id'] }}">
-                                <img src="{{ image['filepath'] }}" alt="Carousel Image">
+                                <img src="{{ url_for('static', filename='images/carousel/' + image['filename']) }}" alt="Carousel Image">
                                 <form action="{{ url_for('admin.edit_carousel_image', id=image['id']) }}" method="post" enctype="multipart/form-data">
                                     <div class="form-group">
                                         <label for="title_{{ image['id'] }}">Title:</label>

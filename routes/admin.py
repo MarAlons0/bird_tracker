@@ -349,16 +349,20 @@ def manage_carousel():
 @admin_required
 def add_carousel_image():
     if 'image' not in request.files:
+        current_app.logger.error('No image file in request.files')
         flash('No image file uploaded', 'error')
         return redirect(url_for('admin.manage_carousel'))
 
     image_file = request.files['image']
     if image_file.filename == '':
+        current_app.logger.error('Empty filename in uploaded file')
         flash('No selected file', 'error')
         return redirect(url_for('admin.manage_carousel'))
 
     title = request.form.get('title')
     description = request.form.get('description')
+    
+    current_app.logger.info(f'Processing carousel image upload: filename={image_file.filename}, title={title}')
 
     try:
         # Process and upload image to Cloudinary
@@ -366,6 +370,8 @@ def add_carousel_image():
         base_filename = os.path.splitext(filename)[0]
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         new_filename = f"{base_filename}_{timestamp}"
+        
+        current_app.logger.info(f'Processing image: original={filename}, new={new_filename}')
         
         # Process the image
         processed_image = process_image(image_file)
@@ -387,27 +393,36 @@ def add_carousel_image():
                 'x': 20
             })
         
+        current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}, transformations={len(transformation)}')
         upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
+        current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
         
         # Get the highest order value using raw SQL
         result = db.session.execute(text("SELECT COALESCE(MAX(\"order\"), -1) FROM carousel_images")).fetchone()
         max_order = result[0]
+        current_app.logger.info(f'Current max order: {max_order}')
         
         # Create new carousel image
+        current_app.logger.info('Creating new CarouselImage record')
         new_image = CarouselImage(
-            filepath=upload_result['secure_url'],
             filename=new_filename,
             title=title,
             description=description,
             order=max_order + 1,
-            is_active=True
+            is_active=True,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
         )
+        
+        current_app.logger.info(f'New image details: {new_image.__dict__}')
         
         db.session.add(new_image)
         db.session.commit()
+        current_app.logger.info(f'Successfully added carousel image with ID: {new_image.id}')
         
         flash('Image added successfully', 'success')
     except Exception as e:
+        current_app.logger.error(f'Error adding carousel image: {str(e)}', exc_info=True)
         flash(f'Error adding image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
@@ -416,7 +431,9 @@ def add_carousel_image():
 @login_required
 @admin_required
 def edit_carousel_image(id):
+    current_app.logger.info(f'Editing carousel image ID: {id}')
     image = CarouselImage.query.get_or_404(id)
+    current_app.logger.info(f'Found image: {image.__dict__}')
     
     # Update title and description
     image.title = request.form.get('title')
@@ -424,15 +441,20 @@ def edit_carousel_image(id):
     
     # Update active status
     image.is_active = 'active' in request.form
+    current_app.logger.info(f'Updated image details: title={image.title}, description={image.description}, is_active={image.is_active}')
     
     # If a new image is uploaded
     if 'image' in request.files and request.files['image'].filename:
         try:
             image_file = request.files['image']
+            current_app.logger.info(f'Processing new image upload: {image_file.filename}')
+            
             filename = secure_filename(image_file.filename)
             base_filename = os.path.splitext(filename)[0]
             timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
             new_filename = f"{base_filename}_{timestamp}"
+            
+            current_app.logger.info(f'Processing image: original={filename}, new={new_filename}')
             
             # Process the image
             processed_image = process_image(image_file)
@@ -454,17 +476,26 @@ def edit_carousel_image(id):
                     'x': 20
                 })
             
+            current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}, transformations={len(transformation)}')
             upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
-            image.filepath = upload_result['secure_url']
+            current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
+            
+            image.filename = new_filename
+            current_app.logger.info(f'Updated image filename to: {new_filename}')
             
         except Exception as e:
+            current_app.logger.error(f'Error updating image file: {str(e)}', exc_info=True)
             flash(f'Error updating image: {str(e)}', 'error')
             return redirect(url_for('admin.manage_carousel'))
     
+    image.updated_at = datetime.utcnow()
+    
     try:
         db.session.commit()
+        current_app.logger.info(f'Successfully updated carousel image ID: {id}')
         flash('Image updated successfully', 'success')
     except Exception as e:
+        current_app.logger.error(f'Error saving changes: {str(e)}', exc_info=True)
         flash(f'Error saving changes: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
