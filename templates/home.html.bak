@@ -75,18 +75,23 @@
     <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-indicators">
             {% for image in carousel_images %}
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
             {% endfor %}
         </div>
         <div class="carousel-inner">
             {% for image in carousel_images %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <img src="{{ url_for('static', filename='images/carousel/' + image['filename']) }}" class="d-block w-100" alt="{{ image['title'] or 'Carousel Image' }}">
                 {% if image['title'] or image['description'] %}
                 <div class="carousel-caption d-none d-md-block">
                     {% if image['title'] %}
                     <h5>{{ image['title'] }}</h5>
+                    {% endif %}
                     {% if image['description'] %}
                     <p>{{ image['description'] }}</p>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -99,6 +104,7 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
+    {% endif %}
 
     <!-- Site Description -->
     <div class="row mb-4">
@@ -199,17 +205,22 @@
     </div>
 </div>
 
+{% if google_places_api_key %}
 <script>
+function initMap() {
+    const mapLocation = {
         lat: {{ location.latitude }},
         lng: {{ location.longitude }}
     };
     
+    const map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
         center: mapLocation,
         mapTypeId: 'terrain'
     });
     
     // Add a marker for the location
+    new google.maps.Marker({
         position: mapLocation,
         map: map,
         title: '{{ location.name }}'
@@ -217,5 +228,6 @@
 }
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&callback=initMap"></script>
+{% endif %}
 
 {% endblock %} 
