@@ -367,9 +367,9 @@ def add_carousel_image():
     try:
         # Process and upload image to Cloudinary
         filename = secure_filename(image_file.filename)
-        base_filename = os.path.splitext(filename)[0]
+        base_filename, ext = os.path.splitext(filename)
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        new_filename = f"{base_filename}_{timestamp}"
+        new_filename = f"{base_filename}_{timestamp}{ext}"
         
         current_app.logger.info(f'Processing image: original={filename}, new={new_filename}')
         
