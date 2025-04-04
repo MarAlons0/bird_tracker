@@ -434,20 +434,26 @@ def add_carousel_image():
 @admin_required
 def edit_carousel_image(id):
     current_app.logger.info(f'Editing carousel image ID: {id}')
-    image = CarouselImage.query.get_or_404(id)
-    current_app.logger.info(f'Found image: {image.__dict__}')
     
-    # Update title and description
-    image.title = request.form.get('title')
-    image.description = request.form.get('description')
+    # Get the image using raw SQL
+    result = db.session.execute(
+        text("SELECT * FROM carousel_images WHERE id = :id"),
+        {"id": id}
+    ).fetchone()
     
-    # Update active status
-    image.is_active = 'active' in request.form
-    current_app.logger.info(f'Updated image details: title={image.title}, description={image.description}, is_active={image.is_active}')
+    if not result:
+        flash('Image not found', 'error')
+        return redirect(url_for('admin.manage_carousel'))
     
-    # If a new image is uploaded
-    if 'image' in request.files and request.files['image'].filename:
-        try:
+    title = request.form.get('title')
+    description = request.form.get('description')
+    is_active = 'active' in request.form
+    
+    current_app.logger.info(f'Updating image details: title={title}, description={description}, is_active={is_active}')
+    
+    try:
+        # If a new image is uploaded
+        if 'image' in request.files and request.files['image'].filename:
             image_file = request.files['image']
             current_app.logger.info(f'Processing new image upload: {image_file.filename}')
             
@@ -463,16 +469,16 @@ def edit_carousel_image(id):
             
             # Upload to Cloudinary with text overlays if title or description is provided
             transformation = []
-            if image.title:
+            if title:
                 transformation.append({
-                    'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': image.title},
+                    'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': title},
                     'color': '#FFFFFF',
                     'y': 20,
                     'x': 20
                 })
-            if image.description:
+            if description:
                 transformation.append({
-                    'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': image.description},
+                    'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': description},
                     'color': '#FFFFFF',
                     'y': 100,
                     'x': 20
@@ -482,21 +488,51 @@ def edit_carousel_image(id):
             upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
             current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
             
-            image.filename = new_filename
-            current_app.logger.info(f'Updated image filename to: {new_filename}')
-            
-        except Exception as e:
-            current_app.logger.error(f'Error updating image file: {str(e)}', exc_info=True)
-            flash(f'Error updating image: {str(e)}', 'error')
-            return redirect(url_for('admin.manage_carousel'))
-    
-    try:
-        db.session.commit()
+            # Update the database with new filename using raw SQL
+            with db.engine.connect() as conn:
+                conn.execute(
+                    text("""
+                        UPDATE carousel_images 
+                        SET filename = :filename,
+                            title = :title,
+                            description = :description,
+                            is_active = :is_active
+                        WHERE id = :id
+                    """),
+                    {
+                        'id': id,
+                        'filename': new_filename,
+                        'title': title,
+                        'description': description,
+                        'is_active': is_active
+                    }
+                )
+                conn.commit()
+        else:
+            # Just update the metadata using raw SQL
+            with db.engine.connect() as conn:
+                conn.execute(
+                    text("""
+                        UPDATE carousel_images 
+                        SET title = :title,
+                            description = :description,
+                            is_active = :is_active
+                        WHERE id = :id
+                    """),
+                    {
+                        'id': id,
+                        'title': title,
+                        'description': description,
+                        'is_active': is_active
+                    }
+                )
+                conn.commit()
+        
         current_app.logger.info(f'Successfully updated carousel image ID: {id}')
         flash('Image updated successfully', 'success')
     except Exception as e:
-        current_app.logger.error(f'Error saving changes: {str(e)}', exc_info=True)
-        flash(f'Error saving changes: {str(e)}', 'error')
+        current_app.logger.error(f'Error updating image: {str(e)}', exc_info=True)
+        flash(f'Error updating image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
@@ -505,13 +541,25 @@ def edit_carousel_image(id):
 @admin_required
 def delete_carousel_image(id):
     """Delete a carousel image"""
-    image = CarouselImage.query.get_or_404(id)
+    # Get the image using raw SQL
+    result = db.session.execute(
+        text("SELECT filename FROM carousel_images WHERE id = :id"),
+        {"id": id}
+    ).fetchone()
+    
+    if not result:
+        flash('Image not found', 'error')
+        return redirect(url_for('admin.manage_carousel'))
     
     # Delete from Cloudinary
-    if delete_image(image.filename, 'carousel'):
-        # Delete the database record
-        db.session.delete(image)
-        db.session.commit()
+    if delete_image(result[0], 'carousel'):
+        # Delete the database record using raw SQL
+        with db.engine.connect() as conn:
+            conn.execute(
+                text("DELETE FROM carousel_images WHERE id = :id"),
+                {"id": id}
+            )
+            conn.commit()
         flash('Image deleted successfully', 'success')
     else:
         flash('Error deleting image file', 'error')
@@ -525,11 +573,16 @@ def reorder_carousel_images():
     """Update the order of carousel images"""
     new_order = request.json.get('order', [])
     
-    # Update the order of each image
-    for index, image_id in enumerate(new_order):
-        image = CarouselImage.query.get(image_id)
-        if image:
-            image.order = index
-    
-    db.session.commit()
-    return jsonify({'status': 'success'}) 
+    try:
+        # Update the order of each image using raw SQL
+        with db.engine.connect() as conn:
+            for index, image_id in enumerate(new_order):
+                conn.execute(
+                    text('UPDATE carousel_images SET "order" = :order WHERE id = :id'),
+                    {"id": image_id, "order": index}
+                )
+            conn.commit()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        current_app.logger.error(f'Error reordering images: {str(e)}', exc_info=True)
+        return jsonify({'status': 'error', 'message': str(e)}), 500 
