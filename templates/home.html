@@ -50,14 +50,26 @@
     .location-input-container {
         position: relative;
     }
+    .carousel-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
     .carousel-item img {
+        width: 400px;
         height: 400px;
         object-fit: cover;
+        margin: 0 auto;
+    }
+    .carousel-inner {
+        text-align: center;
+        background-color: #f8f9fa;
     }
     .carousel-caption {
         background: rgba(0, 0, 0, 0.5);
         padding: 20px;
         border-radius: 10px;
+        max-width: 80%;
+        margin: 0 auto;
     }
     .version-info {
         font-size: 0.8em;
@@ -73,42 +85,6 @@
 
 {% block content %}
 <div class="container main-content">
-    <!-- Carousel -->
-    {% if carousel_images %}
-    <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            {% for image in carousel_images %}
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}"></button>
-            {% endfor %}
-        </div>
-        <div class="carousel-inner">
-            {% for image in carousel_images %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                <img src="{{ image['filename'] }}" class="d-block w-100" alt="{{ image['title'] or 'Carousel Image' }}">
-                {% if image['title'] or image['description'] %}
-                <div class="carousel-caption d-none d-md-block">
-                    {% if image['title'] %}
-                    <h5>{{ image['title'] }}</h5>
-                    {% endif %}
-                    {% if image['description'] %}
-                    <p>{{ image['description'] }}</p>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-    {% endif %}
-
     <!-- Site Description -->
     <div class="row mb-4">
         <div class="col-md-12">
@@ -116,12 +92,12 @@
                 <div class="card-body">
                     <h2 class="card-title">Welcome to Mario's Bird Tracker</h2>
                     <p class="card-text">
-                        This application helps you track and discover bird sightings in your area. Here's how it works:
+                        This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:
                     </p>
                     <ul>
                         <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
                         <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
-                        <li><strong>Notifications:</strong> Receive email updates about new bird sightings in your area.</li>
+                        <li><strong>Newsletter:</strong> Receive email updates about new bird sightings in your area.</li>
                     </ul>
                     <p class="card-text">
                         To get started, make sure your location is set correctly below. You can change it at any time.
@@ -145,6 +121,51 @@
             </button>
         </div>
     </div>
+
+    <!-- Carousel -->
+    {% if carousel_images %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Featured Birds</h5>
+        </div>
+        <div class="card-body">
+            <div class="carousel-container">
+                <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        {% for image in carousel_images %}
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}"></button>
+                        {% endfor %}
+                    </div>
+                    <div class="carousel-inner">
+                        {% for image in carousel_images %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <img src="{{ image['filename'] }}" class="d-block" alt="{{ image['title'] or 'Carousel Image' }}">
+                            {% if image['title'] or image['description'] %}
+                            <div class="carousel-caption d-none d-md-block">
+                                {% if image['title'] %}
+                                <h5>{{ image['title'] }}</h5>
+                                {% endif %}
+                                {% if image['description'] %}
+                                <p>{{ image['description'] }}</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="version-info">
         Version 1.3.1
