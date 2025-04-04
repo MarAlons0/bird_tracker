@@ -389,8 +389,9 @@ def add_carousel_image():
         
         upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
         
-        # Get the highest order value
-        max_order = db.session.query(db.func.max(CarouselImage.order)).scalar() or 0
+        # Get the highest order value using raw SQL
+        result = db.session.execute(text("SELECT MAX(\"order\") FROM carousel_images")).fetchone()
+        max_order = result[0] if result else 0
         
         # Create new carousel image
         new_image = CarouselImage(
