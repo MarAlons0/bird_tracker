@@ -90,7 +90,7 @@ class CarouselImage(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=True)
-    file_path = db.Column(db.String(255), nullable=True)
+    filepath = db.Column(db.String(255), nullable=True)
     upload_date = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     order = db.Column(db.Integer, nullable=False, default=0)
