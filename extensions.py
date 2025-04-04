@@ -11,10 +11,6 @@ mail = Mail()
 scheduler = BackgroundScheduler()
 
 def init_extensions(app):
-    # Clear any existing mappers and registry
-    clear_mappers()
-    mapper_registry.dispose()
-    
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
@@ -23,9 +19,6 @@ def init_extensions(app):
     
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
-    
-    # Create a new registry and configure it
-    mapper_registry.configure()
     
     @login_manager.user_loader
     def load_user(user_id):
