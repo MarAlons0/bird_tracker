@@ -92,11 +92,11 @@ class CarouselImage(db.Model):
     filename = db.Column(db.String(255), nullable=False)
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
-    order = db.Column(db.Integer, nullable=False, default=0)
-    is_active = db.Column(db.Boolean, nullable=False, default=True)
-    created_at = db.Column(db.DateTime, nullable=True)
-    updated_at = db.Column(db.DateTime, nullable=True)
-
+    order = db.Column(db.Integer, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
     def __repr__(self):
         return f'<CarouselImage {self.filename}>'
 
