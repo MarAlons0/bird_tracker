@@ -208,22 +208,30 @@
 </div>
 
 <script>
+function initMap() {
+    const mapLocation = {
         lat: {{ location.latitude }},
         lng: {{ location.longitude }}
     };
     
+    const map = new google.maps.Map(document.getElementById('map'), {
         zoom: 10,
         center: mapLocation,
         mapTypeId: 'terrain'
     });
     
     // Add a marker for the location
+    new google.maps.Marker({
         position: mapLocation,
         map: map,
         title: '{{ location.name }}'
     });
 }
+
+// Load Google Maps API
+const script = document.createElement('script');
+script.src = `https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initMap&loading=async`;
+document.head.appendChild(script);
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&callback=initMap"></script>
 
 {% endblock %} 
