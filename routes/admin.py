@@ -404,15 +404,14 @@ def add_carousel_image():
         
         # Create new carousel image
         current_app.logger.info('Creating new CarouselImage record')
-        new_image = CarouselImage(
-            filename=new_filename,
-            title=title,
-            description=description,
-            order=max_order + 1,
-            is_active=True,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        new_image = CarouselImage()
+        new_image.filename = new_filename
+        new_image.title = title
+        new_image.description = description
+        new_image.order = max_order + 1
+        new_image.is_active = True
+        new_image.created_at = datetime.utcnow()
+        new_image.updated_at = datetime.utcnow()
         
         current_app.logger.info(f'New image details: {new_image.__dict__}')
         
