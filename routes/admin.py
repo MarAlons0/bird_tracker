@@ -376,25 +376,9 @@ def add_carousel_image():
         # Process the image
         processed_image = process_image(image_file)
         
-        # Upload to Cloudinary with text overlays if title or description is provided
-        transformation = []
-        if title:
-            transformation.append({
-                'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': title},
-                'color': '#FFFFFF',
-                'y': 20,
-                'x': 20
-            })
-        if description:
-            transformation.append({
-                'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': description},
-                'color': '#FFFFFF',
-                'y': 100,
-                'x': 20
-            })
-        
-        current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}, transformations={len(transformation)}')
-        upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
+        # Upload to Cloudinary
+        current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}')
+        upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}")
         current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
         
         # Get the highest order value using raw SQL
@@ -411,7 +395,7 @@ def add_carousel_image():
                     VALUES (:filename, :title, :description, :order, :is_active)
                 """),
                 {
-                    'filename': new_filename,
+                    'filename': upload_result.get("secure_url"),  # Store the full Cloudinary URL
                     'title': title,
                     'description': description,
                     'order': max_order + 1,
