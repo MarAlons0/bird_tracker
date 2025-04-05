@@ -95,6 +95,16 @@ class BirdSightingTracker:
         if config.read(config_path):
             logger.info("Config file loaded successfully")
             logger.info(f"Sections found: {config.sections()}")
+            
+            # Verify that the active location exists in the config
+            if 'locations' in config and 'active_location' in config['locations']:
+                active_location = config['locations']['active_location']
+                location_section = f"location_{active_location}"
+                if location_section not in config:
+                    logger.warning(f"Active location section {location_section} not found, resetting to Cincinnati")
+                    config['locations']['active_location'] = 'cincinnati'
+                    with open(config_path, 'w') as configfile:
+                        config.write(configfile)
             return config
             
         # If no config file, use environment variables
@@ -114,6 +124,10 @@ class BirdSightingTracker:
         config[location_section]['latitude'] = os.getenv('DEFAULT_LATITUDE', '39.1031')
         config[location_section]['longitude'] = os.getenv('DEFAULT_LONGITUDE', '-84.5120')
         config[location_section]['radius'] = os.getenv('DEFAULT_RADIUS', '25')
+        
+        # Save the config file
+        with open(config_path, 'w') as configfile:
+            config.write(configfile)
         
         logger.info("Created config from environment variables")
         return config
@@ -145,8 +159,19 @@ class BirdSightingTracker:
                                 'radius': float(self.config[section]['radius'])
                             }
                 
-                logger.warning(f"Location section {location_section} not found in config")
-                return None
+                # If no matching location found, reset to Cincinnati
+                logger.warning(f"Location section {location_section} not found, resetting to Cincinnati")
+                self.config['locations']['active_location'] = 'cincinnati'
+                config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
+                with open(config_path, 'w') as configfile:
+                    self.config.write(configfile)
+                
+                return {
+                    'name': 'Cincinnati',
+                    'latitude': 39.1031,
+                    'longitude': -84.5120,
+                    'radius': 25
+                }
         except Exception as e:
             logger.error(f"Error getting active location: {str(e)}")
             return None
