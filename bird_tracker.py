@@ -348,16 +348,35 @@ This report was generated automatically by the Bird Tracker application.
             {location_info}
             {observation_text}
             
-            Format your response exactly as follows:
+            Format your response EXACTLY as follows:
             
             1. Start with a main paragraph providing an overall summary of the observations.
             
-            2. Then include three bulleted sections:
+            2. Then include three bulleted sections, each starting with a bullet point (•):
                • Unusual or rare species for this location
                • Migratory species observed
                • Summary of Birds of Prey
             
-            Make sure to format your response with proper paragraphs and bullet points."""
+            For each bulleted section:
+            - List each species on a new line
+            - Start each species with a hyphen (-)
+            - Include the location in parentheses after each species
+            - Include the date if available
+            
+            Example format:
+            • Unusual or rare species for this location:
+            - Species Name (Location) - Date
+            - Another Species (Location) - Date
+            
+            • Migratory species observed:
+            - Species Name (Location) - Date
+            - Another Species (Location) - Date
+            
+            • Summary of Birds of Prey:
+            - Species Name (Location) - Date
+            - Another Species (Location) - Date
+            
+            Make sure to follow this exact format with proper paragraphs and bullet points."""
 
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
@@ -420,7 +439,12 @@ This report was generated automatically by the Bird Tracker application.
             
             User question: {message}
             
-            Please provide a helpful, informative response about birds and birdwatching."""
+            Please provide a helpful, informative response about birds and birdwatching. Format your response with:
+            - Clear paragraphs for general information
+            - Bullet points (•) for lists
+            - Hyphens (-) for individual items in lists
+            - Include locations and dates when relevant
+            - Use proper spacing between sections"""
             
             # Send to Claude
             response = self.claude.messages.create(
