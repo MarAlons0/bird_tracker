@@ -357,7 +357,7 @@ This report was generated automatically by the Bird Tracker application.
             Format your response in clear, concise paragraphs."""
 
             message = self.claude.messages.create(
-                model="claude-3-sonnet",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data.",
@@ -410,7 +410,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Send to Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
