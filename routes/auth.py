@@ -247,12 +247,11 @@ def request_registration():
         # Create new registration request using raw SQL
         db.session.execute(
             text("""
-                INSERT INTO registration_requests (email, notes, status, request_date)
-                VALUES (:email, :notes, :status, :request_date)
+                INSERT INTO registration_requests (email, status, request_date)
+                VALUES (:email, :status, :request_date)
             """),
             {
                 "email": email,
-                "notes": message,
                 "status": "pending",
                 "request_date": datetime.utcnow()
             }
