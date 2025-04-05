@@ -387,12 +387,20 @@ This report was generated automatically by the Bird Tracker application.
             )
 
             # Extract the text content from the response
-            if hasattr(message, 'content') and message.content:
-                # Handle both string and ContentBlock responses
-                if isinstance(message.content, str):
-                    return message.content
+            if hasattr(message, 'content'):
+                if isinstance(message.content, list):
+                    # Handle list of ContentBlock objects
+                    text_content = ""
+                    for block in message.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
                 elif hasattr(message.content, 'text'):
+                    # Handle single ContentBlock object
                     return message.content.text
+                elif isinstance(message.content, str):
+                    # Handle string content
+                    return message.content
                 else:
                     # Try to convert to string if it's some other type
                     return str(message.content)
@@ -456,12 +464,20 @@ This report was generated automatically by the Bird Tracker application.
             )
             
             # Extract the text content from the response
-            if hasattr(response, 'content') and response.content:
-                # Handle both string and ContentBlock responses
-                if isinstance(response.content, str):
-                    return response.content
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
+                    # Handle list of ContentBlock objects
+                    text_content = ""
+                    for block in response.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
                 elif hasattr(response.content, 'text'):
+                    # Handle single ContentBlock object
                     return response.content.text
+                elif isinstance(response.content, str):
+                    # Handle string content
+                    return response.content
                 else:
                     # Try to convert to string if it's some other type
                     return str(response.content)
