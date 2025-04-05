@@ -213,7 +213,7 @@ def registration_requests():
     # Get registration requests using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, email, notes, status, request_date, processed_at, processed_by
+            SELECT id, email, username, status, request_date, processed_at, processed_by
             FROM registration_requests
             ORDER BY request_date DESC
         """)
@@ -224,7 +224,7 @@ def registration_requests():
         request = RegistrationRequest()
         request.id = row[0]
         request.email = row[1]
-        request.notes = row[2]
+        request.username = row[2]
         request.status = row[3]
         request.request_date = row[4]
         request.processed_at = row[5]
@@ -239,7 +239,7 @@ def process_registration_request(request_id, action):
     # Get registration request using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, email, notes
+            SELECT id, email, username
             FROM registration_requests
             WHERE id = :request_id
         """),
@@ -253,7 +253,7 @@ def process_registration_request(request_id, action):
     request = RegistrationRequest()
     request.id = result[0]
     request.email = result[1]
-    request.notes = result[2]
+    request.username = result[2]
     
     if action == 'approve':
         # Update request status using raw SQL
@@ -262,14 +262,12 @@ def process_registration_request(request_id, action):
                 UPDATE registration_requests
                 SET status = 'approved',
                     processed_at = :processed_at,
-                    processed_by = :processed_by,
-                    notes = :notes
+                    processed_by = :processed_by
                 WHERE id = :request_id
             """),
             {
                 "processed_at": datetime.utcnow(),
                 "processed_by": current_user.id,
-                "notes": f"Approved by {current_user.email}",
                 "request_id": request_id
             }
         )
@@ -301,14 +299,12 @@ def process_registration_request(request_id, action):
                 UPDATE registration_requests
                 SET status = 'rejected',
                     processed_at = :processed_at,
-                    processed_by = :processed_by,
-                    notes = :notes
+                    processed_by = :processed_by
                 WHERE id = :request_id
             """),
             {
                 "processed_at": datetime.utcnow(),
                 "processed_by": current_user.id,
-                "notes": f"Rejected by {current_user.email}",
                 "request_id": request_id
             }
         )

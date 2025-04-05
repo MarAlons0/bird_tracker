@@ -10,8 +10,8 @@
             <thead>
                 <tr>
                     <th>Email</th>
+                    <th>Username</th>
                     <th>Status</th>
-                    <th>Message</th>
                     <th>Submitted</th>
                     <th>Processed</th>
                     <th>Actions</th>
@@ -21,6 +21,7 @@
                 {% for request in requests %}
                 <tr>
                     <td>{{ request.email }}</td>
+                    <td>{{ request.username }}</td>
                     <td>
                         <span class="badge {% if request.status == 'pending' %}bg-warning
                                           {% elif request.status == 'approved' %}bg-success
@@ -29,8 +30,7 @@
                             {{ request.status }}
                         </span>
                     </td>
-                    <td>{{ request.notes or 'No message' }}</td>
-                    <td>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M') }}</td>
                     <td>{{ request.processed_at.strftime('%Y-%m-%d %H:%M') if request.processed_at else '-' }}</td>
                     <td>
                         {% if request.status == 'pending' %}
