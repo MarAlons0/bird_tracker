@@ -2,8 +2,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     const analysisContent = document.getElementById('analysisContent');
     
-    // Show loading message
-    analysisContent.innerHTML = '<div class="alert alert-info">Loading analysis...</div>';
+    // Show loading message with spinner
+    analysisContent.innerHTML = `
+        <div class="text-center p-4">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted">Generating AI analysis of recent bird sightings...</p>
+        </div>
+    `;
     
     // Fetch analysis from the API
     fetch('/api/analysis')
