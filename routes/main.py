@@ -103,7 +103,7 @@ def ai_analysis():
         observations = current_app.tracker.get_recent_observations()
         if not observations:
             return jsonify({
-                'analysis': '<div class="alert alert-info">No recent observations found.</div>'
+                'analysis': 'No recent observations found.'
             })
         
         # Get AI analysis from the tracker
@@ -111,19 +111,15 @@ def ai_analysis():
         
         if not analysis:
             return jsonify({
-                'analysis': '<div class="alert alert-warning">Unable to generate AI analysis.</div>'
+                'analysis': 'Unable to generate AI analysis.'
             })
         
-        # Ensure the analysis is properly formatted HTML
-        if not isinstance(analysis, str) or not analysis.strip().startswith('<'):
-            analysis = f'<div class="alert alert-warning">{analysis}</div>'
-        
+        # Return the analysis as plain text
         return jsonify({'analysis': analysis})
     except Exception as e:
         logger.error(f"Error in AI analysis: {e}")
-        # Don't return 503 status code, just return error message
         return jsonify({
-            'analysis': '<div class="alert alert-danger">Error generating AI analysis. Please try again later.</div>'
+            'analysis': 'Error generating AI analysis. Please try again later.'
         })
 
 @bp.route('/api/chat', methods=['POST'])

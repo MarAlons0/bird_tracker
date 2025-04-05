@@ -132,6 +132,19 @@ class BirdSightingTracker:
                     'radius': float(self.config[location_section]['radius'])
                 }
             else:
+                # Try to find a matching location section
+                for section in self.config.sections():
+                    if section.startswith('location_'):
+                        # Compare the normalized names
+                        section_name = section.replace('location_', '').lower()
+                        if section_name == active_location.lower():
+                            return {
+                                'name': self.config[section]['name'],
+                                'latitude': float(self.config[section]['latitude']),
+                                'longitude': float(self.config[section]['longitude']),
+                                'radius': float(self.config[section]['radius'])
+                            }
+                
                 logger.warning(f"Location section {location_section} not found in config")
                 return None
         except Exception as e:
@@ -141,8 +154,11 @@ class BirdSightingTracker:
     def set_location(self, name, latitude, longitude, radius):
         """Set a new active location"""
         try:
+            # Format location name for config file
+            location_key = name.lower().replace(' ', '_').replace(',', '_').replace('(', '').replace(')', '').replace("'", '')
+            
             # Create a new location section
-            location_section = f"location_{name.lower().replace(' ', '_')}"
+            location_section = f"location_{location_key}"
             if not self.config.has_section(location_section):
                 self.config.add_section(location_section)
             
@@ -153,7 +169,7 @@ class BirdSightingTracker:
             self.config[location_section]['radius'] = str(radius)
             
             # Set as active location
-            self.config['locations']['active_location'] = name.lower().replace(' ', '_')
+            self.config['locations']['active_location'] = location_key
             
             # Save config
             config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
