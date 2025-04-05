@@ -343,24 +343,27 @@ This report was generated automatically by the Bird Tracker application.
                 
                 """
             
-            prompt = f"""Please analyze these bird observations and provide insights:
+            prompt = f"""Please analyze these bird observations and provide insights in the following format:
+
             {location_info}
             {observation_text}
             
-            Consider:
-            1. Unusual or rare species for this location
-            2. Patterns in species distribution
-            3. Notable counts or behaviors
-            4. Seasonal context for this region
-            5. Migration patterns that might explain the observations
+            Format your response exactly as follows:
             
-            Format your response in clear, concise paragraphs."""
+            1. Start with a main paragraph providing an overall summary of the observations.
+            
+            2. Then include three bulleted sections:
+               • Unusual or rare species for this location
+               • Migratory species observed
+               • Summary of Birds of Prey
+            
+            Make sure to format your response with proper paragraphs and bullet points."""
 
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
-                system="You are an expert ornithologist analyzing bird sighting data.",
+                system="You are an expert ornithologist analyzing bird sighting data. Format your response with proper paragraphs and bullet points as requested.",
                 messages=[{"role": "user", "content": prompt}]
             )
 
@@ -417,7 +420,18 @@ This report was generated automatically by the Bird Tracker application.
                 messages=[{"role": "user", "content": prompt}]
             )
             
-            return response.content
+            # Extract the text content from the response
+            if hasattr(response, 'content') and response.content:
+                # Handle both string and ContentBlock responses
+                if isinstance(response.content, str):
+                    return response.content
+                elif hasattr(response.content, 'text'):
+                    return response.content.text
+                else:
+                    # Try to convert to string if it's some other type
+                    return str(response.content)
+            else:
+                return "Sorry, I couldn't generate a response."
             
         except Exception as e:
             self.logger.error(f"Error in chat_with_ai: {str(e)}")
