@@ -367,7 +367,18 @@ This report was generated automatically by the Bird Tracker application.
                 messages=[{"role": "user", "content": prompt}]
             )
 
-            return message.content
+            # Extract the text content from the response
+            if hasattr(message, 'content') and message.content:
+                # Handle both string and ContentBlock responses
+                if isinstance(message.content, str):
+                    return message.content
+                elif hasattr(message.content, 'text'):
+                    return message.content.text
+                else:
+                    # Try to convert to string if it's some other type
+                    return str(message.content)
+            else:
+                return "Sorry, I couldn't generate a response."
 
         except Exception as e:
             self.logger.error(f"Error generating AI analysis: {str(e)}")
