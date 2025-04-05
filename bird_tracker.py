@@ -330,14 +330,26 @@ This report was generated automatically by the Bird Tracker application.
             # Prepare the observation data for analysis
             observation_text = self._format_observations(observations)
             
+            # Include location information
+            location_info = ""
+            if self.active_location:
+                location_info = f"""Location: {self.active_location['name']}
+                Latitude: {self.active_location['latitude']}
+                Longitude: {self.active_location['longitude']}
+                Search radius: {self.active_location['radius']} miles
+                
+                """
+            
             prompt = f"""Please analyze these bird observations and provide insights:
+            {location_info}
             {observation_text}
             
             Consider:
-            1. Unusual or rare species
+            1. Unusual or rare species for this location
             2. Patterns in species distribution
             3. Notable counts or behaviors
-            4. Seasonal context
+            4. Seasonal context for this region
+            5. Migration patterns that might explain the observations
             
             Format your response in clear, concise paragraphs."""
 
@@ -354,6 +366,59 @@ This report was generated automatically by the Bird Tracker application.
         except Exception as e:
             self.logger.error(f"Error generating AI analysis: {str(e)}")
             return None
+
+    def chat_with_ai(self, message):
+        """Chat with the AI assistant about bird sightings."""
+        try:
+            if not self.claude:
+                self.logger.warning("Claude client not initialized, cannot chat with AI")
+                return "Sorry, the AI assistant is not available at the moment."
+                
+            # Get recent observations to provide context
+            observations = self.get_recent_observations()
+            observation_context = ""
+            
+            # Include location information
+            location_info = ""
+            if self.active_location:
+                location_info = f"""Current location: {self.active_location['name']}
+                Latitude: {self.active_location['latitude']}
+                Longitude: {self.active_location['longitude']}
+                Search radius: {self.active_location['radius']} miles
+                
+                """
+            
+            if observations:
+                observation_context = f"""{location_info}
+                Here are recent bird observations in the area:
+                {self._format_observations(observations)}
+                
+                Please use this information to answer the user's question if relevant."""
+            else:
+                observation_context = f"""{location_info}
+                No recent bird observations are available for this location."""
+            
+            # Create the prompt with the user's message and observation context
+            prompt = f"""{observation_context}
+            
+            User question: {message}
+            
+            Please provide a helpful, informative response about birds and birdwatching."""
+            
+            # Send to Claude
+            response = self.claude.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1000,
+                temperature=0.7,
+                system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            return response.content
+            
+        except Exception as e:
+            self.logger.error(f"Error in chat_with_ai: {str(e)}")
+            return f"Sorry, there was an error processing your request: {str(e)}"
 
     def _generate_basic_analysis(self, observations):
         """Generate a basic analysis of bird observations without AI."""
