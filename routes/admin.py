@@ -269,6 +269,25 @@ def process_registration_request(request_id, action):
                 "request_id": request_id
             }
         )
+        
+        # Create new user using raw SQL
+        default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+        db.session.execute(
+            text("""
+                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
+                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
+            """),
+            {
+                "email": request.email,
+                "username": request.username,
+                "password_hash": generate_password_hash(default_password),
+                "is_admin": False,
+                "is_approved": True,
+                "is_active": True,
+                "newsletter_subscription": True
+            }
+        )
+        
         db.session.commit()
         
         # Send approval email to user
@@ -280,15 +299,17 @@ def process_registration_request(request_id, action):
         msg.body = f"""
         Your registration request for Bird Tracker has been approved!
         
-        You can now complete your registration by visiting:
-        {url_for('auth.register', token=request.email, _external=True)}
+        You can now log in with your email and the following temporary password:
+        {default_password}
+        
+        Please change your password after logging in.
         
         Best regards,
         The Bird Tracker Team
         """
         mail.send(msg)
         
-        flash('Registration request approved.', 'success')
+        flash('Registration request approved and user created.', 'success')
     
     elif action == 'reject':
         # Update request status using raw SQL
