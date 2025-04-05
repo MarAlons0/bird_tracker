@@ -245,13 +245,17 @@ def request_registration():
                 error="A registration request for this email is already pending.")
         
         # Create new registration request using raw SQL
+        # Generate username from email
+        username = email.split('@')[0]
+        
         db.session.execute(
             text("""
-                INSERT INTO registration_requests (email, status, request_date)
-                VALUES (:email, :status, :request_date)
+                INSERT INTO registration_requests (email, username, status, request_date)
+                VALUES (:email, :username, :status, :request_date)
             """),
             {
                 "email": email,
+                "username": username,
                 "status": "pending",
                 "request_date": datetime.utcnow()
             }
