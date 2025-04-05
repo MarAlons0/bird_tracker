@@ -350,7 +350,7 @@ This report was generated automatically by the Bird Tracker application.
             
             Format your response EXACTLY as follows:
             
-            1. Start with a main paragraph providing an overall summary of the observations.
+            1. Start with a main paragraph providing an overall summary of the observations. This should be a clear, well-structured paragraph that gives a comprehensive overview.
             
             2. Then include three bulleted sections, each starting with a bullet point (•):
                • Unusual or rare species for this location
@@ -361,22 +361,27 @@ This report was generated automatically by the Bird Tracker application.
             - List each species on a new line
             - Start each species with a hyphen (-)
             - Include the location in parentheses after each species
-            - Include the date if available
+            - DO NOT include dates in the summary
             
             Example format:
             • Unusual or rare species for this location:
-            - Species Name (Location) - Date
-            - Another Species (Location) - Date
+            - Species Name (Location)
+            - Another Species (Location)
             
             • Migratory species observed:
-            - Species Name (Location) - Date
-            - Another Species (Location) - Date
+            - Species Name (Location)
+            - Another Species (Location)
             
             • Summary of Birds of Prey:
-            - Species Name (Location) - Date
-            - Another Species (Location) - Date
+            - Species Name (Location)
+            - Another Species (Location)
             
-            Make sure to follow this exact format with proper paragraphs and bullet points."""
+            Make sure to:
+            1. Use clear, well-structured paragraphs
+            2. Include proper spacing between sections
+            3. Keep the main summary paragraph concise but informative
+            4. Focus on the species and locations without dates
+            5. Use proper bullet points and formatting for readability."""
 
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
