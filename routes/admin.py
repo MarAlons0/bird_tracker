@@ -10,6 +10,7 @@ import os
 from sqlalchemy import text
 from werkzeug.utils import secure_filename
 from utils.image_processing import process_image, upload_to_cloudinary
+from extensions import mail
 
 bp = Blueprint('admin', __name__)
 
@@ -285,7 +286,7 @@ def process_registration_request(request_id, action):
         Best regards,
         The Bird Tracker Team
         """
-        current_app.mail.send(msg)
+        mail.send(msg)
         
         flash('Registration request approved.', 'success')
     
@@ -317,7 +318,7 @@ def process_registration_request(request_id, action):
         Best regards,
         The Bird Tracker Team
         """
-        current_app.mail.send(msg)
+        mail.send(msg)
         
         flash('Registration request rejected.', 'success')
     
