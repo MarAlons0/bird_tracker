@@ -213,7 +213,7 @@ def registration_requests():
     # Get registration requests using raw SQL
     result = db.session.execute(
         text("""
-            SELECT id, email, username, status, request_date, processed_at, processed_by
+            SELECT id, email, username, status, request_date
             FROM registration_requests
             ORDER BY request_date DESC
         """)
@@ -227,8 +227,9 @@ def registration_requests():
         request.username = row[2]
         request.status = row[3]
         request.request_date = row[4]
-        request.processed_at = row[5]
-        request.processed_by = row[6]
+        # Set processed_at and processed_by to None since they don't exist in the table
+        request.processed_at = None
+        request.processed_by = None
         requests.append(request)
     
     return render_template('admin/registration_requests.html', requests=requests)
@@ -260,14 +261,10 @@ def process_registration_request(request_id, action):
         db.session.execute(
             text("""
                 UPDATE registration_requests
-                SET status = 'approved',
-                    processed_at = :processed_at,
-                    processed_by = :processed_by
+                SET status = 'approved'
                 WHERE id = :request_id
             """),
             {
-                "processed_at": datetime.utcnow(),
-                "processed_by": current_user.id,
                 "request_id": request_id
             }
         )
@@ -297,14 +294,10 @@ def process_registration_request(request_id, action):
         db.session.execute(
             text("""
                 UPDATE registration_requests
-                SET status = 'rejected',
-                    processed_at = :processed_at,
-                    processed_by = :processed_by
+                SET status = 'rejected'
                 WHERE id = :request_id
             """),
             {
-                "processed_at": datetime.utcnow(),
-                "processed_by": current_user.id,
                 "request_id": request_id
             }
         )
