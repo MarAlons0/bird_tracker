@@ -226,11 +226,11 @@ def request_registration():
         
         # Check if email is already registered and active using raw SQL
         result = db.session.execute(
-            text("SELECT id, active FROM users WHERE email = :email"),
+            text("SELECT id, is_active FROM users WHERE email = :email"),
             {"email": email}
         ).fetchone()
         
-        if result and result[1]:  # active is True
+        if result and result[1]:  # is_active is True
             return render_template('request_registration.html', 
                 error="This email is already registered.")
         
