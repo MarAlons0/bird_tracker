@@ -15,7 +15,21 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.analysis) {
-                analysisContent.innerHTML = data.analysis;
+                // Create a pre element to preserve whitespace and line breaks
+                const preElement = document.createElement('pre');
+                preElement.style.whiteSpace = 'pre-wrap';
+                preElement.style.fontFamily = 'inherit';
+                preElement.style.margin = '0';
+                preElement.style.padding = '1rem';
+                preElement.style.backgroundColor = '#f8f9fa';
+                preElement.style.borderRadius = '8px';
+                
+                // Set the content
+                preElement.textContent = data.analysis;
+                
+                // Clear the analysis content and append the pre element
+                analysisContent.innerHTML = '';
+                analysisContent.appendChild(preElement);
             } else {
                 analysisContent.innerHTML = '<div class="alert alert-warning">No analysis available.</div>';
             }
