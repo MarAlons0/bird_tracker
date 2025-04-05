@@ -126,14 +126,14 @@ def admin_panel():
                 # Create user using raw SQL
                 db.session.execute(
                     text("""
-                        INSERT INTO users (email, username, password_hash, active, is_admin, is_approved, newsletter_subscription)
-                        VALUES (:email, :username, :password_hash, :active, :is_admin, :is_approved, :newsletter_subscription)
+                        INSERT INTO users (email, username, password_hash, is_active, is_admin, is_approved, newsletter_subscription)
+                        VALUES (:email, :username, :password_hash, :is_active, :is_admin, :is_approved, :newsletter_subscription)
                     """),
                     {
                         "email": email,
                         "username": username,
                         "password_hash": generate_password_hash(password),
-                        "active": True,
+                        "is_active": True,
                         "is_admin": is_admin,
                         "is_approved": True,
                         "newsletter_subscription": True
@@ -147,7 +147,7 @@ def admin_panel():
             db.session.execute(
                 text("""
                     UPDATE users
-                    SET active = NOT active
+                    SET is_active = NOT is_active
                     WHERE id = :user_id
                 """),
                 {"user_id": user_id}
