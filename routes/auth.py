@@ -244,10 +244,20 @@ def request_registration():
             return render_template('request_registration.html', 
                 error="A registration request for this email is already pending.")
         
-        # Create new registration request using raw SQL
         # Generate username from email
         username = email.split('@')[0]
         
+        # Ensure username is unique in registration_requests table
+        base_username = username
+        counter = 1
+        while db.session.execute(
+            text("SELECT id FROM registration_requests WHERE username = :username"),
+            {"username": username}
+        ).fetchone():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        # Create new registration request using raw SQL
         db.session.execute(
             text("""
                 INSERT INTO registration_requests (email, username, status, request_date)
