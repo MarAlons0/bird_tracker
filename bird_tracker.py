@@ -348,11 +348,13 @@ This report was generated automatically by the Bird Tracker application.
             {location_info}
             {observation_text}
             
-            Format your response EXACTLY as follows:
+            Format your response EXACTLY as follows, with clear paragraph breaks between sections:
             
             1. Start with a main paragraph providing an overall summary of the observations. This should be a clear, well-structured paragraph that gives a comprehensive overview.
             
-            2. Then include three bulleted sections, each starting with a bullet point (•):
+            2. After the main paragraph, add TWO blank lines before starting the bulleted sections.
+            
+            3. Then include three bulleted sections, each starting with a bullet point (•) and separated by ONE blank line:
                • Unusual or rare species for this location
                • Migratory species observed
                • Summary of Birds of Prey
@@ -364,24 +366,28 @@ This report was generated automatically by the Bird Tracker application.
             - DO NOT include dates in the summary
             
             Example format:
+            [Main summary paragraph goes here]
+
             • Unusual or rare species for this location:
             - Species Name (Location)
             - Another Species (Location)
-            
+
             • Migratory species observed:
             - Species Name (Location)
             - Another Species (Location)
-            
+
             • Summary of Birds of Prey:
             - Species Name (Location)
             - Another Species (Location)
             
             Make sure to:
             1. Use clear, well-structured paragraphs
-            2. Include proper spacing between sections
-            3. Keep the main summary paragraph concise but informative
-            4. Focus on the species and locations without dates
-            5. Use proper bullet points and formatting for readability."""
+            2. Include TWO blank lines after the main summary paragraph
+            3. Include ONE blank line between each bulleted section
+            4. Keep the main summary paragraph concise but informative
+            5. Focus on the species and locations without dates
+            6. Use proper bullet points and formatting for readability
+            7. Ensure each section is visually distinct with proper spacing"""
 
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
