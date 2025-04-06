@@ -44,7 +44,7 @@
                            <th>Date</th>
                        </tr>
                    </thead>
-                   <tbody>
+                   <tbody id="observationsTableBody">
                        {% for obs in observations %}
                        <tr>
                            <td>{{ obs.comName }}</td>
@@ -63,140 +63,124 @@
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Initialize map centered on current location
-    const mapConfig = {
-        lat: Number('{{ location.latitude }}'),
-        lng: Number('{{ location.longitude }}'),
-        zoom: 11
-    };
+    // Initialize map with current location
+    const map = L.map('map').setView([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')], 10);
     
-    let birdMap = null;
-    let markers = [];
-    
-    function initMap() {
-        try {
-            // Initialize map if not already initialized
-            if (!birdMap) {
-                birdMap = L.map('map').setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(birdMap);
-            } else {
-                // Update center if map exists
-                birdMap.setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
-            }
-            
-            // Clear existing markers
-            markers.forEach(marker => marker.remove());
-            markers = [];
-            
-            // Add observations to map
-            const observations = JSON.parse('{{ observations|tojson|safe }}');
-            
-            // Bird type colors
-            const birdColors = {
-                raptor: '#ff0000',
-                waterfowl: '#0000ff',
-                songbird: '#00ff00',
-                other: '#808080'
-            };
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-            // Add markers for each observation
-            observations.forEach(obs => {
-                const color = birdColors[obs.category] || birdColors.other;
-                const marker = L.circleMarker([obs.lat, obs.lng], {
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.5,
-                    radius: 8,
-                    weight: 2
-                }).addTo(birdMap);
-                
-                marker.bindPopup(`
-                    <b>${obs.comName}</b><br>
-                    Count: ${obs.howMany}<br>
-                    Location: ${obs.locName}<br>
-                    Date: ${obs.obsDt}
-                `);
-                
-                markers.push(marker);
-            });
-            
-        } catch (error) {
-            console.error('Error initializing map:', error);
-            document.getElementById('map').innerHTML = '<div class="alert alert-danger">Error loading map. Please try refreshing the page.</div>';
-        }
-    }
+    // Add marker for current location
+    const locationMarker = L.marker([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')])
+        .addTo(map)
+        .bindPopup('Current Location: {{ location.name }}');
 
-    // Initialize map when page loads
-    initMap();
+    // Add circle for search radius
+    const searchCircle = L.circle([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')], {
+        color: 'blue',
+        fillColor: '#30f',
+        fillOpacity: 0.1,
+        radius: parseFloat('{{ location.radius }}') * 1000 // Convert km to meters
+    }).addTo(map);
 
-    // Add event listener for location changes
-    window.addEventListener('locationChanged', function(e) {
-        const newLocation = e.detail.location;
-        
-        // Update map configuration
-        mapConfig.lat = newLocation.latitude;
-        mapConfig.lng = newLocation.longitude;
-        
-        // Update map with new location
-        if (birdMap) {
-            birdMap.setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
-            
-            // Clear existing markers
-            markers.forEach(marker => marker.remove());
-            markers = [];
-            
-            // Fetch new observations for the updated location
-            fetch('/api/observations')
-                .then(response => response.json())
-                .then(observations => {
-                    // Add new observations to map
-                    observations.forEach(obs => {
-                        const color = birdColors[obs.category] || birdColors.other;
-                        const marker = L.circleMarker([obs.lat, obs.lng], {
-                            color: color,
-                            fillColor: color,
-                            fillOpacity: 0.5,
-                            radius: 8,
-                            weight: 2
-                        }).addTo(birdMap);
-                        
-                        marker.bindPopup(`
-                            <b>${obs.comName}</b><br>
-                            Count: ${obs.howMany}<br>
-                            Location: ${obs.locName}<br>
-                            Date: ${obs.obsDt}
-                        `);
-                        
-                        markers.push(marker);
-                    });
-                    
-                    // Update observations table
-                    updateObservationsTable(observations);
-                })
-                .catch(error => {
-                    console.error('Error fetching new observations:', error);
-                });
-        }
+    // Add markers for recent observations
+    const initialObservations = JSON.parse('{{ observations|tojson|safe }}');
+    const markers = [];
+    const observationRows = [];
+
+    initialObservations.forEach(obs => {
+        const marker = L.circleMarker([parseFloat(obs.latitude), parseFloat(obs.longitude)], {
+            radius: 8,
+            fillColor: '#f03',
+            color: '#000',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <strong>${obs.common_name}</strong><br>
+            Scientific Name: ${obs.scientific_name}<br>
+            Date: ${obs.observation_date}<br>
+            Location: ${obs.locality_name}
+        `);
+
+        markers.push(marker);
+
+        // Add row to observations table
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${obs.common_name}</td>
+            <td>${obs.scientific_name}</td>
+            <td>${obs.observation_date}</td>
+            <td>${obs.locality_name}</td>
+        `;
+        observationRows.push(row);
     });
 
-    // Function to update observations table
-    function updateObservationsTable(observations) {
-        const tbody = document.querySelector('table tbody');
-        tbody.innerHTML = '';
+    // Update observations table
+    const tableBody = document.getElementById('observationsTableBody');
+    tableBody.innerHTML = '';
+    observationRows.forEach(row => tableBody.appendChild(row));
+
+    // Listen for location changes
+    window.addEventListener('locationChanged', function(event) {
+        const newLocation = event.detail.location;
         
-        observations.forEach(obs => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${obs.comName}</td>
-                <td>${obs.howMany}</td>
-                <td>${obs.locName}</td>
-                <td>${obs.obsDt}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
+        // Update map center and zoom
+        map.setView([newLocation.latitude, newLocation.longitude], 10);
+        
+        // Update location marker
+        locationMarker.setLatLng([newLocation.latitude, newLocation.longitude])
+            .setPopupContent(`Current Location: ${newLocation.name}`);
+        
+        // Update search radius circle
+        searchCircle.setLatLng([newLocation.latitude, newLocation.longitude])
+            .setRadius(newLocation.radius * 1000);
+        
+        // Clear existing observation markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers.length = 0;
+        
+        // Clear observations table
+        tableBody.innerHTML = '';
+        
+        // Fetch new observations for the updated location
+        fetch('/api/observations')
+            .then(response => response.json())
+            .then(newObservations => {
+                newObservations.forEach(obs => {
+                    const marker = L.circleMarker([parseFloat(obs.latitude), parseFloat(obs.longitude)], {
+                        radius: 8,
+                        fillColor: '#f03',
+                        color: '#000',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+
+                    marker.bindPopup(`
+                        <strong>${obs.common_name}</strong><br>
+                        Scientific Name: ${obs.scientific_name}<br>
+                        Date: ${obs.observation_date}<br>
+                        Location: ${obs.locality_name}
+                    `);
+
+                    markers.push(marker);
+
+                    // Add row to observations table
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${obs.common_name}</td>
+                        <td>${obs.scientific_name}</td>
+                        <td>${obs.observation_date}</td>
+                        <td>${obs.locality_name}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching observations:', error));
+    });
 </script>
 {% endblock %} 
