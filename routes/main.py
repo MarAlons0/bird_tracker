@@ -82,11 +82,11 @@ def index():
                     is_active=location_result[5]
                 )
             else:
-                # Create a default location
+                # Create a default location (Cincinnati, OH)
                 location = Location(
-                    name="New York City",
-                    latitude=40.7128,  # New York City coordinates
-                    longitude=-74.0060,
+                    name="Cincinnati, OH",
+                    latitude=39.1031,  # Cincinnati coordinates
+                    longitude=-84.5120,
                     radius=25,
                     is_active=True
                 )
@@ -258,9 +258,12 @@ def update_location():
                 coordinates = coords
                 break
         
-        # If no matching city found, use New York City as default
+        # If no matching city found, use Cincinnati as default
         if not coordinates:
-            coordinates = city_coordinates['new york']
+            # For any other location, use a default location (Cincinnati)
+            # In a real application, you would use a geocoding service here
+            coordinates = city_coordinates['cincinnati']
+            logger.info(f"Using default coordinates for location: {data['name']}")
         
         # Deactivate all current locations
         db.session.execute(
