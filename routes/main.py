@@ -231,9 +231,16 @@ def update_location():
             return jsonify({'error': 'Location name is required'}), 400
             
         # Set default values for optional fields
-        latitude = float(data.get('latitude', 40.7128))  # Default to NYC
-        longitude = float(data.get('longitude', -74.0060))
         radius = int(data.get('radius', 25))
+        
+        # For demo purposes, use fixed coordinates for Cincinnati
+        if 'cincinnati' in data['name'].lower():
+            latitude = 39.1031
+            longitude = -84.5120
+        else:
+            # Default to NYC coordinates for other locations
+            latitude = 40.7128
+            longitude = -74.0060
         
         # Deactivate all current locations
         db.session.execute(

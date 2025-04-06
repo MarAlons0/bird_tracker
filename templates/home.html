@@ -152,8 +152,8 @@
                     <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             {% for image in carousel_images %}
-                            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <img src="{{ image.filename }}" class="d-block w-100" alt="{{ image.title }}" style="object-fit: cover; height: 400px;">
+                            <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
+                                <img src="{{ image.filename }}" class="d-block w-100" alt="{{ image.title }}" style="object-fit: cover; height: 400px; width: 100%;">
                                 <div class="carousel-caption d-none d-md-block">
                                     <h5>{{ image.title }}</h5>
                                     {% if image.description %}
@@ -196,11 +196,13 @@
                 <form id="locationForm">
                     <div class="mb-3">
                         <label for="locationName" class="form-label">Location Name</label>
-                        <input type="text" class="form-control" id="locationName" name="name" required>
+                        <input type="text" class="form-control" id="locationName" name="name" placeholder="Enter city, park, or location name..." required>
+                        <small class="form-text text-muted">Enter any location name (e.g., "Cincinnati OH", "Central Park", etc.)</small>
                     </div>
                     <div class="mb-3">
                         <label for="searchRadius" class="form-label">Search Radius (miles)</label>
                         <input type="number" class="form-control" id="searchRadius" name="radius" min="1" max="50" value="25" required>
+                        <small class="form-text text-muted">Area around the location to search for birds</small>
                     </div>
                 </form>
             </div>
@@ -229,12 +231,24 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Debug carousel images
-    console.log('Carousel images:', {{ carousel_images|tojson|safe }});
+    const carouselImages = {{ carousel_images|tojson|safe }};
+    console.log('Carousel images:', carouselImages);
     
     // Initialize carousel
     console.log('Initializing carousel...');
     const carousel = new bootstrap.Carousel(document.getElementById('birdCarousel'), {
         interval: 5000
+    });
+    
+    // Debug image loading
+    document.querySelectorAll('.carousel-item img').forEach(function(img) {
+        console.log('Loading image:', img.src);
+        img.onerror = function() {
+            console.error('Failed to load image:', img.src);
+        };
+        img.onload = function() {
+            console.log('Successfully loaded image:', img.src);
+        };
     });
     
     // Location change functionality
