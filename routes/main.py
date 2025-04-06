@@ -225,14 +225,42 @@ def update_location():
         # Set default values for optional fields
         radius = int(data.get('radius', 25))
         
-        # For demo purposes, use fixed coordinates for Cincinnati
-        if 'cincinnati' in data['name'].lower():
-            latitude = 39.1031
-            longitude = -84.5120
-        else:
-            # Default to NYC coordinates for other locations
-            latitude = 40.7128
-            longitude = -74.0060
+        # Predefined coordinates for common cities
+        city_coordinates = {
+            'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
+            'denver': {'lat': 39.7392, 'lng': -104.9903},
+            'new york': {'lat': 40.7128, 'lng': -74.0060},
+            'los angeles': {'lat': 34.0522, 'lng': -118.2437},
+            'chicago': {'lat': 41.8781, 'lng': -87.6298},
+            'houston': {'lat': 29.7604, 'lng': -95.3698},
+            'phoenix': {'lat': 33.4484, 'lng': -112.0740},
+            'philadelphia': {'lat': 39.9526, 'lng': -75.1652},
+            'san antonio': {'lat': 29.4241, 'lng': -98.4936},
+            'san diego': {'lat': 32.7157, 'lng': -117.1611},
+            'dallas': {'lat': 32.7767, 'lng': -96.7970},
+            'san jose': {'lat': 37.3382, 'lng': -121.8863},
+            'austin': {'lat': 30.2672, 'lng': -97.7431},
+            'jacksonville': {'lat': 30.3322, 'lng': -81.6557},
+            'fort worth': {'lat': 32.7254, 'lng': -97.3208},
+            'columbus': {'lat': 39.9612, 'lng': -82.9988},
+            'charlotte': {'lat': 35.2271, 'lng': -80.8431},
+            'san francisco': {'lat': 37.7749, 'lng': -122.4194},
+            'indianapolis': {'lat': 39.7684, 'lng': -86.1581},
+            'seattle': {'lat': 47.6062, 'lng': -122.3321}
+        }
+        
+        # Check if the location name contains any of our predefined cities
+        location_name = data['name'].lower()
+        coordinates = None
+        
+        for city, coords in city_coordinates.items():
+            if city in location_name:
+                coordinates = coords
+                break
+        
+        # If no matching city found, use New York City as default
+        if not coordinates:
+            coordinates = city_coordinates['new york']
         
         # Deactivate all current locations
         db.session.execute(
@@ -247,8 +275,8 @@ def update_location():
             '''),
             {
                 'name': data['name'],
-                'lat': latitude,
-                'lng': longitude,
+                'lat': coordinates['lat'],
+                'lng': coordinates['lng'],
                 'radius': radius
             }
         )
@@ -260,8 +288,8 @@ def update_location():
             'message': 'Location updated successfully',
             'location': {
                 'name': data['name'],
-                'latitude': latitude,
-                'longitude': longitude,
+                'latitude': coordinates['lat'],
+                'longitude': coordinates['lng'],
                 'radius': radius
             }
         })

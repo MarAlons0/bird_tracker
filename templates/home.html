@@ -196,13 +196,16 @@
                 <form id="locationForm">
                     <div class="mb-3">
                         <label for="locationName" class="form-label">Location Name</label>
-                        <input type="text" class="form-control" id="locationName" name="name" placeholder="Enter city, park, or location name..." required>
-                        <small class="form-text text-muted">Enter any location name (e.g., "Cincinnati OH", "Central Park", etc.)</small>
+                        <input type="text" class="form-control" id="locationName" name="name" required
+                               placeholder="Enter city, park, or location name..."
+                               autocomplete="off">
+                        <small class="text-muted">Enter any location name (e.g., "Denver CO", "Central Park NY")</small>
                     </div>
                     <div class="mb-3">
                         <label for="searchRadius" class="form-label">Search Radius (miles)</label>
-                        <input type="number" class="form-control" id="searchRadius" name="radius" min="1" max="50" value="25" required>
-                        <small class="form-text text-muted">Area around the location to search for birds</small>
+                        <input type="number" class="form-control" id="searchRadius" name="radius" 
+                               value="25" min="1" max="100" required>
+                        <small class="text-muted">How far to search for bird sightings (1-100 miles)</small>
                     </div>
                 </form>
             </div>
@@ -230,7 +233,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Debug carousel images
+    // Parse carousel images from template
     const carouselImages = JSON.parse('{{ carousel_images|tojson|safe }}');
     console.log('Carousel images:', carouselImages);
     
@@ -253,55 +256,58 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Location change functionality
     const locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
     const locationForm = document.getElementById('locationForm');
-    const saveLocationBtn = document.getElementById('saveLocation');
     
-    // Set current location values when modal is shown
-    document.getElementById('locationModal').addEventListener('show.bs.modal', function() {
-        const currentLocation = JSON.parse('{{ location|tojson|safe }}');
-        if (currentLocation && currentLocation.name) {
-            document.getElementById('locationName').value = currentLocation.name;
-            document.getElementById('searchRadius').value = currentLocation.radius || 25;
-        }
+    // Show location modal
+    document.getElementById('changeLocationBtn').addEventListener('click', function() {
+        locationModal.show();
     });
     
     // Handle location form submission
-    saveLocationBtn.addEventListener('click', async function() {
-        const formData = new FormData(locationForm);
-        const data = {
-            name: formData.get('name'),
-            radius: parseInt(formData.get('radius'))
+    locationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('locationName').value,
+            radius: parseInt(document.getElementById('searchRadius').value)
         };
         
-        try {
-            loadingModal.show();
+        // Show loading modal
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
+        
+        // Send location update request
+        fetch('/api/location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Update location display
+            document.getElementById('currentLocation').textContent = data.location.name;
+            
+            // Hide modals
+            loadingModal.hide();
             locationModal.hide();
             
-            const response = await fetch('/api/location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+            // Show success message
+            alert('Location updated successfully!');
             
-            if (!response.ok) {
-                throw new Error('Failed to update location');
-            }
-            
-            const result = await response.json();
-            if (result.success) {
-                window.location.reload();
-            } else {
-                alert('Error updating location: ' + result.error);
-            }
-        } catch (error) {
+            // Reload page to refresh data
+            window.location.reload();
+        })
+        .catch(error => {
             console.error('Error:', error);
-            alert('Error updating location. Please try again.');
-        } finally {
             loadingModal.hide();
-        }
+            alert('Error updating location: ' + error.message);
+        });
     });
 });
 </script>
