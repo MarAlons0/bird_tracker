@@ -11,8 +11,12 @@ load_dotenv()
 
 def process_image(image_file):
     """Process an uploaded image file."""
-    # Open the image using PIL
-    image = Image.open(image_file)
+    # If image_file is already a PIL Image, use it directly
+    if isinstance(image_file, Image.Image):
+        image = image_file
+    else:
+        # Open the image using PIL
+        image = Image.open(image_file)
     
     # Log image information
     current_app.logger.info(f"Original image mode: {image.mode}, size: {image.size}")
@@ -36,12 +40,17 @@ def upload_to_cloudinary(image, public_id, transformations=None):
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
     
-    # Convert PIL Image to bytes
-    img_byte_arr = io.BytesIO()
     # Determine format from public_id extension
     format = os.path.splitext(public_id)[1][1:].upper() if os.path.splitext(public_id)[1] else 'JPEG'
-    image.save(img_byte_arr, format=format)
-    img_byte_arr = img_byte_arr.getvalue()
+    
+    # If image is a file-like object, read it directly
+    if hasattr(image, 'read'):
+        img_data = image.read()
+    else:
+        # Convert PIL Image to bytes
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format=format)
+        img_data = img_byte_arr.getvalue()
     
     # Remove extension from public_id if it exists
     public_id = os.path.splitext(public_id)[0]
@@ -58,7 +67,7 @@ def upload_to_cloudinary(image, public_id, transformations=None):
         upload_params['transformation'] = transformations
     
     # Upload the image
-    result = cloudinary.uploader.upload(img_byte_arr, **upload_params)
+    result = cloudinary.uploader.upload(img_data, **upload_params)
     
     current_app.logger.info(f"Successfully uploaded image to Cloudinary: {public_id}")
     return result 

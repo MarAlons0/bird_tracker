@@ -2,6 +2,9 @@ import os
 from app import create_app, db
 from models import CarouselImage
 from werkzeug.utils import secure_filename
+from utils.image_processing import process_image, upload_to_cloudinary
+from PIL import Image as PILImage
+import io
 
 def ensure_carousel_directory():
     """Ensure the carousel directory exists"""
@@ -44,23 +47,57 @@ def add_carousel_images():
         # Add each image to the database
         for i, image_data in enumerate(images, 1):
             filename = secure_filename(image_data['filename'])
-            image = CarouselImage(
-                filename=filename,
-                title=image_data['title'],
-                description=image_data['description'],
-                order=i,
-                is_active=True
-            )
+            image_path = os.path.join('static', 'images', 'birds', filename)
             
-            # Check if image already exists
-            existing = CarouselImage.query.filter_by(filename=filename).first()
-            if existing:
-                print(f"Image {filename} already exists in database")
+            if not os.path.exists(image_path):
+                print(f"Warning: Image file not found: {image_path}")
                 continue
+            
+            try:
+                # Open and process the image
+                with PILImage.open(image_path) as img:
+                    # Convert to RGB if necessary
+                    if img.mode != 'RGB':
+                        img = img.convert('RGB')
+                    
+                    # Process the image
+                    processed_img = process_image(img)
+                    
+                    # Convert processed image to bytes
+                    img_byte_arr = io.BytesIO()
+                    processed_img.save(img_byte_arr, format='JPEG')
+                    img_byte_arr.seek(0)
+                    
+                    # Upload to Cloudinary
+                    cloudinary_path = f"carousel/{filename}"
+                    upload_result = upload_to_cloudinary(img_byte_arr, cloudinary_path)
+                    
+                    if not upload_result or 'secure_url' not in upload_result:
+                        print(f"Warning: Failed to upload {filename} to Cloudinary")
+                        continue
+                    
+                    # Create new carousel image
+                    image = CarouselImage(
+                        filename=upload_result['secure_url'],  # Store the Cloudinary URL
+                        title=image_data['title'],
+                        description=image_data['description'],
+                        order=i,
+                        is_active=True
+                    )
+                    
+                    # Check if image already exists
+                    existing = CarouselImage.query.filter_by(filename=upload_result['secure_url']).first()
+                    if existing:
+                        print(f"Image {filename} already exists in database")
+                        continue
+                    
+                    # Add to database
+                    db.session.add(image)
+                    print(f"Added image {filename} to database with Cloudinary URL: {upload_result['secure_url']}")
                 
-            # Add to database
-            db.session.add(image)
-            print(f"Added image {filename} to database")
+            except Exception as e:
+                print(f"Error processing {filename}: {str(e)}")
+                continue
         
         # Commit changes
         db.session.commit()

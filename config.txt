@@ -1,0 +1,28 @@
+=== bird-tracker-app Config Vars
+
+ADMIN_EMAIL:           cutie-unquiet0j@icloud.com
+ADMIN_PASSWORD:        admin123
+ALLOWED_EMAILS:        alonsoencinci@gmail.com,jalonso91@gmail.com,nunualonso96@gmail.com
+ANTHROPIC_API_KEY:     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
+CLOUDINARY_API_KEY:    846739871247459
+CLOUDINARY_API_SECRET: glWICSkKh709LYbkpOKkUTB15Wk
+CLOUDINARY_CLOUD_NAME: dov36rgse
+DATABASE_URL:          postgres://u393psopndshbh:p18ba7986cd5ad98b91e865897e2115a1efbdad521c3c82df5a93ef977c206452@cd5gks8n4kb20g.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dca2lkdkae52ej
+DEFAULT_LATITUDE:      39.1031
+DEFAULT_LOCATION:      cincinnati
+DEFAULT_LOCATION_NAME: Cincinnati
+DEFAULT_LONGITUDE:     -84.5120
+DEFAULT_RADIUS:        25
+DEFAULT_USER_PASSWORD: user123
+EBIRD_API_KEY:         7pgb8l664h94
+EMAIL_SCHEDULE_HOUR:   8
+EMAIL_SCHEDULE_MINUTE: 0
+FLASK_SECRET_KEY:      c7fd211ea188244225f60d30fc5596a1
+GOOGLE_PLACES_API_KEY: AIzaSyC6MVglln7fltmGCpdyvPGqdByyxagy3hQ
+HOST_URL:              https://bird-tracker-app-9af5a4fb26d3.herokuapp.com
+RECIPIENT_EMAIL:       alonsoencinci@gmail.com
+SMTP_PASSWORD:         ywezmdmgyyzcmesi
+SMTP_PORT:             587
+SMTP_SERVER:           smtp.gmail.com
+SMTP_USER:             mariobirdtracker@gmail.com
+TEST_VAR:              hello
