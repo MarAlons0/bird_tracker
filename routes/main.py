@@ -241,7 +241,7 @@ def update_location():
                 return jsonify({'error': 'Could not find coordinates for this location'}), 400
         
         # Deactivate all current locations
-        Location.query.filter_by(active=True).update({'active': False})
+        Location.query.filter_by(is_active=True).update({'is_active': False})
         
         # Create new location
         new_location = Location(
@@ -249,7 +249,7 @@ def update_location():
             latitude=lat,
             longitude=lng,
             radius=radius,
-            active=True
+            is_active=True
         )
         
         db.session.add(new_location)
