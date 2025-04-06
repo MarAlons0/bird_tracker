@@ -14,9 +14,14 @@ logger = logging.getLogger(__name__)
 def index():
     """Home page route"""
     try:
-        # Get active carousel images
+        # Get active carousel images with explicit column selection
         result = db.session.execute(
-            text('SELECT * FROM carousel_images WHERE is_active = true ORDER BY "order"')
+            text('''
+                SELECT id, filename, title, description, "order", is_active 
+                FROM carousel_images 
+                WHERE is_active = true 
+                ORDER BY "order"
+            ''')
         )
         
         # Convert to list of dicts for template
