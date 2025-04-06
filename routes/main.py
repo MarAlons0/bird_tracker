@@ -211,93 +211,64 @@ def update_location():
         logger.info(f"Received location update request: {data}")
         
         if not data or 'name' not in data:
-            logger.error("Missing required field 'name' in request")
             return jsonify({'error': 'Location name is required'}), 400
-        
+            
         name = data['name']
-        radius = data.get('radius', 25)
+        radius = data.get('radius', 25)  # Default to 25 miles if not specified
         
-        logger.info(f"Processing location update: name={name}, radius={radius}")
-        
-        # Dictionary of predefined city coordinates
-        city_coordinates = {
-            'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
-            'new york': {'lat': 40.7128, 'lng': -74.0060},
-            'los angeles': {'lat': 34.0522, 'lng': -118.2437},
-            'chicago': {'lat': 41.8781, 'lng': -87.6298},
-            'denver': {'lat': 39.7392, 'lng': -104.9903}
-        }
-        
-        # Check if the location name contains any of our predefined cities
-        location_name_lower = name.lower()
-        coordinates = None
-        
-        for city, coords in city_coordinates.items():
-            if city in location_name_lower:
-                coordinates = coords
-                logger.info(f"Found matching city coordinates for {city}")
-                break
-        
-        if not coordinates:
-            # If no matching city found, use geocoding to get coordinates
-            try:
-                import requests
-                api_key = os.getenv('GOOGLE_PLACES_API_KEY')
-                if not api_key:
-                    logger.error("Google Places API key not found!")
-                    return jsonify({'error': 'Google Places API key not configured'}), 500
-                
-                # Use Google Geocoding API to get coordinates
-                geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={name}&key={api_key}"
-                response = requests.get(geocode_url)
-                geocode_data = response.json()
-                
-                if geocode_data['status'] == 'OK' and geocode_data['results']:
-                    location = geocode_data['results'][0]['geometry']['location']
-                    coordinates = {
-                        'lat': location['lat'],
-                        'lng': location['lng']
-                    }
-                    logger.info(f"Geocoded location: {name} -> {coordinates}")
-                else:
-                    logger.error(f"Geocoding failed: {geocode_data['status']}")
-                    return jsonify({'error': 'Could not find coordinates for this location'}), 400
-            except Exception as e:
-                logger.error(f"Error geocoding location: {str(e)}")
-                return jsonify({'error': 'Error geocoding location'}), 500
+        # Check if we have coordinates from the frontend
+        if 'latitude' in data and 'longitude' in data:
+            lat = float(data['latitude'])
+            lng = float(data['longitude'])
+            logger.info(f"Using provided coordinates: {lat}, {lng}")
+        else:
+            # Fall back to predefined cities
+            city_coords = {
+                'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
+                'new york': {'lat': 40.7128, 'lng': -74.0060},
+                'los angeles': {'lat': 34.0522, 'lng': -118.2437},
+                'chicago': {'lat': 41.8781, 'lng': -87.6298},
+                'denver': {'lat': 39.7392, 'lng': -104.9903}
+            }
+            
+            city_key = name.lower()
+            if city_key in city_coords:
+                coords = city_coords[city_key]
+                lat = coords['lat']
+                lng = coords['lng']
+                logger.info(f"Using predefined city coordinates: {lat}, {lng}")
+            else:
+                return jsonify({'error': 'Could not find coordinates for this location'}), 400
         
         # Deactivate all current locations
-        db.session.execute(text('UPDATE locations SET is_active = false'))
+        Location.query.filter_by(active=True).update({'active': False})
         
-        # Insert new location
-        result = db.session.execute(text('''
-            INSERT INTO locations (name, latitude, longitude, radius, is_active)
-            VALUES (:name, :lat, :lng, :radius, true)
-            RETURNING id, name, latitude, longitude, radius
-        '''), {
-            'name': name,
-            'lat': coordinates['lat'],
-            'lng': coordinates['lng'],
-            'radius': radius
-        })
+        # Create new location
+        new_location = Location(
+            name=name,
+            latitude=lat,
+            longitude=lng,
+            radius=radius,
+            active=True
+        )
         
-        new_location = result.fetchone()
+        db.session.add(new_location)
         db.session.commit()
         
-        logger.info(f"Successfully updated location: {new_location.name} ({new_location.latitude}, {new_location.longitude})")
-        
+        logger.info(f"Successfully updated location to: {name} ({lat}, {lng})")
         return jsonify({
             'success': True,
             'location': {
-                'name': new_location.name,
-                'latitude': new_location.latitude,
-                'longitude': new_location.longitude,
-                'radius': new_location.radius
+                'name': name,
+                'latitude': lat,
+                'longitude': lng,
+                'radius': radius
             }
         })
         
     except Exception as e:
-        logger.error(f"Error updating location: {str(e)}", exc_info=True)
+        logger.error(f"Error updating location: {str(e)}")
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/newsletter-preferences', methods=['GET', 'POST'])

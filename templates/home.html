@@ -245,7 +245,20 @@
     </div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+<!-- Google Places API -->
+<script>
+    function initGoogleMaps() {
+        const script = document.createElement('script');
+        script.src = "https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initLocationAutocomplete";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+</script>
+<script>
+    // Initialize Google Maps when the page loads
+    window.addEventListener('load', initGoogleMaps);
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize location elements
@@ -255,25 +268,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchRadius = document.getElementById('searchRadius');
     
     // Initialize Google Places Autocomplete
-    function initLocationAutocomplete() {
+    window.initLocationAutocomplete = function() {
         if (!locationInput || !google || !google.maps || !google.maps.places) {
             console.error('Google Places API not loaded');
             return;
         }
 
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['(cities)'],
-            fields: ['formatted_address', 'geometry', 'name']
+            types: ['(cities)', 'establishment', 'geocode'],
+            fields: ['formatted_address', 'geometry', 'name', 'place_id']
         });
 
         autocomplete.addListener('place_changed', function() {
             const place = autocomplete.getPlace();
+            console.log('Selected place:', place);
+            
             if (!place.geometry) {
                 locationError.textContent = 'Please select a location from the dropdown';
                 saveLocationBtn.disabled = true;
                 return;
             }
 
+            // Store the place data for submission
+            locationInput.dataset.placeId = place.place_id;
+            locationInput.dataset.lat = place.geometry.location.lat();
+            locationInput.dataset.lng = place.geometry.location.lng();
+            
             locationError.textContent = '';
             saveLocationBtn.disabled = false;
         });
@@ -286,20 +306,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize autocomplete when Google Maps API is loaded
-    if (window.google && window.google.maps) {
-        initLocationAutocomplete();
-    } else {
-        window.initLocationAutocomplete = initLocationAutocomplete;
-    }
-
     // Handle location change
     saveLocationBtn.addEventListener('click', function() {
         const locationName = locationInput.value.trim();
         const radius = parseInt(searchRadius.value);
+        const placeId = locationInput.dataset.placeId;
+        const lat = locationInput.dataset.lat;
+        const lng = locationInput.dataset.lng;
 
-        if (!locationName) {
-            locationError.textContent = 'Please enter a location name';
+        if (!locationName || !placeId || !lat || !lng) {
+            locationError.textContent = 'Please select a valid location from the dropdown';
             return;
         }
 
@@ -315,7 +331,10 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 name: locationName,
-                radius: radius
+                radius: radius,
+                place_id: placeId,
+                latitude: lat,
+                longitude: lng
             })
         })
         .then(response => response.json())
