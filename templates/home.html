@@ -247,28 +247,30 @@
 
 <!-- Google Places API -->
 <script>
+    // Global function to initialize Google Maps
     function initGoogleMaps() {
-        const script = document.createElement('script');
-        script.src = "https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initLocationAutocomplete";
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+        return new Promise((resolve, reject) => {
+            if (window.google && window.google.maps) {
+                resolve(window.google.maps);
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = "https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places";
+            script.async = true;
+            script.defer = true;
+            script.onload = () => resolve(window.google.maps);
+            script.onerror = () => reject(new Error('Failed to load Google Maps'));
+            document.head.appendChild(script);
+        });
     }
-</script>
-<script>
-    // Initialize Google Maps when the page loads
-    window.addEventListener('load', initGoogleMaps);
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize location elements
-    const locationInput = document.getElementById('locationName');
-    const locationError = document.getElementById('locationError');
-    const saveLocationBtn = document.getElementById('saveLocationBtn');
-    const searchRadius = document.getElementById('searchRadius');
-    
-    // Initialize Google Places Autocomplete
-    window.initLocationAutocomplete = function() {
+
+    // Initialize location autocomplete
+    function initLocationAutocomplete() {
+        const locationInput = document.getElementById('locationName');
+        const locationError = document.getElementById('locationError');
+        const saveLocationBtn = document.getElementById('saveLocationBtn');
+
         if (!locationInput || !google || !google.maps || !google.maps.places) {
             console.error('Google Places API not loaded');
             return;
@@ -306,54 +308,73 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle location change
-    saveLocationBtn.addEventListener('click', function() {
-        const locationName = locationInput.value.trim();
-        const radius = parseInt(searchRadius.value);
-        const placeId = locationInput.dataset.placeId;
-        const lat = locationInput.dataset.lat;
-        const lng = locationInput.dataset.lng;
+    // Initialize everything when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize location elements
+        const locationInput = document.getElementById('locationName');
+        const locationError = document.getElementById('locationError');
+        const saveLocationBtn = document.getElementById('saveLocationBtn');
+        const searchRadius = document.getElementById('searchRadius');
 
-        if (!locationName || !placeId || !lat || !lng) {
-            locationError.textContent = 'Please select a valid location from the dropdown';
-            return;
-        }
-
-        // Show loading modal
-        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        loadingModal.show();
-
-        // Send location update request
-        fetch('/api/location', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: locationName,
-                radius: radius,
-                place_id: placeId,
-                latitude: lat,
-                longitude: lng
+        // Load Google Maps and initialize autocomplete
+        initGoogleMaps()
+            .then(() => {
+                console.log('Google Maps loaded successfully');
+                initLocationAutocomplete();
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingModal.hide();
-            if (data.error) {
-                locationError.textContent = data.error;
+            .catch(error => {
+                console.error('Error loading Google Maps:', error);
+                locationError.textContent = 'Error loading location search. Please try again.';
+            });
+
+        // Handle location change
+        saveLocationBtn.addEventListener('click', function() {
+            const locationName = locationInput.value.trim();
+            const radius = parseInt(searchRadius.value);
+            const placeId = locationInput.dataset.placeId;
+            const lat = locationInput.dataset.lat;
+            const lng = locationInput.dataset.lng;
+
+            if (!locationName || !placeId || !lat || !lng) {
+                locationError.textContent = 'Please select a valid location from the dropdown';
                 return;
             }
-            // Close location modal and refresh page
-            bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
-            window.location.reload();
-        })
-        .catch(error => {
-            loadingModal.hide();
-            locationError.textContent = 'Error updating location. Please try again.';
-            console.error('Error:', error);
+
+            // Show loading modal
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+
+            // Send location update request
+            fetch('/api/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: locationName,
+                    radius: radius,
+                    place_id: placeId,
+                    latitude: lat,
+                    longitude: lng
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingModal.hide();
+                if (data.error) {
+                    locationError.textContent = data.error;
+                    return;
+                }
+                // Close location modal and refresh page
+                bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
+                window.location.reload();
+            })
+            .catch(error => {
+                loadingModal.hide();
+                locationError.textContent = 'Error updating location. Please try again.';
+                console.error('Error:', error);
+            });
         });
     });
-});
 </script>
 {% endblock %} 
