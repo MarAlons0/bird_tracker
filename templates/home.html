@@ -135,7 +135,7 @@
                     <p><strong>Name:</strong> {{ location.name }}</p>
                     <p><strong>Coordinates:</strong> {{ location.latitude }}, {{ location.longitude }}</p>
                     <p><strong>Radius:</strong> {{ location.radius }} miles</p>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                    <button type="button" class="btn btn-primary" id="changeLocationBtn" data-bs-toggle="modal" data-bs-target="#locationModal">
                         Change Location
                     </button>
                 </div>
@@ -153,7 +153,8 @@
                         <div class="carousel-inner">
                             {% for image in carousel_images %}
                             <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
-                                <img src="{{ image.filename }}" class="d-block w-100" alt="{{ image.title }}" style="object-fit: cover; height: 400px; width: 100%;">
+                                <img src="{{ image.filename }}" class="d-block w-100" alt="{{ image.title }}" 
+                                     style="object-fit: contain; height: 300px; width: 100%;">
                                 <div class="carousel-caption d-none d-md-block">
                                     <h5>{{ image.title }}</h5>
                                     {% if image.description %}
@@ -257,16 +258,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Location change functionality
     const locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
     const locationForm = document.getElementById('locationForm');
-    
-    // Show location modal
-    document.getElementById('changeLocationBtn').addEventListener('click', function() {
-        locationModal.show();
-    });
+    const saveLocationBtn = document.getElementById('saveLocation');
     
     // Handle location form submission
-    locationForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
+    saveLocationBtn.addEventListener('click', function() {
         const formData = {
             name: document.getElementById('locationName').value,
             radius: parseInt(document.getElementById('searchRadius').value)
@@ -289,9 +284,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.error) {
                 throw new Error(data.error);
             }
-            
-            // Update location display
-            document.getElementById('currentLocation').textContent = data.location.name;
             
             // Hide modals
             loadingModal.hide();
