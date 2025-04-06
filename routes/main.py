@@ -28,9 +28,19 @@ def index():
             ORDER BY "order"
         ''')).fetchall()
         
+        # Convert Row objects to dictionaries
+        carousel_images = [{
+            'id': img.image_id,
+            'filename': img.image_url,
+            'title': img.image_title,
+            'description': img.image_description,
+            'order': img.image_order,
+            'is_active': img.image_active
+        } for img in carousel_images]
+        
         logger.info(f"Found {len(carousel_images)} active carousel images")
         for img in carousel_images:
-            logger.debug(f"Carousel image: id={img.image_id}, title={img.image_title}, url={img.image_url}")
+            logger.debug(f"Carousel image: id={img['id']}, title={img['title']}, url={img['filename']}")
         
         # Get current location
         location = db.session.execute(text('''
@@ -63,11 +73,19 @@ def index():
                 LIMIT 1
             ''')).fetchone()
         
-        logger.info(f"Current location: {location.name} ({location.latitude}, {location.longitude})")
+        # Convert location Row to dictionary
+        location_dict = {
+            'name': location.name,
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+            'radius': location.radius
+        }
+        
+        logger.info(f"Current location: {location_dict['name']} ({location_dict['latitude']}, {location_dict['longitude']})")
         
         return render_template('home.html', 
                            carousel_images=carousel_images,
-                           location=location)
+                           location=location_dict)
                            
     except Exception as e:
         logger.error(f"Error in index route: {str(e)}", exc_info=True)
