@@ -262,10 +262,10 @@
         const locationInput = document.getElementById('locationName');
         if (!locationInput) return;
 
-        // Create autocomplete with only establishment type
+        // Create autocomplete with both cities and establishments
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['establishment'],
-            fields: ['formatted_address', 'geometry', 'name']
+            types: ['(cities)', 'point_of_interest'],
+            fields: ['formatted_address', 'geometry', 'name', 'address_components']
         });
 
         // Handle place selection
@@ -281,8 +281,20 @@
             document.getElementById('locationError').textContent = '';
             document.getElementById('saveLocationBtn').disabled = false;
 
-            // Update input with formatted address
-            locationInput.value = place.formatted_address;
+            // Format the location name nicely
+            let locationName = place.name;
+            const addressComponents = place.address_components || [];
+            
+            // Add state if available
+            const stateComponent = addressComponents.find(component => 
+                component.types.includes('administrative_area_level_1')
+            );
+            if (stateComponent) {
+                locationName += `, ${stateComponent.short_name}`;
+            }
+
+            // Update input with formatted name
+            locationInput.value = locationName;
         });
 
         // Prevent form submission on enter
