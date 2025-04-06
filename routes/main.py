@@ -34,13 +34,15 @@ def index():
         carousel_images = []
         for row in result:
             try:
+                # Access row data using dictionary-style access
+                row_dict = dict(row)
                 carousel_images.append({
-                    'id': row.image_id,
-                    'filename': row.image_url,
-                    'title': row.image_title,
-                    'description': row.image_description,
-                    'order': row.image_order,
-                    'is_active': row.image_active
+                    'id': row_dict['image_id'],
+                    'filename': row_dict['image_url'],
+                    'title': row_dict['image_title'],
+                    'description': row_dict['image_description'],
+                    'order': row_dict['image_order'],
+                    'is_active': row_dict['image_active']
                 })
             except Exception as row_error:
                 print(f"Error processing row: {str(row_error)}")
