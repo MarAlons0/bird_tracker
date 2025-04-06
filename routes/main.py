@@ -15,12 +15,21 @@ def index():
     """Home page route"""
     try:
         # Get active carousel images
-        carousel_images = db.session.execute(
+        result = db.session.execute(
             text('SELECT * FROM carousel_images WHERE is_active = true ORDER BY "order"')
-        ).fetchall()
+        )
         
         # Convert to list of dicts for template
-        carousel_images = [dict(row) for row in carousel_images]
+        carousel_images = []
+        for row in result:
+            carousel_images.append({
+                'id': row.id,
+                'filename': row.filename,
+                'title': row.title,
+                'description': row.description,
+                'order': row.order,
+                'is_active': row.is_active
+            })
         
         # Debug logging
         print(f"Found {len(carousel_images)} active carousel images")
