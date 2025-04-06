@@ -383,5 +383,27 @@ document.getElementById('saveLocation').addEventListener('click', async function
         loadingModal.hide();
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug carousel images
+    console.log('Carousel images:', {{ carousel_images|tojson|safe }});
+    
+    // Initialize carousel
+    var carousel = new bootstrap.Carousel(document.getElementById('featuredBirdsCarousel'), {
+        interval: 5000,
+        wrap: true
+    });
+    
+    // Debug image loading
+    document.querySelectorAll('.carousel-item img').forEach(function(img) {
+        console.log('Image source:', img.src);
+        img.onerror = function() {
+            console.error('Failed to load image:', img.src);
+        };
+        img.onload = function() {
+            console.log('Successfully loaded image:', img.src);
+        };
+    });
+});
 </script>
 {% endblock %} 
