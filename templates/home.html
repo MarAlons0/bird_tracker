@@ -25,56 +25,79 @@
         z-index: 1050;
     }
     .pac-container {
-        z-index: 10000;  /* Ensure dropdown appears above modal */
+        z-index: 10000;
     }
+    /* Carousel Styles */
     .carousel-container {
-        position: relative;
         width: 100%;
-        padding-bottom: 100%; /* Creates a 1:1 aspect ratio */
         background-color: #f8f9fa;
         border-radius: 8px;
         overflow: hidden;
+        margin-bottom: 20px;
     }
     .carousel-inner {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 100%;
+        position: relative;
+        width: 100%;
+        height: 400px;
     }
     .carousel-item {
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
+    .carousel-item.active {
+        display: block;
+    }
+    .carousel-image-container {
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: #f8f9fa;
-        height: 100%;
     }
     .carousel-item img {
         max-width: 100%;
         max-height: 100%;
-        width: auto;
-        height: auto;
         object-fit: contain;
-        display: block;
-        margin: auto;
-        position: relative;
     }
     .carousel-caption {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 15px;
+        background: rgba(0, 0, 0, 0.7);
         color: white;
+        padding: 15px;
         text-align: center;
-        z-index: 1;
+    }
+    .carousel-control-prev,
+    .carousel-control-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+    .carousel-control-prev {
+        left: 10px;
+    }
+    .carousel-control-next {
+        right: 10px;
+    }
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background: rgba(0, 0, 0, 0.8);
     }
     .version-info {
         font-size: 0.8em;
@@ -90,46 +113,6 @@
     }
     .featured-birds-card {
         height: 100%;
-    }
-    @media (max-width: 767.98px) {
-        .carousel-container {
-            padding-bottom: 100%; /* Maintain 1:1 aspect ratio on mobile */
-        }
-    }
-    .carousel-image-container {
-        position: relative;
-        width: 100%;
-        height: 400px;
-        background-color: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .carousel-item img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-    .carousel-caption {
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 5px;
-        padding: 10px;
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        min-width: 200px;
-        text-align: center;
-    }
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 5%;
-        opacity: 0.8;
-    }
-    .carousel-control-prev:hover,
-    .carousel-control-next:hover {
-        opacity: 1;
     }
 </style>
 {% endblock %}
@@ -170,7 +153,7 @@
                     <p><strong>Name:</strong> {{ location.name }}</p>
                     <p><strong>Coordinates:</strong> {{ location.latitude }}, {{ location.longitude }}</p>
                     <p><strong>Radius:</strong> {{ location.radius }} miles</p>
-                    <button type="button" class="btn btn-primary change-location-btn" data-bs-toggle="modal" data-bs-target="#locationModal">
+                    <button type="button" class="btn btn-primary" id="changeLocationBtn" data-bs-toggle="modal" data-bs-target="#locationModal">
                         Change Location
                     </button>
                 </div>
@@ -184,15 +167,12 @@
                     <h5 class="mb-0">Featured Birds</h5>
                 </div>
                 <div class="card-body">
-                    <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
+                    <div class="carousel-container">
+                        <div class="carousel-inner" id="birdCarousel">
                             {% for image in carousel_images %}
                             <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
                                 <div class="carousel-image-container">
-                                    <img src="{{ image.filename }}" 
-                                         class="d-block" 
-                                         alt="{{ image.title }}"
-                                         style="width: 100%; height: 400px; object-fit: contain;">
+                                    <img src="{{ image.filename }}" alt="{{ image.title }}">
                                 </div>
                                 <div class="carousel-caption">
                                     <h5>{{ image.title }}</h5>
@@ -204,14 +184,12 @@
                             {% endfor %}
                         </div>
                         {% if carousel_images|length > 1 %}
-                        <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                        <div class="carousel-control-prev" id="prevSlide">
+                            <span class="carousel-control-prev-icon"></span>
+                        </div>
+                        <div class="carousel-control-next" id="nextSlide">
+                            <span class="carousel-control-next-icon"></span>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -297,44 +275,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }))
     });
     
-    // Initialize carousel
-    console.log('Initializing carousel...');
-    const carouselElement = document.getElementById('birdCarousel');
-    console.log('Carousel element found:', !!carouselElement);
+    // Carousel functionality
+    const carousel = document.getElementById('birdCarousel');
+    const items = carousel.getElementsByClassName('carousel-item');
+    let currentIndex = 0;
     
-    const carousel = new bootstrap.Carousel(carouselElement, {
-        interval: 5000
-    });
-    console.log('Carousel initialized:', !!carousel);
+    function showSlide(index) {
+        // Remove active class from all items
+        Array.from(items).forEach(item => item.classList.remove('active'));
+        
+        // Add active class to current item
+        items[index].classList.add('active');
+    }
     
-    // Debug image loading
-    document.querySelectorAll('.carousel-item img').forEach(function(img, index) {
-        console.log(`Image ${index + 1} loading:`, {
-            src: img.src,
-            alt: img.alt,
-            parentId: img.closest('.carousel-item').dataset.imageId
-        });
-        
-        img.onerror = function(error) {
-            console.error(`Failed to load image ${index + 1}:`, {
-                src: img.src,
-                error: error,
-                naturalWidth: img.naturalWidth,
-                naturalHeight: img.naturalHeight
-            });
-        };
-        
-        img.onload = function() {
-            console.log(`Successfully loaded image ${index + 1}:`, {
-                src: img.src,
-                naturalWidth: img.naturalWidth,
-                naturalHeight: img.naturalHeight,
-                displaySize: {
-                    width: img.offsetWidth,
-                    height: img.offsetHeight
-                }
-            });
-        };
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % items.length;
+        showSlide(currentIndex);
+    }
+    
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + items.length) % items.length;
+        showSlide(currentIndex);
+    }
+    
+    // Add click handlers for navigation
+    const prevButton = document.getElementById('prevSlide');
+    const nextButton = document.getElementById('nextSlide');
+    
+    if (prevButton) prevButton.addEventListener('click', prevSlide);
+    if (nextButton) nextButton.addEventListener('click', nextSlide);
+    
+    // Auto-advance slides every 5 seconds
+    let slideInterval = setInterval(nextSlide, 5000);
+    
+    // Pause auto-advance when hovering over carousel
+    carousel.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    carousel.addEventListener('mouseleave', () => {
+        slideInterval = setInterval(nextSlide, 5000);
     });
     
     // Location change functionality
@@ -362,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingModal.show();
         
         // Send location update request
-        fetch('/api/location', {
+        fetch('/update_location', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
