@@ -294,8 +294,14 @@
                 locationName += `, ${stateComponent.short_name}`;
             }
 
-            // Update input with formatted name
+            // Store the coordinates
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            
+            // Update input with formatted name and store coordinates
             locationInput.value = locationName;
+            locationInput.dataset.lat = lat;
+            locationInput.dataset.lng = lng;
         });
 
         // Prevent form submission on enter
@@ -320,6 +326,15 @@
             return;
         }
 
+        // Get stored coordinates
+        const lat = locationInput.dataset.lat;
+        const lng = locationInput.dataset.lng;
+        
+        if (!lat || !lng) {
+            locationError.textContent = 'Please select a location from the dropdown';
+            return;
+        }
+
         loadingModal.show();
         
         fetch('/api/location', {
@@ -329,6 +344,8 @@
             },
             body: JSON.stringify({
                 name: locationInput.value,
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng),
                 radius: parseInt(radiusInput.value) || 10
             })
         })
