@@ -222,29 +222,54 @@ def chat():
 @bp.route('/api/location', methods=['POST'])
 @login_required
 def update_location():
+    """Update the active location"""
     try:
-        name = request.form.get('name')
-        lat = float(request.form.get('lat'))
-        lng = float(request.form.get('lng'))
-        radius = int(request.form.get('radius'))
+        data = request.get_json()
         
-        # Validate inputs
-        if not all([name, lat, lng, radius]):
-            return jsonify({"error": "Missing required fields"}), 400
+        # Validate required fields
+        if not data.get('name'):
+            return jsonify({'error': 'Location name is required'}), 400
+            
+        # Set default values for optional fields
+        latitude = float(data.get('latitude', 40.7128))  # Default to NYC
+        longitude = float(data.get('longitude', -74.0060))
+        radius = int(data.get('radius', 25))
         
-        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
-            return jsonify({"error": "Invalid coordinates"}), 400
+        # Deactivate all current locations
+        db.session.execute(
+            text('UPDATE locations SET is_active = false')
+        )
         
-        if not (1 <= radius <= 50):
-            return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
-
-        # Update tracker location
-        current_app.tracker.set_location(name, lat, lng, radius)
-        return jsonify({"success": True})
-
+        # Insert new location
+        db.session.execute(
+            text('''
+                INSERT INTO locations (name, latitude, longitude, radius, is_active)
+                VALUES (:name, :lat, :lng, :radius, true)
+            '''),
+            {
+                'name': data['name'],
+                'lat': latitude,
+                'lng': longitude,
+                'radius': radius
+            }
+        )
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Location updated successfully',
+            'location': {
+                'name': data['name'],
+                'latitude': latitude,
+                'longitude': longitude,
+                'radius': radius
+            }
+        })
+        
     except Exception as e:
         logger.error(f"Error updating location: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/newsletter-preferences', methods=['GET', 'POST'])
 @login_required
