@@ -37,7 +37,7 @@ def index():
             SELECT name, latitude, longitude, radius
             FROM locations
             WHERE is_active = true
-            ORDER BY created_at DESC
+            ORDER BY id DESC
             LIMIT 1
         ''')).fetchone()
         
@@ -59,7 +59,7 @@ def index():
                 SELECT name, latitude, longitude, radius
                 FROM locations
                 WHERE is_active = true
-                ORDER BY created_at DESC
+                ORDER BY id DESC
                 LIMIT 1
             ''')).fetchone()
         
