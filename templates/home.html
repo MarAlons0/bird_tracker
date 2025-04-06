@@ -4,7 +4,6 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic">
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&loading=async"></script>
 <style>
     .location-section {
         background: #f8f9fa;
@@ -248,7 +247,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Debug carousel images
-    console.log('Carousel images:', {{ carousel_images|tojson|safe }});
+    const carouselImages = {{ carousel_images|tojson|safe }};
+    console.log('Carousel images:', carouselImages);
     
     // Initialize carousel
     const carouselElement = document.getElementById('featuredBirdsCarousel');
