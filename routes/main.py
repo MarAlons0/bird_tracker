@@ -70,6 +70,34 @@ def index():
         if hasattr(current_app, 'tracker') and current_app.tracker.active_location:
             location = current_app.tracker.active_location
         
+        # If no location exists, create a default one
+        if location is None:
+            # Check if there's a location in the database
+            location_result = db.session.execute(text('SELECT * FROM locations LIMIT 1')).fetchone()
+            
+            if location_result:
+                # Create a Location object from the database result
+                location = Location(
+                    id=location_result[0],
+                    name=location_result[1],
+                    latitude=location_result[2],
+                    longitude=location_result[3],
+                    radius=location_result[4],
+                    is_active=location_result[5]
+                )
+            else:
+                # Create a default location
+                location = Location(
+                    name="Default Location",
+                    latitude=40.7128,  # New York City coordinates
+                    longitude=-74.0060,
+                    radius=25,
+                    is_active=True
+                )
+                db.session.add(location)
+                db.session.commit()
+                print(f"Created default location: {location.name}")
+        
         return render_template('home.html', 
                              carousel_images=carousel_images,
                              total_birds=total_birds,

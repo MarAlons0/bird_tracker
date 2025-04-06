@@ -203,23 +203,45 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="location-section">
-                    <input type="text" id="locationSearch" class="form-control" placeholder="Search for a location...">
-                    <div class="radius-selector">
-                        <label for="radius">Search Radius (miles):</label>
-                        <select id="radius" class="form-select">
-                            <option value="5">5 miles</option>
-                            <option value="10">10 miles</option>
-                            <option value="25">25 miles</option>
-                            <option value="50">50 miles</option>
-                            <option value="100">100 miles</option>
-                        </select>
+                <form id="newLocationForm">
+                    <div class="mb-3">
+                        <label for="locationName" class="form-label">Location Name</label>
+                        <input type="text" class="form-control" id="locationName" name="name" placeholder="Enter a location name" required>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="locationLat" class="form-label">Latitude</label>
+                        <input type="number" class="form-control" id="locationLat" name="lat" step="0.0001" required>
+                        <small class="form-text text-muted">Enter a value between -90 and 90</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="locationLng" class="form-label">Longitude</label>
+                        <input type="number" class="form-control" id="locationLng" name="lng" step="0.0001" required>
+                        <small class="form-text text-muted">Enter a value between -180 and 180</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="locationRadius" class="form-label">Search Radius (miles)</label>
+                        <input type="number" class="form-control" id="locationRadius" name="radius" min="1" max="50" value="25" required>
+                        <small class="form-text text-muted">Area around the selected location to search for birds</small>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveLocation">Save Location</button>
+                <button type="button" class="btn btn-primary" id="saveLocation">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Updating location and fetching new bird sightings...</p>
             </div>
         </div>
     </div>
@@ -253,6 +275,84 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
         console.error('Carousel element not found!');
+    }
+    
+    // Initialize location form with current values
+    const locationModal = document.getElementById('locationModal');
+    if (locationModal) {
+        locationModal.addEventListener('shown.bs.modal', function() {
+            // Get current location values
+            const currentName = "{{ location.name }}";
+            const currentLat = {{ location.latitude }};
+            const currentLng = {{ location.longitude }};
+            const currentRadius = {{ location.radius }};
+            
+            // Set form values
+            document.getElementById('locationName').value = currentName;
+            document.getElementById('locationLat').value = currentLat;
+            document.getElementById('locationLng').value = currentLng;
+            document.getElementById('locationRadius').value = currentRadius;
+        });
+    }
+    
+    // Handle location form submission
+    const saveButton = document.getElementById('saveLocation');
+    if (saveButton) {
+        saveButton.addEventListener('click', async function() {
+            const form = document.getElementById('newLocationForm');
+            const formData = new FormData(form);
+            
+            // Validate form data
+            const lat = parseFloat(formData.get('lat'));
+            const lng = parseFloat(formData.get('lng'));
+            const radius = parseInt(formData.get('radius'));
+            
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                alert('Please enter a valid latitude between -90 and 90');
+                return;
+            }
+            
+            if (isNaN(lng) || lng < -180 || lng > 180) {
+                alert('Please enter a valid longitude between -180 and 180');
+                return;
+            }
+            
+            if (isNaN(radius) || radius < 1 || radius > 50) {
+                alert('Please enter a valid radius between 1 and 50 miles');
+                return;
+            }
+            
+            // Show loading modal
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+            
+            try {
+                const response = await fetch('/api/location', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Dispatch location change event
+                    const event = new CustomEvent('locationChanged', {
+                        detail: {
+                            latitude: lat,
+                            longitude: lng
+                        }
+                    });
+                    window.dispatchEvent(event);
+                    
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Failed to update location');
+                }
+            } catch (error) {
+                alert('Error updating location');
+            } finally {
+                loadingModal.hide();
+            }
+        });
     }
 });
 </script>
