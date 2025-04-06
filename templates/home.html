@@ -220,9 +220,10 @@
                                name="name" 
                                required 
                                autocomplete="off"
-                               placeholder="Enter city, park, or location name (e.g., Cincinnati, OH or Eden Park)"
+                               placeholder="Search for a location (city, park, landmark, etc.)"
                                value="{{ location.name if location else '' }}">
-                        <div class="form-text">Enter any location name you want to track birds from.</div>
+                        <div class="form-text">Type to search for any location. Select from the dropdown suggestions.</div>
+                        <div id="locationError" class="alert alert-danger mt-2 d-none"></div>
                     </div>
                     <div class="mb-3">
                         <label for="searchRadius" class="form-label">Search Radius (miles)</label>
@@ -261,8 +262,66 @@
     </div>
 </div>
 
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Google Places Autocomplete
+    const locationInput = document.getElementById('locationName');
+    const locationError = document.getElementById('locationError');
+    const saveLocationBtn = document.getElementById('saveLocation');
+    
+    // Disable save button initially
+    saveLocationBtn.disabled = true;
+    
+    // Initialize autocomplete
+    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+        types: ['(cities)', 'establishment', 'geocode'],
+        fields: ['formatted_address', 'geometry', 'name', 'place_id']
+    });
+    
+    // Handle place selection
+    autocomplete.addListener('place_changed', function() {
+        const place = autocomplete.getPlace();
+        console.log('Place selected:', place);
+        
+        // Hide any previous error
+        locationError.classList.add('d-none');
+        
+        if (!place.geometry || !place.geometry.location) {
+            // Show error if no geometry
+            locationError.textContent = 'Please select a location from the dropdown suggestions';
+            locationError.classList.remove('d-none');
+            saveLocationBtn.disabled = true;
+            return;
+        }
+        
+        // Update the input with the formatted address
+        locationInput.value = place.formatted_address || place.name;
+        
+        // Enable save button
+        saveLocationBtn.disabled = false;
+        
+        // Show success feedback
+        const successDiv = document.createElement('div');
+        successDiv.className = 'alert alert-success mt-2';
+        successDiv.textContent = 'Location selected successfully';
+        locationInput.parentNode.appendChild(successDiv);
+        setTimeout(() => successDiv.remove(), 2000);
+    });
+    
+    // Prevent form submission on enter key
+    locationInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    });
+    
+    // Clear error when user starts typing
+    locationInput.addEventListener('input', function() {
+        locationError.classList.add('d-none');
+        saveLocationBtn.disabled = true;
+    });
+    
     // Parse carousel images from template
     const carouselImages = JSON.parse('{{ carousel_images|tojson|safe }}');
     console.log('Carousel images data:', {
@@ -299,17 +358,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add click handlers for navigation
-    const prevButton = document.getElementById('prevSlide');
-    const nextButton = document.getElementById('nextSlide');
-    
-    if (prevButton) prevButton.addEventListener('click', prevSlide);
-    if (nextButton) nextButton.addEventListener('click', nextSlide);
+    document.getElementById('prevSlide')?.addEventListener('click', prevSlide);
+    document.getElementById('nextSlide')?.addEventListener('click', nextSlide);
     
     // Auto-advance slides every 5 seconds
     let slideInterval = setInterval(nextSlide, 5000);
     
     // Pause auto-advance when hovering over carousel
-    carousel.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    carousel.addEventListener('mouseenter', () => {
+        clearInterval(slideInterval);
+    });
+    
     carousel.addEventListener('mouseleave', () => {
         slideInterval = setInterval(nextSlide, 5000);
     });
@@ -317,7 +376,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Location change functionality
     const locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
     const locationForm = document.getElementById('locationForm');
-    const saveLocationBtn = document.getElementById('saveLocation');
     
     console.log('Location elements initialized:', {
         modal: !!locationModal,

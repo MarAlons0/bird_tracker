@@ -83,9 +83,16 @@ def index():
         
         logger.info(f"Current location: {location_dict['name']} ({location_dict['latitude']}, {location_dict['longitude']})")
         
+        # Get Google Places API key
+        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        if not google_places_key:
+            logger.error("Google Places API key not found!")
+            return render_template('error.html', error="Google Places API key not configured")
+        
         return render_template('home.html', 
                            carousel_images=carousel_images,
-                           location=location_dict)
+                           location=location_dict,
+                           google_maps_api_key=google_places_key)
                            
     except Exception as e:
         logger.error(f"Error in index route: {str(e)}", exc_info=True)
@@ -232,8 +239,32 @@ def update_location():
                 break
         
         if not coordinates:
-            logger.info("No matching city found, using Cincinnati as default")
-            coordinates = city_coordinates['cincinnati']
+            # If no matching city found, use geocoding to get coordinates
+            try:
+                import requests
+                api_key = os.getenv('GOOGLE_PLACES_API_KEY')
+                if not api_key:
+                    logger.error("Google Places API key not found!")
+                    return jsonify({'error': 'Google Places API key not configured'}), 500
+                
+                # Use Google Geocoding API to get coordinates
+                geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={name}&key={api_key}"
+                response = requests.get(geocode_url)
+                geocode_data = response.json()
+                
+                if geocode_data['status'] == 'OK' and geocode_data['results']:
+                    location = geocode_data['results'][0]['geometry']['location']
+                    coordinates = {
+                        'lat': location['lat'],
+                        'lng': location['lng']
+                    }
+                    logger.info(f"Geocoded location: {name} -> {coordinates}")
+                else:
+                    logger.error(f"Geocoding failed: {geocode_data['status']}")
+                    return jsonify({'error': 'Could not find coordinates for this location'}), 400
+            except Exception as e:
+                logger.error(f"Error geocoding location: {str(e)}")
+                return jsonify({'error': 'Error geocoding location'}), 500
         
         # Deactivate all current locations
         db.session.execute(text('UPDATE locations SET is_active = false'))
