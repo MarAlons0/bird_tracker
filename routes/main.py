@@ -34,8 +34,8 @@ def index():
         carousel_images = []
         for row in result:
             try:
-                # Access row data using dictionary-style access
-                row_dict = dict(row)
+                # Access row data using _asdict() method
+                row_dict = row._asdict()
                 carousel_images.append({
                     'id': row_dict['image_id'],
                     'filename': row_dict['image_url'],
@@ -65,10 +65,16 @@ def index():
         total_birds = db.session.execute(text('SELECT COUNT(*) FROM birds')).scalar()
         total_sightings = db.session.execute(text('SELECT COUNT(*) FROM bird_sightings')).scalar()
         
+        # Get active location
+        location = None
+        if hasattr(current_app, 'tracker') and current_app.tracker.active_location:
+            location = current_app.tracker.active_location
+        
         return render_template('home.html', 
                              carousel_images=carousel_images,
                              total_birds=total_birds,
-                             total_sightings=total_sightings)
+                             total_sightings=total_sightings,
+                             location=location)
     except Exception as e:
         print(f"Error in index route: {str(e)}")
         print(f"Error type: {type(e)}")
@@ -78,7 +84,8 @@ def index():
         return render_template('home.html', 
                              carousel_images=[],
                              total_birds=0,
-                             total_sightings=0)
+                             total_sightings=0,
+                             location=None)
 
 @bp.route('/map')
 @login_required
