@@ -14,10 +14,16 @@ logger = logging.getLogger(__name__)
 def index():
     """Home page route"""
     try:
-        # Get active carousel images with explicit column selection
+        # Get active carousel images with explicit column selection and aliases
         result = db.session.execute(
             text('''
-                SELECT id, filename, title, description, "order", is_active 
+                SELECT 
+                    id as image_id,
+                    filename as image_url,
+                    title as image_title,
+                    description as image_description,
+                    "order" as image_order,
+                    is_active as image_active
                 FROM carousel_images 
                 WHERE is_active = true 
                 ORDER BY "order"
@@ -29,12 +35,12 @@ def index():
         for row in result:
             try:
                 carousel_images.append({
-                    'id': row.id,
-                    'filename': row.filename,
-                    'title': row.title,
-                    'description': row.description,
-                    'order': row.order,
-                    'is_active': row.is_active
+                    'id': row.image_id,
+                    'filename': row.image_url,
+                    'title': row.image_title,
+                    'description': row.image_description,
+                    'order': row.image_order,
+                    'is_active': row.image_active
                 })
             except Exception as row_error:
                 print(f"Error processing row: {str(row_error)}")
@@ -66,8 +72,11 @@ def index():
         print(f"Error type: {type(e)}")
         import traceback
         print(f"Traceback: {traceback.format_exc()}")
-        # Re-raise the exception to see the full error in the logs
-        raise
+        # Return empty list of carousel images if there's an error
+        return render_template('home.html', 
+                             carousel_images=[],
+                             total_birds=0,
+                             total_sightings=0)
 
 @bp.route('/map')
 @login_required
