@@ -313,9 +313,7 @@
     }
 
     // Handle location form submission
-    document.getElementById('locationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
+    document.getElementById('saveLocationBtn').addEventListener('click', function() {
         const locationInput = document.getElementById('locationName');
         const radiusInput = document.getElementById('searchRadius');
         const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
