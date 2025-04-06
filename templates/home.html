@@ -247,7 +247,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Debug carousel images
-    const carouselImages = {{ carousel_images|tojson|safe }};
+    const carouselImages = JSON.parse('{{ carousel_images|tojson|safe }}');
     console.log('Carousel images:', carouselImages);
     
     // Initialize carousel
@@ -279,9 +279,9 @@ document.addEventListener('DOMContentLoaded', function() {
         locationModal.addEventListener('shown.bs.modal', function() {
             // Get current location values
             const currentName = "{{ location.name }}";
-            const currentLat = {{ location.latitude }};
-            const currentLng = {{ location.longitude }};
-            const currentRadius = {{ location.radius }};
+            const currentLat = parseFloat("{{ location.latitude }}");
+            const currentLng = parseFloat("{{ location.longitude }}");
+            const currentRadius = parseInt("{{ location.radius }}");
             
             // Set form values
             document.getElementById('locationSearch').value = currentName;
