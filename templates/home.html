@@ -238,22 +238,53 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Parse carousel images from template
     const carouselImages = JSON.parse('{{ carousel_images|tojson|safe }}');
-    console.log('Carousel images:', carouselImages);
+    console.log('Carousel images data:', {
+        count: carouselImages.length,
+        images: carouselImages.map(img => ({
+            id: img.id,
+            title: img.title,
+            url: img.filename,
+            order: img.order
+        }))
+    });
     
     // Initialize carousel
     console.log('Initializing carousel...');
-    const carousel = new bootstrap.Carousel(document.getElementById('birdCarousel'), {
+    const carouselElement = document.getElementById('birdCarousel');
+    console.log('Carousel element found:', !!carouselElement);
+    
+    const carousel = new bootstrap.Carousel(carouselElement, {
         interval: 5000
     });
+    console.log('Carousel initialized:', !!carousel);
     
     // Debug image loading
-    document.querySelectorAll('.carousel-item img').forEach(function(img) {
-        console.log('Loading image:', img.src);
-        img.onerror = function() {
-            console.error('Failed to load image:', img.src);
+    document.querySelectorAll('.carousel-item img').forEach(function(img, index) {
+        console.log(`Image ${index + 1} loading:`, {
+            src: img.src,
+            alt: img.alt,
+            parentId: img.closest('.carousel-item').dataset.imageId
+        });
+        
+        img.onerror = function(error) {
+            console.error(`Failed to load image ${index + 1}:`, {
+                src: img.src,
+                error: error,
+                naturalWidth: img.naturalWidth,
+                naturalHeight: img.naturalHeight
+            });
         };
+        
         img.onload = function() {
-            console.log('Successfully loaded image:', img.src);
+            console.log(`Successfully loaded image ${index + 1}:`, {
+                src: img.src,
+                naturalWidth: img.naturalWidth,
+                naturalHeight: img.naturalHeight,
+                displaySize: {
+                    width: img.offsetWidth,
+                    height: img.offsetHeight
+                }
+            });
         };
     });
     
@@ -262,12 +293,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const locationForm = document.getElementById('locationForm');
     const saveLocationBtn = document.getElementById('saveLocation');
     
+    console.log('Location elements initialized:', {
+        modal: !!locationModal,
+        form: !!locationForm,
+        saveButton: !!saveLocationBtn
+    });
+    
     // Handle location form submission
     saveLocationBtn.addEventListener('click', function() {
         const formData = {
             name: document.getElementById('locationName').value,
             radius: parseInt(document.getElementById('searchRadius').value)
         };
+        
+        console.log('Submitting location update:', formData);
         
         // Show loading modal
         const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -281,8 +320,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(formData)
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Location update response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Location update response data:', data);
+            
             if (data.error) {
                 throw new Error(data.error);
             }
@@ -298,7 +342,10 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload();
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Location update error:', {
+                message: error.message,
+                stack: error.stack
+            });
             loadingModal.hide();
             alert('Error updating location: ' + error.message);
         });

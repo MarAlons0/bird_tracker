@@ -14,98 +14,64 @@ logger = logging.getLogger(__name__)
 def index():
     """Home page route"""
     try:
-        # Get active carousel images with explicit column selection and aliases
-        result = db.session.execute(
-            text('''
-                SELECT 
-                    id as image_id,
-                    filename as image_url,
-                    title as image_title,
-                    description as image_description,
-                    "order" as image_order,
-                    is_active as image_active
-                FROM carousel_images 
-                WHERE is_active = true 
-                ORDER BY "order"
-            ''')
-        )
+        # Get active carousel images
+        carousel_images = db.session.execute(text('''
+            SELECT 
+                id as image_id,
+                filename as image_url,
+                title as image_title,
+                description as image_description,
+                "order" as image_order,
+                is_active as image_active
+            FROM carousel_images 
+            WHERE is_active = true 
+            ORDER BY "order"
+        ''')).fetchall()
         
-        # Convert to list of dicts for template
-        carousel_images = []
-        for row in result:
-            try:
-                # Access row data using _asdict() method
-                row_dict = row._asdict()
-                carousel_images.append({
-                    'id': row_dict['image_id'],
-                    'filename': row_dict['image_url'],
-                    'title': row_dict['image_title'],
-                    'description': row_dict['image_description'],
-                    'order': row_dict['image_order'],
-                    'is_active': row_dict['image_active']
-                })
-            except Exception as row_error:
-                print(f"Error processing row: {str(row_error)}")
-                print(f"Row data: {row}")
-                print(f"Row type: {type(row)}")
-                print(f"Row dir: {dir(row)}")
-                raise
-        
-        # Debug logging
-        print(f"Found {len(carousel_images)} active carousel images")
+        logger.info(f"Found {len(carousel_images)} active carousel images")
         for img in carousel_images:
-            print(f"Image ID: {img['id']}")
-            print(f"Title: {img['title']}")
-            print(f"Filename (Cloudinary URL): {img['filename']}")
-            print(f"Is Active: {img['is_active']}")
-            print(f"Order: {img['order']}")
-            print("---")
+            logger.debug(f"Carousel image: id={img.image_id}, title={img.image_title}, url={img.image_url}")
         
-        # Get active location
-        location = None
-        if hasattr(current_app, 'tracker') and current_app.tracker.active_location:
-            location = current_app.tracker.active_location
+        # Get current location
+        location = db.session.execute(text('''
+            SELECT name, latitude, longitude, radius
+            FROM locations
+            WHERE is_active = true
+            ORDER BY created_at DESC
+            LIMIT 1
+        ''')).fetchone()
         
-        # If no location exists, create a default one
-        if location is None:
-            # Check if there's a location in the database
-            location_result = db.session.execute(text('SELECT * FROM locations LIMIT 1')).fetchone()
+        if not location:
+            logger.info("No active location found, creating default location")
+            # Create default location (Cincinnati)
+            db.session.execute(text('''
+                INSERT INTO locations (name, latitude, longitude, radius, is_active)
+                VALUES (:name, :lat, :lng, :radius, true)
+            '''), {
+                'name': 'Cincinnati, OH',
+                'lat': 39.1031,
+                'lng': -84.5120,
+                'radius': 25
+            })
+            db.session.commit()
             
-            if location_result:
-                # Create a Location object from the database result
-                location = Location(
-                    id=location_result[0],
-                    name=location_result[1],
-                    latitude=location_result[2],
-                    longitude=location_result[3],
-                    radius=location_result[4],
-                    is_active=location_result[5]
-                )
-            else:
-                # Create a default location (Cincinnati, OH)
-                location = Location(
-                    name="Cincinnati, OH",
-                    latitude=39.1031,  # Cincinnati coordinates
-                    longitude=-84.5120,
-                    radius=25,
-                    is_active=True
-                )
-                db.session.add(location)
-                db.session.commit()
-                print(f"Created default location: {location.name}")
+            location = db.session.execute(text('''
+                SELECT name, latitude, longitude, radius
+                FROM locations
+                WHERE is_active = true
+                ORDER BY created_at DESC
+                LIMIT 1
+            ''')).fetchone()
+        
+        logger.info(f"Current location: {location.name} ({location.latitude}, {location.longitude})")
         
         return render_template('home.html', 
-                             carousel_images=carousel_images,
-                             location=location)
+                           carousel_images=carousel_images,
+                           location=location)
+                           
     except Exception as e:
-        print(f"Error in index route: {str(e)}")
-        print(f"Error type: {type(e)}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
-        # Return empty list of carousel images if there's an error
-        return render_template('home.html', 
-                             carousel_images=[],
-                             location=None)
+        logger.error(f"Error in index route: {str(e)}", exc_info=True)
+        return render_template('error.html', error=str(e))
 
 @bp.route('/map')
 @login_required
@@ -217,88 +183,72 @@ def update_location():
     """Update the active location"""
     try:
         data = request.get_json()
+        logger.info(f"Received location update request: {data}")
         
-        # Validate required fields
-        if not data.get('name'):
+        if not data or 'name' not in data:
+            logger.error("Missing required field 'name' in request")
             return jsonify({'error': 'Location name is required'}), 400
-            
-        # Set default values for optional fields
-        radius = int(data.get('radius', 25))
         
-        # Predefined coordinates for common cities
+        name = data['name']
+        radius = data.get('radius', 25)
+        
+        logger.info(f"Processing location update: name={name}, radius={radius}")
+        
+        # Dictionary of predefined city coordinates
         city_coordinates = {
             'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
-            'denver': {'lat': 39.7392, 'lng': -104.9903},
             'new york': {'lat': 40.7128, 'lng': -74.0060},
             'los angeles': {'lat': 34.0522, 'lng': -118.2437},
             'chicago': {'lat': 41.8781, 'lng': -87.6298},
-            'houston': {'lat': 29.7604, 'lng': -95.3698},
-            'phoenix': {'lat': 33.4484, 'lng': -112.0740},
-            'philadelphia': {'lat': 39.9526, 'lng': -75.1652},
-            'san antonio': {'lat': 29.4241, 'lng': -98.4936},
-            'san diego': {'lat': 32.7157, 'lng': -117.1611},
-            'dallas': {'lat': 32.7767, 'lng': -96.7970},
-            'san jose': {'lat': 37.3382, 'lng': -121.8863},
-            'austin': {'lat': 30.2672, 'lng': -97.7431},
-            'jacksonville': {'lat': 30.3322, 'lng': -81.6557},
-            'fort worth': {'lat': 32.7254, 'lng': -97.3208},
-            'columbus': {'lat': 39.9612, 'lng': -82.9988},
-            'charlotte': {'lat': 35.2271, 'lng': -80.8431},
-            'san francisco': {'lat': 37.7749, 'lng': -122.4194},
-            'indianapolis': {'lat': 39.7684, 'lng': -86.1581},
-            'seattle': {'lat': 47.6062, 'lng': -122.3321}
+            'denver': {'lat': 39.7392, 'lng': -104.9903}
         }
         
         # Check if the location name contains any of our predefined cities
-        location_name = data['name'].lower()
+        location_name_lower = name.lower()
         coordinates = None
         
         for city, coords in city_coordinates.items():
-            if city in location_name:
+            if city in location_name_lower:
                 coordinates = coords
+                logger.info(f"Found matching city coordinates for {city}")
                 break
         
-        # If no matching city found, use Cincinnati as default
         if not coordinates:
-            # For any other location, use a default location (Cincinnati)
-            # In a real application, you would use a geocoding service here
+            logger.info("No matching city found, using Cincinnati as default")
             coordinates = city_coordinates['cincinnati']
-            logger.info(f"Using default coordinates for location: {data['name']}")
         
         # Deactivate all current locations
-        db.session.execute(
-            text('UPDATE locations SET is_active = false')
-        )
+        db.session.execute(text('UPDATE locations SET is_active = false'))
         
         # Insert new location
-        db.session.execute(
-            text('''
-                INSERT INTO locations (name, latitude, longitude, radius, is_active)
-                VALUES (:name, :lat, :lng, :radius, true)
-            '''),
-            {
-                'name': data['name'],
-                'lat': coordinates['lat'],
-                'lng': coordinates['lng'],
-                'radius': radius
-            }
-        )
+        result = db.session.execute(text('''
+            INSERT INTO locations (name, latitude, longitude, radius, is_active)
+            VALUES (:name, :lat, :lng, :radius, true)
+            RETURNING id, name, latitude, longitude, radius
+        '''), {
+            'name': name,
+            'lat': coordinates['lat'],
+            'lng': coordinates['lng'],
+            'radius': radius
+        })
         
+        new_location = result.fetchone()
         db.session.commit()
+        
+        logger.info(f"Successfully updated location: {new_location.name} ({new_location.latitude}, {new_location.longitude})")
         
         return jsonify({
             'success': True,
-            'message': 'Location updated successfully',
             'location': {
-                'name': data['name'],
-                'latitude': coordinates['lat'],
-                'longitude': coordinates['lng'],
-                'radius': radius
+                'name': new_location.name,
+                'latitude': new_location.latitude,
+                'longitude': new_location.longitude,
+                'radius': new_location.radius
             }
         })
         
     except Exception as e:
-        logger.error(f"Error updating location: {str(e)}")
+        logger.error(f"Error updating location: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/newsletter-preferences', methods=['GET', 'POST'])
