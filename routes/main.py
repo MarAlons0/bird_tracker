@@ -12,42 +12,43 @@ logger = logging.getLogger(__name__)
 @bp.route('/')
 @login_required
 def index():
+    """Home page route"""
     try:
-        email_schedule = {
-            'hour': int(os.getenv('EMAIL_SCHEDULE_HOUR', '7')),
-            'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
-        }
+        # Get active carousel images
+        carousel_images = db.session.execute(
+            text('SELECT * FROM carousel_images WHERE is_active = true ORDER BY "order"')
+        ).fetchall()
         
-        # Get active carousel images, ordered by their order field
-        try:
-            result = db.session.execute(text("SELECT * FROM carousel_images WHERE is_active = true ORDER BY \"order\""))
-            carousel_images = [dict(zip(result.keys(), row)) for row in result]
-        except Exception as e:
-            logger.error(f"Error fetching carousel images: {e}")
-            carousel_images = []
+        # Convert to list of dicts for template
+        carousel_images = [dict(row) for row in carousel_images]
         
-        # Get Google Places API key
-        google_places_api_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        if not google_places_api_key:
-            logger.warning("Google Places API key not found, maps will be disabled")
-            google_places_api_key = ""
+        # Debug logging
+        print(f"Found {len(carousel_images)} active carousel images")
+        for img in carousel_images:
+            print(f"Image ID: {img['id']}")
+            print(f"Title: {img['title']}")
+            print(f"Filename (Cloudinary URL): {img['filename']}")
+            print(f"Is Active: {img['is_active']}")
+            print(f"Order: {img['order']}")
+            print("---")
         
-        # Get location from tracker
-        location = current_app.tracker.active_location if hasattr(current_app, 'tracker') else {
-            'name': 'Default Location',
-            'latitude': 39.1031,
-            'longitude': -84.5120,
-            'radius': 25
-        }
+        # Get total birds and sightings
+        total_birds = db.session.execute(text('SELECT COUNT(*) FROM birds')).scalar()
+        total_sightings = db.session.execute(text('SELECT COUNT(*) FROM bird_sightings')).scalar()
         
-        return render_template('home.html',
-                             location=location,
-                             email_schedule=email_schedule,
+        return render_template('home.html', 
                              carousel_images=carousel_images,
-                             google_places_api_key=google_places_api_key)
+                             total_birds=total_birds,
+                             total_sightings=total_sightings)
     except Exception as e:
-        logger.error(f"Error in index route: {e}")
-        return render_template('error.html', error=str(e)), 500
+        print(f"Error in index route: {str(e)}")
+        print(f"Error type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return render_template('home.html', 
+                             carousel_images=[],
+                             total_birds=0,
+                             total_sightings=0)
 
 @bp.route('/map')
 @login_required
