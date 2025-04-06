@@ -61,10 +61,6 @@ def index():
             print(f"Order: {img['order']}")
             print("---")
         
-        # Get total birds and sightings
-        total_birds = db.session.execute(text('SELECT COUNT(*) FROM birds')).scalar()
-        total_sightings = db.session.execute(text('SELECT COUNT(*) FROM bird_sightings')).scalar()
-        
         # Get active location
         location = None
         if hasattr(current_app, 'tracker') and current_app.tracker.active_location:
@@ -88,7 +84,7 @@ def index():
             else:
                 # Create a default location
                 location = Location(
-                    name="Default Location",
+                    name="New York City",
                     latitude=40.7128,  # New York City coordinates
                     longitude=-74.0060,
                     radius=25,
@@ -100,8 +96,6 @@ def index():
         
         return render_template('home.html', 
                              carousel_images=carousel_images,
-                             total_birds=total_birds,
-                             total_sightings=total_sightings,
                              location=location)
     except Exception as e:
         print(f"Error in index route: {str(e)}")
@@ -111,8 +105,6 @@ def index():
         # Return empty list of carousel images if there's an error
         return render_template('home.html', 
                              carousel_images=[],
-                             total_birds=0,
-                             total_sightings=0,
                              location=None)
 
 @bp.route('/map')

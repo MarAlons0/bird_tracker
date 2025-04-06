@@ -231,7 +231,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Debug carousel images
-    const carouselImages = {{ carousel_images|tojson|safe }};
+    const carouselImages = JSON.parse('{{ carousel_images|tojson|safe }}');
     console.log('Carousel images:', carouselImages);
     
     // Initialize carousel
@@ -259,9 +259,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set current location values when modal is shown
     document.getElementById('locationModal').addEventListener('show.bs.modal', function() {
-        const currentLocation = {{ location|tojson|safe }};
-        document.getElementById('locationName').value = currentLocation.name;
-        document.getElementById('searchRadius').value = currentLocation.radius;
+        const currentLocation = JSON.parse('{{ location|tojson|safe }}');
+        if (currentLocation && currentLocation.name) {
+            document.getElementById('locationName').value = currentLocation.name;
+            document.getElementById('searchRadius').value = currentLocation.radius || 25;
+        }
     });
     
     // Handle location form submission
