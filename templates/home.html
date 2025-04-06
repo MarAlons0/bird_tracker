@@ -148,38 +148,38 @@
         <div class="col-md-6">
             <div class="card featured-birds-card">
                 <div class="card-header">
-                    <h5 class="mb-0">Featured Birds (Mario's pics)</h5>
+                    <h5 class="mb-0">Featured Birds</h5>
                 </div>
                 <div class="card-body">
                     <div class="carousel-container">
-                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                        <div id="featuredBirdsCarousel" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-indicators">
                                 {% for image in carousel_images %}
-                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}"></button>
+                                <button type="button" data-bs-target="#featuredBirdsCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}"></button>
                                 {% endfor %}
                             </div>
                             <div class="carousel-inner">
                                 {% for image in carousel_images %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                    <img src="{{ image['filename'] }}" class="d-block" alt="{{ image['title'] or 'Carousel Image' }}">
-                                    {% if image['title'] or image['description'] %}
-                                    <div class="carousel-caption d-none d-md-block">
-                                        {% if image['title'] %}
-                                        <h5>{{ image['title'] }}</h5>
+                                    <img src="{{ image.filename }}" class="d-block w-100" alt="{{ image.title or 'Featured Bird' }}">
+                                    {% if image.title or image.description %}
+                                    <div class="carousel-caption">
+                                        {% if image.title %}
+                                        <h5>{{ image.title }}</h5>
                                         {% endif %}
-                                        {% if image['description'] %}
-                                        <p>{{ image['description'] }}</p>
+                                        {% if image.description %}
+                                        <p>{{ image.description }}</p>
                                         {% endif %}
                                     </div>
                                     {% endif %}
                                 </div>
                                 {% endfor %}
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#featuredBirdsCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" data-bs-target="#featuredBirdsCarousel" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
@@ -389,21 +389,24 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Carousel images:', {{ carousel_images|tojson|safe }});
     
     // Initialize carousel
-    var carousel = new bootstrap.Carousel(document.getElementById('featuredBirdsCarousel'), {
-        interval: 5000,
-        wrap: true
-    });
-    
-    // Debug image loading
-    document.querySelectorAll('.carousel-item img').forEach(function(img) {
-        console.log('Image source:', img.src);
-        img.onerror = function() {
-            console.error('Failed to load image:', img.src);
-        };
-        img.onload = function() {
-            console.log('Successfully loaded image:', img.src);
-        };
-    });
+    const carouselElement = document.getElementById('featuredBirdsCarousel');
+    if (carouselElement) {
+        const carousel = new bootstrap.Carousel(carouselElement, {
+            interval: 5000,
+            wrap: true
+        });
+        
+        // Debug image loading
+        document.querySelectorAll('.carousel-item img').forEach(function(img) {
+            console.log('Image source:', img.src);
+            img.onerror = function() {
+                console.error('Failed to load image:', img.src);
+            };
+            img.onload = function() {
+                console.log('Successfully loaded image:', img.src);
+            };
+        });
+    }
 });
 </script>
 {% endblock %} 
