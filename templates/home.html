@@ -265,7 +265,7 @@
         // Create autocomplete with proper configuration for bird watching locations
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
             // Use types that are relevant for bird watching locations
-            types: ['park', 'natural_feature', 'point_of_interest'],
+            types: ['(cities)', 'geocode', 'establishment'],
             fields: ['formatted_address', 'geometry', 'name', 'address_components']
         });
 
