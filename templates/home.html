@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingModal.show();
         
         // Send location update request
-        fetch('/update_location', {
+        fetch('/api/location', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
