@@ -262,9 +262,10 @@
         const locationInput = document.getElementById('locationName');
         if (!locationInput) return;
 
-        // Create autocomplete with both cities and establishments
+        // Create autocomplete with proper configuration for bird watching locations
         const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-            types: ['(cities)', 'point_of_interest'],
+            // Use types that are relevant for bird watching locations
+            types: ['park', 'natural_feature', 'point_of_interest'],
             fields: ['formatted_address', 'geometry', 'name', 'address_components']
         });
 
