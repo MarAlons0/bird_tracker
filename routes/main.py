@@ -22,14 +22,21 @@ def index():
         # Convert to list of dicts for template
         carousel_images = []
         for row in result:
-            carousel_images.append({
-                'id': row.id,
-                'filename': row.filename,
-                'title': row.title,
-                'description': row.description,
-                'order': row.order,
-                'is_active': row.is_active
-            })
+            try:
+                carousel_images.append({
+                    'id': row.id,
+                    'filename': row.filename,
+                    'title': row.title,
+                    'description': row.description,
+                    'order': row.order,
+                    'is_active': row.is_active
+                })
+            except Exception as row_error:
+                print(f"Error processing row: {str(row_error)}")
+                print(f"Row data: {row}")
+                print(f"Row type: {type(row)}")
+                print(f"Row dir: {dir(row)}")
+                raise
         
         # Debug logging
         print(f"Found {len(carousel_images)} active carousel images")
@@ -54,10 +61,8 @@ def index():
         print(f"Error type: {type(e)}")
         import traceback
         print(f"Traceback: {traceback.format_exc()}")
-        return render_template('home.html', 
-                             carousel_images=[],
-                             total_birds=0,
-                             total_sightings=0)
+        # Re-raise the exception to see the full error in the logs
+        raise
 
 @bp.route('/map')
 @login_required
