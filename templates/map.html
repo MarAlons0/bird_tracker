@@ -104,51 +104,24 @@
 
             // Add markers for each observation
             observations.forEach(obs => {
-                let color = birdColors.other;
-                const species = obs.comName.toLowerCase();
-                
-                if (['hawk', 'eagle', 'owl', 'falcon', 'kite', 'osprey'].some(term => species.includes(term))) {
-                    color = birdColors.raptor;
-                } else if (['duck', 'goose', 'swan', 'merganser', 'teal'].some(term => species.includes(term))) {
-                    color = birdColors.waterfowl;
-                } else if (['warbler', 'sparrow', 'finch', 'thrush'].some(term => species.includes(term))) {
-                    color = birdColors.songbird;
-                }
-
+                const color = birdColors[obs.category] || birdColors.other;
                 const marker = L.circleMarker([obs.lat, obs.lng], {
-                    radius: 8,
+                    color: color,
                     fillColor: color,
-                    color: '#000',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                });
-
+                    fillOpacity: 0.5,
+                    radius: 8,
+                    weight: 2
+                }).addTo(birdMap);
+                
                 marker.bindPopup(`
-                    <strong>${obs.comName}</strong><br>
-                    Count: ${obs.howMany || 'Not specified'}<br>
+                    <b>${obs.comName}</b><br>
+                    Count: ${obs.howMany}<br>
                     Location: ${obs.locName}<br>
                     Date: ${obs.obsDt}
                 `);
-
-                marker.addTo(birdMap);
+                
                 markers.push(marker);
             });
-
-            // Add legend
-            const legend = L.control({position: 'bottomright'});
-            legend.onAdd = function(map) {
-                const div = L.DomUtil.create('div', 'legend');
-                div.innerHTML = `
-                    <h4>Bird Types</h4>
-                    <i style="background: ${birdColors.raptor}"></i> Raptors<br>
-                    <i style="background: ${birdColors.waterfowl}"></i> Waterfowl<br>
-                    <i style="background: ${birdColors.songbird}"></i> Songbirds<br>
-                    <i style="background: ${birdColors.other}"></i> Other
-                `;
-                return div;
-            };
-            legend.addTo(birdMap);
             
         } catch (error) {
             console.error('Error initializing map:', error);
@@ -161,9 +134,69 @@
 
     // Add event listener for location changes
     window.addEventListener('locationChanged', function(e) {
-        mapConfig.lat = e.detail.latitude;
-        mapConfig.lng = e.detail.longitude;
-        initMap();
+        const newLocation = e.detail.location;
+        
+        // Update map configuration
+        mapConfig.lat = newLocation.latitude;
+        mapConfig.lng = newLocation.longitude;
+        
+        // Update map with new location
+        if (birdMap) {
+            birdMap.setView([mapConfig.lat, mapConfig.lng], mapConfig.zoom);
+            
+            // Clear existing markers
+            markers.forEach(marker => marker.remove());
+            markers = [];
+            
+            // Fetch new observations for the updated location
+            fetch('/api/observations')
+                .then(response => response.json())
+                .then(observations => {
+                    // Add new observations to map
+                    observations.forEach(obs => {
+                        const color = birdColors[obs.category] || birdColors.other;
+                        const marker = L.circleMarker([obs.lat, obs.lng], {
+                            color: color,
+                            fillColor: color,
+                            fillOpacity: 0.5,
+                            radius: 8,
+                            weight: 2
+                        }).addTo(birdMap);
+                        
+                        marker.bindPopup(`
+                            <b>${obs.comName}</b><br>
+                            Count: ${obs.howMany}<br>
+                            Location: ${obs.locName}<br>
+                            Date: ${obs.obsDt}
+                        `);
+                        
+                        markers.push(marker);
+                    });
+                    
+                    // Update observations table
+                    updateObservationsTable(observations);
+                })
+                .catch(error => {
+                    console.error('Error fetching new observations:', error);
+                });
+        }
     });
+
+    // Function to update observations table
+    function updateObservationsTable(observations) {
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = '';
+        
+        observations.forEach(obs => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${obs.comName}</td>
+                <td>${obs.howMany}</td>
+                <td>${obs.locName}</td>
+                <td>${obs.obsDt}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 </script>
 {% endblock %} 

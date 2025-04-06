@@ -355,6 +355,19 @@
                 const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
                 locationModal.hide();
                 
+                // Dispatch location changed event
+                const locationChangedEvent = new CustomEvent('locationChanged', {
+                    detail: {
+                        location: {
+                            name: locationInput.value,
+                            latitude: parseFloat(lat),
+                            longitude: parseFloat(lng),
+                            radius: parseInt(radiusInput.value) || 10
+                        }
+                    }
+                });
+                window.dispatchEvent(locationChangedEvent);
+                
                 // Show success message and refresh page
                 alert('Location updated successfully!');
                 window.location.reload();

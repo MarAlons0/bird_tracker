@@ -19,6 +19,7 @@ def index():
             SELECT 
                 id as image_id,
                 filename as image_url,
+                cloudinary_url,
                 title as image_title,
                 description as image_description,
                 "order" as image_order,
@@ -31,7 +32,7 @@ def index():
         # Convert Row objects to dictionaries
         carousel_images = [{
             'id': img.image_id,
-            'filename': img.image_url,
+            'filename': img.cloudinary_url or img.image_url,  # Use cloudinary_url if available, fallback to filename
             'title': img.image_title,
             'description': img.image_description,
             'order': img.image_order,
@@ -255,6 +256,20 @@ def update_location():
         db.session.add(new_location)
         db.session.commit()
         
+        # Update the tracker's active location
+        current_app.tracker.active_location = {
+            'name': name,
+            'latitude': lat,
+            'longitude': lng,
+            'radius': radius
+        }
+        
+        # Update the config file
+        current_app.tracker.set_location(name, lat, lng, radius)
+        
+        # Fetch new observations for the updated location
+        new_observations = current_app.tracker.get_recent_observations()
+        
         logger.info(f"Successfully updated location to: {name} ({lat}, {lng})")
         return jsonify({
             'success': True,
@@ -263,7 +278,8 @@ def update_location():
                 'latitude': lat,
                 'longitude': lng,
                 'radius': radius
-            }
+            },
+            'observations': new_observations
         })
         
     except Exception as e:
@@ -325,4 +341,15 @@ def profile():
                              location=current_app.tracker.active_location)
     except Exception as e:
         logger.error(f"Error in profile route: {e}")
-        return render_template('error.html', error=str(e)) 
+        return render_template('error.html', error=str(e))
+
+@bp.route('/api/observations')
+@login_required
+def get_observations():
+    """Get observations for the current location"""
+    try:
+        observations = current_app.tracker.get_recent_observations()
+        return jsonify(observations)
+    except Exception as e:
+        logger.error(f"Error fetching observations: {e}")
+        return jsonify({'error': 'Failed to fetch observations'}), 500 
