@@ -483,16 +483,16 @@ def chat():
         logger.info(f"Processing chat message: {message}")
         
         # Get recent observations for context
-        observations = app.tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations(current_user.id if current_user.is_authenticated else None)
         logger.info(f"Retrieved {len(observations)} observations for context")
         
         # Use the tracker's chat_with_ai method
-        response = app.tracker.chat_with_ai(message, observations)
+        response = app.tracker.chat_with_ai(message, current_user.id if current_user.is_authenticated else None)
         logger.info(f"Received response from chat_with_ai, length: {len(response) if response else 0}")
         
         if not response:
             logger.warning("No response generated from chat_with_ai")
-        return jsonify({
+            return jsonify({
                 'error': 'No response generated',
                 'response': 'I apologize, but I was unable to process your question. Please try again.'
             }), 500

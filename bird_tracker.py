@@ -177,8 +177,27 @@ class BirdSightingTracker:
                         'longitude': prefs.active_location.longitude,
                         'radius': prefs.active_location.radius
                     }
+                else:
+                    # If no user-specific location exists, create one with default values
+                    prefs = UserPreferences(user_id=user_id)
+                    location = Location(
+                        name='Cincinnati',
+                        latitude=39.1031,
+                        longitude=-84.5120,
+                        radius=25,
+                        is_active=True
+                    )
+                    prefs.active_location = location
+                    db.session.add(prefs)
+                    db.session.commit()
+                    return {
+                        'name': location.name,
+                        'latitude': location.latitude,
+                        'longitude': location.longitude,
+                        'radius': location.radius
+                    }
             
-            # Fall back to global location
+            # Fall back to global location only if no user_id is provided
             return self.active_location
         except Exception as e:
             self.logger.error(f"Error getting active location: {str(e)}")
@@ -324,15 +343,18 @@ This report was generated automatically by the Bird Tracker application.
             self.logger.error(f"Error sending email: {str(e)}")
             raise
 
-    def analyze_recent_sightings(self, observations):
+    def analyze_recent_sightings(self, observations, user_id=None):
         """Analyze recent bird sightings and generate a report"""
         try:
             # Format observations for display
             formatted_observations = self._format_observations(observations)
             
+            # Get the active location for this user
+            active_location = self.get_active_location(user_id)
+            
             # If Claude is available, get AI analysis
             if self.claude:
-                return self._get_ai_analysis(observations)
+                return self._get_ai_analysis(observations, active_location)
             else:
                 return self._generate_basic_analysis(observations)
             
@@ -340,23 +362,7 @@ This report was generated automatically by the Bird Tracker application.
             logger.error(f"Error analyzing sightings: {str(e)}")
             return f"Error analyzing sightings: {str(e)}"
 
-    def _format_observations(self, observations):
-        """Format bird observations into a readable string."""
-        if not observations:
-            return "No bird sightings found in the last 7 days."
-        
-        formatted_text = "Recent Bird Sightings:\n\n"
-        for obs in observations:
-            date = datetime.fromisoformat(obs['obsDt']).strftime('%Y-%m-%d')
-            formatted_text += f"- {obs['comName']} (Scientific name: {obs['sciName']})\n"
-            formatted_text += f"  Observed on: {date}\n"
-            formatted_text += f"  Location: {obs['locName']}\n"
-            if obs.get('howMany'):
-                formatted_text += f"  Count: {obs['howMany']}\n"
-            formatted_text += "\n"
-        return formatted_text
-
-    def _get_ai_analysis(self, observations):
+    def _get_ai_analysis(self, observations, active_location):
         """Generate AI analysis of bird observations using Claude."""
         try:
             if not observations:
@@ -371,11 +377,11 @@ This report was generated automatically by the Bird Tracker application.
             
             # Include location information
             location_info = ""
-            if self.active_location:
-                location_info = f"""Location: {self.active_location['name']}
-                Latitude: {self.active_location['latitude']}
-                Longitude: {self.active_location['longitude']}
-                Search radius: {self.active_location['radius']} miles
+            if active_location:
+                location_info = f"""Location: {active_location['name']}
+                Latitude: {active_location['latitude']}
+                Longitude: {active_location['longitude']}
+                Search radius: {active_location['radius']} miles
                 
                 """
             
@@ -458,7 +464,7 @@ This report was generated automatically by the Bird Tracker application.
             self.logger.error(f"Error generating AI analysis: {str(e)}")
             return None
 
-    def chat_with_ai(self, message):
+    def chat_with_ai(self, message, user_id=None):
         """Chat with the AI assistant about bird sightings."""
         try:
             if not self.claude:
@@ -466,16 +472,19 @@ This report was generated automatically by the Bird Tracker application.
                 return "Sorry, the AI assistant is not available at the moment."
                 
             # Get recent observations to provide context
-            observations = self.get_recent_observations()
+            observations = self.get_recent_observations(user_id)
             observation_context = ""
+            
+            # Get the active location for this user
+            active_location = self.get_active_location(user_id)
             
             # Include location information
             location_info = ""
-            if self.active_location:
-                location_info = f"""Current location: {self.active_location['name']}
-                Latitude: {self.active_location['latitude']}
-                Longitude: {self.active_location['longitude']}
-                Search radius: {self.active_location['radius']} miles
+            if active_location:
+                location_info = f"""Current location: {active_location['name']}
+                Latitude: {active_location['latitude']}
+                Longitude: {active_location['longitude']}
+                Search radius: {active_location['radius']} miles
                 
                 """
             
