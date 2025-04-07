@@ -414,23 +414,42 @@ def get_basic_analysis():
 @app.route('/api/location', methods=['POST'])
 @login_required
 def update_location():
+    """Update the active location"""
     try:
-        name = request.form.get('name')
-        lat = float(request.form.get('lat'))
-        lng = float(request.form.get('lng'))
-        radius = int(request.form.get('radius'))
+        data = request.get_json()
+        logger.info(f"Received location update request: {data}")
         
-        # Validate inputs
-        if not all([name, lat, lng, radius]):
-            return jsonify({"error": "Missing required fields"}), 400
+        if not data or 'name' not in data:
+            return jsonify({'error': 'Location name is required'}), 400
+            
+        name = data['name']
+        radius = data.get('radius', 25)  # Default to 25 miles if not specified
         
-        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
-            return jsonify({"error": "Invalid coordinates"}), 400
+        # Check if we have coordinates from the frontend
+        if 'latitude' in data and 'longitude' in data:
+            lat = float(data['latitude'])
+            lng = float(data['longitude'])
+            logger.info(f"Using provided coordinates: {lat}, {lng}")
+        else:
+            # Fall back to predefined cities
+            city_coords = {
+                'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
+                'new york': {'lat': 40.7128, 'lng': -74.0060},
+                'los angeles': {'lat': 34.0522, 'lng': -118.2437},
+                'chicago': {'lat': 41.8781, 'lng': -87.6298},
+                'denver': {'lat': 39.7392, 'lng': -104.9903}
+            }
+            
+            city_key = name.lower()
+            if city_key in city_coords:
+                coords = city_coords[city_key]
+                lat = coords['lat']
+                lng = coords['lng']
+                logger.info(f"Using predefined city coordinates: {lat}, {lng}")
+            else:
+                return jsonify({'error': 'Could not find coordinates for this location'}), 400
         
-        if not (1 <= radius <= 50):
-            return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
-
-        # Update tracker location for current user
+        # Update location using the tracker's set_location method
         success = app.tracker.set_location(
             user_id=current_user.id,
             name=name,
@@ -439,13 +458,20 @@ def update_location():
             radius=radius
         )
         
-        if success:
-            return jsonify({"success": True})
-        else:
-            return jsonify({"error": "Failed to update location"}), 500
-
+        if not success:
+            return jsonify({'error': 'Failed to update location'}), 500
+        
+        # Get the updated location
+        location = app.tracker.get_active_location(current_user.id)
+        
+        return jsonify({
+            'success': True,
+            'location': location
+        })
+        
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error updating location: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
