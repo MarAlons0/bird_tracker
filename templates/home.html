@@ -47,9 +47,12 @@
         width: 100%;
         height: 100%;
         display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
     }
     .carousel-item.active {
         display: block;
+        opacity: 1;
     }
     .carousel-image-container {
         width: 100%;
@@ -390,6 +393,80 @@
             loadingModal.hide();
             locationError.textContent = 'Error updating location. Please try again.';
             console.error('Error:', error);
+        });
+    });
+
+    // Carousel functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('birdCarousel');
+        const items = carousel.getElementsByClassName('carousel-item');
+        const totalItems = items.length;
+        let currentIndex = 0;
+        let usedIndices = new Set();
+        
+        // Function to get a random unused index
+        function getRandomUnusedIndex() {
+            if (usedIndices.size === totalItems) {
+                usedIndices.clear(); // Reset if all indices have been used
+            }
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * totalItems);
+            } while (usedIndices.has(randomIndex));
+            
+            usedIndices.add(randomIndex);
+            return randomIndex;
+        }
+        
+        // Function to show a specific slide
+        function showSlide(index) {
+            // Remove active class from all slides
+            Array.from(items).forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to the selected slide
+            items[index].classList.add('active');
+        }
+        
+        // Function to show next random slide
+        function showNextRandomSlide() {
+            const nextIndex = getRandomUnusedIndex();
+            showSlide(nextIndex);
+        }
+        
+        // Set up automatic rotation
+        let rotationInterval = setInterval(showNextRandomSlide, 3000);
+        
+        // Handle manual navigation
+        const prevButton = document.getElementById('prevSlide');
+        const nextButton = document.getElementById('nextSlide');
+        
+        if (prevButton && nextButton) {
+            prevButton.addEventListener('click', function() {
+                clearInterval(rotationInterval);
+                const nextIndex = getRandomUnusedIndex();
+                showSlide(nextIndex);
+                rotationInterval = setInterval(showNextRandomSlide, 3000);
+            });
+            
+            nextButton.addEventListener('click', function() {
+                clearInterval(rotationInterval);
+                const nextIndex = getRandomUnusedIndex();
+                showSlide(nextIndex);
+                rotationInterval = setInterval(showNextRandomSlide, 3000);
+            });
+        }
+        
+        // Pause rotation when hovering over carousel
+        carousel.addEventListener('mouseenter', function() {
+            clearInterval(rotationInterval);
+        });
+        
+        // Resume rotation when mouse leaves carousel
+        carousel.addEventListener('mouseleave', function() {
+            rotationInterval = setInterval(showNextRandomSlide, 3000);
         });
     });
 </script>
