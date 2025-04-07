@@ -146,14 +146,6 @@ class BirdSightingTracker:
                 location.is_active = True
                 
                 db.session.commit()
-                
-                # Update the active_location for this instance
-                self.active_location = {
-                    'name': name,
-                    'latitude': lat,
-                    'longitude': lng,
-                    'radius': radius
-                }
             else:
                 # Global location (backward compatibility)
                 self.active_location = {
