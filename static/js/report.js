@@ -24,7 +24,7 @@ function loadAIAnalysis() {
     
     // Add cache-busting query parameter
     const timestamp = new Date().getTime();
-    fetch(`/api/ai-analysis?t=${timestamp}`)
+    fetch(`/api/analysis?t=${timestamp}`)
         .then(response => response.json())
         .then(data => {
             console.log('AI analysis response:', data);
@@ -51,7 +51,7 @@ window.addEventListener('locationChanged', function(event) {
     
     // Add cache-busting query parameter
     const timestamp = new Date().getTime();
-    fetch(`/api/ai-analysis?t=${timestamp}`)
+    fetch(`/api/analysis?t=${timestamp}`)
         .then(response => response.json())
         .then(data => {
             console.log('AI analysis response after location change:', data);
