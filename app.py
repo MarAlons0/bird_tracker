@@ -313,7 +313,7 @@ def home():
         
         # Get user-specific location
         location = app.tracker.get_active_location(current_user.id)
-        observations = app.tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations(current_user.id)
         logger.debug(f"Found {len(observations)} recent observations")
         
         return render_template('home.html', 
@@ -334,7 +334,7 @@ def map():
         
     # Get user-specific location
     location = app.tracker.get_active_location(current_user.id)
-    observations = app.tracker.get_recent_observations()
+    observations = app.tracker.get_recent_observations(current_user.id)
     return render_template('map.html', 
                          observations=observations,
                          location=location,
@@ -354,13 +354,13 @@ def report():
 @app.route('/api/observations')
 @login_required
 def get_observations():
-    observations = app.tracker.get_recent_observations()
+    observations = app.tracker.get_recent_observations(current_user.id)
     return jsonify(observations)
 
 @app.route('/api/analysis')
 def get_analysis():
     try:
-        observations = app.tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations(current_user.id if current_user.is_authenticated else None)
         logger.debug(f"Analyzing {len(observations)} observations")
         if not observations:
             return jsonify({
@@ -398,13 +398,13 @@ def get_analysis():
 @app.route('/api/analysis/basic')
 def get_basic_analysis():
     try:
-        observations = app.tracker.get_recent_observations()
+        observations = app.tracker.get_recent_observations(current_user.id if current_user.is_authenticated else None)
         if not observations:
             return jsonify({
                 'analysis': '<p class="alert alert-info">No bird sightings found in the last 21 days for this location.</p>'
             })
         
-        basic_analysis = app.tracker._generate_basic_analysis(observations, {})
+        basic_analysis = app.tracker._generate_basic_analysis(observations)
         return jsonify({'analysis': basic_analysis})
         
     except Exception as e:

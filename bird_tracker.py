@@ -575,25 +575,15 @@ This report was generated automatically by the Bird Tracker application.
         
         return "\n".join(analysis)
 
-    def get_recent_observations(self):
+    def get_recent_observations(self, user_id=None):
         """Get recent bird observations from eBird API"""
         try:
             if not self.api_key:
                 raise ValueError("eBird API key not found")
             
-            # Get the most recent active location from the database
-            active_location = Location.query.filter_by(is_active=True).first()
-            
-            if active_location:
-                # Update the active_location property
-                self.active_location = {
-                    'name': active_location.name,
-                    'latitude': active_location.latitude,
-                    'longitude': active_location.longitude,
-                    'radius': active_location.radius
-                }
-            
-            if not self.active_location:
+            # Get the active location for this user
+            active_location = self.get_active_location(user_id)
+            if not active_location:
                 raise ValueError("No active location configured")
             
             # Set up request parameters
@@ -602,9 +592,9 @@ This report was generated automatically by the Bird Tracker application.
             }
             
             params = {
-                'lat': self.active_location['latitude'],
-                'lng': self.active_location['longitude'],
-                'dist': self.active_location['radius'],
+                'lat': active_location['latitude'],
+                'lng': active_location['longitude'],
+                'dist': active_location['radius'],
                 'back': 7,  # Get observations from last 7 days
                 'maxResults': 100
             }
