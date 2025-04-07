@@ -329,21 +329,37 @@ class BirdSightingTracker:
         try:
             self.logger.info("Starting daily report generation")
             
-            # Get recent observations
-            observations = self.get_recent_observations()
-            if not observations:
-                self.logger.info("No observations to report")
+            # Get all users with newsletter subscriptions
+            from models import User, db
+            users = User.query.filter_by(newsletter_subscription=True).all()
+            
+            if not users:
+                self.logger.info("No users with newsletter subscriptions found")
                 return
             
-            # Format observations
-            formatted_observations = self._format_observations(observations)
+            self.logger.info(f"Found {len(users)} users with newsletter subscriptions")
             
-            # Get analysis
-            analysis = self.analyze_recent_sightings(observations)
-            
-            # Prepare email content
-            subject = f"Daily Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
-            body = f"""Bird Sighting Report for {self.active_location['name']}
+            for user in users:
+                try:
+                    # Get recent observations for this user
+                    observations = self.get_recent_observations(user_id=user.id)
+                    if not observations:
+                        self.logger.info(f"No observations to report for user {user.id}")
+                        continue
+                    
+                    # Format observations
+                    formatted_observations = self._format_observations(observations)
+                    
+                    # Get analysis
+                    analysis = self.analyze_recent_sightings(observations, user_id=user.id)
+                    
+                    # Get user's active location
+                    active_location = self.get_active_location(user.id)
+                    location_name = active_location['name'] if active_location else "your location"
+                    
+                    # Prepare email content
+                    subject = f"Daily Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
+                    body = f"""Bird Sighting Report for {location_name}
 
 {formatted_observations}
 
@@ -352,16 +368,20 @@ Analysis:
 
 This report was generated automatically by the Bird Tracker application.
 """
-            
-            # Send email
-            self.send_email(subject, body)
-            self.logger.info("Daily report sent successfully")
+                    
+                    # Send email
+                    self.send_email(subject, body, recipient=user.email)
+                    self.logger.info(f"Daily report sent successfully to user {user.id}")
+                    
+                except Exception as e:
+                    self.logger.error(f"Error sending daily report to user {user.id}: {str(e)}")
+                    continue
             
         except Exception as e:
             self.logger.error(f"Error sending daily report: {str(e)}")
             raise
 
-    def send_email(self, subject, body):
+    def send_email(self, subject, body, recipient=None):
         """Send an email using configured SMTP settings."""
         try:
             # Check if email configuration exists
@@ -374,7 +394,7 @@ This report was generated automatically by the Bird Tracker application.
             smtp_port = self.config.getint('email', 'smtp_port')
             sender_email = self.config.get('email', 'sender_email')
             sender_password = self.config.get('email', 'sender_password')
-            recipient_email = self.config.get('email', 'recipient_email')
+            recipient_email = recipient or self.config.get('email', 'recipient_email')
 
             # Create message
             msg = MIMEText(body)
@@ -627,16 +647,17 @@ This report was generated automatically by the Bird Tracker application.
         
         return "\n".join(analysis)
 
-    def get_recent_observations(self, days_back=7):
+    def get_recent_observations(self, user_id=None, days_back=7):
         """Get recent bird observations from eBird API."""
         try:
             if not self.api_key:
                 self.logger.error("eBird API key is missing")
                 raise ValueError("eBird API key is missing")
 
-            active_location = self.get_active_location()
+            # Get active location for the user
+            active_location = self.get_active_location(user_id)
             if not active_location:
-                self.logger.error("No active location found")
+                self.logger.error(f"No active location found for user {user_id}")
                 raise ValueError("No active location found")
 
             # Validate location data

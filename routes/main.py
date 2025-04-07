@@ -106,7 +106,7 @@ def map():
     if not google_places_key:
         return render_template('error.html', error="Google Places API key not configured")
         
-    observations = current_app.tracker.get_recent_observations()
+    observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
     return render_template('map.html', 
                          observations=observations,
                          location=current_app.tracker.active_location,
@@ -150,7 +150,7 @@ def basic_analysis():
 @login_required
 def ai_analysis():
     try:
-        observations = current_app.tracker.get_recent_observations()
+        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
         if not observations:
             return jsonify({
                 'analysis': 'No recent observations found.'
@@ -248,7 +248,7 @@ def update_location():
 
             # Get recent observations for the new location
             try:
-                observations = current_app.tracker.get_recent_observations()
+                observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
                 current_app.logger.info(f"Retrieved {len(observations) if observations else 0} observations")
             except Exception as e:
                 current_app.logger.error(f"Error getting observations: {str(e)}")
@@ -300,7 +300,7 @@ def locations():
 def sightings():
     try:
         # Get recent observations from the tracker
-        observations = current_app.tracker.get_recent_observations()
+        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
         
         # Get Google Places API key
         google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
@@ -332,7 +332,7 @@ def profile():
 def get_observations():
     """Get observations for the current location"""
     try:
-        observations = current_app.tracker.get_recent_observations()
+        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
         return jsonify(observations)
     except Exception as e:
         logger.error(f"Error fetching observations: {e}")
