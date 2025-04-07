@@ -241,44 +241,28 @@ def update_location():
             else:
                 return jsonify({'error': 'Could not find coordinates for this location'}), 400
         
-        # Deactivate all current locations
-        Location.query.filter_by(is_active=True).update({'is_active': False})
-        
-        # Create new location
-        new_location = Location(
+        # Update location using the tracker's set_location method with user_id
+        success = current_app.tracker.set_location(
+            user_id=current_user.id,
             name=name,
-            latitude=lat,
-            longitude=lng,
-            radius=radius,
-            is_active=True
+            lat=lat,
+            lng=lng,
+            radius=radius
         )
         
-        db.session.add(new_location)
-        db.session.commit()
+        if not success:
+            return jsonify({'error': 'Failed to update location'}), 500
         
-        # Update the tracker's active location
-        current_app.tracker.active_location = {
-            'name': name,
-            'latitude': lat,
-            'longitude': lng,
-            'radius': radius
-        }
-        
-        # Update the config file
-        current_app.tracker.set_location(name, lat, lng, radius)
+        # Get the updated location
+        location = current_app.tracker.get_active_location(current_user.id)
         
         # Fetch new observations for the updated location
-        new_observations = current_app.tracker.get_recent_observations()
+        new_observations = current_app.tracker.get_recent_observations(current_user.id)
         
         logger.info(f"Successfully updated location to: {name} ({lat}, {lng})")
         return jsonify({
             'success': True,
-            'location': {
-                'name': name,
-                'latitude': lat,
-                'longitude': lng,
-                'radius': radius
-            },
+            'location': location,
             'observations': new_observations
         })
         
