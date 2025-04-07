@@ -277,6 +277,18 @@ document.getElementById('locationModal').addEventListener('shown.bs.modal', func
 document.getElementById('saveLocation').addEventListener('click', async function() {
     const form = document.getElementById('newLocationForm');
     const formData = new FormData(form);
+    const locationError = document.getElementById('locationError');
+    
+    // Validate form data
+    const name = formData.get('name');
+    const lat = formData.get('lat');
+    const lng = formData.get('lng');
+    const radius = formData.get('radius');
+    
+    if (!name || !lat || !lng) {
+        locationError.textContent = 'Please select a location from the dropdown';
+        return;
+    }
     
     // Show loading modal
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -285,17 +297,46 @@ document.getElementById('saveLocation').addEventListener('click', async function
     try {
         const response = await fetch('/api/location', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng),
+                radius: parseInt(radius) || 25
+            })
         });
         
-        if (response.ok) {
-            window.location.reload();
+        const data = await response.json();
+        
+        if (response.ok && data.location) {
+            // Close the location modal
+            const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
+            locationModal.hide();
+            
+            // Save location to localStorage
+            localStorage.setItem('currentLocation', JSON.stringify(data.location));
+            console.log('Saved location to localStorage:', data.location);
+            
+            // Dispatch location change event
+            window.dispatchEvent(new CustomEvent('locationChanged', {
+                detail: { location: data.location }
+            }));
+            
+            // Show success message
+            alert('Location updated successfully!');
+            
+            // Reload the page after a short delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } else {
-            const error = await response.json();
-            alert(error.error || 'Failed to update location');
+            throw new Error(data.error || 'Failed to update location');
         }
     } catch (error) {
-        alert('Error updating location');
+        console.error('Error updating location:', error);
+        locationError.textContent = error.message || 'Error updating location. Please try again.';
     } finally {
         loadingModal.hide();
     }
