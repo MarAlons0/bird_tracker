@@ -311,11 +311,13 @@ def home():
             logger.error("eBird API key not found!")
             return render_template('error.html', error="eBird API key not configured")
         
+        # Get user-specific location
+        location = app.tracker.get_active_location(current_user.id)
         observations = app.tracker.get_recent_observations()
         logger.debug(f"Found {len(observations)} recent observations")
         
         return render_template('home.html', 
-                             location=app.tracker.active_location,
+                             location=location,
                              email_schedule=email_schedule,
                              carousel_images=carousel_images,
                              google_places_api_key=google_places_key)
@@ -330,10 +332,12 @@ def map():
     if not google_places_key:
         return render_template('error.html', error="Google Places API key not configured")
         
+    # Get user-specific location
+    location = app.tracker.get_active_location(current_user.id)
     observations = app.tracker.get_recent_observations()
     return render_template('map.html', 
                          observations=observations,
-                         location=app.tracker.active_location,
+                         location=location,
                          google_maps_key=google_places_key)
 
 @app.route('/report')
@@ -408,6 +412,7 @@ def get_basic_analysis():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/location', methods=['POST'])
+@login_required
 def update_location():
     try:
         name = request.form.get('name')
@@ -425,9 +430,19 @@ def update_location():
         if not (1 <= radius <= 50):
             return jsonify({"error": "Radius must be between 1 and 50 miles"}), 400
 
-        # Update tracker location
-        app.tracker.set_location(name, lat, lng, radius)
-        return jsonify({"success": True})
+        # Update tracker location for current user
+        success = app.tracker.set_location(
+            user_id=current_user.id,
+            name=name,
+            lat=lat,
+            lng=lng,
+            radius=radius
+        )
+        
+        if success:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"error": "Failed to update location"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

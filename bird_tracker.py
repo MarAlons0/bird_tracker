@@ -24,7 +24,7 @@ import tempfile
 from math import cos, sin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-from models import User, Location
+from models import User, Location, UserPreferences
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -34,8 +34,14 @@ db = SQLAlchemy()
 
 class BirdSightingTracker:
     def __init__(self):
-        load_dotenv()
+        self.logger = logging.getLogger(__name__)
         self.config = self._load_config()
+        self.active_location = None
+        self.claude = None
+        self._initialize_claude()
+        self._load_default_location()
+        self.scheduler = None
+        self._setup_scheduler()
         
         # Initialize with default values if environment variables are missing
         self.api_key = os.getenv('EBIRD_API_KEY')
@@ -50,41 +56,6 @@ class BirdSightingTracker:
             'admin_email': os.getenv('ADMIN_EMAIL', ''),
             'recipient': os.getenv('RECIPIENT_EMAIL', '')
         }
-        
-        # Set active location with defaults
-        self.active_location = self._get_active_location()
-        
-        # Initialize Claude with the latest API version
-        anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
-        if anthropic_api_key:
-            # Ensure API key starts with 'sk-ant'
-            if not anthropic_api_key.startswith('sk-ant'):
-                anthropic_api_key = f"sk-ant-{anthropic_api_key}"
-            
-            logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
-            
-            # Create a custom httpx client without proxies
-            http_client = httpx.Client(
-                base_url="https://api.anthropic.com",
-                headers={
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json"
-                }
-            )
-            
-            self.claude = Anthropic(
-                api_key=anthropic_api_key,
-                http_client=http_client
-            )
-        else:
-            logging.warning("ANTHROPIC_API_KEY not found, AI analysis will be limited")
-            self.claude = None
-        
-        # Start daily report scheduler
-        self.scheduler = self.start_daily_reports()
-        
-        # Initialize logger
-        self.logger = logging.getLogger(__name__)
     
     def _load_config(self):
         """Load configuration from file or environment variables"""
@@ -132,92 +103,124 @@ class BirdSightingTracker:
         logger.info("Created config from environment variables")
         return config
 
-    def _get_active_location(self):
-        """Get the active location from the config"""
+    def _load_default_location(self):
+        """Load the default location from config"""
         try:
-            active_location = self.config['locations']['active_location']
-            location_section = f"location_{active_location}"
-            
-            if location_section in self.config:
-                return {
-                    'name': self.config[location_section]['name'],
-                    'latitude': float(self.config[location_section]['latitude']),
-                    'longitude': float(self.config[location_section]['longitude']),
-                    'radius': float(self.config[location_section]['radius'])
+            if 'location_cincinnati' in self.config:
+                loc = self.config['location_cincinnati']
+                self.active_location = {
+                    'name': 'Cincinnati',
+                    'latitude': float(loc['latitude']),
+                    'longitude': float(loc['longitude']),
+                    'radius': float(loc['radius'])
+                }
+                self.logger.info(f"Loaded default location: {self.active_location['name']}")
+        except Exception as e:
+            self.logger.error(f"Error loading default location: {str(e)}")
+            self.active_location = None
+
+    def set_location(self, user_id=None, name=None, lat=None, lng=None, radius=None):
+        """Set the active location, supporting both user-specific and global locations"""
+        try:
+            if user_id is not None:
+                # User-specific location
+                from models import UserPreferences, Location, db
+                
+                # Get or create user preferences
+                prefs = UserPreferences.query.filter_by(user_id=user_id).first()
+                if not prefs:
+                    prefs = UserPreferences(user_id=user_id)
+                    db.session.add(prefs)
+                
+                # Create or update location
+                if prefs.active_location:
+                    location = prefs.active_location
+                else:
+                    location = Location()
+                    prefs.active_location = location
+                
+                location.name = name
+                location.latitude = lat
+                location.longitude = lng
+                location.radius = radius
+                location.is_active = True
+                
+                db.session.commit()
+                
+                # Update the active_location for this instance
+                self.active_location = {
+                    'name': name,
+                    'latitude': lat,
+                    'longitude': lng,
+                    'radius': radius
                 }
             else:
-                # Try to find a matching location section
-                for section in self.config.sections():
-                    if section.startswith('location_'):
-                        # Compare the normalized names
-                        section_name = section.replace('location_', '').lower()
-                        if section_name == active_location.lower():
-                            return {
-                                'name': self.config[section]['name'],
-                                'latitude': float(self.config[section]['latitude']),
-                                'longitude': float(self.config[section]['longitude']),
-                                'radius': float(self.config[section]['radius'])
-                            }
-                
-                # If no matching location found, reset to Cincinnati
-                logger.warning(f"Location section {location_section} not found, resetting to Cincinnati")
-                self.config['locations']['active_location'] = 'cincinnati'
-                config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
-                with open(config_path, 'w') as configfile:
-                    self.config.write(configfile)
-                
-                return {
-                    'name': 'Cincinnati',
-                    'latitude': 39.1031,
-                    'longitude': -84.5120,
-                    'radius': 25
+                # Global location (backward compatibility)
+                self.active_location = {
+                    'name': name,
+                    'latitude': lat,
+                    'longitude': lng,
+                    'radius': radius
                 }
-        except Exception as e:
-            logger.error(f"Error getting active location: {str(e)}")
-            return None
-
-    def set_location(self, name, latitude, longitude, radius):
-        """Set a new active location"""
-        try:
-            # Format location name for config file
-            location_key = name.lower().replace(' ', '_').replace(',', '_').replace('(', '').replace(')', '').replace("'", '')
             
-            # Create a new location section
-            location_section = f"location_{location_key}"
-            if not self.config.has_section(location_section):
-                self.config.add_section(location_section)
-            
-            # Update location details
-            self.config[location_section]['name'] = name
-            self.config[location_section]['latitude'] = str(latitude)
-            self.config[location_section]['longitude'] = str(longitude)
-            self.config[location_section]['radius'] = str(radius)
-            
-            # Set as active location
-            self.config['locations']['active_location'] = location_key
-            
-            # Save config
-            config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
-            with open(config_path, 'w') as configfile:
-                self.config.write(configfile)
-            
-            # Update active location in memory
-            self.active_location = {
-                'name': name,
-                'latitude': float(latitude),
-                'longitude': float(longitude),
-                'radius': float(radius)
-            }
-            
-            logger.info(f"Location updated to: {name}")
+            self.logger.info(f"Location set to: {name}")
             return True
-            
         except Exception as e:
-            logger.error(f"Error setting location: {str(e)}")
+            self.logger.error(f"Error setting location: {str(e)}")
+            if 'db' in locals():
+                db.session.rollback()
             return False
 
-    def start_daily_reports(self):
-        """Start the daily report scheduler"""
+    def get_active_location(self, user_id=None):
+        """Get the active location, supporting both user-specific and global locations"""
+        try:
+            if user_id is not None:
+                # Try to get user-specific location
+                from models import UserPreferences
+                prefs = UserPreferences.query.filter_by(user_id=user_id).first()
+                if prefs and prefs.active_location:
+                    return {
+                        'name': prefs.active_location.name,
+                        'latitude': prefs.active_location.latitude,
+                        'longitude': prefs.active_location.longitude,
+                        'radius': prefs.active_location.radius
+                    }
+            
+            # Fall back to global location
+            return self.active_location
+        except Exception as e:
+            self.logger.error(f"Error getting active location: {str(e)}")
+            return self.active_location  # Fall back to global location
+
+    def _initialize_claude(self):
+        """Initialize Claude with the latest API version"""
+        anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+        if anthropic_api_key:
+            # Ensure API key starts with 'sk-ant'
+            if not anthropic_api_key.startswith('sk-ant'):
+                anthropic_api_key = f"sk-ant-{anthropic_api_key}"
+            
+            logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
+            
+            # Create a custom httpx client without proxies
+            http_client = httpx.Client(
+                base_url="https://api.anthropic.com",
+                headers={
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                }
+            )
+            
+            self.claude = Anthropic(
+                api_key=anthropic_api_key,
+                http_client=http_client
+            )
+        else:
+            logging.warning("ANTHROPIC_API_KEY not found, AI analysis will be limited")
+            self.claude = None
+
+    def _setup_scheduler(self):
+        """Start daily report scheduler"""
         try:
             scheduler = BackgroundScheduler()
             
@@ -242,11 +245,11 @@ class BirdSightingTracker:
             
             scheduler.start()
             logger.info(f"Started daily report scheduler (runs at {hour:02d}:{minute:02d})")
-            return scheduler
+            self.scheduler = scheduler
             
         except Exception as e:
             logger.error(f"Error starting daily reports: {str(e)}")
-            return None
+            self.scheduler = None
 
     def _handle_job_error(self, event):
         """Handle scheduler job errors"""

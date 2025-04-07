@@ -83,6 +83,22 @@ class User(UserMixin, db.Model):
         logger.info(f"Password check result for user {self.email}: {result}")
         return result
 
+class UserPreferences(db.Model):
+    __tablename__ = 'user_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    active_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
+    default_radius = db.Column(db.Float, default=50.0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('preferences', uselist=False))
+    active_location = db.relationship('Location')
+
+    def __repr__(self):
+        return f'<UserPreferences for user {self.user_id}>'
+
 class RegistrationRequest(db.Model):
     __tablename__ = 'registration_requests'
     
