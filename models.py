@@ -29,6 +29,9 @@ class Location(db.Model):
     longitude = db.Column(db.Float)
     radius = db.Column(db.Float)
     is_active = db.Column(db.Boolean, default=False)
+    
+    # Add relationship to UserPreferences
+    user_preferences = db.relationship('UserPreferences', backref='location', lazy='dynamic')
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -94,7 +97,7 @@ class UserPreferences(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     user = db.relationship('User', backref=db.backref('preferences', uselist=False))
-    active_location = db.relationship('Location')
+    active_location = db.relationship('Location', foreign_keys=[active_location_id])
 
     def __repr__(self):
         return f'<UserPreferences for user {self.user_id}>'
