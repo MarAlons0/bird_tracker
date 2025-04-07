@@ -624,82 +624,83 @@ This report was generated automatically by the Bird Tracker application.
         
         return "\n".join(analysis)
 
-    def get_recent_observations(self, user_id=None):
-        """Get recent bird observations from eBird API"""
+    def get_recent_observations(self, days_back=7):
+        """Get recent bird observations from eBird API."""
         try:
             if not self.api_key:
-                self.logger.error("eBird API key not found")
-                raise ValueError("eBird API key not found")
-            
-            # Get the active location for this user
-            active_location = self.get_active_location(user_id)
+                self.logger.error("eBird API key is missing")
+                raise ValueError("eBird API key is missing")
+
+            active_location = self.get_active_location()
             if not active_location:
-                self.logger.error(f"No active location found for user {user_id}")
-                raise ValueError("No active location configured")
-            
+                self.logger.error("No active location found")
+                raise ValueError("No active location found")
+
             # Validate location data
             if not all(key in active_location for key in ['latitude', 'longitude', 'radius']):
                 self.logger.error(f"Invalid location data: {active_location}")
-                raise ValueError("Invalid location data")
-            
-            # Set up request parameters
-            headers = {
-                'X-eBirdApiToken': self.api_key
-            }
-            
+                raise ValueError("Invalid location data in active location")
+
+            # Calculate date range
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days_back)
+
+            # Format dates for eBird API
+            start_date_str = start_date.strftime('%Y-%m-%d')
+            end_date_str = end_date.strftime('%Y-%m-%d')
+
+            # Construct request URL
+            base_url = 'https://api.ebird.org/v2/data/obs/geo/recent'
             params = {
                 'lat': active_location['latitude'],
                 'lng': active_location['longitude'],
                 'dist': active_location['radius'],
-                'back': 7,  # Get observations from last 7 days
-                'maxResults': 100
+                'back': days_back,
+                'fmt': 'json'
             }
-            
+
+            # Log the request details
+            self.logger.info(f"Making eBird API request with params: {params}")
+
             # Make request to eBird API
-            url = f"{self.base_url}/data/obs/geo/recent"
-            self.logger.info(f"Making request to eBird API: {url} with params {params}")
-            response = requests.get(url, headers=headers, params=params)
-            response.raise_for_status()
-            
-            # Parse response
+            headers = {'X-eBirdApiToken': self.api_key}
+            response = requests.get(base_url, params=params, headers=headers)
+
+            # Log the response status
+            self.logger.info(f"eBird API response status: {response.status_code}")
+
+            if response.status_code != 200:
+                self.logger.error(f"eBird API error: {response.status_code} - {response.text}")
+                raise Exception(f"eBird API returned status code {response.status_code}")
+
             observations = response.json()
             self.logger.info(f"Retrieved {len(observations)} observations from eBird API")
-            
-            # Sort observations by date (most recent first)
-            observations.sort(key=lambda x: x['obsDt'], reverse=True)
-            
-            # Transform field names to match template expectations
+
+            # Transform observations into our format
             transformed_observations = []
             for obs in observations:
-                transformed_obs = {
-                    'comName': obs.get('comName', ''),
-                    'sciName': obs.get('sciName', ''),
-                    'howMany': obs.get('howMany', 0),
-                    'locName': obs.get('locName', ''),
-                    'obsDt': obs.get('obsDt', ''),
-                    'lat': obs.get('lat', 0),
-                    'lng': obs.get('lng', 0),
-                    'subId': obs.get('subId', ''),
-                    'userDisplayName': obs.get('userDisplayName', ''),
-                    'obsValid': obs.get('obsValid', True),
-                    'obsReviewed': obs.get('obsReviewed', False),
-                    'locationPrivate': obs.get('locationPrivate', False),
-                    'subnational2Code': obs.get('subnational2Code', ''),
-                    'subnational2Name': obs.get('subnational2Name', ''),
-                    'subnational1Code': obs.get('subnational1Code', ''),
-                    'subnational1Name': obs.get('subnational1Name', ''),
-                    'countryCode': obs.get('countryCode', ''),
-                    'countryName': obs.get('countryName', ''),
-                    'speciesCode': obs.get('speciesCode', ''),
-                    'category': ''  # Will be set by the frontend
-                }
-                transformed_observations.append(transformed_obs)
-            
+                try:
+                    transformed_obs = {
+                        'species': obs.get('comName', 'Unknown Species'),
+                        'location': obs.get('locName', 'Unknown Location'),
+                        'date': obs.get('obsDt', ''),
+                        'count': obs.get('howMany', 1),
+                        'latitude': obs.get('lat', active_location['latitude']),
+                        'longitude': obs.get('lng', active_location['longitude'])
+                    }
+                    transformed_observations.append(transformed_obs)
+                except Exception as e:
+                    self.logger.error(f"Error transforming observation: {e}")
+                    continue
+
             return transformed_observations
-            
+
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"Error getting observations from eBird API: {str(e)}")
-            return None
+            self.logger.error(f"Network error in get_recent_observations: {str(e)}")
+            raise Exception(f"Failed to fetch observations: {str(e)}")
+        except ValueError as e:
+            self.logger.error(f"Validation error in get_recent_observations: {str(e)}")
+            raise
         except Exception as e:
-            self.logger.error(f"Error getting observations: {str(e)}")
-            return None 
+            self.logger.error(f"Unexpected error in get_recent_observations: {str(e)}")
+            raise Exception(f"Failed to get recent observations: {str(e)}") 
