@@ -243,13 +243,16 @@ class BirdSightingTracker:
             
             # Fall back to global location only if no user_id is provided
             self.logger.info("No user_id provided, using global location")
+            if not self.active_location:
+                self.logger.error("No global location found")
+                return None
             return self.active_location
             
         except Exception as e:
             self.logger.error(f"Error in get_active_location: {str(e)}", exc_info=True)
             if 'db' in locals():
                 db.session.rollback()
-            return self.active_location  # Fall back to global location
+            return None  # Return None instead of falling back to global location
 
     def _initialize_claude(self):
         """Initialize Claude with the latest API version"""
