@@ -209,66 +209,67 @@ def update_location():
     """Update the user's location"""
     try:
         if not request.is_json:
-            current_app.logger.error("No JSON data received in location update request")
-            return jsonify({'error': 'No data received'}), 400
-            
+            current_app.logger.error("Request must be JSON")
+            return jsonify({'error': 'Request must be JSON'}), 400
+
         data = request.get_json()
         current_app.logger.info(f"Received location update request: {data}")
-        
+
         # Extract location data
-        lat = data.get('latitude')
-        lng = data.get('longitude')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
         name = data.get('name')
-        radius = data.get('radius', 25)  # Default to 25 miles if not specified
-        
-        # Validate required data
-        if not all([lat, lng, name]):
-            current_app.logger.error(f"Missing required location data: lat={lat}, lng={lng}, name={name}")
+        radius = data.get('radius', 25)  # Default radius if not provided
+
+        # Validate required fields
+        if not all([latitude, longitude, name]):
+            current_app.logger.error(f"Missing required location data: {data}")
             return jsonify({'error': 'Missing required location data'}), 400
-            
+
         try:
-            # Update location
+            # Update the location
             success = current_app.tracker.set_location(
                 user_id=current_user.id,
                 name=name,
-                lat=lat,
-                lng=lng,
-                radius=radius
+                lat=float(latitude),
+                lng=float(longitude),
+                radius=float(radius)
             )
-            
+
             if not success:
-                current_app.logger.error("Failed to update location in tracker")
+                current_app.logger.error("Failed to update location")
                 return jsonify({'error': 'Failed to update location'}), 500
-                
-            # Get updated location and recent observations
+
+            # Get the updated location
+            active_location = current_app.tracker.get_active_location(current_user.id)
+            if not active_location:
+                current_app.logger.error("Failed to get active location after update")
+                return jsonify({'error': 'Failed to get active location'}), 500
+
+            # Get recent observations for the new location
             try:
-                location = current_app.tracker.get_active_location(current_user.id)
-                if not location:
-                    current_app.logger.error("Failed to get updated location")
-                    return jsonify({'error': 'Failed to get updated location'}), 500
-                    
-                recent_observations = current_app.tracker.get_recent_observations(
-                    lat=location['latitude'],
-                    lng=location['longitude'],
-                    radius=location['radius']
-                )
-                
-                return jsonify({
-                    'location': location,
-                    'recent_observations': recent_observations
-                })
-                
+                observations = current_app.tracker.get_recent_observations()
+                current_app.logger.info(f"Retrieved {len(observations) if observations else 0} observations")
             except Exception as e:
-                current_app.logger.error(f"Error getting location data: {str(e)}", exc_info=True)
-                return jsonify({'error': 'Failed to get location data'}), 500
-                
+                current_app.logger.error(f"Error getting observations: {str(e)}")
+                observations = []
+
+            return jsonify({
+                'message': 'Location updated successfully',
+                'location': active_location,
+                'observations': observations
+            })
+
+        except ValueError as e:
+            current_app.logger.error(f"Invalid location data: {str(e)}")
+            return jsonify({'error': str(e)}), 400
         except Exception as e:
-            current_app.logger.error(f"Error updating location: {str(e)}", exc_info=True)
+            current_app.logger.error(f"Error updating location: {str(e)}")
             return jsonify({'error': 'Failed to update location'}), 500
-            
+
     except Exception as e:
-        current_app.logger.error(f"Unexpected error in update_location: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error'}), 500
+        current_app.logger.error(f"Unexpected error in update_location: {str(e)}")
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @bp.route('/newsletter-preferences', methods=['GET', 'POST'])
 @login_required
