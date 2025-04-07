@@ -29,8 +29,10 @@ class Location(db.Model):
     longitude = db.Column(db.Float)
     radius = db.Column(db.Float)
     is_active = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
-    # Add relationship to UserPreferences
+    # Add relationships
+    user = db.relationship('User', backref=db.backref('locations', lazy='dynamic'))
     user_preferences = db.relationship('UserPreferences', backref='location', lazy='dynamic')
 
 class User(UserMixin, db.Model):

@@ -48,7 +48,8 @@ def init_db():
                         latitude FLOAT,
                         longitude FLOAT,
                         radius FLOAT,
-                        is_active BOOLEAN DEFAULT FALSE
+                        is_active BOOLEAN DEFAULT FALSE,
+                        user_id INTEGER REFERENCES users(id)
                     )
                 """)
                 

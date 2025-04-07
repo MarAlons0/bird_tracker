@@ -137,23 +137,25 @@ class BirdSightingTracker:
                         db.session.add(prefs)
                         db.session.flush()  # Get the ID for the new preferences
                     
-                    # Create or update location
-                    if prefs.active_location:
-                        self.logger.info(f"Updating existing location for user {user_id}")
-                        location = prefs.active_location
-                    else:
-                        self.logger.info(f"Creating new location for user {user_id}")
-                        location = Location()
-                        db.session.add(location)
-                        db.session.flush()  # Get the ID for the new location
-                        prefs.active_location = location
+                    # Deactivate all existing locations for this user
+                    Location.query.filter_by(user_id=user_id).update({'is_active': False})
+                    db.session.flush()
                     
-                    # Update location details
-                    location.name = name
-                    location.latitude = lat
-                    location.longitude = lng
-                    location.radius = radius
-                    location.is_active = True
+                    # Create a new location for the user
+                    self.logger.info(f"Creating new location for user {user_id}")
+                    location = Location(
+                        name=name,
+                        latitude=lat,
+                        longitude=lng,
+                        radius=radius,
+                        is_active=True,
+                        user_id=user_id
+                    )
+                    db.session.add(location)
+                    db.session.flush()  # Get the ID for the new location
+                    
+                    # Update user preferences with the new location
+                    prefs.active_location = location
                     
                     # Commit all changes
                     db.session.commit()
@@ -192,7 +194,7 @@ class BirdSightingTracker:
                 
                 try:
                     prefs = UserPreferences.query.filter_by(user_id=user_id).first()
-                    if prefs and prefs.active_location:
+                    if prefs and prefs.active_location and prefs.active_location.is_active:
                         self.logger.info(f"Found existing location for user {user_id}: {prefs.active_location.name}")
                         return {
                             'name': prefs.active_location.name,
@@ -211,15 +213,19 @@ class BirdSightingTracker:
                                 latitude=39.1031,
                                 longitude=-84.5120,
                                 radius=25,
-                                is_active=True
+                                is_active=True,
+                                user_id=user_id  # Set the user_id for the location
                             )
                             db.session.add(location)
                             db.session.flush()  # Get the ID for the new location
                             
-                            # Create new preferences
-                            prefs = UserPreferences(user_id=user_id)
+                            # Create new preferences if they don't exist
+                            if not prefs:
+                                prefs = UserPreferences(user_id=user_id)
+                                db.session.add(prefs)
+                            
+                            # Set the active location
                             prefs.active_location = location
-                            db.session.add(prefs)
                             
                             # Commit all changes
                             db.session.commit()
@@ -252,7 +258,7 @@ class BirdSightingTracker:
             self.logger.error(f"Error in get_active_location: {str(e)}", exc_info=True)
             if 'db' in locals():
                 db.session.rollback()
-            return None  # Return None instead of falling back to global location
+            return None
 
     def _initialize_claude(self):
         """Initialize Claude with the latest API version"""

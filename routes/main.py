@@ -43,36 +43,57 @@ def index():
         for img in carousel_images:
             logger.debug(f"Carousel image: id={img['id']}, title={img['title']}, url={img['filename']}")
         
-        # Get current location
+        # Get current user's location
         location = db.session.execute(text('''
-            SELECT name, latitude, longitude, radius
-            FROM locations
-            WHERE is_active = true
-            ORDER BY id DESC
+            SELECT l.name, l.latitude, l.longitude, l.radius
+            FROM locations l
+            JOIN user_preferences up ON up.active_location_id = l.id
+            WHERE up.user_id = :user_id AND l.is_active = true
+            ORDER BY l.id DESC
             LIMIT 1
-        ''')).fetchone()
+        '''), {'user_id': current_user.id}).fetchone()
         
         if not location:
-            logger.info("No active location found, creating default location")
-            # Create default location (Cincinnati)
+            logger.info("No active location found for user, creating default location")
+            # Create default location (Cincinnati) for this user
             db.session.execute(text('''
-                INSERT INTO locations (name, latitude, longitude, radius, is_active)
-                VALUES (:name, :lat, :lng, :radius, true)
+                INSERT INTO locations (name, latitude, longitude, radius, is_active, user_id)
+                VALUES (:name, :lat, :lng, :radius, true, :user_id)
+                RETURNING id
             '''), {
                 'name': 'Cincinnati, OH',
                 'lat': 39.1031,
                 'lng': -84.5120,
-                'radius': 25
+                'radius': 25,
+                'user_id': current_user.id
             })
+            
+            # Get the new location ID
+            new_location_id = db.session.execute(text('''
+                SELECT id FROM locations 
+                WHERE user_id = :user_id AND is_active = true 
+                ORDER BY id DESC LIMIT 1
+            '''), {'user_id': current_user.id}).scalar()
+            
+            # Create or update user preferences
+            db.session.execute(text('''
+                INSERT INTO user_preferences (user_id, active_location_id)
+                VALUES (:user_id, :location_id)
+                ON CONFLICT (user_id) 
+                DO UPDATE SET active_location_id = :location_id
+            '''), {
+                'user_id': current_user.id,
+                'location_id': new_location_id
+            })
+            
             db.session.commit()
             
+            # Get the newly created location
             location = db.session.execute(text('''
                 SELECT name, latitude, longitude, radius
                 FROM locations
-                WHERE is_active = true
-                ORDER BY id DESC
-                LIMIT 1
-            ''')).fetchone()
+                WHERE id = :location_id
+            '''), {'location_id': new_location_id}).fetchone()
         
         # Convert location Row to dictionary
         location_dict = {
@@ -82,7 +103,7 @@ def index():
             'radius': location.radius
         }
         
-        logger.info(f"Current location: {location_dict['name']} ({location_dict['latitude']}, {location_dict['longitude']})")
+        logger.info(f"Current location for user {current_user.id}: {location_dict['name']} ({location_dict['latitude']}, {location_dict['longitude']})")
         
         # Get Google Places API key
         google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
