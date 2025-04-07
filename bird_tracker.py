@@ -126,17 +126,22 @@ class BirdSightingTracker:
                 # User-specific location
                 from models import UserPreferences, Location, db
                 
+                self.logger.info(f"Setting user-specific location for user {user_id}: {name} ({lat}, {lng}, radius={radius})")
+                
                 # Get or create user preferences
                 prefs = UserPreferences.query.filter_by(user_id=user_id).first()
                 if not prefs:
+                    self.logger.info(f"Creating new UserPreferences for user {user_id}")
                     prefs = UserPreferences(user_id=user_id)
                     db.session.add(prefs)
                     db.session.flush()  # Get the ID for the new preferences
                 
                 # Create or update location
                 if prefs.active_location:
+                    self.logger.info(f"Updating existing location for user {user_id}")
                     location = prefs.active_location
                 else:
+                    self.logger.info(f"Creating new location for user {user_id}")
                     location = Location()
                     db.session.add(location)
                     db.session.flush()  # Get the ID for the new location
@@ -151,8 +156,10 @@ class BirdSightingTracker:
                 
                 # Commit all changes
                 db.session.commit()
+                self.logger.info(f"Successfully set location for user {user_id}: {name}")
             else:
                 # Global location (backward compatibility)
+                self.logger.info(f"Setting global location: {name} ({lat}, {lng}, radius={radius})")
                 self.active_location = {
                     'name': name,
                     'latitude': lat,
@@ -160,10 +167,9 @@ class BirdSightingTracker:
                     'radius': radius
                 }
             
-            self.logger.info(f"Location set to: {name}")
             return True
         except Exception as e:
-            self.logger.error(f"Error setting location: {str(e)}")
+            self.logger.error(f"Error setting location: {str(e)}", exc_info=True)
             if 'db' in locals():
                 db.session.rollback()
             return False
