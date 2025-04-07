@@ -63,14 +63,22 @@
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Debug logs for localStorage
+    console.log('Map page loaded');
+    console.log('localStorage available:', !!localStorage);
+    
     // Get location from localStorage or use server-side default
     const storedLocation = localStorage.getItem('currentLocation');
+    console.log('Stored location:', storedLocation);
+    
     const initialLocation = storedLocation ? JSON.parse(storedLocation) : {
         latitude: parseFloat('{{ location.latitude }}'),
         longitude: parseFloat('{{ location.longitude }}'),
         name: '{{ location.name }}',
         radius: parseFloat('{{ location.radius }}')
     };
+    
+    console.log('Using initial location:', initialLocation);
     
     // Initialize map with current location
     const map = L.map('map').setView([initialLocation.latitude, initialLocation.longitude], 10);
@@ -135,10 +143,12 @@
 
     // Listen for location changes
     window.addEventListener('locationChanged', function(event) {
+        console.log('Location change event received:', event.detail);
         const newLocation = event.detail.location;
         
         // Save location to localStorage
         localStorage.setItem('currentLocation', JSON.stringify(newLocation));
+        console.log('Saved location to localStorage:', newLocation);
         
         // Update map center and zoom
         map.setView([newLocation.latitude, newLocation.longitude], 10);

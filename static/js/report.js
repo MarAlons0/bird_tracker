@@ -1,101 +1,74 @@
-// Load AI analysis when the page loads
-document.addEventListener('DOMContentLoaded', function() {
+// Debug logs for localStorage
+console.log('Report page loaded');
+console.log('localStorage available:', !!localStorage);
+
+// Get current location from localStorage if available
+const storedLocation = localStorage.getItem('currentLocation');
+console.log('Stored location on report page:', storedLocation);
+
+// Function to load AI analysis
+function loadAIAnalysis() {
+    console.log('Loading AI analysis');
     const analysisContent = document.getElementById('analysisContent');
+    analysisContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p>Loading AI analysis...</p></div>';
     
-    // Show loading message with spinner
-    analysisContent.innerHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-primary mb-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="text-muted">Generating AI analysis of recent bird sightings...</p>
-        </div>
-    `;
+    // Get current location from localStorage
+    const location = JSON.parse(localStorage.getItem('currentLocation')) || {
+        name: 'Cincinnati, OH',
+        latitude: 39.1031,
+        longitude: -84.5120,
+        radius: 10
+    };
     
-    // Fetch analysis from the API
-    fetch('/api/analysis')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+    console.log('Using location for analysis:', location);
+    
+    // Add cache-busting query parameter
+    const timestamp = new Date().getTime();
+    fetch(`/api/ai-analysis?t=${timestamp}`)
+        .then(response => response.json())
         .then(data => {
+            console.log('AI analysis response:', data);
             if (data.analysis) {
-                // Create a pre element to preserve whitespace and line breaks
-                const preElement = document.createElement('pre');
-                preElement.style.whiteSpace = 'pre-wrap';
-                preElement.style.fontFamily = 'inherit';
-                preElement.style.margin = '0';
-                preElement.style.padding = '1rem';
-                preElement.style.backgroundColor = '#f8f9fa';
-                preElement.style.borderRadius = '8px';
-                
-                // Set the content
-                preElement.textContent = data.analysis;
-                
-                // Clear the analysis content and append the pre element
-                analysisContent.innerHTML = '';
-                analysisContent.appendChild(preElement);
+                analysisContent.innerHTML = data.analysis;
             } else {
-                analysisContent.innerHTML = '<div class="alert alert-warning">No analysis available.</div>';
+                analysisContent.innerHTML = `<div class="alert alert-info">No analysis available for ${location.name}. Please check back later.</div>`;
             }
         })
         .catch(error => {
-            console.error('Error fetching analysis:', error);
-            analysisContent.innerHTML = '<div class="alert alert-danger">Error loading analysis. Please try again later.</div>';
+            console.error('Error loading AI analysis:', error);
+            analysisContent.innerHTML = '<div class="alert alert-danger">Error loading AI analysis. Please try again later.</div>';
         });
-});
+}
 
 // Listen for location changes
 window.addEventListener('locationChanged', function(event) {
+    console.log('Location change event received in report:', event.detail);
     const newLocation = event.detail.location;
+    
+    // Update loading message with new location
     const analysisContent = document.getElementById('analysisContent');
+    analysisContent.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p>Loading AI analysis for ${newLocation.name}...</p></div>`;
     
-    // Show loading message with new location
-    analysisContent.innerHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-primary mb-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="text-muted">Generating AI analysis for ${newLocation.name}...</p>
-        </div>
-    `;
-    
-    // Fetch new analysis with cache-busting
-    fetch('/api/analysis?' + new Date().getTime())
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+    // Add cache-busting query parameter
+    const timestamp = new Date().getTime();
+    fetch(`/api/ai-analysis?t=${timestamp}`)
+        .then(response => response.json())
         .then(data => {
+            console.log('AI analysis response after location change:', data);
             if (data.analysis) {
-                // Create a pre element to preserve whitespace and line breaks
-                const preElement = document.createElement('pre');
-                preElement.style.whiteSpace = 'pre-wrap';
-                preElement.style.fontFamily = 'inherit';
-                preElement.style.margin = '0';
-                preElement.style.padding = '1rem';
-                preElement.style.backgroundColor = '#f8f9fa';
-                preElement.style.borderRadius = '8px';
-                
-                // Set the content
-                preElement.textContent = data.analysis;
-                
-                // Clear the analysis content and append the pre element
-                analysisContent.innerHTML = '';
-                analysisContent.appendChild(preElement);
+                analysisContent.innerHTML = data.analysis;
             } else {
-                analysisContent.innerHTML = '<div class="alert alert-warning">No analysis available for this location.</div>';
+                analysisContent.innerHTML = `<div class="alert alert-info">No analysis available for ${newLocation.name}. Please check back later.</div>`;
             }
         })
         .catch(error => {
-            console.error('Error fetching analysis:', error);
-            analysisContent.innerHTML = '<div class="alert alert-danger">Error loading analysis. Please try again later.</div>';
+            console.error('Error loading AI analysis after location change:', error);
+            analysisContent.innerHTML = '<div class="alert alert-danger">Error loading AI analysis. Please try again later.</div>';
         });
 });
+
+// Load initial analysis
+loadAIAnalysis();
 
 function sendMessage() {
     const input = document.getElementById('chatInput');
