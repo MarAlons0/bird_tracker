@@ -17,15 +17,15 @@ def migrate_locations():
             logger.info("Adding user_id column to locations table...")
             db.session.execute(text('ALTER TABLE locations ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id)'))
             
-            # Get all active user preferences
-            logger.info("Getting active user preferences...")
-            user_prefs = UserPreferences.query.filter_by(is_active=True).all()
+            # Get all user preferences
+            logger.info("Getting all user preferences...")
+            user_prefs = UserPreferences.query.all()
             
             # Associate locations with users based on user preferences
             logger.info("Associating locations with users...")
             for pref in user_prefs:
-                if pref.location_id:
-                    location = Location.query.get(pref.location_id)
+                if pref.active_location_id:
+                    location = Location.query.get(pref.active_location_id)
                     if location:
                         location.user_id = pref.user_id
                         logger.info(f"Associated location {location.name} with user {pref.user_id}")
