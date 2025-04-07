@@ -1,5 +1,6 @@
 from app import create_app, db
 from models import Location, UserPreferences
+from sqlalchemy import text
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +15,7 @@ def migrate_locations():
             
             # Add user_id column if it doesn't exist
             logger.info("Adding user_id column to locations table...")
-            db.session.execute('ALTER TABLE locations ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id)')
+            db.session.execute(text('ALTER TABLE locations ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id)'))
             
             # Get all active user preferences
             logger.info("Getting active user preferences...")
