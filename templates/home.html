@@ -362,6 +362,9 @@
                     detail: { location: data.location }
                 }));
                 
+                // Save location to localStorage
+                localStorage.setItem('currentLocation', JSON.stringify(data.location));
+                
                 // Show success message
                 alert('Location updated successfully!');
                 

@@ -63,8 +63,17 @@
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Get location from localStorage or use server-side default
+    const storedLocation = localStorage.getItem('currentLocation');
+    const initialLocation = storedLocation ? JSON.parse(storedLocation) : {
+        latitude: parseFloat('{{ location.latitude }}'),
+        longitude: parseFloat('{{ location.longitude }}'),
+        name: '{{ location.name }}',
+        radius: parseFloat('{{ location.radius }}')
+    };
+    
     // Initialize map with current location
-    const map = L.map('map').setView([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')], 10);
+    const map = L.map('map').setView([initialLocation.latitude, initialLocation.longitude], 10);
     
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -72,16 +81,16 @@
     }).addTo(map);
 
     // Add marker for current location
-    const locationMarker = L.marker([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')])
+    const locationMarker = L.marker([initialLocation.latitude, initialLocation.longitude])
         .addTo(map)
-        .bindPopup('Current Location: {{ location.name }}');
+        .bindPopup('Current Location: ' + initialLocation.name);
 
     // Add circle for search radius
-    const searchCircle = L.circle([parseFloat('{{ location.latitude }}'), parseFloat('{{ location.longitude }}')], {
+    const searchCircle = L.circle([initialLocation.latitude, initialLocation.longitude], {
         color: 'blue',
         fillColor: '#30f',
         fillOpacity: 0.1,
-        radius: parseFloat('{{ location.radius }}') * 1000 // Convert km to meters
+        radius: initialLocation.radius * 1609.34 // Convert miles to meters
     }).addTo(map);
 
     // Add markers for recent observations
@@ -128,6 +137,9 @@
     window.addEventListener('locationChanged', function(event) {
         const newLocation = event.detail.location;
         
+        // Save location to localStorage
+        localStorage.setItem('currentLocation', JSON.stringify(newLocation));
+        
         // Update map center and zoom
         map.setView([newLocation.latitude, newLocation.longitude], 10);
         
@@ -137,7 +149,7 @@
         
         // Update search radius circle
         searchCircle.setLatLng([newLocation.latitude, newLocation.longitude])
-            .setRadius(newLocation.radius * 1000);
+            .setRadius(newLocation.radius * 1609.34); // Convert miles to meters
         
         // Clear existing observation markers
         markers.forEach(marker => map.removeLayer(marker));
@@ -149,8 +161,8 @@
         // Fetch new observations for the updated location
         fetch('/api/observations')
             .then(response => response.json())
-            .then(newObservations => {
-                newObservations.forEach(obs => {
+            .then(data => {
+                data.forEach(obs => {
                     const marker = L.circleMarker([parseFloat(obs.latitude), parseFloat(obs.longitude)], {
                         radius: 8,
                         fillColor: '#f03',
@@ -180,7 +192,9 @@
                     tableBody.appendChild(row);
                 });
             })
-            .catch(error => console.error('Error fetching observations:', error));
+            .catch(error => {
+                console.error('Error fetching observations:', error);
+            });
     });
 </script>
 {% endblock %} 
