@@ -128,35 +128,42 @@ class BirdSightingTracker:
                 
                 self.logger.info(f"Setting user-specific location for user {user_id}: {name} ({lat}, {lng}, radius={radius})")
                 
-                # Get or create user preferences
-                prefs = UserPreferences.query.filter_by(user_id=user_id).first()
-                if not prefs:
-                    self.logger.info(f"Creating new UserPreferences for user {user_id}")
-                    prefs = UserPreferences(user_id=user_id)
-                    db.session.add(prefs)
-                    db.session.flush()  # Get the ID for the new preferences
-                
-                # Create or update location
-                if prefs.active_location:
-                    self.logger.info(f"Updating existing location for user {user_id}")
-                    location = prefs.active_location
-                else:
-                    self.logger.info(f"Creating new location for user {user_id}")
-                    location = Location()
-                    db.session.add(location)
-                    db.session.flush()  # Get the ID for the new location
-                    prefs.active_location = location
-                
-                # Update location details
-                location.name = name
-                location.latitude = lat
-                location.longitude = lng
-                location.radius = radius
-                location.is_active = True
-                
-                # Commit all changes
-                db.session.commit()
-                self.logger.info(f"Successfully set location for user {user_id}: {name}")
+                try:
+                    # Get or create user preferences
+                    prefs = UserPreferences.query.filter_by(user_id=user_id).first()
+                    if not prefs:
+                        self.logger.info(f"Creating new UserPreferences for user {user_id}")
+                        prefs = UserPreferences(user_id=user_id)
+                        db.session.add(prefs)
+                        db.session.flush()  # Get the ID for the new preferences
+                    
+                    # Create or update location
+                    if prefs.active_location:
+                        self.logger.info(f"Updating existing location for user {user_id}")
+                        location = prefs.active_location
+                    else:
+                        self.logger.info(f"Creating new location for user {user_id}")
+                        location = Location()
+                        db.session.add(location)
+                        db.session.flush()  # Get the ID for the new location
+                        prefs.active_location = location
+                    
+                    # Update location details
+                    location.name = name
+                    location.latitude = lat
+                    location.longitude = lng
+                    location.radius = radius
+                    location.is_active = True
+                    
+                    # Commit all changes
+                    db.session.commit()
+                    self.logger.info(f"Successfully set location for user {user_id}: {name}")
+                    return True
+                    
+                except Exception as e:
+                    self.logger.error(f"Error setting user-specific location: {str(e)}", exc_info=True)
+                    db.session.rollback()
+                    return False
             else:
                 # Global location (backward compatibility)
                 self.logger.info(f"Setting global location: {name} ({lat}, {lng}, radius={radius})")
@@ -166,10 +173,10 @@ class BirdSightingTracker:
                     'longitude': lng,
                     'radius': radius
                 }
-            
-            return True
+                return True
+                
         except Exception as e:
-            self.logger.error(f"Error setting location: {str(e)}", exc_info=True)
+            self.logger.error(f"Error in set_location: {str(e)}", exc_info=True)
             if 'db' in locals():
                 db.session.rollback()
             return False
@@ -179,7 +186,7 @@ class BirdSightingTracker:
         try:
             if user_id is not None:
                 # Try to get user-specific location
-                from models import UserPreferences
+                from models import UserPreferences, Location, db
                 prefs = UserPreferences.query.filter_by(user_id=user_id).first()
                 if prefs and prefs.active_location:
                     return {
@@ -190,28 +197,39 @@ class BirdSightingTracker:
                     }
                 else:
                     # If no user-specific location exists, create one with default values
-                    prefs = UserPreferences(user_id=user_id)
-                    location = Location(
-                        name='Cincinnati',
-                        latitude=39.1031,
-                        longitude=-84.5120,
-                        radius=25,
-                        is_active=True
-                    )
-                    prefs.active_location = location
-                    db.session.add(prefs)
-                    db.session.commit()
-                    return {
-                        'name': location.name,
-                        'latitude': location.latitude,
-                        'longitude': location.longitude,
-                        'radius': location.radius
-                    }
+                    try:
+                        self.logger.info(f"Creating default location for user {user_id}")
+                        location = Location(
+                            name='Cincinnati',
+                            latitude=39.1031,
+                            longitude=-84.5120,
+                            radius=25,
+                            is_active=True
+                        )
+                        db.session.add(location)
+                        db.session.flush()  # Get the ID for the new location
+                        
+                        prefs = UserPreferences(user_id=user_id)
+                        prefs.active_location = location
+                        db.session.add(prefs)
+                        db.session.commit()
+                        
+                        self.logger.info(f"Successfully created default location for user {user_id}")
+                        return {
+                            'name': location.name,
+                            'latitude': location.latitude,
+                            'longitude': location.longitude,
+                            'radius': location.radius
+                        }
+                    except Exception as e:
+                        self.logger.error(f"Error creating default location: {str(e)}", exc_info=True)
+                        db.session.rollback()
+                        return None
             
             # Fall back to global location only if no user_id is provided
             return self.active_location
         except Exception as e:
-            self.logger.error(f"Error getting active location: {str(e)}")
+            self.logger.error(f"Error getting active location: {str(e)}", exc_info=True)
             return self.active_location  # Fall back to global location
 
     def _initialize_claude(self):
