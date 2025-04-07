@@ -39,6 +39,7 @@
                    <thead>
                        <tr>
                            <th>Species</th>
+                           <th>Category</th>
                            <th>Count</th>
                            <th>Location</th>
                            <th>Date</th>
@@ -48,6 +49,7 @@
                        {% for obs in observations %}
                        <tr>
                            <td>{{ obs.comName }}</td>
+                           <td>{{ obs.category }}</td>
                            <td>{{ obs.howMany }}</td>
                            <td>{{ obs.locName }}</td>
                            <td>{{ obs.obsDt }}</td>
@@ -63,76 +65,79 @@
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Debug logs for localStorage
-    console.log('Map page loaded');
-    console.log('localStorage available:', !!localStorage);
-    
-    // Get location from localStorage or use server-side default
-    const storedLocation = localStorage.getItem('currentLocation');
-    console.log('Stored location:', storedLocation);
-    
-    const initialLocation = storedLocation ? JSON.parse(storedLocation) : {
-        latitude: parseFloat('{{ location.latitude }}'),
-        longitude: parseFloat('{{ location.longitude }}'),
-        name: '{{ location.name }}',
-        radius: parseFloat('{{ location.radius }}')
-    };
-    
-    console.log('Using initial location:', initialLocation);
-    
-    // Initialize map with current location
-    const map = L.map('map').setView([initialLocation.latitude, initialLocation.longitude], 10);
-    
-    // Add tile layer
+    // Bird categorization function
+    function categorizeBird(birdName) {
+        const raptors = ['hawk', 'eagle', 'falcon', 'owl', 'osprey', 'kite', 'harrier', 'vulture'];
+        const waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'crane', 'grebe', 'loon', 'coot', 'gallinule', 'rail', 'shorebird', 'sandpiper', 'plover', 'gull', 'tern'];
+        const songbirds = ['warbler', 'sparrow', 'finch', 'thrush', 'wren', 'chickadee', 'titmouse', 'nuthatch', 'creeper', 'kinglet', 'gnatcatcher', 'flycatcher', 'phoebe', 'pewee', 'vireo', 'jay', 'crow', 'raven', 'blackbird', 'oriole', 'grackle', 'starling', 'mockingbird', 'thrasher', 'catbird', 'cardinal', 'grosbeak', 'bunting', 'towhee', 'junco', 'lark', 'pipit', 'swallow', 'martin', 'swift', 'hummingbird', 'woodpecker', 'flicker', 'sapsucker'];
+        
+        const birdNameLower = birdName.toLowerCase();
+        
+        if (raptors.some(term => birdNameLower.includes(term))) {
+            return { category: 'Raptors', color: '#e74c3c' };
+        } else if (waterfowl.some(term => birdNameLower.includes(term))) {
+            return { category: 'Waterfowl', color: '#3498db' };
+        } else if (songbirds.some(term => birdNameLower.includes(term))) {
+            return { category: 'Songbirds', color: '#2ecc71' };
+        } else {
+            return { category: 'Other', color: '#95a5a6' };
+        }
+    }
+
+    // Initialize map
+    const map = L.map('map').setView([{{ location.latitude }}, {{ location.longitude }}], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add marker for current location
-    const locationMarker = L.marker([initialLocation.latitude, initialLocation.longitude])
-        .addTo(map)
-        .bindPopup('Current Location: ' + initialLocation.name);
+    // Create legend
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = 
+            '<h4>Bird Categories</h4>' +
+            '<div><i style="background: #e74c3c"></i> Raptors</div>' +
+            '<div><i style="background: #3498db"></i> Waterfowl</div>' +
+            '<div><i style="background: #2ecc71"></i> Songbirds</div>' +
+            '<div><i style="background: #95a5a6"></i> Other</div>';
+        return div;
+    };
+    legend.addTo(map);
 
-    // Add circle for search radius
-    const searchCircle = L.circle([initialLocation.latitude, initialLocation.longitude], {
-        color: 'blue',
-        fillColor: '#30f',
-        fillOpacity: 0.1,
-        radius: initialLocation.radius * 1609.34 // Convert miles to meters
-    }).addTo(map);
-
-    // Add markers for recent observations
-    const initialObservations = JSON.parse('{{ observations|tojson|safe }}');
+    // Store markers for later removal
     const markers = [];
     const observationRows = [];
 
+    // Add initial observations
+    const initialObservations = {{ observations|tojson|safe }};
     initialObservations.forEach(obs => {
-        const marker = L.circleMarker([parseFloat(obs.latitude), parseFloat(obs.longitude)], {
+        const birdInfo = categorizeBird(obs.comName);
+        const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
             radius: 8,
-            fillColor: '#f03',
+            fillColor: birdInfo.color,
             color: '#000',
             weight: 1,
             opacity: 1,
             fillOpacity: 0.8
         }).addTo(map);
 
-        marker.bindPopup(`
-            <strong>${obs.common_name}</strong><br>
-            Scientific Name: ${obs.scientific_name}<br>
-            Date: ${obs.observation_date}<br>
-            Location: ${obs.locality_name}
-        `);
+        const popupContent = '<strong>' + obs.comName + '</strong><br>' +
+            'Category: ' + birdInfo.category + '<br>' +
+            'Count: ' + obs.howMany + '<br>' +
+            'Location: ' + obs.locName + '<br>' +
+            'Date: ' + obs.obsDt;
+
+        marker.bindPopup(popupContent);
 
         markers.push(marker);
 
         // Add row to observations table
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${obs.common_name}</td>
-            <td>${obs.scientific_name}</td>
-            <td>${obs.observation_date}</td>
-            <td>${obs.locality_name}</td>
-        `;
+        row.innerHTML = '<td>' + obs.comName + '</td>' +
+            '<td>' + birdInfo.category + '</td>' +
+            '<td>' + obs.howMany + '</td>' +
+            '<td>' + obs.locName + '</td>' +
+            '<td>' + obs.obsDt + '</td>';
         observationRows.push(row);
     });
 
@@ -142,63 +147,50 @@
     observationRows.forEach(row => tableBody.appendChild(row));
 
     // Listen for location changes
-    window.addEventListener('locationChanged', function(event) {
-        console.log('Location change event received:', event.detail);
-        const newLocation = event.detail.location;
-        
-        // Save location to localStorage
-        localStorage.setItem('currentLocation', JSON.stringify(newLocation));
-        console.log('Saved location to localStorage:', newLocation);
-        
-        // Update map center and zoom
-        map.setView([newLocation.latitude, newLocation.longitude], 10);
-        
-        // Update location marker
-        locationMarker.setLatLng([newLocation.latitude, newLocation.longitude])
-            .setPopupContent(`Current Location: ${newLocation.name}`);
-        
-        // Update search radius circle
-        searchCircle.setLatLng([newLocation.latitude, newLocation.longitude])
-            .setRadius(newLocation.radius * 1609.34); // Convert miles to meters
-        
-        // Clear existing observation markers
+    window.addEventListener('locationChanged', function(e) {
+        // Clear existing markers
         markers.forEach(marker => map.removeLayer(marker));
         markers.length = 0;
         
-        // Clear observations table
+        // Clear existing table rows
         tableBody.innerHTML = '';
-        
-        // Fetch new observations for the updated location
+        observationRows.length = 0;
+
+        // Update map view
+        map.setView([e.detail.latitude, e.detail.longitude], 10);
+
+        // Fetch new observations
         fetch('/api/observations')
             .then(response => response.json())
             .then(data => {
                 data.forEach(obs => {
-                    const marker = L.circleMarker([parseFloat(obs.latitude), parseFloat(obs.longitude)], {
+                    const birdInfo = categorizeBird(obs.comName);
+                    const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
                         radius: 8,
-                        fillColor: '#f03',
+                        fillColor: birdInfo.color,
                         color: '#000',
                         weight: 1,
                         opacity: 1,
                         fillOpacity: 0.8
                     }).addTo(map);
 
-                    marker.bindPopup(`
-                        <strong>${obs.common_name}</strong><br>
-                        Scientific Name: ${obs.scientific_name}<br>
-                        Date: ${obs.observation_date}<br>
-                        Location: ${obs.locality_name}
-                    `);
+                    const popupContent = '<strong>' + obs.comName + '</strong><br>' +
+                        'Category: ' + birdInfo.category + '<br>' +
+                        'Count: ' + obs.howMany + '<br>' +
+                        'Location: ' + obs.locName + '<br>' +
+                        'Date: ' + obs.obsDt;
+
+                    marker.bindPopup(popupContent);
 
                     markers.push(marker);
 
                     // Add row to observations table
                     const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${obs.common_name}</td>
-                        <td>${obs.scientific_name}</td>
-                        <td>${obs.observation_date}</td>
-                        <td>${obs.locality_name}</td>
-                    `;
+                    row.innerHTML = '<td>' + obs.comName + '</td>' +
+                        '<td>' + birdInfo.category + '</td>' +
+                        '<td>' + obs.howMany + '</td>' +
+                        '<td>' + obs.locName + '</td>' +
+                        '<td>' + obs.obsDt + '</td>';
                     tableBody.appendChild(row);
                 });
             })

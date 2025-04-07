@@ -5,6 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import column_property
+import logging
+
+logger = logging.getLogger(__name__)
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -66,11 +69,19 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         """Set the user's password"""
+        logger.info(f"Setting password for user {self.email}")
         self.password_hash = generate_password_hash(password)
+        logger.info("Password hash generated successfully")
 
     def check_password(self, password):
         """Check if the provided password matches"""
-        return check_password_hash(self.password_hash, password)
+        logger.info(f"Checking password for user {self.email}")
+        if not self.password_hash:
+            logger.error(f"No password hash found for user {self.email}")
+            return False
+        result = check_password_hash(self.password_hash, password)
+        logger.info(f"Password check result for user {self.email}: {result}")
+        return result
 
 class RegistrationRequest(db.Model):
     __tablename__ = 'registration_requests'
@@ -91,6 +102,7 @@ class CarouselImage(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
+    cloudinary_url = db.Column(db.String(255), nullable=True)
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
     order = db.Column(db.Integer, nullable=True)
@@ -98,7 +110,7 @@ class CarouselImage(db.Model):
     
     # Explicitly tell SQLAlchemy not to track created_at and updated_at
     __mapper_args__ = {
-        'include_properties': ['id', 'filename', 'title', 'description', 'order', 'is_active']
+        'include_properties': ['id', 'filename', 'cloudinary_url', 'title', 'description', 'order', 'is_active']
     }
 
     def __repr__(self):

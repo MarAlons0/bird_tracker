@@ -17,6 +17,9 @@ def add_carousel_images():
     """Add carousel images to the database"""
     app = create_app()
     with app.app_context():
+        # Create all tables
+        db.create_all()
+        
         # Ensure carousel directory exists
         carousel_dir = ensure_carousel_directory()
         
@@ -36,22 +39,18 @@ def add_carousel_images():
             {'filename': 'photo12.jpeg', 'title': 'Nuthatch', 'description': 'Birds that walk headfirst down trees'},
             {'filename': 'photo13.jpeg', 'title': 'Owl', 'description': 'Nocturnal hunters with silent flight'},
             {'filename': 'photo14.jpg', 'title': 'Parrot', 'description': 'Colorful birds known for their intelligence'},
-            {'filename': 'photo15.jpg', 'title': 'Pigeon', 'description': 'Common city dwellers with remarkable navigation'},
+            {'filename': 'photo15.jpg', 'title': 'Pigeon', 'description': 'Common urban birds with surprising intelligence'},
             {'filename': 'photo16.jpeg', 'title': 'Quail', 'description': 'Ground-dwelling birds with distinctive calls'},
-            {'filename': 'photo17.jpeg', 'title': 'Raven', 'description': 'Highly intelligent corvids'},
+            {'filename': 'photo17.jpeg', 'title': 'Raven', 'description': 'Highly intelligent birds of the corvid family'},
             {'filename': 'photo18.jpeg', 'title': 'Sparrow', 'description': 'Small, adaptable songbirds'},
-            {'filename': 'photo19.jpeg', 'title': 'Swallow', 'description': 'Graceful aerial acrobats'},
-            {'filename': 'photo20.jpeg', 'title': 'Woodpecker', 'description': 'Birds that drum on trees'}
+            {'filename': 'photo19.jpeg', 'title': 'Swallow', 'description': 'Agile aerial insectivores'},
+            {'filename': 'photo20.jpeg', 'title': 'Woodpecker', 'description': 'Birds that drum on trees for food'}
         ]
         
-        # Add each image to the database
-        for i, image_data in enumerate(images, 1):
-            filename = secure_filename(image_data['filename'])
+        # Process each image
+        for i, image_data in enumerate(images):
+            filename = image_data['filename']
             image_path = os.path.join('static', 'images', 'birds', filename)
-            
-            if not os.path.exists(image_path):
-                print(f"Warning: Image file not found: {image_path}")
-                continue
             
             try:
                 # Open and process the image
@@ -76,32 +75,41 @@ def add_carousel_images():
                         print(f"Warning: Failed to upload {filename} to Cloudinary")
                         continue
                     
-                    # Create new carousel image
-                    image = CarouselImage(
-                        filename=upload_result['secure_url'],  # Store the Cloudinary URL
-                        title=image_data['title'],
-                        description=image_data['description'],
-                        order=i,
-                        is_active=True
-                    )
-                    
                     # Check if image already exists
-                    existing = CarouselImage.query.filter_by(filename=upload_result['secure_url']).first()
-                    if existing:
-                        print(f"Image {filename} already exists in database")
-                        continue
+                    existing = CarouselImage.query.filter_by(filename=filename).first()
                     
-                    # Add to database
-                    db.session.add(image)
-                    print(f"Added image {filename} to database with Cloudinary URL: {upload_result['secure_url']}")
+                    if existing:
+                        # Update existing image
+                        existing.cloudinary_url = upload_result['secure_url']
+                        existing.title = image_data['title']
+                        existing.description = image_data['description']
+                        existing.order = i
+                        existing.is_active = True
+                        print(f"Updated image {filename} with Cloudinary URL: {upload_result['secure_url']}")
+                    else:
+                        # Create new carousel image
+                        image = CarouselImage(
+                            filename=filename,
+                            cloudinary_url=upload_result['secure_url'],
+                            title=image_data['title'],
+                            description=image_data['description'],
+                            order=i,
+                            is_active=True
+                        )
+                        db.session.add(image)
+                        print(f"Added image {filename} to database with Cloudinary URL: {upload_result['secure_url']}")
                 
             except Exception as e:
-                print(f"Error processing {filename}: {str(e)}")
+                print(f"Error processing image {filename}: {str(e)}")
+                db.session.rollback()
                 continue
         
-        # Commit changes
-        db.session.commit()
-        print(f"Added {len(images)} images to the carousel database")
+        try:
+            db.session.commit()
+            print("Successfully committed all changes to database")
+        except Exception as e:
+            print(f"Error committing to database: {str(e)}")
+            db.session.rollback()
 
 if __name__ == '__main__':
     add_carousel_images() 

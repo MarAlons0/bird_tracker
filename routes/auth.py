@@ -58,6 +58,7 @@ def login():
         
         try:
             # Check if user exists in database using raw SQL
+            logger.info("Checking if user exists in database...")
             result = db.session.execute(
                 text("""
                     SELECT id, username, email, password_hash, is_admin, is_approved,
@@ -71,7 +72,7 @@ def login():
             
             # If user exists, allow login regardless of ALLOWED_EMAILS
             if result:
-                logger.info(f"User exists in database: {email}")
+                logger.info(f"User found in database: {email}")
                 user = User()
                 user.id = result[0]
                 user.username = result[1]
@@ -85,12 +86,14 @@ def login():
                 user.token_expiry = result[9]
                 user.newsletter_subscription = result[10]
                 
+                logger.info(f"Checking password for user: {email}")
                 if not user.check_password(password):
                     logger.warning(f"Invalid password for user: {email}")
                     return render_template('login.html', 
                         error="Invalid email or password")
                 
                 # Log user in
+                logger.info(f"Logging in user: {email}")
                 login_user(user, remember=True)
                 logger.info(f"User logged in successfully: {email}")
                 flash("Successfully logged in!", "success")
@@ -102,9 +105,11 @@ def login():
                 next_page = request.args.get('next')
                 if not next_page or not next_page.startswith('/'):
                     next_page = url_for('main.index')
+                logger.info(f"Redirecting to: {next_page}")
                 return redirect(next_page)
             
             # For new users, check ALLOWED_EMAILS
+            logger.info("User not found in database, checking ALLOWED_EMAILS")
             allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
             logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
             
@@ -139,6 +144,7 @@ def login():
             
             # Create user using raw SQL
             default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+            logger.info(f"Creating user with default password: {default_password}")
             db.session.execute(
                 text("""
                     INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
@@ -183,8 +189,9 @@ def login():
             user.newsletter_subscription = result[10]
             
             # Log user in
+            logger.info(f"Logging in new user: {email}")
             login_user(user, remember=True)
-            logger.info(f"User logged in successfully: {email}")
+            logger.info(f"New user logged in successfully: {email}")
             flash("Successfully logged in!", "success")
             
             # Set session as permanent
@@ -194,6 +201,7 @@ def login():
             
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")
+            logger.exception("Full traceback:")
             db.session.rollback()
             return render_template('login.html', 
                 error="An error occurred during login. Please try again.")

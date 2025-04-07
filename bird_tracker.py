@@ -24,7 +24,7 @@ import tempfile
 from math import cos, sin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-from models import User
+from models import User, Location
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -578,6 +578,18 @@ This report was generated automatically by the Bird Tracker application.
             if not self.api_key:
                 raise ValueError("eBird API key not found")
             
+            # Get the most recent active location from the database
+            active_location = Location.query.filter_by(is_active=True).first()
+            
+            if active_location:
+                # Update the active_location property
+                self.active_location = {
+                    'name': active_location.name,
+                    'latitude': active_location.latitude,
+                    'longitude': active_location.longitude,
+                    'radius': active_location.radius
+                }
+            
             if not self.active_location:
                 raise ValueError("No active location configured")
             
@@ -605,7 +617,34 @@ This report was generated automatically by the Bird Tracker application.
             # Sort observations by date (most recent first)
             observations.sort(key=lambda x: x['obsDt'], reverse=True)
             
-            return observations
+            # Transform field names to match template expectations
+            transformed_observations = []
+            for obs in observations:
+                transformed_obs = {
+                    'comName': obs.get('comName', ''),
+                    'sciName': obs.get('sciName', ''),
+                    'howMany': obs.get('howMany', 0),
+                    'locName': obs.get('locName', ''),
+                    'obsDt': obs.get('obsDt', ''),
+                    'lat': obs.get('lat', 0),
+                    'lng': obs.get('lng', 0),
+                    'subId': obs.get('subId', ''),
+                    'userDisplayName': obs.get('userDisplayName', ''),
+                    'obsValid': obs.get('obsValid', True),
+                    'obsReviewed': obs.get('obsReviewed', False),
+                    'locationPrivate': obs.get('locationPrivate', False),
+                    'subnational2Code': obs.get('subnational2Code', ''),
+                    'subnational2Name': obs.get('subnational2Name', ''),
+                    'subnational1Code': obs.get('subnational1Code', ''),
+                    'subnational1Name': obs.get('subnational1Name', ''),
+                    'countryCode': obs.get('countryCode', ''),
+                    'countryName': obs.get('countryName', ''),
+                    'speciesCode': obs.get('speciesCode', ''),
+                    'category': ''  # Will be set by the frontend
+                }
+                transformed_observations.append(transformed_obs)
+            
+            return transformed_observations
             
         except requests.exceptions.RequestException as e:
             logger.error(f"Error getting observations from eBird API: {str(e)}")

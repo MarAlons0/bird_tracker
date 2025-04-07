@@ -90,10 +90,20 @@
                     <div class="carousel-inner">
                         {% for image in carousel_images %}
                         <div class="carousel-item {% if loop.first %}active{% endif %}">
-                            <img src="{{ url_for('static', filename='images/birds/' + image) }}" 
+                            <img src="{{ image.filename }}" 
                                  class="d-block" 
-                                 alt="Bird Photo {{ loop.index }}"
+                                 alt="{{ image.title or 'Bird Photo ' + loop.index|string }}"
                                  style="max-width: 100%; height: auto;">
+                            {% if image.title or image.description %}
+                            <div class="carousel-caption d-none d-md-block">
+                                {% if image.title %}
+                                <h5>{{ image.title }}</h5>
+                                {% endif %}
+                                {% if image.description %}
+                                <p>{{ image.description }}</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -289,6 +299,72 @@ document.getElementById('saveLocation').addEventListener('click', async function
     } finally {
         loadingModal.hide();
     }
+});
+
+// Handle location form submission
+document.getElementById('saveLocationBtn').addEventListener('click', function() {
+    const locationInput = document.getElementById('locationName');
+    const radiusInput = document.getElementById('searchRadius');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const locationError = document.getElementById('locationError');
+    
+    if (!locationInput.value) {
+        locationError.textContent = 'Please enter a location';
+        return;
+    }
+
+    // Get stored coordinates
+    const lat = locationInput.dataset.lat;
+    const lng = locationInput.dataset.lng;
+    
+    if (!lat || !lng) {
+        locationError.textContent = 'Please select a location from the dropdown';
+        return;
+    }
+
+    loadingModal.show();
+    
+    fetch('/api/location', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: locationInput.value,
+            latitude: parseFloat(lat),
+            longitude: parseFloat(lng),
+            radius: parseInt(radiusInput.value) || 10
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            // Close the location modal
+            const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
+            locationModal.hide();
+            
+            // Dispatch custom event with new location and observations
+            const locationChangedEvent = new CustomEvent('locationChanged', {
+                detail: {
+                    location: data.location,
+                    observations: data.observations
+                }
+            });
+            window.dispatchEvent(locationChangedEvent);
+            
+            // Show success message and refresh page
+            alert('Location updated successfully!');
+            window.location.reload();
+        } else {
+            locationError.textContent = data.error || 'Failed to update location';
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        locationError.textContent = 'Error updating location. Please try again.';
+        console.error('Error:', error);
+    });
 });
 </script>
 {% endblock %} 
