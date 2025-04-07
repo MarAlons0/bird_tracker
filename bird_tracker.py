@@ -628,12 +628,19 @@ This report was generated automatically by the Bird Tracker application.
         """Get recent bird observations from eBird API"""
         try:
             if not self.api_key:
+                self.logger.error("eBird API key not found")
                 raise ValueError("eBird API key not found")
             
             # Get the active location for this user
             active_location = self.get_active_location(user_id)
             if not active_location:
+                self.logger.error(f"No active location found for user {user_id}")
                 raise ValueError("No active location configured")
+            
+            # Validate location data
+            if not all(key in active_location for key in ['latitude', 'longitude', 'radius']):
+                self.logger.error(f"Invalid location data: {active_location}")
+                raise ValueError("Invalid location data")
             
             # Set up request parameters
             headers = {
@@ -650,11 +657,13 @@ This report was generated automatically by the Bird Tracker application.
             
             # Make request to eBird API
             url = f"{self.base_url}/data/obs/geo/recent"
+            self.logger.info(f"Making request to eBird API: {url} with params {params}")
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
             
             # Parse response
             observations = response.json()
+            self.logger.info(f"Retrieved {len(observations)} observations from eBird API")
             
             # Sort observations by date (most recent first)
             observations.sort(key=lambda x: x['obsDt'], reverse=True)
@@ -689,8 +698,8 @@ This report was generated automatically by the Bird Tracker application.
             return transformed_observations
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error getting observations from eBird API: {str(e)}")
+            self.logger.error(f"Error getting observations from eBird API: {str(e)}")
             return None
         except Exception as e:
-            logger.error(f"Error getting observations: {str(e)}")
+            self.logger.error(f"Error getting observations: {str(e)}")
             return None 
