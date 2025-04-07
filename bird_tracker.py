@@ -187,49 +187,68 @@ class BirdSightingTracker:
             if user_id is not None:
                 # Try to get user-specific location
                 from models import UserPreferences, Location, db
-                prefs = UserPreferences.query.filter_by(user_id=user_id).first()
-                if prefs and prefs.active_location:
-                    return {
-                        'name': prefs.active_location.name,
-                        'latitude': prefs.active_location.latitude,
-                        'longitude': prefs.active_location.longitude,
-                        'radius': prefs.active_location.radius
-                    }
-                else:
-                    # If no user-specific location exists, create one with default values
-                    try:
-                        self.logger.info(f"Creating default location for user {user_id}")
-                        location = Location(
-                            name='Cincinnati',
-                            latitude=39.1031,
-                            longitude=-84.5120,
-                            radius=25,
-                            is_active=True
-                        )
-                        db.session.add(location)
-                        db.session.flush()  # Get the ID for the new location
-                        
-                        prefs = UserPreferences(user_id=user_id)
-                        prefs.active_location = location
-                        db.session.add(prefs)
-                        db.session.commit()
-                        
-                        self.logger.info(f"Successfully created default location for user {user_id}")
+                
+                self.logger.info(f"Getting active location for user {user_id}")
+                
+                try:
+                    prefs = UserPreferences.query.filter_by(user_id=user_id).first()
+                    if prefs and prefs.active_location:
+                        self.logger.info(f"Found existing location for user {user_id}: {prefs.active_location.name}")
                         return {
-                            'name': location.name,
-                            'latitude': location.latitude,
-                            'longitude': location.longitude,
-                            'radius': location.radius
+                            'name': prefs.active_location.name,
+                            'latitude': prefs.active_location.latitude,
+                            'longitude': prefs.active_location.longitude,
+                            'radius': prefs.active_location.radius
                         }
-                    except Exception as e:
-                        self.logger.error(f"Error creating default location: {str(e)}", exc_info=True)
-                        db.session.rollback()
-                        return None
+                    else:
+                        # If no user-specific location exists, create one with default values
+                        self.logger.info(f"Creating default location for user {user_id}")
+                        
+                        try:
+                            # Create new location
+                            location = Location(
+                                name='Cincinnati',
+                                latitude=39.1031,
+                                longitude=-84.5120,
+                                radius=25,
+                                is_active=True
+                            )
+                            db.session.add(location)
+                            db.session.flush()  # Get the ID for the new location
+                            
+                            # Create new preferences
+                            prefs = UserPreferences(user_id=user_id)
+                            prefs.active_location = location
+                            db.session.add(prefs)
+                            
+                            # Commit all changes
+                            db.session.commit()
+                            
+                            self.logger.info(f"Successfully created default location for user {user_id}")
+                            return {
+                                'name': location.name,
+                                'latitude': location.latitude,
+                                'longitude': location.longitude,
+                                'radius': location.radius
+                            }
+                        except Exception as e:
+                            self.logger.error(f"Error creating default location: {str(e)}", exc_info=True)
+                            db.session.rollback()
+                            return None
+                            
+                except Exception as e:
+                    self.logger.error(f"Error getting user location: {str(e)}", exc_info=True)
+                    db.session.rollback()
+                    return None
             
             # Fall back to global location only if no user_id is provided
+            self.logger.info("No user_id provided, using global location")
             return self.active_location
+            
         except Exception as e:
-            self.logger.error(f"Error getting active location: {str(e)}", exc_info=True)
+            self.logger.error(f"Error in get_active_location: {str(e)}", exc_info=True)
+            if 'db' in locals():
+                db.session.rollback()
             return self.active_location  # Fall back to global location
 
     def _initialize_claude(self):
