@@ -131,20 +131,25 @@ class BirdSightingTracker:
                 if not prefs:
                     prefs = UserPreferences(user_id=user_id)
                     db.session.add(prefs)
+                    db.session.flush()  # Get the ID for the new preferences
                 
                 # Create or update location
                 if prefs.active_location:
                     location = prefs.active_location
                 else:
                     location = Location()
+                    db.session.add(location)
+                    db.session.flush()  # Get the ID for the new location
                     prefs.active_location = location
                 
+                # Update location details
                 location.name = name
                 location.latitude = lat
                 location.longitude = lng
                 location.radius = radius
                 location.is_active = True
                 
+                # Commit all changes
                 db.session.commit()
             else:
                 # Global location (backward compatibility)
