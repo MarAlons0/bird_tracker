@@ -47,6 +47,56 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 
+// Listen for location changes
+window.addEventListener('locationChanged', function(event) {
+    const analysisContent = document.getElementById('analysisContent');
+    const newLocation = event.detail.location;
+    
+    // Show loading message with spinner
+    analysisContent.innerHTML = `
+        <div class="text-center p-4">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted">Generating AI analysis for ${newLocation.name}...</p>
+        </div>
+    `;
+    
+    // Fetch new analysis from the API with cache-busting
+    fetch('/api/analysis?' + new Date().getTime())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.analysis) {
+                // Create a pre element to preserve whitespace and line breaks
+                const preElement = document.createElement('pre');
+                preElement.style.whiteSpace = 'pre-wrap';
+                preElement.style.fontFamily = 'inherit';
+                preElement.style.margin = '0';
+                preElement.style.padding = '1rem';
+                preElement.style.backgroundColor = '#f8f9fa';
+                preElement.style.borderRadius = '8px';
+                
+                // Set the content
+                preElement.textContent = data.analysis;
+                
+                // Clear the analysis content and append the pre element
+                analysisContent.innerHTML = '';
+                analysisContent.appendChild(preElement);
+            } else {
+                analysisContent.innerHTML = '<div class="alert alert-warning">No analysis available for this location.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching analysis:', error);
+            analysisContent.innerHTML = '<div class="alert alert-danger">Error loading analysis. Please try again later.</div>';
+        });
+});
+
 function sendMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
