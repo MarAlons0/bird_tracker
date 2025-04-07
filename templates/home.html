@@ -370,9 +370,11 @@
                 });
                 window.dispatchEvent(locationChangedEvent);
                 
-                // Show success message and refresh page
+                // Show success message and refresh page after a delay
                 alert('Location updated successfully!');
-                window.location.reload();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000); // Give event listeners 1 second to process the event
             } else {
                 locationError.textContent = data.error || 'Failed to update location';
             }
