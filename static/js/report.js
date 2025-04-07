@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Listen for location changes
 window.addEventListener('locationChanged', function(event) {
-    const analysisContent = document.getElementById('analysisContent');
     const newLocation = event.detail.location;
+    const analysisContent = document.getElementById('analysisContent');
     
-    // Show loading message with spinner
+    // Show loading message with new location
     analysisContent.innerHTML = `
         <div class="text-center p-4">
             <div class="spinner-border text-primary mb-3" role="status">
@@ -62,7 +62,7 @@ window.addEventListener('locationChanged', function(event) {
         </div>
     `;
     
-    // Fetch new analysis from the API with cache-busting
+    // Fetch new analysis with cache-busting
     fetch('/api/analysis?' + new Date().getTime())
         .then(response => {
             if (!response.ok) {

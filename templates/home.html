@@ -357,24 +357,18 @@
                 const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
                 locationModal.hide();
                 
-                // Dispatch location changed event
-                const locationChangedEvent = new CustomEvent('locationChanged', {
-                    detail: {
-                        location: {
-                            name: locationInput.value,
-                            latitude: parseFloat(lat),
-                            longitude: parseFloat(lng),
-                            radius: parseInt(radiusInput.value) || 10
-                        }
-                    }
-                });
-                window.dispatchEvent(locationChangedEvent);
+                // Dispatch location change event
+                window.dispatchEvent(new CustomEvent('locationChanged', {
+                    detail: { location: data.location }
+                }));
                 
-                // Show success message and refresh page after a delay
+                // Show success message
                 alert('Location updated successfully!');
+                
+                // Delay page reload to allow event listeners to process
                 setTimeout(() => {
                     window.location.reload();
-                }, 1000); // Give event listeners 1 second to process the event
+                }, 1000);
             } else {
                 locationError.textContent = data.error || 'Failed to update location';
             }
