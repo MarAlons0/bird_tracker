@@ -414,64 +414,69 @@ def get_basic_analysis():
 @app.route('/api/location', methods=['POST'])
 @login_required
 def update_location():
-    """Update the active location"""
+    """Update the user's location"""
     try:
-        data = request.get_json()
-        logger.info(f"Received location update request: {data}")
-        
-        if not data or 'name' not in data:
-            return jsonify({'error': 'Location name is required'}), 400
+        if not request.is_json:
+            current_app.logger.error("No JSON data received in location update request")
+            return jsonify({'error': 'No data received'}), 400
             
-        name = data['name']
+        data = request.get_json()
+        current_app.logger.info(f"Received location update request: {data}")
+        
+        # Extract location data
+        lat = data.get('latitude')
+        lng = data.get('longitude')
+        name = data.get('name')
         radius = data.get('radius', 25)  # Default to 25 miles if not specified
         
-        # Check if we have coordinates from the frontend
-        if 'latitude' in data and 'longitude' in data:
-            lat = float(data['latitude'])
-            lng = float(data['longitude'])
-            logger.info(f"Using provided coordinates: {lat}, {lng}")
-        else:
-            # Fall back to predefined cities
-            city_coords = {
-                'cincinnati': {'lat': 39.1031, 'lng': -84.5120},
-                'new york': {'lat': 40.7128, 'lng': -74.0060},
-                'los angeles': {'lat': 34.0522, 'lng': -118.2437},
-                'chicago': {'lat': 41.8781, 'lng': -87.6298},
-                'denver': {'lat': 39.7392, 'lng': -104.9903}
-            }
+        # Validate required data
+        if not all([lat, lng, name]):
+            current_app.logger.error(f"Missing required location data: lat={lat}, lng={lng}, name={name}")
+            return jsonify({'error': 'Missing required location data'}), 400
             
-            city_key = name.lower()
-            if city_key in city_coords:
-                coords = city_coords[city_key]
-                lat = coords['lat']
-                lng = coords['lng']
-                logger.info(f"Using predefined city coordinates: {lat}, {lng}")
-            else:
-                return jsonify({'error': 'Could not find coordinates for this location'}), 400
-        
-        # Update location using the tracker's set_location method
-        success = app.tracker.set_location(
-            user_id=current_user.id,
-            name=name,
-            lat=lat,
-            lng=lng,
-            radius=radius
-        )
-        
-        if not success:
+        try:
+            # Update location
+            success = app.tracker.set_location(
+                user_id=current_user.id,
+                name=name,
+                lat=lat,
+                lng=lng,
+                radius=radius
+            )
+            
+            if not success:
+                current_app.logger.error("Failed to update location in tracker")
+                return jsonify({'error': 'Failed to update location'}), 500
+                
+            # Get updated location and recent observations
+            try:
+                location = app.tracker.get_active_location(current_user.id)
+                if not location:
+                    current_app.logger.error("Failed to get updated location")
+                    return jsonify({'error': 'Failed to get updated location'}), 500
+                    
+                recent_observations = app.tracker.get_recent_observations(
+                    lat=location['latitude'],
+                    lng=location['longitude'],
+                    radius=location['radius']
+                )
+                
+                return jsonify({
+                    'location': location,
+                    'recent_observations': recent_observations
+                })
+                
+            except Exception as e:
+                current_app.logger.error(f"Error getting location data: {str(e)}", exc_info=True)
+                return jsonify({'error': 'Failed to get location data'}), 500
+                
+        except Exception as e:
+            current_app.logger.error(f"Error updating location: {str(e)}", exc_info=True)
             return jsonify({'error': 'Failed to update location'}), 500
-        
-        # Get the updated location
-        location = app.tracker.get_active_location(current_user.id)
-        
-        return jsonify({
-            'success': True,
-            'location': location
-        })
-        
+            
     except Exception as e:
-        logger.error(f"Error updating location: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        current_app.logger.error(f"Unexpected error in update_location: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
