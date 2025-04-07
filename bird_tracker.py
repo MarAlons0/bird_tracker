@@ -384,57 +384,57 @@ This report was generated automatically by the Bird Tracker application.
                 
                 """
             
-            prompt = f"""Please analyze these bird observations and provide insights in the following format:
+            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
 
             {location_info}
             {observation_text}
             
-            Format your response EXACTLY as follows, with clear paragraph breaks between sections:
+            Format your response EXACTLY as follows:
             
-            1. Start with a main paragraph providing an overall summary of the observations. This should be a clear, well-structured paragraph that gives a comprehensive overview.
-            
-            2. After the main paragraph, add TWO blank lines before starting the bulleted sections.
-            
-            3. Then include three bulleted sections, each starting with a bullet point (•) and separated by ONE blank line:
-               • Unusual or rare species for this location
-               • Migratory species observed
-               • Summary of Birds of Prey
-            
-            For each bulleted section:
-            - List each species on a new line
-            - Start each species with a hyphen (-)
-            - Include the location in parentheses after each species
-            - DO NOT include dates in the summary
-            
-            Example format:
-            [Main summary paragraph goes here]
+            <p>Start directly with the main summary paragraph. No introductory statements.</p>
 
-            • Unusual or rare species for this location:
-            - Species Name (Location)
-            - Another Species (Location)
+            <ul style="margin-left: 20px;">
+                <li>Unusual or rare species for this location:
+                    <ul style="margin-left: 20px;">
+                        <li>Species Name (Location)</li>
+                        <li>Another Species (Location)</li>
+                    </ul>
+                </li>
+            </ul>
 
-            • Migratory species observed:
-            - Species Name (Location)
-            - Another Species (Location)
+            <ul style="margin-left: 20px;">
+                <li>Migratory species observed:
+                    <ul style="margin-left: 20px;">
+                        <li>Species Name (Location)</li>
+                        <li>Another Species (Location)</li>
+                    </ul>
+                </li>
+            </ul>
 
-            • Summary of Birds of Prey:
-            - Species Name (Location)
-            - Another Species (Location)
+            <ul style="margin-left: 20px;">
+                <li>Summary of Birds of Prey:
+                    <ul style="margin-left: 20px;">
+                        <li>Species Name (Location)</li>
+                        <li>Another Species (Location)</li>
+                    </ul>
+                </li>
+            </ul>
             
-            Make sure to:
-            1. Use clear, well-structured paragraphs
+            Requirements:
+            1. Start the main summary paragraph immediately - no introductory statements
             2. Include TWO blank lines after the main summary paragraph
             3. Include ONE blank line between each bulleted section
             4. Keep the main summary paragraph concise but informative
             5. Focus on the species and locations without dates
-            6. Use proper bullet points and formatting for readability
-            7. Ensure each section is visually distinct with proper spacing"""
+            6. Use proper HTML formatting for readability
+            7. Ensure each section is visually distinct with proper spacing
+            8. DO NOT include any meta-commentary about the format or structure"""
 
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
-                system="You are an expert ornithologist analyzing bird sighting data. Format your response with proper paragraphs and bullet points as requested.",
+                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )
 

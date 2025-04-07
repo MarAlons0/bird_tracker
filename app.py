@@ -578,4 +578,4 @@ if __name__ == '__main__':
     app = create_app()
     init_db()
     print("Starting Flask server...")
-    app.run(host='localhost', port=8000, debug=True) 
+    app.run(host='localhost', port=5001, debug=True) 
