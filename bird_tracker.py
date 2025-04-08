@@ -5,7 +5,7 @@ from collections import defaultdict
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import anthropic
+from anthropic import Anthropic
 import os
 import folium
 import base64
@@ -16,7 +16,6 @@ import logging
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MISSED
 from dotenv import load_dotenv
 import httpx
-from anthropic import Anthropic
 import json
 import time
 import random
@@ -273,7 +272,7 @@ class BirdSightingTracker:
                 self.claude = None
                 return
                 
-            # Initialize the client without any additional parameters
+            # Initialize the client with just the API key
             self.claude = Anthropic(api_key=api_key)
             self.logger.info("Claude client initialized successfully")
             
