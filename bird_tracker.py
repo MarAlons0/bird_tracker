@@ -268,9 +268,11 @@ class BirdSightingTracker:
                 self.claude = None
                 return
                 
-            # Ensure API key starts with 'sk-ant'
-            if not anthropic_api_key.startswith('sk-ant'):
-                anthropic_api_key = f"sk-ant-{anthropic_api_key}"
+            # Validate API key format
+            if not anthropic_api_key.startswith('sk-ant-'):
+                self.logger.error("Invalid API key format. Must start with 'sk-ant-'")
+                self.claude = None
+                return
             
             self.logger.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
             
@@ -281,10 +283,17 @@ class BirdSightingTracker:
             try:
                 self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-opus-20240229",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
+                
+                # Verify the response format
+                if not hasattr(response, 'content'):
+                    self.logger.error("Invalid response format from Claude API")
+                    self.claude = None
+                    return
+                    
                 self.logger.info("Claude client initialized and tested successfully")
                 self.logger.info(f"Test response: {response}")
             except Exception as e:
@@ -449,7 +458,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # If Claude is available, get AI analysis
             if self.claude:
-                analysis = self._get_ai_analysis(observations, active_location)
+                analysis = self._get_ai_analysis(observations)
                 if analysis:
                     return analysis
                 else:
@@ -463,7 +472,7 @@ This report was generated automatically by the Bird Tracker application.
             logger.error(f"Error analyzing sightings: {str(e)}")
             return f"Error analyzing sightings: {str(e)}"
 
-    def _get_ai_analysis(self, observations, active_location):
+    def _get_ai_analysis(self, observations):
         """Generate AI analysis of bird observations using Claude."""
         try:
             if not observations:
@@ -476,7 +485,6 @@ This report was generated automatically by the Bird Tracker application.
 
             self.logger.info("Starting AI analysis with Claude")
             self.logger.info(f"Number of observations: {len(observations)}")
-            self.logger.info(f"Active location: {active_location}")
 
             # Format observations for display
             formatted_observations = []
@@ -485,104 +493,92 @@ This report was generated automatically by the Bird Tracker application.
                 formatted_observations.append(formatted_obs)
             observation_text = "\n".join(formatted_observations)
             
-            # Include location information
-            location_info = ""
-            if active_location:
-                location_info = f"""Location: {active_location['name']}
-                Latitude: {active_location['latitude']}
-                Longitude: {active_location['longitude']}
-                Search radius: {active_location['radius']} miles
-                
-                """
-            
             prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
 
-            {location_info}
-            {observation_text}
-            
-            Format your response EXACTLY as follows:
-            
-            <p>Start directly with the main summary paragraph. No introductory statements.</p>
+{observation_text}
 
-            <ul style="margin-left: 20px;">
-                <li>Unusual or rare species for this location:
-                    <ul style="margin-left: 20px;">
-                        <li>Species Name (Location)</li>
-                        <li>Another Species (Location)</li>
-                    </ul>
-                </li>
-            </ul>
+Format your response EXACTLY as follows:
 
-            <ul style="margin-left: 20px;">
-                <li>Migratory species observed:
-                    <ul style="margin-left: 20px;">
-                        <li>Species Name (Location)</li>
-                        <li>Another Species (Location)</li>
-                    </ul>
-                </li>
-            </ul>
+<p>Start directly with the main summary paragraph. No introductory statements.</p>
 
-            <ul style="margin-left: 20px;">
-                <li>Summary of Birds of Prey:
-                    <ul style="margin-left: 20px;">
-                        <li>Species Name (Location)</li>
-                        <li>Another Species (Location)</li>
-                    </ul>
-                </li>
-            </ul>
-            
-            Requirements:
-            1. Start the main summary paragraph immediately - no introductory statements
-            2. Include TWO blank lines after the main summary paragraph
-            3. Include ONE blank line between each bulleted section
-            4. Keep the main summary paragraph concise but informative
-            5. Focus on the species and locations without dates
-            6. Use proper HTML formatting for readability
-            7. Ensure each section is visually distinct with proper spacing
-            8. DO NOT include any meta-commentary about the format or structure"""
+<ul style="margin-left: 20px;">
+    <li>Unusual or rare species for this location:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Migratory species observed:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Summary of Birds of Prey:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+Requirements:
+1. Start the main summary paragraph immediately - no introductory statements
+2. Include TWO blank lines after the main summary paragraph
+3. Include ONE blank line between each bulleted section
+4. Keep the main summary paragraph concise but informative
+5. Focus on the species and locations without dates
+6. Use proper HTML formatting for readability
+7. Ensure each section is visually distinct with proper spacing
+8. DO NOT include any meta-commentary about the format or structure"""
 
             self.logger.info("Sending request to Claude API")
             self.logger.info(f"Using model: claude-3-opus-20240229")
             self.logger.info(f"Prompt length: {len(prompt)} characters")
             
-            message = self.claude.messages.create(
+            response = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 max_tokens=1000,
-                temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )
-
+            
             self.logger.info("Received response from Claude API")
-            self.logger.info(f"Response type: {type(message)}")
-            self.logger.info(f"Response content type: {type(message.content) if hasattr(message, 'content') else 'No content'}")
-            self.logger.info(f"Raw response: {message}")
+            self.logger.info(f"Response type: {type(response)}")
+            self.logger.info(f"Response content type: {type(response.content) if hasattr(response, 'content') else 'No content'}")
+            self.logger.info(f"Raw response: {response}")
 
             # Extract the text content from the response
-            if hasattr(message, 'content'):
-                if isinstance(message.content, list):
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
                     # Handle list of ContentBlock objects
                     text_content = ""
-                    for block in message.content:
+                    for block in response.content:
                         if hasattr(block, 'text'):
                             text_content += block.text + "\n"
                     self.logger.info("Successfully extracted text from list of ContentBlock objects")
                     self.logger.info(f"Extracted text: {text_content[:200]}...")  # Log first 200 chars
                     return text_content.strip()
-                elif hasattr(message.content, 'text'):
+                elif hasattr(response.content, 'text'):
                     # Handle single ContentBlock object
                     self.logger.info("Successfully extracted text from single ContentBlock object")
-                    self.logger.info(f"Extracted text: {message.content.text[:200]}...")  # Log first 200 chars
-                    return message.content.text
-                elif isinstance(message.content, str):
+                    self.logger.info(f"Extracted text: {response.content.text[:200]}...")  # Log first 200 chars
+                    return response.content.text
+                elif isinstance(response.content, str):
                     # Handle string content
                     self.logger.info("Successfully extracted string content")
-                    self.logger.info(f"Extracted text: {message.content[:200]}...")  # Log first 200 chars
-                    return message.content
+                    self.logger.info(f"Extracted text: {response.content[:200]}...")  # Log first 200 chars
+                    return response.content
                 else:
                     # Try to convert to string if it's some other type
-                    self.logger.warning(f"Unexpected content type: {type(message.content)}")
-                    return str(message.content)
+                    self.logger.warning(f"Unexpected content type: {type(response.content)}")
+                    return str(response.content)
             else:
                 self.logger.error("No content attribute found in Claude response")
                 return "Sorry, I couldn't generate a response."
@@ -591,66 +587,30 @@ This report was generated automatically by the Bird Tracker application.
             self.logger.error(f"Error generating AI analysis: {str(e)}", exc_info=True)
             return f"Error generating AI analysis: {str(e)}"
 
-    def chat_with_ai(self, message, user_id=None):
-        """Chat with the AI assistant about bird sightings."""
+    def chat_with_ai(self, user_message, context=None):
+        """Chat with the AI about bird-related topics"""
+        if not self.claude:
+            self.logger.error("Claude client not initialized")
+            return "AI assistant is currently unavailable. Please try again later."
+
         try:
-            if not self.claude:
-                self.logger.warning("Claude client not initialized, cannot chat with AI")
-                return "Sorry, the AI assistant is not available at the moment."
-                
-            # Get recent observations to provide context
-            observations = self.get_recent_observations(user_id)
-            observation_context = ""
+            system_prompt = """You are an expert ornithologist and bird enthusiast helping users learn about birds.
+            Provide accurate, educational responses while maintaining an engaging and friendly tone.
+            If you're unsure about something, be honest about it."""
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+            ]
             
-            # Get the active location for this user
-            active_location = self.get_active_location(user_id)
+            if context:
+                messages.append({"role": "assistant", "content": context})
             
-            # Include location information
-            location_info = ""
-            if active_location:
-                location_info = f"""Current location: {active_location['name']}
-                Latitude: {active_location['latitude']}
-                Longitude: {active_location['longitude']}
-                Search radius: {active_location['radius']} miles
-                
-                """
-            
-            if observations:
-                # Format observations for display
-                formatted_observations = []
-                for obs in observations:
-                    formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
-                    formatted_observations.append(formatted_obs)
-                formatted_text = "\n".join(formatted_observations)
-                
-                observation_context = f"""{location_info}
-                Here are recent bird observations in the area:
-                {formatted_text}
-                
-                Please use this information to answer the user's question if relevant."""
-            else:
-                observation_context = f"""{location_info}
-                No recent bird observations are available for this location."""
-            
-            # Create the prompt with the user's message and observation context
-            prompt = f"""{observation_context}
-            
-            User question: {message}
-            
-            Please provide a helpful, informative response about birds and birdwatching. Format your response with:
-            - Clear paragraphs for general information
-            - Bullet points (•) for lists
-            - Hyphens (-) for individual items in lists
-            - Include locations and dates when relevant
-            - Use proper spacing between sections"""
-            
-            # Send to Claude
+            messages.append({"role": "user", "content": user_message})
+
             response = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 max_tokens=1000,
-                temperature=0.7,
-                system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
-                messages=[{"role": "user", "content": prompt}]
+                messages=messages
             )
             
             # Extract the text content from the response
@@ -673,10 +633,10 @@ This report was generated automatically by the Bird Tracker application.
                     return str(response.content)
             else:
                 return "Sorry, I couldn't generate a response."
-            
+
         except Exception as e:
-            self.logger.error(f"Error in chat_with_ai: {str(e)}")
-            return f"Sorry, there was an error processing your request: {str(e)}"
+            self.logger.error(f"Error in chat with AI: {str(e)}", exc_info=True)
+            return "Error processing your request. Please try again later."
 
     def _generate_basic_analysis(self, observations):
         """Generate a basic analysis of bird observations without AI."""
@@ -819,37 +779,64 @@ This report was generated automatically by the Bird Tracker application.
             if not observations:
                 return "No recent observations to analyze."
             
-            # Format observations for Claude
+            # Format observations for display
             formatted_observations = []
             for obs in observations:
-                formatted_obs = {
-                    'species': obs['comName'],
-                    'count': obs['howMany'],
-                    'location': obs['locName'],
-                    'date': obs['obsDt']
-                }
+                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
                 formatted_observations.append(formatted_obs)
+            observation_text = "\n".join(formatted_observations)
             
-            # Create prompt for Claude
-            prompt = f"""Analyze these recent bird sightings and provide insights:
-            {json.dumps(formatted_observations, indent=2)}
-            
-            Please provide:
-            1. Notable species observed
-            2. Patterns in timing or location
-            3. Any interesting behaviors or counts
-            4. Recommendations for future birdwatching
-            """
+            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
+
+{observation_text}
+
+Format your response EXACTLY as follows:
+
+<p>Start directly with the main summary paragraph. No introductory statements.</p>
+
+<ul style="margin-left: 20px;">
+    <li>Unusual or rare species for this location:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Migratory species observed:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Summary of Birds of Prey:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+Requirements:
+1. Start the main summary paragraph immediately - no introductory statements
+2. Include TWO blank lines after the main summary paragraph
+3. Include ONE blank line between each bulleted section
+4. Keep the main summary paragraph concise but informative
+5. Focus on the species and locations without dates
+6. Use proper HTML formatting for readability
+7. Ensure each section is visually distinct with proper spacing
+8. DO NOT include any meta-commentary about the format or structure"""
             
             # Get analysis from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
-                temperature=0.7,
-                system="You are an expert birdwatcher and ornithologist. Provide detailed, scientific analysis of bird sightings.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
+                messages=[{"role": "user", "content": prompt}]
             )
             
             # Extract the text content from the response

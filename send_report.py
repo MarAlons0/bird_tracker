@@ -13,7 +13,7 @@ def send_daily_report():
             return
             
         # Generate AI analysis
-        analysis = tracker.analyze_observations()
+        analysis = tracker.analyze_recent_sightings(observations)
         
         # Send email with report
         tracker.send_email(analysis)
