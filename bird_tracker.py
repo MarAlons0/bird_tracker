@@ -458,8 +458,14 @@ This report was generated automatically by the Bird Tracker application.
             
             # If Claude is available, get AI analysis
             if self.claude:
-                return self._get_ai_analysis(observations, active_location)
+                analysis = self._get_ai_analysis(observations, active_location)
+                if analysis:
+                    return analysis
+                else:
+                    self.logger.warning("AI analysis failed, falling back to basic analysis")
+                    return self._generate_basic_analysis(observations)
             else:
+                self.logger.warning("Claude not available, using basic analysis")
                 return self._generate_basic_analysis(observations)
             
         except Exception as e:
@@ -474,7 +480,7 @@ This report was generated automatically by the Bird Tracker application.
             
             if not self.claude:
                 self.logger.warning("Claude client not initialized, skipping AI analysis")
-                return None
+                return "AI analysis is not available at this time."
 
             # Format observations for display
             formatted_observations = []
@@ -570,7 +576,7 @@ This report was generated automatically by the Bird Tracker application.
 
         except Exception as e:
             self.logger.error(f"Error generating AI analysis: {str(e)}")
-            return None
+            return f"Error generating AI analysis: {str(e)}"
 
     def chat_with_ai(self, message, user_id=None):
         """Chat with the AI assistant about bird sightings."""
