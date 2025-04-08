@@ -290,18 +290,20 @@ class BirdSightingTracker:
             
             # Test the client with a simple request
             try:
+                self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
                     model="claude-3-sonnet",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
                 self.logger.info("Claude client initialized and tested successfully")
+                self.logger.info(f"Test response: {response}")
             except Exception as e:
-                self.logger.error(f"Error testing Claude client: {str(e)}")
+                self.logger.error(f"Error testing Claude client: {str(e)}", exc_info=True)
                 self.claude = None
                 
         except Exception as e:
-            self.logger.error(f"Error initializing Claude client: {str(e)}")
+            self.logger.error(f"Error initializing Claude client: {str(e)}", exc_info=True)
             self.claude = None
 
     def _setup_scheduler(self):
@@ -551,6 +553,9 @@ This report was generated automatically by the Bird Tracker application.
             8. DO NOT include any meta-commentary about the format or structure"""
 
             self.logger.info("Sending request to Claude API")
+            self.logger.info(f"Using model: claude-3-opus")
+            self.logger.info(f"Prompt length: {len(prompt)} characters")
+            
             message = self.claude.messages.create(
                 model="claude-3-opus",
                 max_tokens=1000,
@@ -562,6 +567,7 @@ This report was generated automatically by the Bird Tracker application.
             self.logger.info("Received response from Claude API")
             self.logger.info(f"Response type: {type(message)}")
             self.logger.info(f"Response content type: {type(message.content) if hasattr(message, 'content') else 'No content'}")
+            self.logger.info(f"Raw response: {message}")
 
             # Extract the text content from the response
             if hasattr(message, 'content'):
@@ -572,14 +578,17 @@ This report was generated automatically by the Bird Tracker application.
                         if hasattr(block, 'text'):
                             text_content += block.text + "\n"
                     self.logger.info("Successfully extracted text from list of ContentBlock objects")
+                    self.logger.info(f"Extracted text: {text_content[:200]}...")  # Log first 200 chars
                     return text_content.strip()
                 elif hasattr(message.content, 'text'):
                     # Handle single ContentBlock object
                     self.logger.info("Successfully extracted text from single ContentBlock object")
+                    self.logger.info(f"Extracted text: {message.content.text[:200]}...")  # Log first 200 chars
                     return message.content.text
                 elif isinstance(message.content, str):
                     # Handle string content
                     self.logger.info("Successfully extracted string content")
+                    self.logger.info(f"Extracted text: {message.content[:200]}...")  # Log first 200 chars
                     return message.content
                 else:
                     # Try to convert to string if it's some other type
