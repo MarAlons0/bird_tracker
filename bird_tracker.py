@@ -273,13 +273,14 @@ class BirdSightingTracker:
                 self.claude = None
                 return
                 
-            self.claude = anthropic.Anthropic(api_key=api_key)
+            # Initialize the client without any additional parameters
+            self.claude = Anthropic(api_key=api_key)
             self.logger.info("Claude client initialized successfully")
             
             # Test the client with a simple request
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=100,
                     messages=[
                         {"role": "user", "content": "Hello, are you working?"}
@@ -444,22 +445,26 @@ This report was generated automatically by the Bird Tracker application.
             for obs in observations:
                 formatted_obs = {
                     'species': obs['comName'],
+                    'count': obs['howMany'],
                     'location': obs['locName'],
-                    'date': obs['obsDt'],
-                    'notes': obs['notes'] or ''
+                    'timestamp': obs['obsDt'],
+                    'weather': obs.get('weather', ''),
+                    'notes': obs.get('notes', '')
                 }
                 formatted_observations.append(formatted_obs)
             
             # Get AI analysis
+            self.logger.info("Attempting to get AI analysis...")
             analysis = self.get_ai_analysis(formatted_observations)
             
             if not analysis:
-                # Fallback to basic analysis if AI analysis fails
+                self.logger.error("AI analysis returned None, falling back to basic analysis")
                 return self._generate_basic_analysis(formatted_observations)
             
+            self.logger.info("Successfully received AI analysis")
             return analysis
         except Exception as e:
-            logger.error(f"Error analyzing sightings: {e}", exc_info=True)
+            self.logger.error(f"Error analyzing sightings: {e}", exc_info=True)
             return self._generate_basic_analysis(formatted_observations)
 
     def get_ai_analysis(self, sightings_data):
