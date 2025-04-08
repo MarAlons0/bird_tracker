@@ -87,6 +87,7 @@ class BirdSightingTracker:
         config['locations']['active_location'] = os.getenv('DEFAULT_LOCATION', 'cincinnati')
         config['email_schedule']['hour'] = os.getenv('EMAIL_SCHEDULE_HOUR', '7')
         config['email_schedule']['minute'] = os.getenv('EMAIL_SCHEDULE_MINUTE', '0')
+        config['email_schedule']['day'] = os.getenv('EMAIL_SCHEDULE_DAY', '5')
         
         # Add location section with default values
         location_section = f"location_{config['locations']['active_location']}"
@@ -293,13 +294,14 @@ class BirdSightingTracker:
             # Get schedule from config
             hour = int(self.config['email_schedule']['hour'])
             minute = int(self.config['email_schedule']['minute'])
+            day = int(self.config['email_schedule']['day'])
             
-            # Add job for daily reports
+            # Add job for weekly reports (Friday mornings)
             scheduler.add_job(
                 func=self.send_daily_report,
-                trigger=CronTrigger(hour=hour, minute=minute),
-                id='daily_report',
-                name='Send daily bird sighting report',
+                trigger=CronTrigger(day_of_week='fri', hour=hour, minute=minute),
+                id='weekly_report',
+                name='Send weekly bird sighting report',
                 replace_existing=True
             )
             
