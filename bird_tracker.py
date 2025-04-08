@@ -476,11 +476,16 @@ This report was generated automatically by the Bird Tracker application.
         """Generate AI analysis of bird observations using Claude."""
         try:
             if not observations:
+                self.logger.warning("No observations provided for AI analysis")
                 return "No observations to analyze."
             
             if not self.claude:
                 self.logger.warning("Claude client not initialized, skipping AI analysis")
                 return "AI analysis is not available at this time."
+
+            self.logger.info("Starting AI analysis with Claude")
+            self.logger.info(f"Number of observations: {len(observations)}")
+            self.logger.info(f"Active location: {active_location}")
 
             # Format observations for display
             formatted_observations = []
@@ -545,6 +550,7 @@ This report was generated automatically by the Bird Tracker application.
             7. Ensure each section is visually distinct with proper spacing
             8. DO NOT include any meta-commentary about the format or structure"""
 
+            self.logger.info("Sending request to Claude API")
             message = self.claude.messages.create(
                 model="claude-3-opus-20240229",
                 max_tokens=1000,
@@ -552,6 +558,10 @@ This report was generated automatically by the Bird Tracker application.
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )
+
+            self.logger.info("Received response from Claude API")
+            self.logger.info(f"Response type: {type(message)}")
+            self.logger.info(f"Response content type: {type(message.content) if hasattr(message, 'content') else 'No content'}")
 
             # Extract the text content from the response
             if hasattr(message, 'content'):
@@ -561,21 +571,26 @@ This report was generated automatically by the Bird Tracker application.
                     for block in message.content:
                         if hasattr(block, 'text'):
                             text_content += block.text + "\n"
+                    self.logger.info("Successfully extracted text from list of ContentBlock objects")
                     return text_content.strip()
                 elif hasattr(message.content, 'text'):
                     # Handle single ContentBlock object
+                    self.logger.info("Successfully extracted text from single ContentBlock object")
                     return message.content.text
                 elif isinstance(message.content, str):
                     # Handle string content
+                    self.logger.info("Successfully extracted string content")
                     return message.content
                 else:
                     # Try to convert to string if it's some other type
+                    self.logger.warning(f"Unexpected content type: {type(message.content)}")
                     return str(message.content)
             else:
+                self.logger.error("No content attribute found in Claude response")
                 return "Sorry, I couldn't generate a response."
 
         except Exception as e:
-            self.logger.error(f"Error generating AI analysis: {str(e)}")
+            self.logger.error(f"Error generating AI analysis: {str(e)}", exc_info=True)
             return f"Error generating AI analysis: {str(e)}"
 
     def chat_with_ai(self, message, user_id=None):
