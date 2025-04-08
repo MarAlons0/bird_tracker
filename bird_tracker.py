@@ -260,44 +260,34 @@ class BirdSightingTracker:
             return None
 
     def _initialize_claude(self):
-        """Initialize Claude with the latest API version"""
+        """Initialize the Claude client with API key from environment"""
         try:
-            anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
-            if not anthropic_api_key:
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if not api_key:
                 self.logger.error("ANTHROPIC_API_KEY not found in environment variables")
                 self.claude = None
                 return
                 
-            # Validate API key format
-            if not anthropic_api_key.startswith('sk-ant-'):
-                self.logger.error("Invalid API key format. Must start with 'sk-ant-'")
+            if not api_key.startswith('sk-ant-'):
+                self.logger.error("Invalid ANTHROPIC_API_KEY format")
                 self.claude = None
                 return
-            
-            self.logger.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
-            
-            # Initialize the Claude client with default configuration
-            self.claude = Anthropic(api_key=anthropic_api_key)
+                
+            self.claude = anthropic.Anthropic(api_key=api_key)
+            self.logger.info("Claude client initialized successfully")
             
             # Test the client with a simple request
             try:
-                self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet",
-                    max_tokens=10,
-                    messages=[{"role": "user", "content": "Test"}]
+                    model="claude-3-sonnet-20240229",
+                    max_tokens=100,
+                    messages=[
+                        {"role": "user", "content": "Hello, are you working?"}
+                    ]
                 )
-                
-                # Verify the response format
-                if not hasattr(response, 'content'):
-                    self.logger.error("Invalid response format from Claude API")
-                    self.claude = None
-                    return
-                    
-                self.logger.info("Claude client initialized and tested successfully")
-                self.logger.info(f"Test response: {response}")
+                self.logger.info(f"Claude API test successful: {response.content[0].text}")
             except Exception as e:
-                self.logger.error(f"Error testing Claude client: {str(e)}", exc_info=True)
+                self.logger.error(f"Claude API test failed: {str(e)}")
                 self.claude = None
                 
         except Exception as e:
@@ -444,231 +434,119 @@ This report was generated automatically by the Bird Tracker application.
             raise
 
     def analyze_recent_sightings(self, observations, user_id=None):
-        """Analyze recent bird sightings and generate a report"""
-        try:
-            # Format observations for display
-            formatted_observations = []
-            for obs in observations:
-                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
-                formatted_observations.append(formatted_obs)
-            formatted_text = "\n".join(formatted_observations)
-            
-            # Get the active location for this user
-            active_location = self.get_active_location(user_id)
-            
-            # If Claude is available, get AI analysis
-            if self.claude:
-                analysis = self._get_ai_analysis(observations)
-                if analysis:
-                    return analysis
-                else:
-                    self.logger.warning("AI analysis failed, falling back to basic analysis")
-                    return self._generate_basic_analysis(observations)
-            else:
-                self.logger.warning("Claude not available, using basic analysis")
-                return self._generate_basic_analysis(observations)
-            
-        except Exception as e:
-            logger.error(f"Error analyzing sightings: {str(e)}")
-            return f"Error analyzing sightings: {str(e)}"
-
-    def _get_ai_analysis(self, observations):
-        """Generate AI analysis of bird observations using Claude."""
+        """Analyze recent bird sightings and generate a report."""
         try:
             if not observations:
-                self.logger.warning("No observations provided for AI analysis")
                 return "No observations to analyze."
             
-            if not self.claude:
-                self.logger.warning("Claude client not initialized, skipping AI analysis")
-                return "AI analysis is not available at this time."
-
-            self.logger.info("Starting AI analysis with Claude")
-            self.logger.info(f"Number of observations: {len(observations)}")
-
-            # Format observations for display
+            # Format observations for AI analysis
             formatted_observations = []
             for obs in observations:
-                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                formatted_obs = {
+                    'species': obs['comName'],
+                    'location': obs['locName'],
+                    'date': obs['obsDt'],
+                    'notes': obs['notes'] or ''
+                }
                 formatted_observations.append(formatted_obs)
-            observation_text = "\n".join(formatted_observations)
             
-            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
-
-{observation_text}
-
-Format your response EXACTLY as follows:
-
-<p>Start directly with the main summary paragraph. No introductory statements.</p>
-
-<ul style="margin-left: 20px;">
-    <li>Unusual or rare species for this location:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Migratory species observed:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Summary of Birds of Prey:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-Requirements:
-1. Start the main summary paragraph immediately - no introductory statements
-2. Include TWO blank lines after the main summary paragraph
-3. Include ONE blank line between each bulleted section
-4. Keep the main summary paragraph concise but informative
-5. Focus on the species and locations without dates
-6. Use proper HTML formatting for readability
-7. Ensure each section is visually distinct with proper spacing
-8. DO NOT include any meta-commentary about the format or structure"""
-
-            self.logger.info("Sending request to Claude API")
-            self.logger.info(f"Using model: claude-3-sonnet")
-            self.logger.info(f"Prompt length: {len(prompt)} characters")
+            # Get AI analysis
+            analysis = self._get_ai_analysis(formatted_observations, user_id)
             
-            response = self.claude.messages.create(
-                model="claude-3-sonnet",
-                max_tokens=1000,
-                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
-                messages=[{"role": "user", "content": prompt}]
-            )
+            if not analysis:
+                # Fallback to basic analysis if AI analysis fails
+                return self._generate_basic_analysis(formatted_observations)
             
-            self.logger.info("Received response from Claude API")
-            self.logger.info(f"Response type: {type(response)}")
-            self.logger.info(f"Response content type: {type(response.content) if hasattr(response, 'content') else 'No content'}")
-            self.logger.info(f"Raw response: {response}")
-
-            # Extract the text content from the response
-            if hasattr(response, 'content'):
-                if isinstance(response.content, list):
-                    # Handle list of ContentBlock objects
-                    text_content = ""
-                    for block in response.content:
-                        if hasattr(block, 'text'):
-                            text_content += block.text + "\n"
-                    self.logger.info("Successfully extracted text from list of ContentBlock objects")
-                    self.logger.info(f"Extracted text: {text_content[:200]}...")  # Log first 200 chars
-                    return text_content.strip()
-                elif hasattr(response.content, 'text'):
-                    # Handle single ContentBlock object
-                    self.logger.info("Successfully extracted text from single ContentBlock object")
-                    self.logger.info(f"Extracted text: {response.content.text[:200]}...")  # Log first 200 chars
-                    return response.content.text
-                elif isinstance(response.content, str):
-                    # Handle string content
-                    self.logger.info("Successfully extracted string content")
-                    self.logger.info(f"Extracted text: {response.content[:200]}...")  # Log first 200 chars
-                    return response.content
-                else:
-                    # Try to convert to string if it's some other type
-                    self.logger.warning(f"Unexpected content type: {type(response.content)}")
-                    return str(response.content)
-            else:
-                self.logger.error("No content attribute found in Claude response")
-                return "Sorry, I couldn't generate a response."
-
+            return analysis
         except Exception as e:
-            self.logger.error(f"Error generating AI analysis: {str(e)}", exc_info=True)
-            return f"Error generating AI analysis: {str(e)}"
+            logger.error(f"Error analyzing sightings: {e}", exc_info=True)
+            return self._generate_basic_analysis(formatted_observations)
 
-    def chat_with_ai(self, user_message, context=None):
-        """Chat with the AI about bird-related topics"""
-        if not self.claude:
-            self.logger.error("Claude client not initialized")
-            return "AI assistant is currently unavailable. Please try again later."
-
+    def _get_ai_analysis(self, observations, user_id=None):
+        """Get AI analysis of bird sightings."""
         try:
-            system_prompt = """You are an expert ornithologist and bird enthusiast helping users learn about birds.
-            Provide accurate, educational responses while maintaining an engaging and friendly tone.
-            If you're unsure about something, be honest about it."""
-
-            messages = [
-                {"role": "system", "content": system_prompt},
-            ]
+            if not self.claude:
+                self.logger.error("Claude client not initialized")
+                return None
             
-            if context:
-                messages.append({"role": "assistant", "content": context})
+            # Get location information from the first sighting
+            location_info = ""
+            if observations and 'location' in observations[0]:
+                location_info = f"\nLocation: {observations[0]['location']}"
             
-            messages.append({"role": "user", "content": user_message})
+            # Format observations for the prompt
+            observations_text = "\n".join([
+                f"- {obs['species']} ({obs['count']}) at {obs['location']} on {obs['timestamp']}"
+                f"{f' (Weather: {obs['weather']})' if obs.get('weather') else ''}"
+                f"{f' (Notes: {obs['notes']})' if obs.get('notes') else ''}"
+                for obs in observations
+            ])
+            
+            # Create the prompt
+            prompt = f"""Please analyze these recent bird sightings and provide insights:{location_info}
 
+{observations_text}
+
+Please provide:
+1. A summary of the species observed
+2. Any notable patterns or trends
+3. Interesting observations or behaviors
+4. Recommendations for future bird watching
+
+Format your response in HTML with appropriate styling."""
+
+            # Get response from Claude
             response = self.claude.messages.create(
                 model="claude-3-sonnet",
                 max_tokens=1000,
-                messages=messages
+                temperature=0.7,
+                system="You are an expert bird watcher and naturalist. Provide detailed, informative analysis of bird sightings.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
             )
             
-            # Extract the text content from the response
-            if hasattr(response, 'content'):
-                if isinstance(response.content, list):
-                    # Handle list of ContentBlock objects
-                    text_content = ""
-                    for block in response.content:
-                        if hasattr(block, 'text'):
-                            text_content += block.text + "\n"
-                    return text_content.strip()
-                elif hasattr(response.content, 'text'):
-                    # Handle single ContentBlock object
-                    return response.content.text
-                elif isinstance(response.content, str):
-                    # Handle string content
-                    return response.content
-                else:
-                    # Try to convert to string if it's some other type
-                    return str(response.content)
-            else:
-                return "Sorry, I couldn't generate a response."
-
+            if not response or not response.content:
+                self.logger.error("Empty response from Claude")
+                return None
+            
+            return response.content[0].text
         except Exception as e:
-            self.logger.error(f"Error in chat with AI: {str(e)}", exc_info=True)
-            return "Error processing your request. Please try again later."
+            self.logger.error(f"Error getting AI analysis: {e}", exc_info=True)
+            return None
 
     def _generate_basic_analysis(self, observations):
-        """Generate a basic analysis of bird observations without AI."""
-        if not observations:
-            return "No observations to analyze."
-
-        analysis = []
-        species_count = len({obs['comName'] for obs in observations})
-        total_birds = sum(obs.get('howMany', 1) for obs in observations)
-        
-        analysis.append(f"Summary of Bird Activity:")
-        analysis.append(f"- Total unique species observed: {species_count}")
-        analysis.append(f"- Total individual birds counted: {total_birds}")
-        
-        # Most frequently observed species
-        species_frequency = {}
-        for obs in observations:
-            species = obs['comName']
-            count = obs.get('howMany', 1)
-            species_frequency[species] = species_frequency.get(species, 0) + count
-        
-        if species_frequency:
-            most_common = max(species_frequency.items(), key=lambda x: x[1])
-            analysis.append(f"- Most frequently observed species: {most_common[0]} ({most_common[1]} individuals)")
-        
-        # Date range
-        dates = [datetime.fromisoformat(obs['obsDt']) for obs in observations]
-        if dates:
-            date_range = f"- Observation period: {min(dates).strftime('%Y-%m-%d')} to {max(dates).strftime('%Y-%m-%d')}"
-            analysis.append(date_range)
-        
-        return "\n".join(analysis)
+        """Generate a basic analysis when AI analysis fails."""
+        try:
+            species_count = {}
+            locations = set()
+            
+            for obs in observations:
+                species_count[obs['species']] = species_count.get(obs['species'], 0) + 1
+                locations.add(obs['location'])
+            
+            analysis = "<div class='basic-analysis'>"
+            analysis += "<h3>Basic Analysis</h3>"
+            
+            # Species summary
+            analysis += "<h4>Species Observed:</h4>"
+            analysis += "<ul>"
+            for species, count in species_count.items():
+                analysis += f"<li>{species}: {count} observation{'s' if count > 1 else ''}</li>"
+            analysis += "</ul>"
+            
+            # Locations
+            analysis += "<h4>Locations:</h4>"
+            analysis += "<ul>"
+            for location in locations:
+                analysis += f"<li>{location}</li>"
+            analysis += "</ul>"
+            
+            analysis += "</div>"
+            return analysis
+        except Exception as e:
+            logger.error(f"Error generating basic analysis: {e}", exc_info=True)
+            return "<div class='alert alert-warning'>Unable to generate analysis.</div>"
 
     def get_recent_observations(self, user_id=None, days_back=7):
         """Get recent bird observations from eBird API."""
@@ -738,14 +616,15 @@ Requirements:
                         'obsDt': obs.get('obsDt', ''),
                         'howMany': obs.get('howMany', 1),
                         'lat': obs.get('lat', active_location['latitude']),
-                        'lng': obs.get('lng', active_location['longitude'])
+                        'lng': obs.get('lng', active_location['longitude']),
+                        'notes': obs.get('notes', '')
                     }
                     
                     # Log the transformed observation
                     self.logger.debug(f"Transformed observation: {transformed_obs}")
                     
                     # Validate the transformed observation
-                    if not all(key in transformed_obs for key in ['comName', 'locName', 'obsDt', 'howMany', 'lat', 'lng']):
+                    if not all(key in transformed_obs for key in ['comName', 'locName', 'obsDt', 'howMany', 'lat', 'lng', 'notes']):
                         self.logger.error(f"Missing required fields in transformed observation: {transformed_obs}")
                         continue
                         
