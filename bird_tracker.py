@@ -274,25 +274,14 @@ class BirdSightingTracker:
             
             self.logger.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
             
-            # Create a custom httpx client without proxies
-            http_client = httpx.Client(
-                base_url="https://api.anthropic.com",
-                headers={
-                    "anthropic-version": "2024-01-01",
-                    "content-type": "application/json"
-                }
-            )
-            
-            self.claude = Anthropic(
-                api_key=anthropic_api_key,
-                http_client=http_client
-            )
+            # Initialize the Claude client with default configuration
+            self.claude = Anthropic(api_key=anthropic_api_key)
             
             # Test the client with a simple request
             try:
                 self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet",
+                    model="claude-3-sonnet-20240229",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
@@ -553,11 +542,11 @@ This report was generated automatically by the Bird Tracker application.
             8. DO NOT include any meta-commentary about the format or structure"""
 
             self.logger.info("Sending request to Claude API")
-            self.logger.info(f"Using model: claude-3-opus")
+            self.logger.info(f"Using model: claude-3-opus-20240229")
             self.logger.info(f"Prompt length: {len(prompt)} characters")
             
             message = self.claude.messages.create(
-                model="claude-3-opus",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -657,7 +646,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Send to Claude
             response = self.claude.messages.create(
-                model="claude-3-opus",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
@@ -854,7 +843,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Get analysis from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet",
+                model="claude-3-sonnet-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert birdwatcher and ornithologist. Provide detailed, scientific analysis of bird sightings.",
