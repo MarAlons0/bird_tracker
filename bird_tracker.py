@@ -535,7 +535,7 @@ Requirements:
             
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-opus-20240229",
                 max_tokens=4000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -737,7 +737,7 @@ User question: {message}"""
 
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-opus-20240229",
                 max_tokens=4000,
                 temperature=0.7,
                 system=system_message,
