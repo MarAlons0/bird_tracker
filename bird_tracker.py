@@ -283,7 +283,7 @@ class BirdSightingTracker:
             try:
                 self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
-                    model="claude-3-opus-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
@@ -539,11 +539,11 @@ Requirements:
 8. DO NOT include any meta-commentary about the format or structure"""
 
             self.logger.info("Sending request to Claude API")
-            self.logger.info(f"Using model: claude-3-opus-20240229")
+            self.logger.info(f"Using model: claude-3-sonnet")
             self.logger.info(f"Prompt length: {len(prompt)} characters")
             
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-sonnet",
                 max_tokens=1000,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
@@ -608,7 +608,7 @@ Requirements:
             messages.append({"role": "user", "content": user_message})
 
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-sonnet",
                 max_tokens=1000,
                 messages=messages
             )
@@ -833,7 +833,7 @@ Requirements:
             
             # Get analysis from Claude
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-sonnet",
                 max_tokens=1000,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
