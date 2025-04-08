@@ -376,14 +376,10 @@
                     locationCard.querySelector('p:nth-child(3)').textContent = `Radius: ${data.location.radius} miles`;
                 }
                 
-                // Save location to localStorage
+                // Save location and observations to localStorage
                 localStorage.setItem('currentLocation', JSON.stringify(data.location));
-                console.log('Saved location to localStorage:', data.location);
-                
-                // Save observations to localStorage
                 if (data.observations) {
                     localStorage.setItem('currentObservations', JSON.stringify(data.observations));
-                    console.log('Saved observations to localStorage:', data.observations);
                 }
                 
                 // Dispatch location change event with observations

@@ -116,88 +116,59 @@
     const markers = [];
     const observationRows = [];
 
-    // Add observations to map
-    storedObservations.forEach(obs => {
-        const birdInfo = categorizeBird(obs.comName);
-        const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
-            radius: 8,
-            fillColor: birdInfo.color,
-            color: '#000',
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(map);
-
-        const popupContent = '<strong>' + obs.comName + '</strong><br>' +
-            'Category: ' + birdInfo.category + '<br>' +
-            'Count: ' + obs.howMany + '<br>' +
-            'Location: ' + obs.locName + '<br>' +
-            'Date: ' + obs.obsDt;
-
-        marker.bindPopup(popupContent);
-
-        markers.push(marker);
-
-        // Add row to observations table
-        const row = document.createElement('tr');
-        row.innerHTML = '<td>' + obs.comName + '</td>' +
-            '<td>' + birdInfo.category + '</td>' +
-            '<td>' + obs.howMany + '</td>' +
-            '<td>' + obs.locName + '</td>' +
-            '<td>' + obs.obsDt + '</td>';
-        observationRows.push(row);
-    });
-
-    // Update observations table
-    const tableBody = document.getElementById('observationsTableBody');
-    tableBody.innerHTML = '';
-    observationRows.forEach(row => tableBody.appendChild(row));
-
-    // Listen for location changes
-    window.addEventListener('locationChanged', function(e) {
-        // Clear existing markers
+    // Function to add observations to map and table
+    function addObservations(observations) {
+        // Clear existing markers and table rows
         markers.forEach(marker => map.removeLayer(marker));
         markers.length = 0;
         
-        // Clear existing table rows
+        const tableBody = document.getElementById('observationsTableBody');
         tableBody.innerHTML = '';
         observationRows.length = 0;
 
+        // Add new observations
+        observations.forEach(obs => {
+            const birdInfo = categorizeBird(obs.comName);
+            const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
+                radius: 8,
+                fillColor: birdInfo.color,
+                color: '#000',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            const popupContent = '<strong>' + obs.comName + '</strong><br>' +
+                'Category: ' + birdInfo.category + '<br>' +
+                'Count: ' + obs.howMany + '<br>' +
+                'Location: ' + obs.locName + '<br>' +
+                'Date: ' + obs.obsDt;
+
+            marker.bindPopup(popupContent);
+            markers.push(marker);
+
+            // Add row to observations table
+            const row = document.createElement('tr');
+            row.innerHTML = '<td>' + obs.comName + '</td>' +
+                '<td>' + birdInfo.category + '</td>' +
+                '<td>' + obs.howMany + '</td>' +
+                '<td>' + obs.locName + '</td>' +
+                '<td>' + obs.obsDt + '</td>';
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Add initial observations
+    addObservations(storedObservations);
+
+    // Listen for location changes
+    window.addEventListener('locationChanged', function(e) {
         // Update map view
         map.setView([e.detail.location.latitude, e.detail.location.longitude], 10);
 
-        // Add new observations
+        // Add new observations if available
         if (e.detail.observations) {
-            e.detail.observations.forEach(obs => {
-                const birdInfo = categorizeBird(obs.comName);
-                const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
-                    radius: 8,
-                    fillColor: birdInfo.color,
-                    color: '#000',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(map);
-
-                const popupContent = '<strong>' + obs.comName + '</strong><br>' +
-                    'Category: ' + birdInfo.category + '<br>' +
-                    'Count: ' + obs.howMany + '<br>' +
-                    'Location: ' + obs.locName + '<br>' +
-                    'Date: ' + obs.obsDt;
-
-                marker.bindPopup(popupContent);
-
-                markers.push(marker);
-
-                // Add row to observations table
-                const row = document.createElement('tr');
-                row.innerHTML = '<td>' + obs.comName + '</td>' +
-                    '<td>' + birdInfo.category + '</td>' +
-                    '<td>' + obs.howMany + '</td>' +
-                    '<td>' + obs.locName + '</td>' +
-                    '<td>' + obs.obsDt + '</td>';
-                tableBody.appendChild(row);
-            });
+            addObservations(e.detail.observations);
         }
     });
 </script>
