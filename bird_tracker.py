@@ -485,24 +485,57 @@ This report was generated automatically by the Bird Tracker application.
                 observations_text.append(observation)
             
             # Create the prompt
-            prompt = f"""Please analyze these recent bird sightings and provide insights:{location_info}
+            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.{location_info}
 
 {chr(10).join(observations_text)}
 
-Please provide:
-1. A summary of the species observed
-2. Any notable patterns or trends
-3. Interesting observations or behaviors
-4. Recommendations for future bird watching
+Format your response EXACTLY as follows:
 
-Format your response in HTML with appropriate styling."""
+<p>Start directly with the main summary paragraph. No introductory statements.</p>
+
+<ul style="margin-left: 20px;">
+    <li>Unusual or rare species for this location:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Migratory species observed:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+<ul style="margin-left: 20px;">
+    <li>Summary of Birds of Prey:
+        <ul style="margin-left: 20px;">
+            <li>Species Name (Location)</li>
+            <li>Another Species (Location)</li>
+        </ul>
+    </li>
+</ul>
+
+Requirements:
+1. Start the main summary paragraph immediately - no introductory statements
+2. Include TWO blank lines after the main summary paragraph
+3. Include ONE blank line between each bulleted section
+4. Keep the main summary paragraph concise but informative
+5. Focus on the species and locations without dates
+6. Use proper HTML formatting for readability
+7. Ensure each section is visually distinct with proper spacing
+8. DO NOT include any meta-commentary about the format or structure"""
 
             # Get response from Claude
             response = self.claude.messages.create(
                 model="claude-3-sonnet",
                 max_tokens=1000,
                 temperature=0.7,
-                system="You are an expert bird watcher and naturalist. Provide detailed, informative analysis of bird sightings.",
+                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[
                     {"role": "user", "content": prompt}
                 ]
@@ -512,7 +545,27 @@ Format your response in HTML with appropriate styling."""
                 self.logger.error("Empty response from Claude")
                 return None
             
-            return response.content[0].text
+            # Extract the text content from the response
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
+                    # Handle list of ContentBlock objects
+                    text_content = ""
+                    for block in response.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
+                elif hasattr(response.content, 'text'):
+                    # Handle single ContentBlock object
+                    return response.content.text
+                elif isinstance(response.content, str):
+                    # Handle string content
+                    return response.content
+                else:
+                    # Try to convert to string if it's some other type
+                    return str(response.content)
+            else:
+                return "Sorry, I couldn't generate a response."
+            
         except Exception as e:
             self.logger.error(f"Error getting AI analysis: {e}", exc_info=True)
             return None
