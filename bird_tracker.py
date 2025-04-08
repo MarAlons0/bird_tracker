@@ -261,13 +261,18 @@ class BirdSightingTracker:
 
     def _initialize_claude(self):
         """Initialize Claude with the latest API version"""
-        anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
-        if anthropic_api_key:
+        try:
+            anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+            if not anthropic_api_key:
+                self.logger.error("ANTHROPIC_API_KEY not found in environment variables")
+                self.claude = None
+                return
+                
             # Ensure API key starts with 'sk-ant'
             if not anthropic_api_key.startswith('sk-ant'):
                 anthropic_api_key = f"sk-ant-{anthropic_api_key}"
             
-            logging.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
+            self.logger.info(f"Initializing Anthropic client with key starting with: {anthropic_api_key[:8]}...")
             
             # Create a custom httpx client without proxies
             http_client = httpx.Client(
@@ -282,8 +287,21 @@ class BirdSightingTracker:
                 api_key=anthropic_api_key,
                 http_client=http_client
             )
-        else:
-            logging.warning("ANTHROPIC_API_KEY not found, AI analysis will be limited")
+            
+            # Test the client with a simple request
+            try:
+                response = self.claude.messages.create(
+                    model="claude-3-sonnet-20240229",
+                    max_tokens=10,
+                    messages=[{"role": "user", "content": "Test"}]
+                )
+                self.logger.info("Claude client initialized and tested successfully")
+            except Exception as e:
+                self.logger.error(f"Error testing Claude client: {str(e)}")
+                self.claude = None
+                
+        except Exception as e:
+            self.logger.error(f"Error initializing Claude client: {str(e)}")
             self.claude = None
 
     def _setup_scheduler(self):
@@ -769,6 +787,10 @@ This report was generated automatically by the Bird Tracker application.
     def analyze_sightings(self, user_id: int) -> str:
         """Analyze recent bird sightings using Claude AI."""
         try:
+            if not self.claude:
+                self.logger.warning("Claude client not initialized, cannot analyze sightings")
+                return "Unable to generate AI analysis: Claude client not initialized"
+                
             # Get recent observations
             observations = self.get_recent_observations(user_id)
             if not observations:
@@ -807,7 +829,26 @@ This report was generated automatically by the Bird Tracker application.
                 ]
             )
             
-            return response.content[0].text
+            # Extract the text content from the response
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
+                    # Handle list of ContentBlock objects
+                    text_content = ""
+                    for block in response.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
+                elif hasattr(response.content, 'text'):
+                    # Handle single ContentBlock object
+                    return response.content.text
+                elif isinstance(response.content, str):
+                    # Handle string content
+                    return response.content
+                else:
+                    # Try to convert to string if it's some other type
+                    return str(response.content)
+            else:
+                return "Sorry, I couldn't generate a response."
             
         except Exception as e:
             logger.error(f"Error analyzing sightings: {str(e)}")
