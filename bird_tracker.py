@@ -279,7 +279,7 @@ class BirdSightingTracker:
             # Test the client with a simple request
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet",
+                    model="claude-3-opus-20240229",
                     max_tokens=100,
                     messages=[
                         {"role": "user", "content": "Hello, are you working?"}
@@ -536,7 +536,7 @@ Requirements:
 
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -771,7 +771,7 @@ Requirements:
             
             # Get analysis from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet",
+                model="claude-3-opus-20240229",
                 max_tokens=1000,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
