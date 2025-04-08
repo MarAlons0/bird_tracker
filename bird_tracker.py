@@ -278,7 +278,7 @@ class BirdSightingTracker:
             http_client = httpx.Client(
                 base_url="https://api.anthropic.com",
                 headers={
-                    "anthropic-version": "2023-06-01",
+                    "anthropic-version": "2024-01-01",
                     "content-type": "application/json"
                 }
             )
@@ -291,7 +291,7 @@ class BirdSightingTracker:
             # Test the client with a simple request
             try:
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
@@ -552,7 +552,7 @@ This report was generated automatically by the Bird Tracker application.
 
             self.logger.info("Sending request to Claude API")
             message = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-opus",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -648,7 +648,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Send to Claude
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-opus",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
@@ -845,7 +845,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Get analysis from Claude
             response = self.claude.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-sonnet",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert birdwatcher and ornithologist. Provide detailed, scientific analysis of bird sightings.",
