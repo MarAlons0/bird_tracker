@@ -451,7 +451,7 @@ This report was generated automatically by the Bird Tracker application.
                 formatted_observations.append(formatted_obs)
             
             # Get AI analysis
-            analysis = self._get_ai_analysis(formatted_observations, user_id)
+            analysis = self.get_ai_analysis(formatted_observations)
             
             if not analysis:
                 # Fallback to basic analysis if AI analysis fails
@@ -462,7 +462,7 @@ This report was generated automatically by the Bird Tracker application.
             logger.error(f"Error analyzing sightings: {e}", exc_info=True)
             return self._generate_basic_analysis(formatted_observations)
 
-    def _get_ai_analysis(self, observations, user_id=None):
+    def get_ai_analysis(self, sightings_data):
         """Get AI analysis of bird sightings."""
         try:
             if not self.claude:
@@ -471,21 +471,23 @@ This report was generated automatically by the Bird Tracker application.
             
             # Get location information from the first sighting
             location_info = ""
-            if observations and 'location' in observations[0]:
-                location_info = f"\nLocation: {observations[0]['location']}"
+            if sightings_data and 'location' in sightings_data[0]:
+                location_info = f"\nLocation: {sightings_data[0]['location']}"
             
             # Format observations for the prompt
-            observations_text = "\n".join([
-                f"- {obs['species']} ({obs['count']}) at {obs['location']} on {obs['timestamp']}"
-                f"{f' (Weather: {obs['weather']})' if obs.get('weather') else ''}"
-                f"{f' (Notes: {obs['notes']})' if obs.get('notes') else ''}"
-                for obs in observations
-            ])
+            observations_text = []
+            for obs in sightings_data:
+                observation = f"- {obs['species']} ({obs['count']}) at {obs['location']} on {obs['timestamp']}"
+                if obs.get('weather'):
+                    observation += f" (Weather: {obs['weather']})"
+                if obs.get('notes'):
+                    observation += f" (Notes: {obs['notes']})"
+                observations_text.append(observation)
             
             # Create the prompt
             prompt = f"""Please analyze these recent bird sightings and provide insights:{location_info}
 
-{observations_text}
+{chr(10).join(observations_text)}
 
 Please provide:
 1. A summary of the species observed
