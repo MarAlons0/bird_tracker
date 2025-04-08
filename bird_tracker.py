@@ -292,7 +292,7 @@ class BirdSightingTracker:
             try:
                 self.logger.info("Testing Claude client with a simple request...")
                 response = self.claude.messages.create(
-                    model="claude-3-sonnet-20240229",
+                    model="claude-3-sonnet",
                     max_tokens=10,
                     messages=[{"role": "user", "content": "Test"}]
                 )
@@ -553,11 +553,11 @@ This report was generated automatically by the Bird Tracker application.
             8. DO NOT include any meta-commentary about the format or structure"""
 
             self.logger.info("Sending request to Claude API")
-            self.logger.info(f"Using model: claude-3-opus-20240229")
+            self.logger.info(f"Using model: claude-3-opus")
             self.logger.info(f"Prompt length: {len(prompt)} characters")
             
             message = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-opus",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -657,7 +657,7 @@ This report was generated automatically by the Bird Tracker application.
             
             # Send to Claude
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-opus",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are a helpful birdwatching assistant. Provide accurate, informative responses about birds and birdwatching.",
