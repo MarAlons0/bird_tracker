@@ -439,6 +439,10 @@ This report was generated automatically by the Bird Tracker application.
             if not observations:
                 return "No observations to analyze."
             
+            if not self.claude:
+                self.logger.warning("Claude client not initialized, cannot analyze sightings")
+                return "Unable to generate AI analysis: Claude client not initialized"
+            
             # Format observations for AI analysis
             formatted_observations = []
             for obs in observations:
@@ -473,25 +477,20 @@ This report was generated automatically by the Bird Tracker application.
                 self.logger.error("Claude client not initialized")
                 return None
             
-            # Get location information from the first sighting
-            location_info = ""
-            if sightings_data and 'location' in sightings_data[0]:
-                location_info = f"\nLocation: {sightings_data[0]['location']}"
-            
-            # Format observations for the prompt
-            observations_text = []
+            # Format observations for display
+            formatted_observations = []
             for obs in sightings_data:
                 observation = f"- {obs['species']} ({obs['count']}) at {obs['location']} on {obs['timestamp']}"
                 if obs.get('weather'):
                     observation += f" (Weather: {obs['weather']})"
                 if obs.get('notes'):
                     observation += f" (Notes: {obs['notes']})"
-                observations_text.append(observation)
+                formatted_observations.append(observation)
+            observation_text = "\n".join(formatted_observations)
             
-            # Create the prompt
-            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.{location_info}
+            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
 
-{chr(10).join(observations_text)}
+{observation_text}
 
 Format your response EXACTLY as follows:
 
@@ -533,10 +532,10 @@ Requirements:
 6. Use proper HTML formatting for readability
 7. Ensure each section is visually distinct with proper spacing
 8. DO NOT include any meta-commentary about the format or structure"""
-
+            
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-sonnet",
                 max_tokens=1000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -708,96 +707,9 @@ Requirements:
     def analyze_sightings(self, user_id: int) -> str:
         """Analyze recent bird sightings using Claude AI."""
         try:
-            if not self.claude:
-                self.logger.warning("Claude client not initialized, cannot analyze sightings")
-                return "Unable to generate AI analysis: Claude client not initialized"
-                
             # Get recent observations
             observations = self.get_recent_observations(user_id)
-            if not observations:
-                return "No recent observations to analyze."
-            
-            # Format observations for display
-            formatted_observations = []
-            for obs in observations:
-                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
-                formatted_observations.append(formatted_obs)
-            observation_text = "\n".join(formatted_observations)
-            
-            prompt = f"""Analyze these bird observations and provide insights. DO NOT include any introductory statements or meta-commentary about the format.
-
-{observation_text}
-
-Format your response EXACTLY as follows:
-
-<p>Start directly with the main summary paragraph. No introductory statements.</p>
-
-<ul style="margin-left: 20px;">
-    <li>Unusual or rare species for this location:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Migratory species observed:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Summary of Birds of Prey:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-Requirements:
-1. Start the main summary paragraph immediately - no introductory statements
-2. Include TWO blank lines after the main summary paragraph
-3. Include ONE blank line between each bulleted section
-4. Keep the main summary paragraph concise but informative
-5. Focus on the species and locations without dates
-6. Use proper HTML formatting for readability
-7. Ensure each section is visually distinct with proper spacing
-8. DO NOT include any meta-commentary about the format or structure"""
-            
-            # Get analysis from Claude
-            response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
-                max_tokens=1000,
-                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            # Extract the text content from the response
-            if hasattr(response, 'content'):
-                if isinstance(response.content, list):
-                    # Handle list of ContentBlock objects
-                    text_content = ""
-                    for block in response.content:
-                        if hasattr(block, 'text'):
-                            text_content += block.text + "\n"
-                    return text_content.strip()
-                elif hasattr(response.content, 'text'):
-                    # Handle single ContentBlock object
-                    return response.content.text
-                elif isinstance(response.content, str):
-                    # Handle string content
-                    return response.content
-                else:
-                    # Try to convert to string if it's some other type
-                    return str(response.content)
-            else:
-                return "Sorry, I couldn't generate a response."
-            
+            return self.analyze_recent_sightings(observations, user_id)
         except Exception as e:
             logger.error(f"Error analyzing sightings: {str(e)}")
             return f"Error analyzing sightings: {str(e)}" 
