@@ -368,10 +368,13 @@
                 const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
                 locationModal.hide();
                 
-                // Dispatch location change event
-                window.dispatchEvent(new CustomEvent('locationChanged', {
-                    detail: { location: data.location }
-                }));
+                // Update the location display in the UI
+                const locationCard = document.querySelector('.location-card');
+                if (locationCard) {
+                    locationCard.querySelector('p:nth-child(1)').textContent = `Name: ${data.location.name}`;
+                    locationCard.querySelector('p:nth-child(2)').textContent = `Coordinates: ${data.location.latitude}, ${data.location.longitude}`;
+                    locationCard.querySelector('p:nth-child(3)').textContent = `Radius: ${data.location.radius} miles`;
+                }
                 
                 // Save location to localStorage
                 localStorage.setItem('currentLocation', JSON.stringify(data.location));
@@ -380,9 +383,8 @@
                 // Show success message
                 alert('Location updated successfully!');
                 
-                // Delay page reload to allow event listeners to process
+                // Reload the page after a short delay
                 setTimeout(() => {
-                    console.log('Reloading page after location update');
                     window.location.reload();
                 }, 1000);
             } else {

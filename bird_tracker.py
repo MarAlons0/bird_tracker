@@ -193,11 +193,12 @@ class BirdSightingTracker:
                 self.logger.info(f"Getting active location for user {user_id}")
                 
                 try:
+                    # Get user preferences and active location
                     prefs = UserPreferences.query.filter_by(user_id=user_id).first()
                     if prefs and prefs.active_location_id:
                         location = Location.query.get(prefs.active_location_id)
                         if location and location.is_active:
-                            self.logger.info(f"Found existing location for user {user_id}: {location.name}")
+                            self.logger.info(f"Found active location for user {user_id}: {location.name}")
                             return {
                                 'name': location.name,
                                 'latitude': location.latitude,
@@ -205,7 +206,7 @@ class BirdSightingTracker:
                                 'radius': location.radius
                             }
                     
-                    # If no user-specific location exists, create one with default values
+                    # If no active location exists, create one with default values
                     self.logger.info(f"Creating default location for user {user_id}")
                     
                     try:
@@ -216,7 +217,7 @@ class BirdSightingTracker:
                             longitude=-84.5120,
                             radius=25,
                             is_active=True,
-                            user_id=user_id  # Set the user_id for the location
+                            user_id=user_id
                         )
                         db.session.add(location)
                         db.session.flush()  # Get the ID for the new location
