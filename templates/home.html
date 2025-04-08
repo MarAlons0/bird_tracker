@@ -380,6 +380,20 @@
                 localStorage.setItem('currentLocation', JSON.stringify(data.location));
                 console.log('Saved location to localStorage:', data.location);
                 
+                // Save observations to localStorage
+                if (data.observations) {
+                    localStorage.setItem('currentObservations', JSON.stringify(data.observations));
+                    console.log('Saved observations to localStorage:', data.observations);
+                }
+                
+                // Dispatch location change event with observations
+                window.dispatchEvent(new CustomEvent('locationChanged', {
+                    detail: {
+                        location: data.location,
+                        observations: data.observations
+                    }
+                }));
+                
                 // Show success message
                 alert('Location updated successfully!');
                 
