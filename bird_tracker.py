@@ -353,8 +353,12 @@ class BirdSightingTracker:
                         self.logger.info(f"No observations to report for user {user.id}")
                         continue
                     
-                    # Format observations
-                    formatted_observations = self._format_observations(observations)
+                    # Format observations for display
+                    formatted_observations = []
+                    for obs in observations:
+                        formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                        formatted_observations.append(formatted_obs)
+                    formatted_text = "\n".join(formatted_observations)
                     
                     # Get analysis
                     analysis = self.analyze_recent_sightings(observations, user_id=user.id)
@@ -364,10 +368,11 @@ class BirdSightingTracker:
                     location_name = active_location['name'] if active_location else "your location"
                     
                     # Prepare email content
-                    subject = f"Daily Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
+                    subject = f"Weekly Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}"
                     body = f"""Bird Sighting Report for {location_name}
 
-{formatted_observations}
+Recent Observations:
+{formatted_text}
 
 Analysis:
 {analysis}
@@ -377,14 +382,14 @@ This report was generated automatically by the Bird Tracker application.
                     
                     # Send email
                     self.send_email(subject, body, recipient=user.email)
-                    self.logger.info(f"Daily report sent successfully to user {user.id}")
+                    self.logger.info(f"Weekly report sent successfully to user {user.id}")
                     
                 except Exception as e:
-                    self.logger.error(f"Error sending daily report to user {user.id}: {str(e)}")
+                    self.logger.error(f"Error sending weekly report to user {user.id}: {str(e)}")
                     continue
             
         except Exception as e:
-            self.logger.error(f"Error sending daily report: {str(e)}")
+            self.logger.error(f"Error sending weekly report: {str(e)}")
             raise
 
     def send_email(self, subject, body, recipient=None):
@@ -424,7 +429,11 @@ This report was generated automatically by the Bird Tracker application.
         """Analyze recent bird sightings and generate a report"""
         try:
             # Format observations for display
-            formatted_observations = self._format_observations(observations)
+            formatted_observations = []
+            for obs in observations:
+                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                formatted_observations.append(formatted_obs)
+            formatted_text = "\n".join(formatted_observations)
             
             # Get the active location for this user
             active_location = self.get_active_location(user_id)
@@ -566,9 +575,16 @@ This report was generated automatically by the Bird Tracker application.
                 """
             
             if observations:
+                # Format observations for display
+                formatted_observations = []
+                for obs in observations:
+                    formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                    formatted_observations.append(formatted_obs)
+                formatted_text = "\n".join(formatted_observations)
+                
                 observation_context = f"""{location_info}
                 Here are recent bird observations in the area:
-                {self._format_observations(observations)}
+                {formatted_text}
                 
                 Please use this information to answer the user's question if relevant."""
             else:
@@ -748,4 +764,51 @@ This report was generated automatically by the Bird Tracker application.
             raise
         except Exception as e:
             self.logger.error(f"Unexpected error in get_recent_observations: {str(e)}")
-            raise Exception(f"Failed to get recent observations: {str(e)}") 
+            raise Exception(f"Failed to get recent observations: {str(e)}")
+
+    def analyze_sightings(self, user_id: int) -> str:
+        """Analyze recent bird sightings using Claude AI."""
+        try:
+            # Get recent observations
+            observations = self.get_recent_observations(user_id)
+            if not observations:
+                return "No recent observations to analyze."
+            
+            # Format observations for Claude
+            formatted_observations = []
+            for obs in observations:
+                formatted_obs = {
+                    'species': obs['comName'],
+                    'count': obs['howMany'],
+                    'location': obs['locName'],
+                    'date': obs['obsDt']
+                }
+                formatted_observations.append(formatted_obs)
+            
+            # Create prompt for Claude
+            prompt = f"""Analyze these recent bird sightings and provide insights:
+            {json.dumps(formatted_observations, indent=2)}
+            
+            Please provide:
+            1. Notable species observed
+            2. Patterns in timing or location
+            3. Any interesting behaviors or counts
+            4. Recommendations for future birdwatching
+            """
+            
+            # Get analysis from Claude
+            response = self.claude.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1000,
+                temperature=0.7,
+                system="You are an expert birdwatcher and ornithologist. Provide detailed, scientific analysis of bird sightings.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            return response.content[0].text
+            
+        except Exception as e:
+            logger.error(f"Error analyzing sightings: {str(e)}")
+            return f"Error analyzing sightings: {str(e)}" 
