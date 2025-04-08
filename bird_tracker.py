@@ -476,8 +476,12 @@ This report was generated automatically by the Bird Tracker application.
                 self.logger.warning("Claude client not initialized, skipping AI analysis")
                 return None
 
-            # Prepare the observation data for analysis
-            observation_text = self._format_observations(observations)
+            # Format observations for display
+            formatted_observations = []
+            for obs in observations:
+                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                formatted_observations.append(formatted_obs)
+            observation_text = "\n".join(formatted_observations)
             
             # Include location information
             location_info = ""
