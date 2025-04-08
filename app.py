@@ -40,33 +40,44 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def create_app():
+    print("Starting app creation...")
     app = Flask(__name__)
+    print("Flask app created")
     
     # Configure the app
+    print("Configuring app...")
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    print("Basic app configuration complete")
 
     # Configure session settings for Safari
+    print("Configuring session settings...")
     app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    print("Session settings configured")
     
     # Configure Flask-Mail
+    print("Configuring Flask-Mail...")
     app.config['MAIL_SERVER'] = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
     app.config['MAIL_PORT'] = int(os.getenv('SMTP_PORT', '587'))
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USERNAME'] = os.getenv('SMTP_USER')
     app.config['MAIL_PASSWORD'] = os.getenv('SMTP_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('SMTP_USER')
+    print("Flask-Mail configured")
     
     # Initialize extensions
+    print("Initializing extensions...")
     init_extensions(app)
+    print("Extensions initialized")
     
     # Configure CORS
+    print("Configuring CORS...")
     if os.getenv('FLASK_ENV') == 'production':
         cors = CORS(app, resources={
             r"/*": {
@@ -78,23 +89,31 @@ def create_app():
         })
     else:
         cors = CORS(app, supports_credentials=True)
+    print("CORS configured")
     
     # Register blueprints
+    print("Registering blueprints...")
     from routes import main, auth, admin
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp, url_prefix='/admin')
+    print("Blueprints registered")
     
     # Initialize bird tracker
+    print("Initializing bird tracker...")
     app.tracker = BirdSightingTracker()
+    print("Bird tracker initialized")
     
     # Configure Cloudinary
+    print("Configuring Cloudinary...")
     cloudinary.config(
         cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
         api_key=os.getenv('CLOUDINARY_API_KEY'),
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
+    print("Cloudinary configured")
     
+    print("App creation complete")
     return app
 
 app = create_app()
@@ -455,15 +474,11 @@ def update_location():
                     current_app.logger.error("Failed to get updated location")
                     return jsonify({'error': 'Failed to get updated location'}), 500
                     
-                recent_observations = app.tracker.get_recent_observations(
-                    lat=location['latitude'],
-                    lng=location['longitude'],
-                    radius=location['radius']
-                )
+                recent_observations = app.tracker.get_recent_observations(user_id=current_user.id)
                 
                 return jsonify({
                     'location': location,
-                    'recent_observations': recent_observations
+                    'observations': recent_observations
                 })
                 
             except Exception as e:
@@ -621,7 +636,22 @@ def internal_error(error):
     return render_template('error.html', error="Internal server error"), 500
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Bird Tracker Application')
+    parser.add_argument('--init-db', action='store_true', help='Initialize the database')
+    args = parser.parse_args()
+
+    print("Starting application...")
+    
+    if args.init_db:
+        print("Initializing database...")
+        init_db()
+        print("Database initialization complete.")
+        sys.exit(0)
+
+    print("Creating Flask application...")
     app = create_app()
-    init_db()
+    print("Flask application created")
+    
     print("Starting Flask server...")
-    app.run(host='localhost', port=5001, debug=True) 
+    app.run(host='127.0.0.1', port=5001, debug=False)  # Only listen on localhost 

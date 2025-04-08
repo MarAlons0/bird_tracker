@@ -694,8 +694,9 @@ This report was generated automatically by the Bird Tracker application.
             headers = {'X-eBirdApiToken': self.api_key}
             response = requests.get(base_url, params=params, headers=headers)
 
-            # Log the response status
+            # Log the response status and data
             self.logger.info(f"eBird API response status: {response.status_code}")
+            self.logger.info(f"eBird API response data: {response.text[:1000]}")  # Log first 1000 chars to avoid huge logs
 
             if response.status_code != 200:
                 self.logger.error(f"eBird API error: {response.status_code} - {response.text}")
@@ -708,19 +709,33 @@ This report was generated automatically by the Bird Tracker application.
             transformed_observations = []
             for obs in observations:
                 try:
+                    # Log the raw observation data
+                    self.logger.debug(f"Raw observation data: {obs}")
+                    
+                    # Transform the observation data to match the frontend's expected format
                     transformed_obs = {
-                        'species': obs.get('comName', 'Unknown Species'),
-                        'location': obs.get('locName', 'Unknown Location'),
-                        'date': obs.get('obsDt', ''),
-                        'count': obs.get('howMany', 1),
-                        'latitude': obs.get('lat', active_location['latitude']),
-                        'longitude': obs.get('lng', active_location['longitude'])
+                        'comName': obs.get('comName', 'Unknown Species'),
+                        'locName': obs.get('locName', 'Unknown Location'),
+                        'obsDt': obs.get('obsDt', ''),
+                        'howMany': obs.get('howMany', 1),
+                        'lat': obs.get('lat', active_location['latitude']),
+                        'lng': obs.get('lng', active_location['longitude'])
                     }
+                    
+                    # Log the transformed observation
+                    self.logger.debug(f"Transformed observation: {transformed_obs}")
+                    
+                    # Validate the transformed observation
+                    if not all(key in transformed_obs for key in ['comName', 'locName', 'obsDt', 'howMany', 'lat', 'lng']):
+                        self.logger.error(f"Missing required fields in transformed observation: {transformed_obs}")
+                        continue
+                        
                     transformed_observations.append(transformed_obs)
                 except Exception as e:
                     self.logger.error(f"Error transforming observation: {e}")
                     continue
 
+            self.logger.info(f"Successfully transformed {len(transformed_observations)} observations")
             return transformed_observations
 
         except requests.exceptions.RequestException as e:

@@ -118,6 +118,8 @@
 
     // Function to add observations to map and table
     function addObservations(observations) {
+        console.log('Adding observations:', observations);
+        
         // Clear existing markers and table rows
         markers.forEach(marker => map.removeLayer(marker));
         markers.length = 0;
@@ -126,49 +128,80 @@
         tableBody.innerHTML = '';
         observationRows.length = 0;
 
+        // Check if observations is valid
+        if (!observations || !Array.isArray(observations)) {
+            console.error('Invalid observations data:', observations);
+            return;
+        }
+
         // Add new observations
         observations.forEach(obs => {
-            const birdInfo = categorizeBird(obs.comName);
-            const marker = L.circleMarker([parseFloat(obs.lat), parseFloat(obs.lng)], {
-                radius: 8,
-                fillColor: birdInfo.color,
-                color: '#000',
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(map);
+            try {
+                const birdInfo = categorizeBird(obs.comName);
+                const lat = parseFloat(obs.lat);
+                const lng = parseFloat(obs.lng);
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.error('Invalid coordinates for observation:', obs);
+                    return;
+                }
+                
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    fillColor: birdInfo.color,
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
 
-            const popupContent = '<strong>' + obs.comName + '</strong><br>' +
-                'Category: ' + birdInfo.category + '<br>' +
-                'Count: ' + obs.howMany + '<br>' +
-                'Location: ' + obs.locName + '<br>' +
-                'Date: ' + obs.obsDt;
+                const popupContent = '<strong>' + obs.comName + '</strong><br>' +
+                    'Category: ' + birdInfo.category + '<br>' +
+                    'Count: ' + obs.howMany + '<br>' +
+                    'Location: ' + obs.locName + '<br>' +
+                    'Date: ' + obs.obsDt;
 
-            marker.bindPopup(popupContent);
-            markers.push(marker);
+                marker.bindPopup(popupContent);
+                markers.push(marker);
 
-            // Add row to observations table
-            const row = document.createElement('tr');
-            row.innerHTML = '<td>' + obs.comName + '</td>' +
-                '<td>' + birdInfo.category + '</td>' +
-                '<td>' + obs.howMany + '</td>' +
-                '<td>' + obs.locName + '</td>' +
-                '<td>' + obs.obsDt + '</td>';
-            tableBody.appendChild(row);
+                // Add row to observations table
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + obs.comName + '</td>' +
+                    '<td>' + birdInfo.category + '</td>' +
+                    '<td>' + obs.howMany + '</td>' +
+                    '<td>' + obs.locName + '</td>' +
+                    '<td>' + obs.obsDt + '</td>';
+                tableBody.appendChild(row);
+            } catch (error) {
+                console.error('Error adding observation:', error, obs);
+            }
         });
     }
 
     // Add initial observations
+    console.log('Initial observations:', storedObservations);
     addObservations(storedObservations);
 
     // Listen for location changes
     window.addEventListener('locationChanged', function(e) {
+        console.log('Location change event received:', e.detail);
+        
         // Update map view
-        map.setView([e.detail.location.latitude, e.detail.location.longitude], 10);
+        const lat = parseFloat(e.detail.location.latitude);
+        const lng = parseFloat(e.detail.location.longitude);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            map.setView([lat, lng], 10);
+        } else {
+            console.error('Invalid coordinates in location:', e.detail.location);
+        }
 
         // Add new observations if available
         if (e.detail.observations) {
+            console.log('New observations:', e.detail.observations);
             addObservations(e.detail.observations);
+        } else {
+            console.log('No observations in location change event');
         }
     });
 </script>

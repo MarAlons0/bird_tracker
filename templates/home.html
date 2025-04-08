@@ -326,67 +326,74 @@
     }
     
     // Handle location form submission
-    document.getElementById('saveLocationBtn').addEventListener('click', function() {
+    document.getElementById('saveLocationBtn').addEventListener('click', async function() {
         const locationInput = document.getElementById('locationName');
         const radiusInput = document.getElementById('searchRadius');
-        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
         const locationError = document.getElementById('locationError');
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
         
-        if (!locationInput.value) {
-            locationError.textContent = 'Please enter a location';
-            return;
-        }
-
-        // Get stored coordinates
-        const lat = locationInput.dataset.lat;
-        const lng = locationInput.dataset.lng;
-        
-        if (!lat || !lng) {
-            locationError.textContent = 'Please select a location from the dropdown';
-            return;
-        }
-
-        loadingModal.show();
-        
-        fetch('/api/location', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: locationInput.value,
-                latitude: parseFloat(lat),
-                longitude: parseFloat(lng),
-                radius: parseInt(radiusInput.value) || 10
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingModal.hide();
-            if (data.success) {
+        try {
+            // Validate input
+            if (!locationInput.value) {
+                locationError.textContent = 'Please enter a location';
+                return;
+            }
+            
+            if (!radiusInput.value || isNaN(radiusInput.value) || radiusInput.value < 1) {
+                locationError.textContent = 'Please enter a valid radius (minimum 1 mile)';
+                return;
+            }
+            
+            // Show loading modal
+            loadingModal.show();
+            
+            // Get coordinates from location input dataset
+            const lat = locationInput.dataset.lat;
+            const lng = locationInput.dataset.lng;
+            
+            if (!lat || !lng) {
+                throw new Error('Please select a location from the dropdown');
+            }
+            
+            // Send location update request
+            const response = await fetch('/api/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: locationInput.value,
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lng),
+                    radius: parseFloat(radiusInput.value)
+                })
+            });
+            
+            console.log('Location update response:', response);
+            const data = await response.json();
+            console.log('Location update data:', data);
+            
+            if (response.ok && data.location) {
                 // Close the location modal
                 const locationModal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
                 locationModal.hide();
                 
-                // Update the location display in the UI
-                const locationCard = document.querySelector('.location-card');
-                if (locationCard) {
-                    locationCard.querySelector('p:nth-child(1)').textContent = `Name: ${data.location.name}`;
-                    locationCard.querySelector('p:nth-child(2)').textContent = `Coordinates: ${data.location.latitude}, ${data.location.longitude}`;
-                    locationCard.querySelector('p:nth-child(3)').textContent = `Radius: ${data.location.radius} miles`;
-                }
-                
                 // Save location and observations to localStorage
                 localStorage.setItem('currentLocation', JSON.stringify(data.location));
+                console.log('Saved location to localStorage:', data.location);
+                
                 if (data.observations) {
                     localStorage.setItem('currentObservations', JSON.stringify(data.observations));
+                    console.log('Saved observations to localStorage:', data.observations);
+                } else {
+                    console.warn('No observations in response data');
                 }
                 
                 // Dispatch location change event with observations
                 window.dispatchEvent(new CustomEvent('locationChanged', {
                     detail: {
                         location: data.location,
-                        observations: data.observations
+                        observations: data.observations || []
                     }
                 }));
                 
@@ -398,14 +405,14 @@
                     window.location.reload();
                 }, 1000);
             } else {
-                locationError.textContent = data.error || 'Failed to update location';
+                throw new Error(data.error || 'Failed to update location');
             }
-        })
-        .catch(error => {
+        } catch (error) {
+            console.error('Error updating location:', error);
+            locationError.textContent = error.message || 'Error updating location. Please try again.';
+        } finally {
             loadingModal.hide();
-            locationError.textContent = 'Error updating location. Please try again.';
-            console.error('Error:', error);
-        });
+        }
     });
 
     // Carousel functionality
