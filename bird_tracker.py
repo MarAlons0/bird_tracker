@@ -297,6 +297,10 @@ class BirdSightingTracker:
     def _setup_scheduler(self):
         """Start daily report scheduler"""
         try:
+            if self.scheduler is not None:
+                logger.warning("Scheduler already initialized, skipping setup")
+                return
+
             scheduler = BackgroundScheduler()
             
             # Get schedule from config
@@ -304,10 +308,10 @@ class BirdSightingTracker:
             minute = int(self.config['email_schedule']['minute'])
             day = int(self.config['email_schedule']['day'])
             
-            # Add job for weekly reports (Wednesday mornings)
+            # Add job for weekly reports (Thursday mornings)
             scheduler.add_job(
                 func=self.send_daily_report,
-                trigger=CronTrigger(day_of_week='wed', hour=hour, minute=minute),
+                trigger=CronTrigger(day_of_week='thu', hour=hour, minute=minute),
                 id='weekly_report',
                 name='Send weekly bird sighting report',
                 replace_existing=True
@@ -320,11 +324,11 @@ class BirdSightingTracker:
             )
             
             scheduler.start()
-            logger.info(f"Started daily report scheduler (runs at {hour:02d}:{minute:02d})")
+            logger.info(f"Started weekly report scheduler (runs on Thursday at {hour:02d}:{minute:02d})")
             self.scheduler = scheduler
             
         except Exception as e:
-            logger.error(f"Error starting daily reports: {str(e)}")
+            logger.error(f"Error starting weekly reports: {str(e)}")
             self.scheduler = None
 
     def _handle_job_error(self, event):
