@@ -1,2 +1,2 @@
 web: gunicorn "app:create_app()"
-scheduler: python -c "from bird_tracker import BirdSightingTracker; tracker = BirdSightingTracker(); import time; print('Scheduler started'); while True: time.sleep(60)" 
+scheduler: python scheduler.py 
