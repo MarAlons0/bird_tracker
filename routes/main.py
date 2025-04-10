@@ -373,4 +373,60 @@ def get_observations():
         return jsonify(observations)
     except Exception as e:
         logger.error(f"Error fetching observations: {e}")
-        return jsonify({'error': 'Failed to fetch observations'}), 500 
+        return jsonify({'error': 'Failed to fetch observations'}), 500
+
+@bp.route('/api/ai-analysis')
+@login_required
+def get_ai_analysis():
+    try:
+        # Get the user's location
+        user_prefs = UserPreferences.query.filter_by(user_id=current_user.id).first()
+        if not user_prefs or not user_prefs.location:
+            return jsonify({
+                'status': 'error',
+                'message': 'Please set your location in preferences first.'
+            }), 400
+
+        # Get recent sightings for the user's location
+        recent_sightings = BirdSighting.query.filter_by(
+            location_id=user_prefs.location.id
+        ).order_by(BirdSighting.timestamp.desc()).limit(10).all()
+
+        if not recent_sightings:
+            return jsonify({
+                'status': 'error',
+                'message': 'No recent bird sightings found for analysis.'
+            }), 404
+
+        # Format sightings data for AI analysis
+        sightings_data = []
+        for sighting in recent_sightings:
+            sightings_data.append({
+                'species': sighting.species,
+                'count': sighting.count,
+                'timestamp': sighting.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'location': sighting.location.name,
+                'weather': sighting.weather_conditions,
+                'notes': sighting.notes
+            })
+
+        # Get AI analysis
+        analysis = bird_tracker.get_ai_analysis(sightings_data)
+        
+        if not analysis:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to generate AI analysis. Please try again later.'
+            }), 500
+
+        return jsonify({
+            'status': 'success',
+            'analysis': analysis
+        })
+
+    except Exception as e:
+        app.logger.error(f"Error generating AI analysis: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An unexpected error occurred while generating the analysis.'
+        }), 500 
