@@ -3,6 +3,7 @@ import time
 import logging
 import signal
 import sys
+from datetime import datetime
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +30,17 @@ def main():
         
         # Keep the process running until signaled to stop
         while running:
+            current_time = datetime.now()
+            # Check if it's Wednesday at 8:00 AM ET
+            if current_time.weekday() == 2 and current_time.hour == 8 and current_time.minute == 0:
+                try:
+                    logger.info("Running weekly report job...")
+                    tracker.send_weekly_report()
+                    logger.info("Weekly report job completed successfully")
+                except Exception as e:
+                    logger.error(f"Error running weekly report job: {str(e)}")
+            
+            # Sleep for 1 minute before next check
             time.sleep(60)
             
         logger.info("Scheduler shutting down...")
