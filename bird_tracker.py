@@ -308,12 +308,14 @@ class BirdSightingTracker:
             minute = int(self.config['email_schedule']['minute'])
             day = int(self.config['email_schedule']['day'])
             
-            # Add job for weekly reports (Thursday mornings)
+            # Schedule weekly report email
             scheduler.add_job(
-                func=self.send_daily_report,
-                trigger=CronTrigger(day_of_week='thu', hour=hour, minute=minute),
+                func=self.send_weekly_report,
+                trigger='cron',
+                day_of_week='wed',
+                hour=8,  # 8:00 AM ET
+                minute=0,
                 id='weekly_report',
-                name='Send weekly bird sighting report',
                 replace_existing=True
             )
             
