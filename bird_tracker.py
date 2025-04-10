@@ -312,7 +312,7 @@ class BirdSightingTracker:
             scheduler.add_job(
                 func=self.send_weekly_report,
                 trigger='cron',
-                day_of_week='wed',
+                day_of_week='fri',
                 hour=8,  # 8:00 AM ET
                 minute=0,
                 id='weekly_report',
@@ -326,7 +326,7 @@ class BirdSightingTracker:
             )
             
             scheduler.start()
-            logger.info(f"Started weekly report scheduler (runs on Thursday at {hour:02d}:{minute:02d})")
+            logger.info(f"Started weekly report scheduler (runs on Friday at {hour:02d}:{minute:02d})")
             self.scheduler = scheduler
             
         except Exception as e:
