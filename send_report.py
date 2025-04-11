@@ -16,7 +16,10 @@ def send_daily_report():
         analysis = tracker.analyze_recent_sightings(observations)
         
         # Send email with report
-        tracker.send_email(analysis)
+        tracker.send_email(
+            subject="Weekly Bird Sighting Report",
+            body=analysis
+        )
         logging.info("Daily report sent successfully")
         
     except Exception as e:
