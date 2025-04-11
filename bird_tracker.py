@@ -308,13 +308,17 @@ class BirdSightingTracker:
             minute = int(self.config['email_schedule']['minute'])
             day = int(self.config['email_schedule']['day'])
             
+            # Convert day number to day name
+            day_names = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+            day_name = day_names[day]
+            
             # Schedule weekly report email
             scheduler.add_job(
                 func=self.send_weekly_report,
                 trigger='cron',
-                day_of_week='wed',
-                hour=10,  # 10:00 AM ET
-                minute=0,
+                day_of_week=day_name,
+                hour=hour,
+                minute=minute,
                 id='weekly_report',
                 replace_existing=True
             )
@@ -326,7 +330,7 @@ class BirdSightingTracker:
             )
             
             scheduler.start()
-            logger.info(f"Started weekly report scheduler (runs on Wednesday at {hour:02d}:{minute:02d})")
+            logger.info(f"Started weekly report scheduler (runs on {day_name} at {hour:02d}:{minute:02d})")
             self.scheduler = scheduler
             
         except Exception as e:

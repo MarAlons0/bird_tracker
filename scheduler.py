@@ -31,8 +31,13 @@ def main():
         # Keep the process running until signaled to stop
         while running:
             current_time = datetime.now()
-            # Check if it's Wednesday at 10:00 AM ET
-            if current_time.weekday() == 2 and current_time.hour == 10 and current_time.minute == 0:  # 2 is Wednesday
+            # Get schedule from tracker config
+            hour = int(tracker.config['email_schedule']['hour'])
+            minute = int(tracker.config['email_schedule']['minute'])
+            day = int(tracker.config['email_schedule']['day'])
+            
+            # Check if it's time to run the report
+            if current_time.weekday() == day and current_time.hour == hour and current_time.minute == minute:
                 try:
                     logger.info("Running weekly report job...")
                     tracker.send_weekly_report()
