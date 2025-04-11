@@ -31,8 +31,8 @@ def main():
         # Keep the process running until signaled to stop
         while running:
             current_time = datetime.now()
-            # Check if it's Friday at 8:00 AM ET
-            if current_time.weekday() == 4 and current_time.hour == 8 and current_time.minute == 0:  # 4 is Friday
+            # Check if it's Wednesday at 10:00 AM ET
+            if current_time.weekday() == 2 and current_time.hour == 10 and current_time.minute == 0:  # 2 is Wednesday
                 try:
                     logger.info("Running weekly report job...")
                     tracker.send_weekly_report()

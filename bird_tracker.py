@@ -312,8 +312,8 @@ class BirdSightingTracker:
             scheduler.add_job(
                 func=self.send_weekly_report,
                 trigger='cron',
-                day_of_week='fri',
-                hour=8,  # 8:00 AM ET
+                day_of_week='wed',
+                hour=10,  # 10:00 AM ET
                 minute=0,
                 id='weekly_report',
                 replace_existing=True
@@ -326,7 +326,7 @@ class BirdSightingTracker:
             )
             
             scheduler.start()
-            logger.info(f"Started weekly report scheduler (runs on Friday at {hour:02d}:{minute:02d})")
+            logger.info(f"Started weekly report scheduler (runs on Wednesday at {hour:02d}:{minute:02d})")
             self.scheduler = scheduler
             
         except Exception as e:
@@ -409,23 +409,33 @@ This report was generated automatically by the Bird Tracker application.
     def send_email(self, subject, body, recipient=None):
         """Send an email using configured SMTP settings."""
         try:
-            # Check if email configuration exists
-            if not self.config.has_section('email'):
-                self.logger.error("Email configuration not found")
-                raise ValueError("Email configuration not found")
+            # Try to get email configuration from environment variables first
+            smtp_server = os.getenv('SMTP_SERVER') or self.config.get('email', 'mail_server')
+            smtp_port = int(os.getenv('SMTP_PORT', '587'))
+            sender_email = os.getenv('SMTP_USER') or self.config.get('email', 'mail_username')
+            sender_password = os.getenv('SMTP_PASSWORD') or self.config.get('email', 'mail_password')
+            recipient_email = recipient or os.getenv('RECIPIENT_EMAIL') or self.config.get('email', 'recipient_email')
 
-            # Get email configuration
-            smtp_server = self.config.get('email', 'smtp_server')
-            smtp_port = self.config.getint('email', 'smtp_port')
-            sender_email = self.config.get('email', 'sender_email')
-            sender_password = self.config.get('email', 'sender_password')
-            recipient_email = recipient or self.config.get('email', 'recipient_email')
+            # Validate email configuration
+            if not all([smtp_server, smtp_port, sender_email, sender_password, recipient_email]):
+                self.logger.error("Missing required email configuration")
+                raise ValueError("Missing required email configuration")
 
             # Create message
-            msg = MIMEText(body)
+            msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = sender_email
             msg['To'] = recipient_email
+
+            # Create both plain text and HTML versions
+            text = "Please view this email in an HTML-compatible email client."
+            html = body
+
+            # Attach both versions
+            part1 = MIMEText(text, 'plain')
+            part2 = MIMEText(html, 'html')
+            msg.attach(part1)
+            msg.attach(part2)
 
             # Send email
             with smtplib.SMTP(smtp_server, smtp_port) as server:
