@@ -21,16 +21,23 @@ def create_email_template(analysis, location_name, observations):
             center_lat = float(observations[0]['lat'])
             center_lng = float(observations[0]['lng'])
             
+            # Create markers for all observations
+            markers = []
+            for obs in observations:
+                lat = float(obs['lat'])
+                lng = float(obs['lng'])
+                markers.append(f"markers=color:red%7C{lat},{lng}")
+            
+            # Create static map URL
+            map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key=AIzaSyD8QJ5Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Q"
+            
             map_html = f"""
             <div class="map-container" style="margin: 20px 0; text-align: center;">
-                <iframe 
-                    width="100%" 
-                    height="400" 
-                    frameborder="0" 
-                    style="border:0" 
-                    src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD8QJ5Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Q&center={center_lat},{center_lng}&zoom=10" 
-                    allowfullscreen>
-                </iframe>
+                <img 
+                    src="{map_url}" 
+                    alt="Map of bird sightings in {location_name}"
+                    style="max-width: 100%; height: auto; border-radius: 5px;"
+                />
                 <div style="margin-top: 10px; font-size: 12px; color: #666;">
                     Map showing recent bird sightings in {location_name}
                 </div>
