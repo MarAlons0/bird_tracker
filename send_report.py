@@ -95,102 +95,113 @@ def create_email_template(analysis, location_name):
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Weekly Bird Sighting Report</title>
             <style>
                 body {{
                     font-family: Arial, sans-serif;
                     line-height: 1.6;
                     color: #333;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f8f9fa;
+                }}
+                .container {{
                     max-width: 800px;
                     margin: 0 auto;
                     padding: 20px;
+                    background-color: #ffffff;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }}
                 .banner {{
-                    background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
+                    background-image: url('https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/static/images/Banner.jpeg');
                     background-size: cover;
-                    background-position: center;
-                    color: white;
-                    text-align: center;
+                    background-position: right center;
+                    background-repeat: no-repeat;
+                    height: 200px;
                     padding: 40px 20px;
-                    margin-bottom: 20px;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                    text-align: left;
+                    color: white;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    position: relative;
+                    overflow: hidden;
+                }}
+                .banner::before {{
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+                    z-index: 1;
+                }}
+                .banner-content {{
+                    position: relative;
+                    z-index: 2;
+                    max-width: 60%;
                 }}
                 .title {{
-                    font-size: 24px;
-                    margin: 0;
+                    font-size: 28px;
                     font-weight: bold;
+                    margin: 0 0 10px 0;
                 }}
                 .subtitle {{
-                    font-size: 18px;
-                    margin: 10px 0 0;
+                    font-size: 16px;
+                    margin: 0;
                 }}
                 .content {{
-                    background-color: #f9f9f9;
                     padding: 20px;
-                    border-radius: 5px;
-                    margin-bottom: 20px;
                 }}
                 .map-container {{
                     margin: 20px 0;
                     text-align: center;
-                    position: relative;
                 }}
                 .map-image {{
                     max-width: 100%;
                     height: auto;
-                    border: 1px solid #ddd;
                     border-radius: 5px;
                 }}
-                .legend {{
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
-                    background: white;
-                    padding: 10px;
+                .analysis {{
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: #f8f9fa;
                     border-radius: 5px;
-                    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-                    font-size: 12px;
                 }}
-                .legend-item {{
-                    display: flex;
-                    align-items: center;
-                    margin-bottom: 5px;
-                }}
-                .legend-color {{
-                    width: 15px;
-                    height: 15px;
-                    margin-right: 8px;
-                    border-radius: 3px;
-                }}
-                .raptor {{ background-color: #e74c3c; }}
-                .waterfowl {{ background-color: #3498db; }}
-                .songbird {{ background-color: #2ecc71; }}
-                .other {{ background-color: #95a5a6; }}
                 .footer {{
                     text-align: center;
+                    padding: 20px;
                     font-size: 12px;
                     color: #666;
-                    margin-top: 20px;
+                    border-top: 1px solid #eee;
                 }}
             </style>
         </head>
         <body>
-            <div class="banner">
-                <h1 class="title">Weekly Bird Sighting Report</h1>
-                <p class="subtitle">{location_name}</p>
-            </div>
-            <div class="content">
-                <div class="map-container">
-                    <img src="{map_url}" 
-                         alt="Bird Sighting Map" 
-                         class="map-image"
-                         style="display: block; margin: 0 auto;"
-                         width="800"
-                         height="400">
+            <div class="container">
+                <div class="banner">
+                    <div class="banner-content">
+                        <h1 class="title">Weekly Bird Sighting Report</h1>
+                        <p class="subtitle">{location_name}</p>
+                    </div>
                 </div>
-                {analysis}
-            </div>
-            <div class="footer">
-                <p>This is an automated report from Bird Tracker. To manage your preferences, visit the Bird Tracker website.</p>
+                <div class="content">
+                    <div class="map-container">
+                        <img src="{map_url}" 
+                             alt="Bird Sighting Map" 
+                             class="map-image"
+                             style="display: block; margin: 0 auto;"
+                             width="800"
+                             height="400">
+                        {legend_html}
+                    </div>
+                    <div class="analysis">
+                        {analysis}
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>This is an automated report generated by the Bird Tracker application.</p>
+                    <p>To unsubscribe or manage your preferences, please visit the application settings.</p>
+                </div>
             </div>
         </body>
         </html>
