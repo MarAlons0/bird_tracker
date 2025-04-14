@@ -30,13 +30,37 @@ def create_email_template(analysis, location_name, observations):
             center_lat = float(observations[0]['lat'])
             center_lng = float(observations[0]['lng'])
             
+            # Bird categorization function
+            def categorize_bird(bird_name):
+                raptors = ['hawk', 'eagle', 'falcon', 'owl', 'osprey', 'kite', 'harrier', 'vulture']
+                waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'crane', 'grebe', 'loon', 'coot', 'gallinule', 'rail', 'shorebird', 'sandpiper', 'plover', 'gull', 'tern']
+                songbirds = ['warbler', 'sparrow', 'finch', 'thrush', 'wren', 'chickadee', 'titmouse', 'nuthatch', 'creeper', 'kinglet', 'gnatcatcher', 'flycatcher', 'phoebe', 'pewee', 'vireo', 'jay', 'crow', 'raven', 'blackbird', 'oriole', 'grackle', 'starling', 'mockingbird', 'thrasher', 'catbird', 'cardinal', 'grosbeak', 'bunting', 'towhee', 'junco', 'lark', 'pipit', 'swallow', 'martin', 'swift', 'hummingbird', 'woodpecker', 'flicker', 'sapsucker']
+                
+                bird_name_lower = bird_name.lower()
+                
+                if any(term in bird_name_lower for term in raptors):
+                    return 'raptor'
+                elif any(term in bird_name_lower for term in waterfowl):
+                    return 'waterfowl'
+                elif any(term in bird_name_lower for term in songbirds):
+                    return 'songbird'
+                else:
+                    return 'other'
+            
             # Limit the number of markers to 20 to keep the URL length manageable
             max_markers = 20
             markers = []
             for obs in observations[:max_markers]:
                 lat = float(obs['lat'])
                 lng = float(obs['lng'])
-                markers.append(f"markers=color:red%7C{lat},{lng}")
+                category = categorize_bird(obs['comName'])
+                color = {
+                    'raptor': 'red',
+                    'waterfowl': 'blue',
+                    'songbird': 'green',
+                    'other': 'gray'
+                }[category]
+                markers.append(f"markers=color:{color}%7C{lat},{lng}")
             
             # Create static map URL with proper encoding
             map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
@@ -65,7 +89,7 @@ def create_email_template(analysis, location_name, observations):
                 else:
                     map_src = fallback_url
             
-            # Create HTML template with base64-encoded image
+            # Create HTML template with base64-encoded image and legend
             html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -109,6 +133,7 @@ def create_email_template(analysis, location_name, observations):
                     .map-container {{
                         margin: 20px 0;
                         text-align: center;
+                        position: relative;
                     }}
                     .map-image {{
                         max-width: 100%;
@@ -116,6 +141,31 @@ def create_email_template(analysis, location_name, observations):
                         border: 1px solid #ddd;
                         border-radius: 5px;
                     }}
+                    .legend {{
+                        position: absolute;
+                        bottom: 10px;
+                        right: 10px;
+                        background: white;
+                        padding: 10px;
+                        border-radius: 5px;
+                        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+                        font-size: 12px;
+                    }}
+                    .legend-item {{
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 5px;
+                    }}
+                    .legend-color {{
+                        width: 15px;
+                        height: 15px;
+                        margin-right: 8px;
+                        border-radius: 3px;
+                    }}
+                    .raptor {{ background-color: #e74c3c; }}
+                    .waterfowl {{ background-color: #3498db; }}
+                    .songbird {{ background-color: #2ecc71; }}
+                    .other {{ background-color: #95a5a6; }}
                     .footer {{
                         text-align: center;
                         font-size: 12px;
@@ -137,6 +187,24 @@ def create_email_template(analysis, location_name, observations):
                              style="display: block; margin: 0 auto;"
                              width="800"
                              height="400">
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color raptor"></div>
+                                <span>Raptors</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color waterfowl"></div>
+                                <span>Waterfowl</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color songbird"></div>
+                                <span>Songbirds</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color other"></div>
+                                <span>Other Birds</span>
+                            </div>
+                        </div>
                     </div>
                     {analysis}
                 </div>
