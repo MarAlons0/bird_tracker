@@ -21,15 +21,16 @@ def create_email_template(analysis, location_name, observations):
             google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
             if not google_places_key:
                 logger.error("Google Places API key not found in environment variables")
-                return ""
+                raise ValueError("Google Places API key not found")
             
             # Create a map centered on the first observation
             center_lat = float(observations[0]['lat'])
             center_lng = float(observations[0]['lng'])
             
-            # Create markers for all observations
+            # Limit the number of markers to 20 to keep the URL length manageable
+            max_markers = 20
             markers = []
-            for obs in observations:
+            for obs in observations[:max_markers]:
                 lat = float(obs['lat'])
                 lng = float(obs['lng'])
                 markers.append(f"markers=color:red%7C{lat},{lng}")
@@ -49,7 +50,7 @@ def create_email_template(analysis, location_name, observations):
                     onerror="this.onerror=null; this.src='https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png';"
                 />
                 <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                    Map showing recent bird sightings in {location_name}
+                    Map showing recent bird sightings in {location_name} (showing {min(len(observations), max_markers)} of {len(observations)} sightings)
                 </div>
             </div>
             """
@@ -64,7 +65,7 @@ def create_email_template(analysis, location_name, observations):
                     style="max-width: 100%; height: auto; border-radius: 5px;"
                 />
                 <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                    Map showing recent bird sightings in {location_name}
+                    Map showing recent bird sightings in {location_name} ({len(observations)} sightings)
                 </div>
             </div>
             """
