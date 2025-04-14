@@ -295,7 +295,7 @@ class BirdSightingTracker:
             self.claude = None
 
     def _setup_scheduler(self):
-        """Start daily report scheduler"""
+        """Start weekly report scheduler"""
         try:
             if self.scheduler is not None:
                 logger.warning("Scheduler already initialized, skipping setup")
@@ -348,10 +348,10 @@ class BirdSightingTracker:
                 body = f"The following error occurred:\n\n{str(event.exception)}"
                 self.send_email(body, self.email_config['admin_email'], subject=subject)
 
-    def send_daily_report(self):
-        """Send daily report of bird sightings."""
+    def send_weekly_report(self):
+        """Send weekly report of bird sightings."""
         try:
-            self.logger.info("Starting daily report generation")
+            self.logger.info("Starting weekly report generation")
             
             # Get all users with newsletter subscriptions
             from models import User, db
