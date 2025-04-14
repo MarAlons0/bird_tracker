@@ -41,18 +41,89 @@ def create_email_template(analysis, location_name, observations):
             # Log the map URL for debugging (without the API key)
             logger.info(f"Generated map URL: {map_url.split('&key=')[0]}")
             
-            map_html = f"""
-            <div class="map-container" style="margin: 20px 0; text-align: center;">
-                <img 
-                    src="{map_url}" 
-                    alt="Map of bird sightings in {location_name}"
-                    style="max-width: 100%; height: auto; border-radius: 5px;"
-                    onerror="this.onerror=null; this.src='https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png';"
-                />
-                <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                    Map showing recent bird sightings in {location_name} (showing {min(len(observations), max_markers)} of {len(observations)} sightings)
+            # Create HTML template with improved image handling
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }}
+                    .banner {{
+                        background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
+                        background-size: cover;
+                        background-position: center;
+                        color: white;
+                        text-align: center;
+                        padding: 40px 20px;
+                        margin-bottom: 20px;
+                        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                    }}
+                    .title {{
+                        font-size: 24px;
+                        margin: 0;
+                        font-weight: bold;
+                    }}
+                    .subtitle {{
+                        font-size: 18px;
+                        margin: 10px 0 0;
+                    }}
+                    .content {{
+                        background-color: #f9f9f9;
+                        padding: 20px;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                    }}
+                    .map-container {{
+                        margin: 20px 0;
+                        text-align: center;
+                    }}
+                    .map-image {{
+                        max-width: 100%;
+                        height: auto;
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                    }}
+                    .footer {{
+                        text-align: center;
+                        font-size: 12px;
+                        color: #666;
+                        margin-top: 20px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="banner">
+                    <h1 class="title">Weekly Bird Sighting Report</h1>
+                    <p class="subtitle">{location_name}</p>
                 </div>
-            </div>
+                <div class="content">
+                    <div class="map-container">
+                        <img src="{map_url}" 
+                             alt="Bird Sighting Map" 
+                             class="map-image"
+                             style="display: block; margin: 0 auto;"
+                             width="800"
+                             height="400"
+                             loading="eager"
+                             decoding="async"
+                             onerror="this.onerror=null; this.src='https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png';">
+                    </div>
+                    {analysis}
+                </div>
+                <div class="footer">
+                    <p>This is an automated report from Bird Tracker. To manage your preferences, visit the Bird Tracker website.</p>
+                </div>
+            </body>
+            </html>
             """
         except Exception as e:
             logger.error(f"Error creating map: {str(e)}")
@@ -70,77 +141,7 @@ def create_email_template(analysis, location_name, observations):
             </div>
             """
     
-    return f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }}
-        .banner {{
-            background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            text-align: center;
-            padding: 40px 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }}
-        .title {{
-            font-size: 24px;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }}
-        .subtitle {{
-            font-size: 18px;
-            margin-bottom: 20px;
-        }}
-        .content {{
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }}
-        .map-container {{
-            margin: 20px 0;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
-        ul {{
-            margin-left: 20px;
-        }}
-        li {{
-            margin-bottom: 8px;
-        }}
-    </style>
-</head>
-<body>
-    <div class="banner">
-        <div class="title">Mario's Bird Tracker Newsletter</div>
-        <div class="subtitle">{current_date}</div>
-    </div>
-    
-    <div class="content">
-        <h2>Bird Sightings Report for {location_name}</h2>
-        {map_html}
-        {analysis}
-    </div>
-    
-    <div style="margin-top: 20px; text-align: center; color: #666; font-size: 12px;">
-        This report was generated automatically by the Bird Tracker application.
-    </div>
-</body>
-</html>
-"""
+    return html_content
 
 def send_weekly_report():
     try:
