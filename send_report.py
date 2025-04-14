@@ -17,6 +17,12 @@ def create_email_template(analysis, location_name, observations):
     map_html = ""
     if observations:
         try:
+            # Get Google Places API key from environment
+            google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+            if not google_places_key:
+                logger.error("Google Places API key not found in environment variables")
+                return ""
+            
             # Create a map centered on the first observation
             center_lat = float(observations[0]['lat'])
             center_lng = float(observations[0]['lng'])
@@ -29,7 +35,7 @@ def create_email_template(analysis, location_name, observations):
                 markers.append(f"markers=color:red%7C{lat},{lng}")
             
             # Create static map URL
-            map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key=AIzaSyD8QJ5Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Q"
+            map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_places_key}"
             
             map_html = f"""
             <div class="map-container" style="margin: 20px 0; text-align: center;">
