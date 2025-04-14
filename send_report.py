@@ -17,11 +17,11 @@ def create_email_template(analysis, location_name, observations):
     map_html = ""
     if observations:
         try:
-            # Get Google Maps API key from environment
-            google_maps_key = os.getenv('GOOGLE_MAPS_API_KEY')
+            # Get Google Places API key from environment (includes Maps API access)
+            google_maps_key = os.getenv('GOOGLE_PLACES_API_KEY')
             if not google_maps_key:
-                logger.error("Google Maps API key not found in environment variables")
-                raise ValueError("Google Maps API key not found")
+                logger.error("Google Places API key not found in environment variables")
+                raise ValueError("Google Places API key not found")
             
             # Create a map centered on the first observation
             center_lat = float(observations[0]['lat'])
