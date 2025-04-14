@@ -41,7 +41,7 @@ def create_email_template(analysis, location_name):
         markers = []
         for obs in observations:
             # Determine bird category
-            bird_name = obs['species'].lower()
+            bird_name = obs['comName'].lower()
             if any(raptor in bird_name for raptor in raptors):
                 color = 'red'  # Raptors
             elif any(water in bird_name for water in waterfowl):
@@ -78,10 +78,31 @@ def create_email_template(analysis, location_name):
                     background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
                     background-size: cover;
                     background-position: center;
+                    background-repeat: no-repeat;
+                    min-height: 200px;
                     padding: 40px 20px;
                     text-align: center;
                     color: white;
                     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                }}
+                .banner::before {{
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.3);
+                    z-index: 1;
+                }}
+                .banner > * {{
+                    position: relative;
+                    z-index: 2;
                 }}
                 .title {{
                     font-size: 24px;
