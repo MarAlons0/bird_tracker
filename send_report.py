@@ -21,41 +21,50 @@ def create_email_template(analysis, location_name):
             logger.error("Google Maps API key not found in environment variables")
             return None
 
-        # Get recent observations for the map
+        # Get observations for the map
         tracker = BirdSightingTracker()
         observations = tracker.get_recent_observations()
-        
         if not observations:
-            logger.error("No observations found for map generation")
+            logger.error("No observations found for map")
             return None
 
         # Get the first observation's coordinates for the map center
         center_lat = observations[0]['lat']
         center_lng = observations[0]['lng']
 
-        # Create markers for the map (limit to 50 markers)
+        # Define bird categories
+        raptors = ['eagle', 'hawk', 'falcon', 'vulture', 'owl', 'osprey', 'kite', 'harrier']
+        waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'cormorant', 'grebe', 'loon', 'coot', 'rail', 'gallinule']
+        songbirds = ['sparrow', 'finch', 'warbler', 'thrush', 'wren', 'blackbird', 'oriole', 'grackle', 'starling', 'jay', 'cardinal', 'tanager', 'bunting', 'grosbeak']
+
+        # Create markers for each observation
         markers = []
-        for obs in observations[:50]:  # Limit to 50 markers
-            # Categorize birds by type
-            if 'water' in obs['comName'].lower() or 'shore' in obs['comName'].lower():
-                color = 'blue'  # Water birds
-            elif 'hawk' in obs['comName'].lower() or 'eagle' in obs['comName'].lower():
-                color = 'red'   # Raptors
-            elif 'sparrow' in obs['comName'].lower() or 'finch' in obs['comName'].lower():
-                color = 'gray'  # Small birds
+        for obs in observations:
+            # Determine bird category
+            bird_name = obs['species'].lower()
+            if any(raptor in bird_name for raptor in raptors):
+                color = 'red'  # Raptors
+            elif any(water in bird_name for water in waterfowl):
+                color = 'blue'  # Waterfowl
+            elif any(song in bird_name for song in songbirds):
+                color = 'green'  # Songbirds
             else:
-                color = 'green' # Other birds
+                color = 'gray'  # Other birds
+
             markers.append(f"markers=color:{color}%7C{obs['lat']},{obs['lng']}")
 
         # Create map URL
         map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
-        logger.info(f"Generated map URL: {map_url}")  # Log the URL without the API key
+        logger.info(f"Generated map URL: {map_url}")
 
-        # Create HTML template with map and legend
-        template = f"""
+        # Create HTML template
+        html_template = f"""
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Weekly Bird Sighting Report</title>
             <style>
                 body {{
                     font-family: Arial, sans-serif;
@@ -72,12 +81,16 @@ def create_email_template(analysis, location_name):
                     padding: 40px 20px;
                     text-align: center;
                     color: white;
-                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
                 }}
                 .title {{
                     font-size: 24px;
                     font-weight: bold;
                     margin: 0;
+                }}
+                .subtitle {{
+                    font-size: 18px;
+                    margin: 10px 0 0;
                 }}
                 .map-container {{
                     margin: 20px 0;
@@ -86,15 +99,18 @@ def create_email_template(analysis, location_name):
                 .map {{
                     max-width: 100%;
                     height: auto;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 }}
                 .legend {{
                     display: flex;
-                    justify-content: center;
                     flex-wrap: wrap;
+                    justify-content: center;
                     gap: 15px;
                     margin: 15px 0;
+                    padding: 10px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
                 }}
                 .legend-item {{
                     display: flex;
@@ -106,52 +122,70 @@ def create_email_template(analysis, location_name):
                     height: 15px;
                     border-radius: 50%;
                 }}
-                .legend-text {{
+                .legend-label {{
                     font-size: 14px;
                 }}
                 .analysis {{
-                    background-color: #f9f9f9;
+                    background-color: #f8f9fa;
                     padding: 20px;
-                    border-radius: 4px;
+                    border-radius: 8px;
                     margin-top: 20px;
+                }}
+                .analysis h2 {{
+                    margin-top: 0;
+                    color: #2c3e50;
+                }}
+                .footer {{
+                    text-align: center;
+                    margin-top: 30px;
+                    padding-top: 20px;
+                    border-top: 1px solid #eee;
+                    font-size: 14px;
+                    color: #666;
                 }}
             </style>
         </head>
         <body>
             <div class="banner">
                 <h1 class="title">Weekly Bird Sighting Report</h1>
-                <p>{location_name}</p>
+                <p class="subtitle">{location_name}</p>
             </div>
             
             <div class="map-container">
                 <img src="{map_url}" alt="Bird Sightings Map" class="map">
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #e74c3c;"></div>
-                        <span class="legend-text">Raptors</span>
+                        <div class="legend-color" style="background-color: #FF0000;"></div>
+                        <span class="legend-label">Raptors</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #3498db;"></div>
-                        <span class="legend-text">Waterfowl</span>
+                        <div class="legend-color" style="background-color: #0000FF;"></div>
+                        <span class="legend-label">Waterfowl</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #2ecc71;"></div>
-                        <span class="legend-text">Songbirds</span>
+                        <div class="legend-color" style="background-color: #00FF00;"></div>
+                        <span class="legend-label">Songbirds</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #95a5a6;"></div>
-                        <span class="legend-text">Other</span>
+                        <div class="legend-color" style="background-color: #808080;"></div>
+                        <span class="legend-label">Other</span>
                     </div>
                 </div>
             </div>
             
             <div class="analysis">
+                <h2>AI Analysis</h2>
                 {analysis}
+            </div>
+            
+            <div class="footer">
+                <p>This is an automated report generated by Bird Tracker.</p>
+                <p>To view more details or manage your preferences, visit the Bird Tracker web app.</p>
             </div>
         </body>
         </html>
         """
-        return template
+        return html_template
     except Exception as e:
         logger.error(f"Error creating email template: {str(e)}")
         return None
