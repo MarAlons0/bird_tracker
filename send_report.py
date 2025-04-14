@@ -4,6 +4,9 @@ import configparser
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import requests
+import base64
+from io import BytesIO
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +44,28 @@ def create_email_template(analysis, location_name, observations):
             # Log the map URL for debugging (without the API key)
             logger.info(f"Generated map URL: {map_url.split('&key=')[0]}")
             
-            # Create HTML template with improved image handling
+            try:
+                # Download the map image and convert to base64
+                response = requests.get(map_url)
+                if response.status_code == 200:
+                    # Convert image to base64
+                    image_data = base64.b64encode(response.content).decode('utf-8')
+                    map_src = f"data:image/png;base64,{image_data}"
+                else:
+                    logger.error(f"Failed to download map image: {response.status_code}")
+                    raise Exception("Failed to download map image")
+            except Exception as e:
+                logger.error(f"Error processing map image: {str(e)}")
+                # Use fallback image from our server
+                fallback_url = "https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png"
+                response = requests.get(fallback_url)
+                if response.status_code == 200:
+                    image_data = base64.b64encode(response.content).decode('utf-8')
+                    map_src = f"data:image/png;base64,{image_data}"
+                else:
+                    map_src = fallback_url
+            
+            # Create HTML template with base64-encoded image
             html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -107,15 +131,12 @@ def create_email_template(analysis, location_name, observations):
                 </div>
                 <div class="content">
                     <div class="map-container">
-                        <img src="{map_url}" 
+                        <img src="{map_src}" 
                              alt="Bird Sighting Map" 
                              class="map-image"
                              style="display: block; margin: 0 auto;"
                              width="800"
-                             height="400"
-                             loading="eager"
-                             decoding="async"
-                             onerror="this.onerror=null; this.src='https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png';">
+                             height="400">
                     </div>
                     {analysis}
                 </div>
