@@ -77,18 +77,20 @@ def create_email_template(analysis, location_name):
                 .banner {{
                     background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
                     background-size: cover;
-                    background-position: center;
+                    background-position: right center;
                     background-repeat: no-repeat;
-                    min-height: 200px;
-                    padding: 40px 20px;
-                    text-align: center;
+                    min-height: 100px;
+                    padding: 20px;
+                    text-align: right;
                     color: white;
                     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
                     position: relative;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
-                    align-items: center;
+                    align-items: flex-end;
+                    border-radius: 8px;
+                    overflow: hidden;
                 }}
                 .banner::before {{
                     content: '';
@@ -103,15 +105,16 @@ def create_email_template(analysis, location_name):
                 .banner > * {{
                     position: relative;
                     z-index: 2;
+                    margin: 0;
+                    padding: 0 20px;
                 }}
                 .title {{
                     font-size: 24px;
                     font-weight: bold;
-                    margin: 0;
                 }}
                 .subtitle {{
                     font-size: 18px;
-                    margin: 10px 0 0;
+                    margin-top: 5px;
                 }}
                 .map-container {{
                     margin: 20px 0;
