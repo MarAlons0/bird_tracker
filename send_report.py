@@ -124,7 +124,7 @@ def create_email_template(analysis, location_name, observations):
 </html>
 """
 
-def send_daily_report():
+def send_weekly_report():
     try:
         # Load environment variables
         load_dotenv()
@@ -160,10 +160,10 @@ def send_daily_report():
             body=email_content,
             recipient=recipient_email
         )
-        logger.info("Daily report sent successfully")
+        logger.info("Weekly report sent successfully")
         
     except Exception as e:
-        logger.error(f"Error sending daily report: {str(e)}")
+        logger.error(f"Error sending weekly report: {str(e)}")
 
 if __name__ == "__main__":
     # Load configuration
@@ -183,4 +183,4 @@ if __name__ == "__main__":
         logging.error(f"Missing required email settings: {', '.join(missing_settings)}")
         exit(1)
     
-    send_daily_report() 
+    send_weekly_report() 
