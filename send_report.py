@@ -9,9 +9,35 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def create_email_template(analysis, location_name):
+def create_email_template(analysis, location_name, observations):
     """Create a nicely formatted email template with banner and proper styling"""
     current_date = datetime.now().strftime("%B %d, %Y")
+    
+    # Create map HTML
+    map_html = ""
+    if observations:
+        try:
+            # Create a map centered on the first observation
+            center_lat = float(observations[0]['lat'])
+            center_lng = float(observations[0]['lng'])
+            
+            map_html = f"""
+            <div class="map-container" style="margin: 20px 0; text-align: center;">
+                <iframe 
+                    width="100%" 
+                    height="400" 
+                    frameborder="0" 
+                    style="border:0" 
+                    src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD8QJ5Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Qq7Q&center={center_lat},{center_lng}&zoom=10" 
+                    allowfullscreen>
+                </iframe>
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    Map showing recent bird sightings in {location_name}
+                </div>
+            </div>
+            """
+        except Exception as e:
+            logger.error(f"Error creating map: {str(e)}")
     
     return f"""
 <!DOCTYPE html>
@@ -52,6 +78,12 @@ def create_email_template(analysis, location_name):
             border-radius: 5px;
             margin-top: 20px;
         }}
+        .map-container {{
+            margin: 20px 0;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
         ul {{
             margin-left: 20px;
         }}
@@ -68,6 +100,7 @@ def create_email_template(analysis, location_name):
     
     <div class="content">
         <h2>Bird Sightings Report for {location_name}</h2>
+        {map_html}
         {analysis}
     </div>
     
@@ -100,7 +133,7 @@ def send_daily_report():
         location_name = location['name'] if location else "Cincinnati Area"
         
         # Create email content
-        email_content = create_email_template(analysis, location_name)
+        email_content = create_email_template(analysis, location_name, observations)
         
         # Get recipient email from environment variable
         recipient_email = os.getenv('RECIPIENT_EMAIL')
