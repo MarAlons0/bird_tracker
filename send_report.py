@@ -17,11 +17,11 @@ def create_email_template(analysis, location_name, observations):
     map_html = ""
     if observations:
         try:
-            # Get Google Places API key from environment
-            google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-            if not google_places_key:
-                logger.error("Google Places API key not found in environment variables")
-                raise ValueError("Google Places API key not found")
+            # Get Google Maps API key from environment
+            google_maps_key = os.getenv('GOOGLE_MAPS_API_KEY')
+            if not google_maps_key:
+                logger.error("Google Maps API key not found in environment variables")
+                raise ValueError("Google Maps API key not found")
             
             # Create a map centered on the first observation
             center_lat = float(observations[0]['lat'])
@@ -36,7 +36,7 @@ def create_email_template(analysis, location_name, observations):
                 markers.append(f"markers=color:red%7C{lat},{lng}")
             
             # Create static map URL with proper encoding
-            map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_places_key}"
+            map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
             
             # Log the map URL for debugging (without the API key)
             logger.info(f"Generated map URL: {map_url.split('&key=')[0]}")
