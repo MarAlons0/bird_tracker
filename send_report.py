@@ -34,8 +34,11 @@ def create_email_template(analysis, location_name, observations):
                 lng = float(obs['lng'])
                 markers.append(f"markers=color:red%7C{lat},{lng}")
             
-            # Create static map URL
+            # Create static map URL with proper encoding
             map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_places_key}"
+            
+            # Log the map URL for debugging (without the API key)
+            logger.info(f"Generated map URL: {map_url.split('&key=')[0]}")
             
             map_html = f"""
             <div class="map-container" style="margin: 20px 0; text-align: center;">
@@ -43,6 +46,7 @@ def create_email_template(analysis, location_name, observations):
                     src="{map_url}" 
                     alt="Map of bird sightings in {location_name}"
                     style="max-width: 100%; height: auto; border-radius: 5px;"
+                    onerror="this.onerror=null; this.src='https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png';"
                 />
                 <div style="margin-top: 10px; font-size: 12px; color: #666;">
                     Map showing recent bird sightings in {location_name}
@@ -51,6 +55,19 @@ def create_email_template(analysis, location_name, observations):
             """
         except Exception as e:
             logger.error(f"Error creating map: {str(e)}")
+            # Add a fallback image if map generation fails
+            map_html = f"""
+            <div class="map-container" style="margin: 20px 0; text-align: center;">
+                <img 
+                    src="https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/map-placeholder.png" 
+                    alt="Map placeholder"
+                    style="max-width: 100%; height: auto; border-radius: 5px;"
+                />
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    Map showing recent bird sightings in {location_name}
+                </div>
+            </div>
+            """
     
     return f"""
 <!DOCTYPE html>
