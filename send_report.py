@@ -51,165 +51,109 @@ def create_email_template(analysis, location_name):
         map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
         logger.info(f"Generated map URL: {map_url}")  # Log the URL without the API key
 
-        # Create legend HTML
-        legend_html = """
-        <div style="margin: 20px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-            <h3 style="margin: 0 0 10px 0; color: #333;">Map Legend</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; align-items: center; margin-right: 15px;">
-                    <div style="width: 20px; height: 20px; background: blue; margin-right: 5px;"></div>
-                    <span>Water Birds</span>
-                </div>
-                <div style="display: flex; align-items: center; margin-right: 15px;">
-                    <div style="width: 20px; height: 20px; background: red; margin-right: 5px;"></div>
-                    <span>Raptors</span>
-                </div>
-                <div style="display: flex; align-items: center; margin-right: 15px;">
-                    <div style="width: 20px; height: 20px; background: gray; margin-right: 5px;"></div>
-                    <span>Small Birds</span>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="width: 20px; height: 20px; background: green; margin-right: 5px;"></div>
-                    <span>Other Birds</span>
-                </div>
-            </div>
-        </div>
-        """
-
-        # Create map HTML
-        map_html = f"""
-        <div class="map-container" style="margin: 20px 0; text-align: center;">
-            <img 
-                src="{map_url}" 
-                alt="Bird Sighting Map"
-                style="max-width: 100%; height: auto; border-radius: 5px;"
-            />
-            {legend_html}
-        </div>
-        """
-
-        # Create HTML template with map and analysis
-        html_content = f"""
+        # Create HTML template with map and legend
+        template = f"""
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Weekly Bird Sighting Report</title>
             <style>
                 body {{
                     font-family: Arial, sans-serif;
                     line-height: 1.6;
                     color: #333;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f8f9fa;
-                }}
-                .container {{
                     max-width: 800px;
                     margin: 0 auto;
                     padding: 20px;
-                    background-color: #ffffff;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }}
                 .banner {{
-                    background-image: url('https://bird-tracker-app-9af5a4fb26d3.herokuapp.com/static/images/Banner.jpeg');
+                    background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
                     background-size: cover;
-                    background-position: right center;
-                    background-repeat: no-repeat;
-                    height: 200px;
+                    background-position: center;
                     padding: 40px 20px;
-                    text-align: left;
+                    text-align: center;
                     color: white;
                     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                    position: relative;
-                    overflow: hidden;
-                }}
-                .banner::before {{
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
-                    z-index: 1;
-                }}
-                .banner-content {{
-                    position: relative;
-                    z-index: 2;
-                    max-width: 60%;
                 }}
                 .title {{
-                    font-size: 28px;
+                    font-size: 24px;
                     font-weight: bold;
-                    margin: 0 0 10px 0;
-                }}
-                .subtitle {{
-                    font-size: 16px;
                     margin: 0;
-                }}
-                .content {{
-                    padding: 20px;
                 }}
                 .map-container {{
                     margin: 20px 0;
                     text-align: center;
                 }}
-                .map-image {{
+                .map {{
                     max-width: 100%;
                     height: auto;
-                    border-radius: 5px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }}
+                .legend {{
+                    display: flex;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                    margin: 15px 0;
+                }}
+                .legend-item {{
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }}
+                .legend-color {{
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 50%;
+                }}
+                .legend-text {{
+                    font-size: 14px;
                 }}
                 .analysis {{
-                    margin-top: 20px;
-                    padding: 15px;
-                    background-color: #f8f9fa;
-                    border-radius: 5px;
-                }}
-                .footer {{
-                    text-align: center;
+                    background-color: #f9f9f9;
                     padding: 20px;
-                    font-size: 12px;
-                    color: #666;
-                    border-top: 1px solid #eee;
+                    border-radius: 4px;
+                    margin-top: 20px;
                 }}
             </style>
         </head>
         <body>
-            <div class="container">
-                <div class="banner">
-                    <div class="banner-content">
-                        <h1 class="title">Weekly Bird Sighting Report</h1>
-                        <p class="subtitle">{location_name}</p>
+            <div class="banner">
+                <h1 class="title">Weekly Bird Sighting Report</h1>
+                <p>{location_name}</p>
+            </div>
+            
+            <div class="map-container">
+                <img src="{map_url}" alt="Bird Sightings Map" class="map">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74c3c;"></div>
+                        <span class="legend-text">Raptors</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3498db;"></div>
+                        <span class="legend-text">Waterfowl</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #2ecc71;"></div>
+                        <span class="legend-text">Songbirds</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #95a5a6;"></div>
+                        <span class="legend-text">Other</span>
                     </div>
                 </div>
-                <div class="content">
-                    <div class="map-container">
-                        <img src="{map_url}" 
-                             alt="Bird Sighting Map" 
-                             class="map-image"
-                             style="display: block; margin: 0 auto;"
-                             width="800"
-                             height="400">
-                        {legend_html}
-                    </div>
-                    <div class="analysis">
-                        {analysis}
-                    </div>
-                </div>
-                <div class="footer">
-                    <p>This is an automated report generated by the Bird Tracker application.</p>
-                    <p>To unsubscribe or manage your preferences, please visit the application settings.</p>
-                </div>
+            </div>
+            
+            <div class="analysis">
+                {analysis}
             </div>
         </body>
         </html>
         """
-
-        return html_content
+        return template
     except Exception as e:
-        logger.error(f"Error creating map: {str(e)}")
+        logger.error(f"Error creating email template: {str(e)}")
         return None
 
 def send_weekly_report():
