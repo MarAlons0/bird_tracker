@@ -301,6 +301,11 @@ class BirdSightingTracker:
                 logger.warning("Scheduler already initialized, skipping setup")
                 return
 
+            # Only start scheduler in Production environment
+            if os.getenv('FLASK_ENV') != 'production':
+                logger.info("Skipping scheduler setup in non-production environment")
+                return
+
             scheduler = BackgroundScheduler()
             
             # Get schedule from config
