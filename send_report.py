@@ -32,14 +32,14 @@ def create_email_template(analysis, location_name):
         center_lat = observations[0]['lat']
         center_lng = observations[0]['lng']
 
-        # Define bird categories
-        raptors = ['eagle', 'hawk', 'falcon', 'vulture', 'owl', 'osprey', 'kite', 'harrier']
-        waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'cormorant', 'grebe', 'loon', 'coot', 'rail', 'gallinule']
-        songbirds = ['sparrow', 'finch', 'warbler', 'thrush', 'wren', 'blackbird', 'oriole', 'grackle', 'starling', 'jay', 'cardinal', 'tanager', 'bunting', 'grosbeak']
+        # Define bird categories to match web app
+        raptors = ['eagle', 'hawk', 'falcon', 'vulture', 'owl', 'osprey', 'kite', 'harrier', 'accipiter', 'buteo']
+        waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'cormorant', 'grebe', 'loon', 'coot', 'rail', 'gallinule', 'bittern', 'sora', 'kingfisher']
+        songbirds = ['sparrow', 'finch', 'warbler', 'thrush', 'wren', 'blackbird', 'oriole', 'grackle', 'starling', 'jay', 'cardinal', 'tanager', 'bunting', 'grosbeak', 'vireo', 'woodpecker', 'nuthatch', 'chickadee', 'titmouse', 'kinglet', 'gnatcatcher', 'waxwing', 'shrike', 'mockingbird', 'catbird', 'thrasher']
 
-        # Create markers for each observation
+        # Create markers for each observation (up to 50 markers)
         markers = []
-        for obs in observations:
+        for obs in observations[:50]:  # Limit to 50 markers to avoid URL length issues
             # Determine bird category
             bird_name = obs['comName'].lower()
             if any(raptor in bird_name for raptor in raptors):
@@ -53,8 +53,8 @@ def create_email_template(analysis, location_name):
 
             markers.append(f"markers=color:{color}%7C{obs['lat']},{obs['lng']}")
 
-        # Create map URL
-        map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=800x400&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
+        # Create map URL with increased size for better visibility
+        map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=1000x500&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
         logger.info(f"Generated map URL: {map_url}")
 
         # Create HTML template
@@ -70,7 +70,7 @@ def create_email_template(analysis, location_name):
                     font-family: Arial, sans-serif;
                     line-height: 1.6;
                     color: #333;
-                    max-width: 800px;
+                    max-width: 1000px;
                     margin: 0 auto;
                     padding: 20px;
                 }}
@@ -81,14 +81,14 @@ def create_email_template(analysis, location_name):
                     background-repeat: no-repeat;
                     min-height: 100px;
                     padding: 20px;
-                    text-align: right;
+                    text-align: center;
                     color: white;
                     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
                     position: relative;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
-                    align-items: flex-end;
+                    align-items: center;
                     border-radius: 8px;
                     overflow: hidden;
                 }}
