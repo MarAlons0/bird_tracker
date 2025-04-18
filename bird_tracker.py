@@ -301,8 +301,13 @@ class BirdSightingTracker:
                 logger.warning("Scheduler already initialized, skipping setup")
                 return
 
-            # Only start scheduler in Production environment
-            if os.getenv('FLASK_ENV') != 'production':
+            # Check if we're in production environment
+            is_production = (
+                os.getenv('FLASK_ENV') == 'production' or
+                os.getenv('HEROKU_APP_NAME') in ['bird-tracker-app', 'bird-tracker-dev']
+            )
+            
+            if not is_production:
                 logger.info("Skipping scheduler setup in non-production environment")
                 return
 
