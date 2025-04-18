@@ -222,35 +222,9 @@ def send_weekly_report():
         # Initialize the tracker
         tracker = BirdSightingTracker()
         
-        # Get recent observations
-        observations = tracker.get_recent_observations()
-        if not observations:
-            logger.warning("No observations to report")
-            return
-            
-        # Generate AI analysis
-        analysis = tracker.analyze_recent_sightings(observations)
-        
-        # Get location name
-        location = tracker.get_active_location()
-        location_name = location['name'] if location else "Cincinnati Area"
-        
-        # Create email content
-        email_content = create_email_template(analysis, location_name)
-        
-        # Get recipient email from environment variable
-        recipient_email = os.getenv('RECIPIENT_EMAIL')
-        if not recipient_email:
-            logger.error("No recipient email configured")
-            return
-        
-        # Send email with report
-        tracker.send_email(
-            subject=f"Mario's Bird Tracker Newsletter - {datetime.now().strftime('%B %d, %Y')}",
-            body=email_content,
-            recipient=recipient_email
-        )
-        logger.info("Weekly report sent successfully")
+        # Send weekly report to all subscribed users
+        tracker.send_weekly_report()
+        logger.info("Weekly report sent successfully to all subscribed users")
         
     except Exception as e:
         logger.error(f"Error sending weekly report: {str(e)}")
