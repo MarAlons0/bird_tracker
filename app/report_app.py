@@ -15,17 +15,19 @@ def create_app():
     """Create and configure the Flask application for report generation."""
     app = Flask(__name__)
     
-    # Load configuration
-    app.config.from_object(Config)
+    # Database configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/bird_tracker')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # Ensure we're using PostgreSQL
-    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-        raise ValueError("DATABASE_URL environment variable is required")
-    
-    # Fix database URI if needed
-    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-    if db_uri.startswith('postgres://'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri.replace('postgres://', 'postgresql://')
+    # Email configuration
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     
     # Initialize extensions
     db.init_app(app)
