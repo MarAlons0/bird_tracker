@@ -21,4 +21,16 @@ class NewsletterSubscription(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     last_sent = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow) 
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class BirdSighting(db.Model):
+    __tablename__ = 'bird_sightings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    bird_name = db.Column(db.String(255), nullable=False)
+    location = db.Column(db.String(255), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    observer = db.Column(db.String(255))
+    notes = db.Column(db.Text) 
