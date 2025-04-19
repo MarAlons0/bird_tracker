@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.models import db, User, NewsletterSubscription, BirdSighting
 from datetime import datetime, timedelta
-from app.utils.bird_tracker import BirdSightingTracker
+from app.bird_tracker import BirdSightingTracker
 
 main = Blueprint('main', __name__)
 
