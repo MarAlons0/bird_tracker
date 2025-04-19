@@ -29,16 +29,16 @@ def create_app():
     db.init_app(app)
     mail = Mail(app)
     
-    # Create tables
-    with app.app_context():
-        db.create_all()
-    
-    # Initialize scheduler
-    init_scheduler()
+    # Initialize scheduler in non-testing environment
+    if not app.config.get('TESTING'):
+        init_scheduler()
     
     logger.info("Report app initialized successfully")
     return app
 
 if __name__ == '__main__':
     app = create_app()
+    # Only create tables if running directly (not through Gunicorn)
+    with app.app_context():
+        db.create_all()
     app.run() 
