@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bird Tracker App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
         .hero-section {
             background-color: #f8f9fa;
@@ -25,6 +26,19 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="/">Bird Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/status">Status</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -37,7 +51,7 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-md-4 mb-4">
+            <div class="col-md-4">
                 <div class="card stats-card">
                     <div class="card-body text-center">
                         <h5 class="card-title">Total Users</h5>
@@ -45,7 +59,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-4">
                 <div class="card stats-card">
                     <div class="card-body text-center">
                         <h5 class="card-title">Active Subscriptions</h5>
@@ -53,11 +67,26 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-4">
                 <div class="card stats-card">
                     <div class="card-body text-center">
                         <h5 class="card-title">Recent Users</h5>
                         <p class="card-text display-4" id="recentUsers">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">About Bird Tracker</h5>
+                        <p class="card-text">
+                            Bird Tracker is a powerful tool for bird enthusiasts to track and analyze bird sightings in their area.
+                            Our platform provides real-time updates, detailed statistics, and personalized reports to help you
+                            stay connected with the birding community.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -67,14 +96,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Fetch and display stats
-        fetch('/api/stats')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('totalUsers').textContent = data.total_users;
-                document.getElementById('activeSubscriptions').textContent = data.active_subscriptions;
-                document.getElementById('recentUsers').textContent = data.recent_users;
-            })
-            .catch(error => console.error('Error fetching stats:', error));
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalUsers').textContent = data.total_users;
+                    document.getElementById('activeSubscriptions').textContent = data.active_subscriptions;
+                    document.getElementById('recentUsers').textContent = data.recent_users;
+                })
+                .catch(error => console.error('Error fetching stats:', error));
+        }
+
+        // Update stats immediately and every 5 minutes
+        updateStats();
+        setInterval(updateStats, 300000);
     </script>
 </body>
 </html> 
