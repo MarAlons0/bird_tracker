@@ -3,91 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bird Tracker App</title>
+    <title>Mario's Bird Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    <style>
-        .hero-section {
-            background-color: #f8f9fa;
-            padding: 4rem 0;
-            margin-bottom: 2rem;
-        }
-        .stats-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Bird Tracker</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/api/status">Status</a>
-                    </li>
-                </ul>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Mario's Bird Tracker</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a href="/map" class="btn btn-primary btn-lg w-100 mb-2">Map</a>
             </div>
-        </div>
-    </nav>
-
-    <div class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-4">Welcome to Bird Tracker</h1>
-            <p class="lead">Track and analyze bird sightings in your area</p>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Total Users</h5>
-                        <p class="card-text display-4" id="totalUsers">-</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Active Subscriptions</h5>
-                        <p class="card-text display-4" id="activeSubscriptions">-</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Recent Users</h5>
-                        <p class="card-text display-4" id="recentUsers">-</p>
-                    </div>
-                </div>
+            <div class="col-md-6">
+                <a href="/ai-analysis" class="btn btn-success btn-lg w-100 mb-2">AI Analysis</a>
             </div>
         </div>
 
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">About Bird Tracker</h5>
-                        <p class="card-text">
-                            Bird Tracker is a powerful tool for bird enthusiasts to track and analyze bird sightings in their area.
-                            Our platform provides real-time updates, detailed statistics, and personalized reports to help you
-                            stay connected with the birding community.
-                        </p>
-                    </div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a href="/request-registration" class="btn btn-info btn-lg w-100 mb-2">Request Registration</a>
+            </div>
+            <div class="col-md-6">
+                <a href="/login" class="btn btn-secondary btn-lg w-100 mb-2">Login</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Recent Bird Sightings</h5>
+                <div id="sightings-container">
+                    <!-- Sightings will be loaded here -->
                 </div>
             </div>
         </div>
@@ -95,21 +40,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fetch and display stats
-        function updateStats() {
-            fetch('/api/stats')
+        // Function to load recent sightings
+        function loadSightings() {
+            fetch('/api/recent-sightings')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('totalUsers').textContent = data.total_users;
-                    document.getElementById('activeSubscriptions').textContent = data.active_subscriptions;
-                    document.getElementById('recentUsers').textContent = data.recent_users;
+                    const container = document.getElementById('sightings-container');
+                    container.innerHTML = '';
+                    
+                    data.forEach(sighting => {
+                        const sightingElement = document.createElement('div');
+                        sightingElement.className = 'alert alert-info';
+                        sightingElement.innerHTML = `
+                            <strong>${sighting.bird_name}</strong> 
+                            spotted at ${sighting.location} 
+                            on ${new Date(sighting.timestamp).toLocaleString()}
+                        `;
+                        container.appendChild(sightingElement);
+                    });
                 })
-                .catch(error => console.error('Error fetching stats:', error));
+                .catch(error => console.error('Error loading sightings:', error));
         }
 
-        // Update stats immediately and every 5 minutes
-        updateStats();
-        setInterval(updateStats, 300000);
+        // Load sightings on page load and every 5 minutes
+        loadSightings();
+        setInterval(loadSightings, 300000);
     </script>
 </body>
 </html> 
