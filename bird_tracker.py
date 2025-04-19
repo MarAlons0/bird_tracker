@@ -21,19 +21,17 @@ import time
 import random
 import tempfile
 from math import cos, sin
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from extensions import db
 from models import User, Location, UserPreferences
+from flask import current_app
 
 # Setup logging
 logger = logging.getLogger(__name__)
 
-# Initialize SQLAlchemy
-db = SQLAlchemy()
-
 class BirdSightingTracker:
-    def __init__(self):
+    def __init__(self, db_instance=None, app=None):
         self.logger = logging.getLogger(__name__)
+        self.app = app
         self.config = self._load_config()
         self.active_location = None
         self.claude = None
@@ -55,6 +53,34 @@ class BirdSightingTracker:
             'admin_email': os.getenv('ADMIN_EMAIL', ''),
             'recipient': os.getenv('RECIPIENT_EMAIL', '')
         }
+        
+        # Set database instance
+        self.db = db_instance or db
+        
+        # Store the current app context
+        if app:
+            self.app_context = app.app_context()
+        else:
+            self.app_context = current_app.app_context() if current_app else None
+    
+    def __enter__(self):
+        """Context manager entry."""
+        if self.app_context:
+            self.app_context.push()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        if self.app_context:
+            self.app_context.pop()
+    
+    def __del__(self):
+        """Cleanup when the BirdSightingTracker instance is destroyed."""
+        if hasattr(self, 'app_context') and self.app_context:
+            try:
+                self.app_context.pop()
+            except Exception:
+                pass
     
     def _load_config(self):
         """Load configuration from file or environment variables"""

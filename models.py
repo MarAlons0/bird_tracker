@@ -49,13 +49,18 @@ class User(UserMixin, db.Model):
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)  # Users are subscribed by default
+    is_subscribed = db.Column(db.Boolean, default=True)  # For newsletter subscription
+
+    # Add default_location relationship
+    default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
+    default_location = db.relationship('Location', foreign_keys=[default_location_id], uselist=False)
 
     # Explicitly tell SQLAlchemy which columns to load
     __mapper_args__ = {
         'include_properties': [
             'id', 'username', 'email', 'password_hash', 'is_admin', 'is_approved',
             'registration_date', '_is_active', 'login_token', 'token_expiry',
-            'newsletter_subscription'
+            'newsletter_subscription', 'is_subscribed', 'default_location_id'
         ]
     }
 

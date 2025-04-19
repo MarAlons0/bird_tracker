@@ -1,250 +1,77 @@
-from bird_tracker import BirdSightingTracker
+from datetime import datetime, timedelta
+from app import create_app
+from app.models import User
+from app.bird_tracker import BirdSightingTracker
 import logging
-import configparser
-import os
-from dotenv import load_dotenv
-from datetime import datetime
-import requests
-import base64
-from io import BytesIO
 
-# Setup logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def create_email_template(analysis, location_name):
-    """Create HTML email template with map and analysis."""
+def send_weekly_reports():
+    """Send weekly bird sighting reports to all subscribed users."""
+    app = create_app()
+    
     try:
-        # Get Google Maps API key from environment
-        google_maps_key = os.getenv('GOOGLE_MAPS_API_KEY')
-        if not google_maps_key:
-            logger.error("Google Maps API key not found in environment variables")
-            return None
-
-        # Get observations for the map
-        tracker = BirdSightingTracker()
-        observations = tracker.get_recent_observations()
-        if not observations:
-            logger.error("No observations found for map")
-            return None
-
-        # Get the first observation's coordinates for the map center
-        center_lat = observations[0]['lat']
-        center_lng = observations[0]['lng']
-
-        # Define bird categories to match web app
-        raptors = ['eagle', 'hawk', 'falcon', 'vulture', 'owl', 'osprey', 'kite', 'harrier', 'accipiter', 'buteo']
-        waterfowl = ['duck', 'goose', 'swan', 'heron', 'egret', 'cormorant', 'grebe', 'loon', 'coot', 'rail', 'gallinule', 'bittern', 'sora', 'kingfisher']
-        songbirds = ['sparrow', 'finch', 'warbler', 'thrush', 'wren', 'blackbird', 'oriole', 'grackle', 'starling', 'jay', 'cardinal', 'tanager', 'bunting', 'grosbeak', 'vireo', 'woodpecker', 'nuthatch', 'chickadee', 'titmouse', 'kinglet', 'gnatcatcher', 'waxwing', 'shrike', 'mockingbird', 'catbird', 'thrasher']
-
-        # Create markers for each observation (up to 50 markers)
-        markers = []
-        for obs in observations[:50]:  # Limit to 50 markers to avoid URL length issues
-            # Determine bird category
-            bird_name = obs['comName'].lower()
-            if any(raptor in bird_name for raptor in raptors):
-                color = 'red'  # Raptors
-            elif any(water in bird_name for water in waterfowl):
-                color = 'blue'  # Waterfowl
-            elif any(song in bird_name for song in songbirds):
-                color = 'green'  # Songbirds
-            else:
-                color = 'gray'  # Other birds
-
-            markers.append(f"markers=color:{color}%7C{obs['lat']},{obs['lng']}")
-
-        # Create map URL with increased size for better visibility
-        map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={center_lat},{center_lng}&zoom=10&size=1000x500&maptype=roadmap&{'&'.join(markers)}&key={google_maps_key}"
-        logger.info(f"Generated map URL: {map_url}")
-
-        # Create HTML template
-        html_template = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Weekly Bird Sighting Report</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    max-width: 1000px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }}
-                .banner {{
-                    background-image: url('https://bird-tracker-dev-a7bb94e09a81.herokuapp.com/static/images/Banner.jpeg');
-                    background-size: cover;
-                    background-position: right center;
-                    background-repeat: no-repeat;
-                    min-height: 100px;
-                    padding: 20px;
-                    text-align: center;
-                    color: white;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    border-radius: 8px;
-                    overflow: hidden;
-                }}
-                .banner::before {{
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.3);
-                    z-index: 1;
-                }}
-                .banner > * {{
-                    position: relative;
-                    z-index: 2;
-                    margin: 0;
-                    padding: 0 20px;
-                }}
-                .title {{
-                    font-size: 24px;
-                    font-weight: bold;
-                }}
-                .subtitle {{
-                    font-size: 18px;
-                    margin-top: 5px;
-                }}
-                .map-container {{
-                    margin: 20px 0;
-                    text-align: center;
-                }}
-                .map {{
-                    max-width: 100%;
-                    height: auto;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }}
-                .legend {{
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    gap: 15px;
-                    margin: 15px 0;
-                    padding: 10px;
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                }}
-                .legend-item {{
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                }}
-                .legend-color {{
-                    width: 15px;
-                    height: 15px;
-                    border-radius: 50%;
-                }}
-                .legend-label {{
-                    font-size: 14px;
-                }}
-                .analysis {{
-                    background-color: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin-top: 20px;
-                }}
-                .analysis h2 {{
-                    margin-top: 0;
-                    color: #2c3e50;
-                }}
-                .footer {{
-                    text-align: center;
-                    margin-top: 30px;
-                    padding-top: 20px;
-                    border-top: 1px solid #eee;
-                    font-size: 14px;
-                    color: #666;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="banner">
-                <h1 class="title">Weekly Bird Sighting Report</h1>
-                <p class="subtitle">{location_name}</p>
-            </div>
+        with app.app_context():
+            # Get all subscribed users
+            users = User.query.filter_by(is_subscribed=True).all()
+            logger.info(f"Found {len(users)} subscribed users")
             
-            <div class="map-container">
-                <img src="{map_url}" alt="Bird Sightings Map" class="map">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FF0000;"></div>
-                        <span class="legend-label">Raptors</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #0000FF;"></div>
-                        <span class="legend-label">Waterfowl</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #00FF00;"></div>
-                        <span class="legend-label">Songbirds</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #808080;"></div>
-                        <span class="legend-label">Other</span>
-                    </div>
-                </div>
-            </div>
+            # Initialize tracker
+            tracker = BirdSightingTracker(db_instance=app.extensions['sqlalchemy'].db, app=app)
             
-            <div class="analysis">
-                <h2>AI Analysis</h2>
-                {analysis}
-            </div>
+            # Calculate date range for the past week
+            end_date = datetime.utcnow()
+            start_date = end_date - timedelta(days=7)
             
-            <div class="footer">
-                <p>This is an automated report generated by Bird Tracker.</p>
-                <p>To view more details or manage your preferences, visit the Bird Tracker web app.</p>
-            </div>
-        </body>
-        </html>
-        """
-        return html_template
-    except Exception as e:
-        logger.error(f"Error creating email template: {str(e)}")
-        return None
-
-def send_weekly_report():
-    try:
-        # Load environment variables
-        load_dotenv()
-        
-        # Initialize the tracker
-        tracker = BirdSightingTracker()
-        
-        # Send weekly report to all subscribed users
-        tracker.send_weekly_report()
-        logger.info("Weekly report sent successfully to all subscribed users")
-        
+            for user in users:
+                try:
+                    if not user.default_location:
+                        logger.warning(f"User {user.id} has no default location set")
+                        continue
+                        
+                    # Get observations for the past week
+                    observations = tracker.get_observations(
+                        location=user.default_location,
+                        start_date=start_date,
+                        end_date=end_date
+                    )
+                    
+                    if not observations:
+                        logger.info(f"No observations found for user {user.id}")
+                        continue
+                        
+                    # Generate analysis
+                    analysis = tracker.analyze_observations(observations)
+                    
+                    # Create email template
+                    email_template = tracker.create_email_template(
+                        user=user,
+                        observations=observations,
+                        analysis=analysis
+                    )
+                    
+                    # Send email
+                    tracker.send_email(
+                        recipient=user.email,
+                        subject="Weekly Bird Sighting Report",
+                        html_content=email_template
+                    )
+                    
+                    logger.info(f"Successfully sent report to user {user.id}")
+                    
+                except Exception as e:
+                    logger.error(f"Error processing user {user.id}: {str(e)}")
+                    continue
+                    
     except Exception as e:
         logger.error(f"Error sending weekly report: {str(e)}")
+        raise
+    finally:
+        # Cleanup
+        if 'tracker' in locals():
+            tracker.cleanup()
 
-if __name__ == "__main__":
-    # Load configuration
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    
-    # Verify email configuration
-    if not config.has_section('email'):
-        logging.error("Missing email configuration section")
-        exit(1)
-        
-    required_email_settings = ['mail_server', 'mail_port', 'mail_username', 'mail_password']
-    missing_settings = [setting for setting in required_email_settings 
-                       if not config.has_option('email', setting)]
-    
-    if missing_settings:
-        logging.error(f"Missing required email settings: {', '.join(missing_settings)}")
-        exit(1)
-    
-    send_weekly_report() 
+if __name__ == '__main__':
+    send_weekly_reports() 
