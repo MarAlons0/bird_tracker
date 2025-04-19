@@ -4,6 +4,7 @@ from flask_mail import Mail
 from config import Config
 from app.models import db
 from app.scheduler import init_scheduler
+from app.routes.main import main
 import os
 import logging
 
@@ -28,6 +29,9 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     mail = Mail(app)
+    
+    # Register blueprints
+    app.register_blueprint(main)
     
     # Initialize scheduler in non-testing environment
     if not app.config.get('TESTING'):

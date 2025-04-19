@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Tracker App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background-color: #f8f9fa;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .stats-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Bird Tracker</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4">Welcome to Bird Tracker</h1>
+            <p class="lead">Track and analyze bird sightings in your area</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Users</h5>
+                        <p class="card-text display-4" id="totalUsers">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Active Subscriptions</h5>
+                        <p class="card-text display-4" id="activeSubscriptions">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Recent Users</h5>
+                        <p class="card-text display-4" id="recentUsers">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fetch and display stats
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalUsers').textContent = data.total_users;
+                document.getElementById('activeSubscriptions').textContent = data.active_subscriptions;
+                document.getElementById('recentUsers').textContent = data.recent_users;
+            })
+            .catch(error => console.error('Error fetching stats:', error));
+    </script>
+</body>
+</html> 
