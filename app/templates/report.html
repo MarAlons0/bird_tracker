@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">AI Analysis</h4>
+            <p class="card-text">
+                Get intelligent insights about bird sightings in your area. Our AI analyzes recent observations
+                to identify patterns, rare sightings, and migration trends.
+            </p>
+        </div>
+    </div>
+
+    <!-- Analysis Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Request Analysis</h5>
+            <form id="analysis-form">
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" required>
+                </div>
+                <div class="mb-3">
+                    <label for="timeframe" class="form-label">Timeframe</label>
+                    <select class="form-select" id="timeframe" required>
+                        <option value="7">Last 7 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Analysis</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Analysis Results -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Analysis Results</h5>
+            <div id="analysis-results">
+                <div class="alert alert-info">
+                    Submit a request to generate analysis.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('analysis-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const location = document.getElementById('location').value;
+        const timeframe = document.getElementById('timeframe').value;
+        
+        const resultsDiv = document.getElementById('analysis-results');
+        resultsDiv.innerHTML = '<div class="alert alert-info">Generating analysis...</div>';
+        
+        fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                location: location,
+                timeframe: timeframe
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Analysis for ${location}</h5>
+                        <p>${data.analysis}</p>
+                        <h6>Key Findings:</h6>
+                        <ul>
+                            ${data.key_findings.map(finding => `<li>${finding}</li>`).join('')}
+                        </ul>
+                        <h6>Rare Sightings:</h6>
+                        <ul>
+                            ${data.rare_sightings.map(sighting => `<li>${sighting}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    Error generating analysis: ${error.message}
+                </div>
+            `;
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Bird Sightings Map</h4>
+            <p class="card-text">
+                Explore bird sightings in your area. The map displays recent bird observations with markers
+                color-coded by bird category. Click on markers to see details about each sighting.
+            </p>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="card">
+        <div class="card-body">
+            <div id="map" style="height: 600px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let map;
+    let markers = [];
+
+    function initMap() {
+        // Default to Cincinnati if no location is set
+        const defaultLocation = { lat: 39.1031, lng: -84.5120 };
+        
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: defaultLocation,
+            zoom: 12
+        });
+
+        loadSightings();
+    }
+
+    function loadSightings() {
+        fetch('/api/sightings')
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing markers
+                markers.forEach(marker => marker.setMap(null));
+                markers = [];
+
+                // Add new markers
+                data.forEach(sighting => {
+                    const marker = new google.maps.Marker({
+                        position: {
+                            lat: parseFloat(sighting.latitude),
+                            lng: parseFloat(sighting.longitude)
+                        },
+                        map: map,
+                        title: sighting.bird_name
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div>
+                                <h5>${sighting.bird_name}</h5>
+                                <p>Location: ${sighting.location}</p>
+                                <p>Date: ${new Date(sighting.timestamp).toLocaleString()}</p>
+                                <p>Observer: ${sighting.observer}</p>
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                });
+            })
+            .catch(error => console.error('Error loading sightings:', error));
+    }
+
+    // Initialize map when the page loads
+    window.onload = initMap;
+</script>
+{% endblock %} 
