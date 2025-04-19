@@ -7,6 +7,7 @@ from app.scheduler import init_scheduler
 from app.routes.main import main
 import os
 import logging
+from flask_migrate import Migrate
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     mail = Mail(app)
+    migrate = Migrate(app, db)
     
     # Register blueprints
     app.register_blueprint(main)
