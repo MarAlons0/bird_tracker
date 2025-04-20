@@ -2,153 +2,212 @@
 
 {% block head %}
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+<style>
+    .intro-section {
+        background-color: #f8f9fa;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    .location-section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .carousel-section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .version-section {
+        text-align: center;
+        padding: 2rem 0;
+        color: #6c757d;
+    }
+    .carousel-item {
+        height: 400px;
+    }
+    .carousel-item img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+    }
+    .carousel-caption {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        border-radius: 5px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <!-- Carousel -->
-        <div id="birdCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="0" class="active"></button>
-                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="1"></button>
-                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="2"></button>
-            </div>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img src="{{ url_for('static', filename='images/carousel/bird1.jpg') }}" class="d-block w-100" alt="Bird 1">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>Discover Local Birds</h5>
-                        <p>Explore the diverse bird species in your area</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/bird2.jpg') }}" class="d-block w-100" alt="Bird 2">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>Track Migrations</h5>
-                        <p>Follow seasonal bird movements and patterns</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/bird3.jpg') }}" class="d-block w-100" alt="Bird 3">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>Share Your Sightings</h5>
-                        <p>Contribute to our growing bird database</p>
-                    </div>
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
+    <!-- Intro Section -->
+    <div class="intro-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Welcome to Mario's Bird Tracker</h1>
+            <p class="lead mb-4">
+                This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:
+            </p>
+            <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-map-marked-alt me-2"></i>Map: View bird sightings on an interactive map of your selected location.</li>
+                <li class="mb-2"><i class="fas fa-robot me-2"></i>AI Analysis: Get insights about bird populations and trends in your area.</li>
+                <li class="mb-2"><i class="fas fa-envelope me-2"></i>Newsletter: Receive email updates about new bird sightings in your area.</li>
+            </ul>
+            <p class="mb-0">
+                To get started, make sure your location is set correctly below. You can change it at any time.
+            </p>
         </div>
+    </div>
 
+    <div class="container">
         <div class="row">
+            <!-- Location Section -->
             <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h4 class="card-title">Version 1.2.1</h4>
-                        <p class="card-text">
-                            Mario's Bird Tracker transforms eBird data into meaningful insights. The 'Map' tab displays bird category 
-                            sightings geographically, while the 'AI Analysis' tab provides intelligent summaries of patterns and 
-                            rarities. Use our chatbot to explore recent sightings, migrations, and species details—making birding 
-                            accessible for enthusiasts at all levels.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Location Selection -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Select Location</h5>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="location-input" placeholder="Enter location">
-                            <button class="btn btn-primary" type="button" id="search-location">Search</button>
-                        </div>
-                        <div id="location-results" class="list-group"></div>
+                <div class="location-section mb-4">
+                    <h4 class="fw-bold mb-4">Current Location</h4>
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Name:</strong> Hyde Park Square, OH</p>
+                        <p class="mb-1"><strong>Coordinates:</strong> 39.1396048, -84.4425126</p>
+                        <p class="mb-3"><strong>Radius:</strong> 25.0 miles</p>
+                        <button class="btn btn-primary" id="change-location">
+                            <i class="fas fa-map-marker-alt me-2"></i>Change Location
+                        </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Carousel Section -->
             <div class="col-md-6">
-                <!-- Recent Sightings -->
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Recent Bird Sightings</h5>
-                        <div id="sightings-container">
-                            <!-- Sightings will be loaded here -->
+                <div class="carousel-section">
+                    <h4 class="fw-bold mb-4">Featured Birds</h4>
+                    <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators" id="carouselIndicators">
+                            <!-- Indicators will be added dynamically -->
                         </div>
+                        <div class="carousel-inner" id="carouselInner">
+                            <!-- Carousel items will be added dynamically -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Version Section -->
+    <div class="version-section">
+        <p class="mb-0">Version 1.4.0</p>
+    </div>
+
     <script>
-        // Function to load recent sightings
-        function loadSightings() {
-            fetch('/api/recent-sightings')
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('sightings-container');
-                    container.innerHTML = '';
-                    
-                    data.forEach(sighting => {
-                        const sightingElement = document.createElement('div');
-                        sightingElement.className = 'alert alert-info';
-                        sightingElement.innerHTML = `
-                            <strong>${sighting.bird_name}</strong> 
-                            spotted at ${sighting.location} 
-                            on ${new Date(sighting.timestamp).toLocaleString()}
-                        `;
-                        container.appendChild(sightingElement);
-                    });
-                })
-                .catch(error => console.error('Error loading sightings:', error));
-        }
-
-        // Load sightings on page load and every 5 minutes
-        loadSightings();
-        setInterval(loadSightings, 300000);
-
-        // Location search functionality
-        document.getElementById('search-location').addEventListener('click', function() {
-            const input = document.getElementById('location-input');
-            const results = document.getElementById('location-results');
-            
-            if (!input.value) {
-                results.innerHTML = '<div class="alert alert-warning">Please enter a location</div>';
-                return;
-            }
-
-            const service = new google.maps.places.AutocompleteService();
-            service.getPlacePredictions({
-                input: input.value,
-                types: ['(cities)']
-            }, function(predictions, status) {
-                results.innerHTML = '';
+        // Load carousel images
+        fetch('/api/carousel-images')
+            .then(response => response.json())
+            .then(images => {
+                const carouselInner = document.getElementById('carouselInner');
+                const carouselIndicators = document.getElementById('carouselIndicators');
                 
-                if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                    results.innerHTML = '<div class="alert alert-warning">No locations found</div>';
+                images.forEach((image, index) => {
+                    // Add indicator
+                    const indicator = document.createElement('button');
+                    indicator.type = 'button';
+                    indicator.setAttribute('data-bs-target', '#birdCarousel');
+                    indicator.setAttribute('data-bs-slide-to', index.toString());
+                    if (index === 0) indicator.classList.add('active');
+                    carouselIndicators.appendChild(indicator);
+                    
+                    // Add carousel item
+                    const carouselItem = document.createElement('div');
+                    carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = image.url;
+                    img.className = 'd-block w-100';
+                    img.alt = image.title || 'Bird Image';
+                    
+                    const caption = document.createElement('div');
+                    caption.className = 'carousel-caption';
+                    
+                    if (image.title) {
+                        const title = document.createElement('h5');
+                        title.textContent = image.title;
+                        caption.appendChild(title);
+                    }
+                    
+                    if (image.description) {
+                        const description = document.createElement('p');
+                        description.textContent = image.description;
+                        caption.appendChild(description);
+                    }
+                    
+                    carouselItem.appendChild(img);
+                    carouselItem.appendChild(caption);
+                    carouselInner.appendChild(carouselItem);
+                });
+            })
+            .catch(error => console.error('Error loading carousel images:', error));
+
+        // Location change functionality
+        document.getElementById('change-location').addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control mb-2';
+            input.placeholder = 'Enter new location';
+            
+            const results = document.createElement('div');
+            results.className = 'list-group';
+            
+            const container = document.createElement('div');
+            container.appendChild(input);
+            container.appendChild(results);
+            
+            const service = new google.maps.places.AutocompleteService();
+            
+            input.addEventListener('input', function() {
+                if (!input.value) {
+                    results.innerHTML = '';
                     return;
                 }
+                
+                service.getPlacePredictions({
+                    input: input.value,
+                    types: ['(cities)']
+                }, function(predictions, status) {
+                    results.innerHTML = '';
+                    
+                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                        results.innerHTML = '<div class="alert alert-warning">No locations found</div>';
+                        return;
+                    }
 
-                predictions.forEach(function(prediction) {
-                    const item = document.createElement('a');
-                    item.href = '#';
-                    item.className = 'list-group-item list-group-item-action';
-                    item.textContent = prediction.description;
-                    item.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        input.value = prediction.description;
-                        results.innerHTML = '';
+                    predictions.forEach(function(prediction) {
+                        const item = document.createElement('a');
+                        item.href = '#';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = prediction.description;
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // Here you would typically update the location in your backend
+                            // For now, we'll just update the display
+                            document.querySelector('.location-section p:first-child').textContent = 'Name: ' + prediction.description;
+                            container.remove();
+                        });
+                        results.appendChild(item);
                     });
-                    results.appendChild(item);
                 });
             });
+            
+            const locationSection = document.querySelector('.location-section');
+            locationSection.appendChild(container);
+            input.focus();
         });
     </script>
 {% endblock %} 

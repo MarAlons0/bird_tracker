@@ -429,4 +429,19 @@ def get_ai_analysis():
         return jsonify({
             'status': 'error',
             'message': 'An unexpected error occurred while generating the analysis.'
-        }), 500 
+        }), 500
+
+@bp.route('/api/carousel-images')
+def get_carousel_images():
+    try:
+        # Get active carousel images ordered by their order field
+        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        return jsonify([{
+            'id': img.id,
+            'url': img.cloudinary_url or img.filename,  # Use Cloudinary URL if available, fallback to filename
+            'title': img.title,
+            'description': img.description
+        } for img in images])
+    except Exception as e:
+        current_app.logger.error(f'Error fetching carousel images: {str(e)}')
+        return jsonify({'error': str(e)}), 500 
