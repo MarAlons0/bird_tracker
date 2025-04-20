@@ -1,32 +1,109 @@
 {% extends "base.html" %}
 
+{% block head %}
+<style>
+    .login-card {
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 10px;
+    }
+    .login-header {
+        background-color: #343a40;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 20px;
+    }
+    .login-body {
+        padding: 30px;
+    }
+    .form-control {
+        border-radius: 5px;
+        padding: 12px;
+    }
+    .btn-login {
+        padding: 12px;
+        font-weight: 500;
+        border-radius: 5px;
+    }
+    .social-login {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .social-login .btn {
+        margin: 0 10px;
+        padding: 10px 20px;
+        border-radius: 5px;
+    }
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .divider span {
+        padding: 0 10px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Sign In</h3>
+            <div class="card login-card">
+                <div class="login-header">
+                    <h3 class="text-center mb-0">Welcome Back</h3>
                 </div>
-                <div class="card-body">
+                <div class="login-body">
                     <form method="POST" action="{{ url_for('auth.login') }}">
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
-                        <div class="form-group form-check">
+                        <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        <button type="submit" class="btn btn-primary btn-login w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
                     </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p>Don't have an account? <a href="{{ url_for('auth.request_registration') }}">Request registration</a></p>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <div class="social-login">
+                        <a href="{{ url_for('auth.google_login') }}" class="btn btn-outline-danger">
+                            <i class="fab fa-google me-2"></i>Google
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fab fa-facebook me-2"></i>Facebook
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-2">
+                            <a href="#" class="text-decoration-none">Forgot your password?</a>
+                        </p>
+                        <p class="mb-0">
+                            Don't have an account? 
+                            <a href="{{ url_for('auth.request_registration') }}" class="text-decoration-none">Request registration</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -6,109 +6,134 @@
     <title>Mario's Bird Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
         .navbar {
             background-color: #343a40;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .navbar-brand {
             color: white !important;
             font-weight: bold;
+            font-size: 1.5rem;
         }
         .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
         }
         .nav-link:hover {
             color: white !important;
         }
         .card {
-            margin-bottom: 1rem;
+            border: none;
+            border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
         }
         .btn {
-            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
         }
-        .banner {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("{{ url_for('static', filename='images/owl_banner.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 6rem 0;
             margin-bottom: 2rem;
         }
-        .content-wrapper {
-            min-height: calc(100vh - 300px);
-            display: flex;
-            flex-direction: column;
+        .hero-content {
+            text-align: center;
         }
-        .main-content {
-            flex: 1;
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
-    <div class="content-wrapper">
-        <img src="{{ url_for('static', filename='images/owl_banner.jpg') }}" alt="Bird Tracker Banner" class="banner">
-        
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand" href="/">Mario's Bird Tracker</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Mario's Bird Tracker</h1>
+                <p class="hero-subtitle">Track, analyze, and discover bird sightings in your area</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Mario's Bird Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.map') }}">
+                            <i class="fas fa-map-marker-alt me-1"></i>Map
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.report') }}">AI Analysis</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.map') }}">
-                                <i class="fas fa-map-marker-alt me-1"></i>Map
+                            <a class="nav-link" href="{{ url_for('admin.admin_panel') }}">
+                                <i class="fas fa-user-shield"></i> Admin Panel
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.change_password') }}">
+                                <i class="fas fa-key"></i> Change Password
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.report') }}">AI Analysis</a>
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                         </li>
-                        {% if current_user.is_authenticated %}
-                            {% if current_user.is_admin %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('admin.admin_panel') }}">
-                                    <i class="fas fa-user-shield"></i> Admin Panel
-                                </a>
-                            </li>
-                            {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.change_password') }}">
-                                    <i class="fas fa-key"></i> Change Password
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.request_registration') }}">
-                                    <i class="fas fa-user-plus"></i> Request Registration
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.request_registration') }}">
+                                <i class="fas fa-user-plus"></i> Request Registration
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
-        </nav>
-
-        <div class="container main-content">
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            {% block content %}{% endblock %}
         </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->

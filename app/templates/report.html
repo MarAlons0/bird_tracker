@@ -1,46 +1,109 @@
 {% extends "base.html" %}
 
+{% block head %}
+<style>
+    .analysis-card {
+        transition: all 0.3s ease;
+    }
+    .analysis-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .loading-spinner {
+        display: none;
+    }
+    .loading-spinner.active {
+        display: block;
+    }
+    .analysis-result {
+        display: none;
+    }
+    .analysis-result.active {
+        display: block;
+    }
+    .key-finding {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #3498db;
+        background-color: #f8f9fa;
+    }
+    .rare-sighting {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #e74c3c;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">AI Analysis</h4>
-            <p class="card-text">
-                Get intelligent insights about bird sightings in your area. Our AI analyzes recent observations
-                to identify patterns, rare sightings, and migration trends.
-            </p>
-        </div>
-    </div>
-
-    <!-- Analysis Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Request Analysis</h5>
-            <form id="analysis-form">
-                <div class="mb-3">
-                    <label for="location" class="form-label">Location</label>
-                    <input type="text" class="form-control" id="location" required>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">AI Analysis</h4>
+                    <p class="card-text">
+                        Get intelligent insights about bird sightings in your area. Our AI analyzes recent observations
+                        to identify patterns, rare sightings, and migration trends.
+                    </p>
                 </div>
-                <div class="mb-3">
-                    <label for="timeframe" class="form-label">Timeframe</label>
-                    <select class="form-select" id="timeframe" required>
-                        <option value="7">Last 7 days</option>
-                        <option value="30">Last 30 days</option>
-                        <option value="90">Last 90 days</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Generate Analysis</button>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- Analysis Results -->
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Analysis Results</h5>
-            <div id="analysis-results">
-                <div class="alert alert-info">
-                    Submit a request to generate analysis.
+            <!-- Analysis Form -->
+            <div class="card analysis-card">
+                <div class="card-body">
+                    <h5 class="card-title">Request Analysis</h5>
+                    <form id="analysis-form">
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeframe" class="form-label">Timeframe</label>
+                            <select class="form-select" id="timeframe" required>
+                                <option value="7">Last 7 days</option>
+                                <option value="30">Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="analysis-type" class="form-label">Analysis Type</label>
+                            <select class="form-select" id="analysis-type" required>
+                                <option value="general">General Analysis</option>
+                                <option value="migration">Migration Patterns</option>
+                                <option value="rarity">Rare Sightings</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-robot me-2"></i>Generate Analysis
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Loading Spinner -->
+            <div class="card mb-4 loading-spinner">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Generating analysis...</p>
+                </div>
+            </div>
+
+            <!-- Analysis Results -->
+            <div class="card analysis-result">
+                <div class="card-body">
+                    <h5 class="card-title">Analysis Results</h5>
+                    <div id="analysis-results">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Submit a request to generate analysis.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,9 +116,11 @@
         
         const location = document.getElementById('location').value;
         const timeframe = document.getElementById('timeframe').value;
+        const analysisType = document.getElementById('analysis-type').value;
         
-        const resultsDiv = document.getElementById('analysis-results');
-        resultsDiv.innerHTML = '<div class="alert alert-info">Generating analysis...</div>';
+        // Show loading spinner and hide results
+        document.querySelector('.loading-spinner').classList.add('active');
+        document.querySelector('.analysis-result').classList.remove('active');
         
         fetch('/api/analyze', {
             method: 'POST',
@@ -64,31 +129,65 @@
             },
             body: JSON.stringify({
                 location: location,
-                timeframe: timeframe
+                timeframe: timeframe,
+                analysis_type: analysisType
             })
         })
         .then(response => response.json())
         .then(data => {
+            // Hide loading spinner and show results
+            document.querySelector('.loading-spinner').classList.remove('active');
+            document.querySelector('.analysis-result').classList.add('active');
+            
+            const resultsDiv = document.getElementById('analysis-results');
             resultsDiv.innerHTML = `
-                <div class="card">
-                    <div class="card-body">
-                        <h5>Analysis for ${location}</h5>
-                        <p>${data.analysis}</p>
-                        <h6>Key Findings:</h6>
-                        <ul>
-                            ${data.key_findings.map(finding => `<li>${finding}</li>`).join('')}
-                        </ul>
-                        <h6>Rare Sightings:</h6>
-                        <ul>
-                            ${data.rare_sightings.map(sighting => `<li>${sighting}</li>`).join('')}
-                        </ul>
-                    </div>
+                <div class="mb-4">
+                    <h6>Summary</h6>
+                    <p>${data.summary}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6>Key Findings</h6>
+                    ${data.key_findings.map(finding => `
+                        <div class="key-finding">
+                            <i class="fas fa-check-circle text-primary me-2"></i>
+                            ${finding}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mb-4">
+                    <h6>Rare Sightings</h6>
+                    ${data.rare_sightings.map(sighting => `
+                        <div class="rare-sighting">
+                            <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                            ${sighting}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mb-4">
+                    <h6>Recommendations</h6>
+                    <ul class="list-group">
+                        ${data.recommendations.map(rec => `
+                            <li class="list-group-item">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>
+                                ${rec}
+                            </li>
+                        `).join('')}
+                    </ul>
                 </div>
             `;
         })
         .catch(error => {
+            // Hide loading spinner and show error
+            document.querySelector('.loading-spinner').classList.remove('active');
+            document.querySelector('.analysis-result').classList.add('active');
+            
+            const resultsDiv = document.getElementById('analysis-results');
             resultsDiv.innerHTML = `
                 <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
                     Error generating analysis: ${error.message}
                 </div>
             `;

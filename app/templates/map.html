@@ -2,24 +2,83 @@
 
 {% block head %}
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+<style>
+    .map-container {
+        position: relative;
+        height: 600px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .map-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .info-window {
+        padding: 10px;
+    }
+    .info-window h5 {
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+    .info-window p {
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">Bird Sightings Map</h4>
-            <p class="card-text">
-                Explore bird sightings in your area. The map displays recent bird observations with markers
-                color-coded by bird category. Click on markers to see details about each sighting.
-            </p>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Bird Sightings Map</h4>
+                    <p class="card-text">
+                        Explore bird sightings in your area. The map displays recent bird observations with markers
+                        color-coded by bird category. Click on markers to see details about each sighting.
+                    </p>
+                    <div class="form-group">
+                        <label for="date-range">Date Range:</label>
+                        <select id="date-range" class="form-select">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Sightings</h5>
+                    <div id="sightings-list" class="list-group">
+                        <!-- Sightings will be loaded here -->
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <!-- Map Container -->
-    <div class="card">
-        <div class="card-body">
-            <div id="map" style="height: 600px;"></div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-controls">
+                            <button id="center-map" class="btn btn-sm btn-primary">
+                                <i class="fas fa-crosshairs"></i> Center Map
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -27,6 +86,7 @@
 <script>
     let map;
     let markers = [];
+    let userLocation = null;
 
     function initMap() {
         // Default to Cincinnati if no location is set
@@ -34,51 +94,129 @@
         
         map = new google.maps.Map(document.getElementById('map'), {
             center: defaultLocation,
-            zoom: 12
+            zoom: 12,
+            styles: [
+                {
+                    "featureType": "poi",
+                    "elementType": "labels",
+                    "stylers": [{"visibility": "off"}]
+                }
+            ]
         });
+
+        // Try to get user's location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    map.setCenter(userLocation);
+                    map.setZoom(12);
+                },
+                error => {
+                    console.error('Error getting location:', error);
+                    map.setCenter(defaultLocation);
+                }
+            );
+        }
 
         loadSightings();
     }
 
     function loadSightings() {
-        fetch('/api/sightings')
+        const dateRange = document.getElementById('date-range').value;
+        fetch(`/api/sightings?days=${dateRange}`)
             .then(response => response.json())
             .then(data => {
                 // Clear existing markers
                 markers.forEach(marker => marker.setMap(null));
                 markers = [];
 
-                // Add new markers
+                // Update sightings list
+                const sightingsList = document.getElementById('sightings-list');
+                sightingsList.innerHTML = '';
+
+                // Add new markers and list items
                 data.forEach(sighting => {
+                    // Create marker
                     const marker = new google.maps.Marker({
                         position: {
                             lat: parseFloat(sighting.latitude),
                             lng: parseFloat(sighting.longitude)
                         },
                         map: map,
-                        title: sighting.bird_name
+                        title: sighting.bird_name,
+                        icon: {
+                            url: getMarkerIcon(sighting.category),
+                            scaledSize: new google.maps.Size(30, 30)
+                        }
                     });
 
                     const infoWindow = new google.maps.InfoWindow({
                         content: `
-                            <div>
+                            <div class="info-window">
                                 <h5>${sighting.bird_name}</h5>
-                                <p>Location: ${sighting.location}</p>
-                                <p>Date: ${new Date(sighting.timestamp).toLocaleString()}</p>
-                                <p>Observer: ${sighting.observer}</p>
+                                <p><i class="fas fa-map-marker-alt"></i> ${sighting.location}</p>
+                                <p><i class="fas fa-calendar"></i> ${new Date(sighting.timestamp).toLocaleString()}</p>
+                                <p><i class="fas fa-user"></i> ${sighting.observer}</p>
                             </div>
                         `
                     });
 
                     marker.addListener('click', () => {
                         infoWindow.open(map, marker);
+                        map.setCenter(marker.getPosition());
+                        map.setZoom(15);
                     });
 
                     markers.push(marker);
+
+                    // Add to sightings list
+                    const listItem = document.createElement('a');
+                    listItem.href = '#';
+                    listItem.className = 'list-group-item list-group-item-action';
+                    listItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${sighting.bird_name}</h6>
+                                <small>${sighting.location}</small>
+                            </div>
+                            <small>${new Date(sighting.timestamp).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                    listItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        infoWindow.open(map, marker);
+                        map.setCenter(marker.getPosition());
+                        map.setZoom(15);
+                    });
+                    sightingsList.appendChild(listItem);
                 });
             })
             .catch(error => console.error('Error loading sightings:', error));
     }
+
+    function getMarkerIcon(category) {
+        const colors = {
+            'waterfowl': '#3498db',
+            'raptor': '#e74c3c',
+            'songbird': '#2ecc71',
+            'shorebird': '#f1c40f',
+            'other': '#9b59b6'
+        };
+        return `https://maps.google.com/mapfiles/ms/icons/${colors[category] || colors.other}-dot.png`;
+    }
+
+    // Event listeners
+    document.getElementById('date-range').addEventListener('change', loadSightings);
+    document.getElementById('center-map').addEventListener('click', () => {
+        if (userLocation) {
+            map.setCenter(userLocation);
+            map.setZoom(12);
+        }
+    });
 
     // Initialize map when the page loads
     window.onload = initMap;

@@ -1,35 +1,147 @@
 {% extends "base.html" %}
 
+{% block head %}
+<style>
+    .register-card {
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 10px;
+    }
+    .register-header {
+        background-color: #343a40;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 20px;
+    }
+    .register-body {
+        padding: 30px;
+    }
+    .form-control {
+        border-radius: 5px;
+        padding: 12px;
+    }
+    .btn-register {
+        padding: 12px;
+        font-weight: 500;
+        border-radius: 5px;
+    }
+    .password-strength {
+        height: 5px;
+        margin-top: 5px;
+        border-radius: 2px;
+    }
+    .password-strength.weak {
+        background-color: #dc3545;
+        width: 33%;
+    }
+    .password-strength.medium {
+        background-color: #ffc107;
+        width: 66%;
+    }
+    .password-strength.strong {
+        background-color: #28a745;
+        width: 100%;
+    }
+    .form-check {
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Request Registration</h3>
+            <div class="card register-card">
+                <div class="register-header">
+                    <h3 class="text-center mb-0">Request Registration</h3>
                 </div>
-                <div class="card-body">
+                <div class="register-body">
                     <form method="POST" action="{{ url_for('auth.request_registration') }}">
-                        <div class="form-group">
-                            <label for="email">Email</label>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" id="email" name="email" required>
+                            <small class="text-muted">We'll send a confirmation email to this address.</small>
                         </div>
-                        <div class="form-group">
-                            <label for="username">Username</label>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>
+                            <small class="text-muted">Choose a unique username for your account.</small>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" required 
+                                       onkeyup="checkPasswordStrength(this.value)">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="password-strength"></div>
+                            <small class="text-muted">
+                                Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
+                            </small>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="newsletter" name="newsletter" checked>
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to our newsletter for bird sighting updates
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-register w-100">
+                            <i class="fas fa-user-plus me-2"></i>Submit Request
+                        </button>
                     </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">
+                            Already have an account? 
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Login here</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    function checkPasswordStrength(password) {
+        const strengthBar = document.getElementById('password-strength');
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]/)) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[^a-zA-Z0-9]/)) strength++;
+        
+        strengthBar.className = 'password-strength';
+        if (strength <= 2) {
+            strengthBar.classList.add('weak');
+        } else if (strength <= 4) {
+            strengthBar.classList.add('medium');
+        } else {
+            strengthBar.classList.add('strong');
+        }
+    }
+</script>
 {% endblock %} 
