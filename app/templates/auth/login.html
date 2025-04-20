@@ -27,31 +27,6 @@
         font-weight: 500;
         border-radius: 5px;
     }
-    .social-login {
-        margin-top: 20px;
-        text-align: center;
-    }
-    .social-login .btn {
-        margin: 0 10px;
-        padding: 10px 20px;
-        border-radius: 5px;
-    }
-    .divider {
-        display: flex;
-        align-items: center;
-        text-align: center;
-        margin: 20px 0;
-    }
-    .divider::before,
-    .divider::after {
-        content: '';
-        flex: 1;
-        border-bottom: 1px solid #dee2e6;
-    }
-    .divider span {
-        padding: 0 10px;
-        color: #6c757d;
-    }
 </style>
 {% endblock %}
 
@@ -77,31 +52,12 @@
                             <input type="checkbox" class="form-check-input" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Remember me</label>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-login w-100">
-                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
-                        </button>
+                        <button type="submit" class="btn btn-primary btn-login w-100">Sign In</button>
                     </form>
-
-                    <div class="divider">
-                        <span>OR</span>
-                    </div>
-
-                    <div class="social-login">
-                        <a href="{{ url_for('auth.google_login') }}" class="btn btn-outline-danger">
-                            <i class="fab fa-google me-2"></i>Google
-                        </a>
-                        <a href="#" class="btn btn-outline-primary">
-                            <i class="fab fa-facebook me-2"></i>Facebook
-                        </a>
-                    </div>
 
                     <div class="text-center mt-4">
                         <p class="mb-2">
-                            <a href="#" class="text-decoration-none">Forgot your password?</a>
-                        </p>
-                        <p class="mb-0">
-                            Don't have an account? 
-                            <a href="{{ url_for('auth.request_registration') }}" class="text-decoration-none">Request registration</a>
+                            <a href="{{ url_for('auth.request_registration') }}" class="text-decoration-none">New user? Request Registration</a>
                         </p>
                     </div>
                 </div>
