@@ -1,2 +1,2 @@
-web: gunicorn "app.report_app:create_app()"
-scheduler: python scheduler.py 
+web: gunicorn "app:create_app()"
+scheduler: python scheduler.py % 
