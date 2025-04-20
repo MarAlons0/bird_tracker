@@ -11,14 +11,16 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    is_active = db.Column(db.Boolean, default=False)
-    is_subscribed = db.Column(db.Boolean, default=False)
-    default_location = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_approved = db.Column(db.Boolean, default=False)
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    login_token = db.Column(db.String(100), unique=True)
+    token_expiry = db.Column(db.DateTime)
+    newsletter_subscription = db.Column(db.Boolean, default=True)
     
-    newsletter_subscription = db.relationship('NewsletterSubscription', backref='user', uselist=False)
+    newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
