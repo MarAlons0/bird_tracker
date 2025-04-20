@@ -27,70 +27,88 @@
         .btn {
             margin-bottom: 0.5rem;
         }
+        .banner {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 2rem;
+        }
+        .content-wrapper {
+            min-height: calc(100vh - 300px);
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Mario's Bird Tracker</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.map') }}">
-                            <i class="fas fa-map-marker-alt me-1"></i>Map
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.report') }}">AI Analysis</a>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                        {% if current_user.is_admin %}
+    <div class="content-wrapper">
+        <img src="{{ url_for('static', filename='images/owl_banner.jpg') }}" alt="Bird Tracker Banner" class="banner">
+        
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/">Mario's Bird Tracker</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.admin_panel') }}">
-                                <i class="fas fa-user-shield"></i> Admin Panel
+                            <a class="nav-link" href="{{ url_for('main.map') }}">
+                                <i class="fas fa-map-marker-alt me-1"></i>Map
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.report') }}">AI Analysis</a>
+                        </li>
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.admin_panel') }}">
+                                    <i class="fas fa-user-shield"></i> Admin Panel
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.change_password') }}">
+                                    <i class="fas fa-key"></i> Change Password
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.request_registration') }}">
+                                    <i class="fas fa-user-plus"></i> Request Registration
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                            </li>
                         {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.change_password') }}">
-                                <i class="fas fa-key"></i> Change Password
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.request_registration') }}">
-                                <i class="fas fa-user-plus"></i> Request Registration
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
+                    </ul>
+                </div>
             </div>
+        </nav>
+
+        <div class="container main-content">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
         </div>
-    </nav>
-
-    <div class="container">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->

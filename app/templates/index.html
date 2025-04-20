@@ -6,6 +6,46 @@
 
 {% block content %}
     <div class="container mt-4">
+        <!-- Carousel -->
+        <div id="birdCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="2"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='images/carousel/bird1.jpg') }}" class="d-block w-100" alt="Bird 1">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Discover Local Birds</h5>
+                        <p>Explore the diverse bird species in your area</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='images/carousel/bird2.jpg') }}" class="d-block w-100" alt="Bird 2">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Track Migrations</h5>
+                        <p>Follow seasonal bird movements and patterns</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='images/carousel/bird3.jpg') }}" class="d-block w-100" alt="Bird 3">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Share Your Sightings</h5>
+                        <p>Contribute to our growing bird database</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+
         <div class="card mb-4">
             <div class="card-body">
                 <h4 class="card-title">Version 1.2.1</h4>
