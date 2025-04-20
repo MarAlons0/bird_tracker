@@ -4,7 +4,7 @@ APScheduler==3.10.4
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Flask-WTF==1.2.1
-Flask-Mail==0.9.1
+Flask-Mail==0.10.0
 Flask-Migrate==4.0.5
 Flask-Babel==4.0.0
 Flask-Caching==2.1.0
