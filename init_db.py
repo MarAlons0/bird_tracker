@@ -1,4 +1,4 @@
-from app import create_app
+from app import create_app, db
 from werkzeug.security import generate_password_hash
 import psycopg2
 import os
@@ -58,10 +58,10 @@ def init_db():
                     CREATE TABLE user_preferences (
                         id SERIAL PRIMARY KEY,
                         user_id INTEGER REFERENCES users(id),
-                        active_location_id INTEGER REFERENCES locations(id),
-                        default_radius FLOAT DEFAULT 50.0,
+                        default_location_id INTEGER REFERENCES locations(id),
+                        notification_enabled BOOLEAN DEFAULT TRUE,
+                        email_frequency VARCHAR(20) DEFAULT 'daily',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         UNIQUE(user_id)
                     )
                 """)
@@ -69,20 +69,19 @@ def init_db():
                 print("Database tables created")
 
                 # Create admin user
-                admin_email = os.getenv('ADMIN_EMAIL')
-                admin_password = os.getenv('ADMIN_PASSWORD')
+                admin_email = 'alonsoencinci@gmail.com'
+                admin_password = 'admin123'
                 
-                if admin_email and admin_password:
-                    # Hash the password
-                    password_hash = generate_password_hash(admin_password)
-                    
-                    # Insert admin user
-                    cur.execute("""
-                        INSERT INTO users (username, email, password_hash, is_admin, is_approved)
-                        VALUES ('admin', %s, %s, TRUE, TRUE)
-                    """, (admin_email, password_hash))
-                    
-                    print("Admin user created")
+                # Hash the password
+                password_hash = generate_password_hash(admin_password)
+                
+                # Insert admin user
+                cur.execute("""
+                    INSERT INTO users (username, email, password_hash, is_admin, is_approved)
+                    VALUES ('admin', %s, %s, TRUE, TRUE)
+                """, (admin_email, password_hash))
+                
+                print("Admin user created")
                 
                 conn.commit()
                 print("Database initialization completed successfully")

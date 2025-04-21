@@ -37,8 +37,9 @@ for user in users:
     if not preferences:
         preferences = UserPreferences(
             user_id=user.id,
-            active_location_id=default_location.id,
-            default_radius=10.0
+            default_location_id=default_location.id,
+            notification_enabled=True,
+            email_frequency='daily'
         )
         db.session.add(preferences)
         db.session.commit()
