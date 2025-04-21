@@ -8,6 +8,7 @@ from app.models import db
 from app.scheduler import init_scheduler
 from app.routes.main import main
 from app.routes.auth import auth
+from app.routes.admin import admin
 import os
 import logging
 from flask_migrate import Migrate
@@ -63,6 +64,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(main)
     app.register_blueprint(auth)
+    app.register_blueprint(admin, url_prefix='/admin')
     
     # Initialize scheduler in non-testing environment
     if not app.config.get('TESTING'):
