@@ -11,17 +11,31 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255))
     is_admin = db.Column(db.Boolean, default=False)
     is_approved = db.Column(db.Boolean, default=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    login_token = db.Column(db.String(100), unique=True)
-    token_expiry = db.Column(db.DateTime)
+    login_token = db.Column(db.String(100), unique=True, nullable=True)
+    token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)
     
+    default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
+    default_location = db.relationship('Location', foreign_keys=[default_location_id], uselist=False)
+
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
     
+    __mapper_args__ = {
+        'include_properties': [
+            'id', 'username', 'email', 'password_hash', 'is_admin', 'is_approved',
+            'registration_date', 'is_active', 'login_token', 'token_expiry',
+            'newsletter_subscription', 'default_location_id'
+        ]
+    }
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     

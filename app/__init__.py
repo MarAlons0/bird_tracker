@@ -12,6 +12,7 @@ import os
 import logging
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,12 @@ def create_app():
     # Secret key configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
     
+    # Session configuration
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    
     # Initialize extensions
     db.init_app(app)
     mail = Mail(app)
@@ -45,6 +52,8 @@ def create_app():
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
     
     @login_manager.user_loader
     def load_user(user_id):
