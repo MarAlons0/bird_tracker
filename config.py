@@ -7,7 +7,7 @@ load_dotenv()
 class Config:
     """Base configuration class."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///bird_tracker.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///bird_tracker.db'  # Use SQLite for local development
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
