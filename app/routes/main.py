@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, jsonify, request
-from app.models import db, User, NewsletterSubscription, BirdSighting
+from app.models import db, User, NewsletterSubscription, BirdSighting, CarouselImage
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
 from flask_login import login_required
+from flask import current_app
 
 main = Blueprint('main', __name__)
 
@@ -89,4 +90,19 @@ def recent_sightings():
             'bird_name': sighting.bird_name,
             'location': sighting.location,
             'timestamp': sighting.timestamp.isoformat()
-        } for sighting in sightings]) 
+        } for sighting in sightings])
+
+@main.route('/api/carousel-images')
+def get_carousel_images():
+    try:
+        # Get active carousel images ordered by their order field
+        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        return jsonify([{
+            'id': img.id,
+            'url': img.filename,  # Use the filename which contains the Cloudinary URL
+            'title': img.title,
+            'description': img.description
+        } for img in images])
+    except Exception as e:
+        current_app.logger.error(f'Error fetching carousel images: {str(e)}')
+        return jsonify({'error': str(e)}), 500 
