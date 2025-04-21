@@ -42,24 +42,6 @@
 {% endblock %}
 
 {% block content %}
-    <!-- Intro Section -->
-    <div class="intro-section">
-        <div class="container">
-            <h1 class="display-4 fw-bold mb-4">Welcome to Mario's Bird Tracker</h1>
-            <p class="lead mb-4">
-                This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:
-            </p>
-            <ul class="list-unstyled">
-                <li class="mb-2"><i class="fas fa-map-marked-alt me-2"></i>Map: View bird sightings on an interactive map of your selected location.</li>
-                <li class="mb-2"><i class="fas fa-robot me-2"></i>AI Analysis: Get insights about bird populations and trends in your area.</li>
-                <li class="mb-2"><i class="fas fa-envelope me-2"></i>Newsletter: Receive email updates about new bird sightings in your area.</li>
-            </ul>
-            <p class="mb-0">
-                To get started, make sure your location is set correctly below. You can change it at any time.
-            </p>
-        </div>
-    </div>
-
     <div class="container">
         <div class="row">
             <!-- Location Section -->
@@ -198,16 +180,15 @@
                             // Here you would typically update the location in your backend
                             // For now, we'll just update the display
                             document.querySelector('.location-section p:first-child').textContent = 'Name: ' + prediction.description;
-                            container.remove();
                         });
                         results.appendChild(item);
                     });
                 });
             });
             
-            const locationSection = document.querySelector('.location-section');
-            locationSection.appendChild(container);
-            input.focus();
+            // Replace the button with the input container
+            const button = document.getElementById('change-location');
+            button.parentNode.replaceChild(container, button);
         });
     </script>
 {% endblock %} 
