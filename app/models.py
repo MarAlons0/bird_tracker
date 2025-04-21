@@ -20,20 +20,9 @@ class User(UserMixin, db.Model):
     token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)
     
-    default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
-    default_location = db.relationship('Location', foreign_keys=[default_location_id], uselist=False, backref='default_location_user')
-    
     locations = db.relationship('Location', backref='user', foreign_keys='Location.user_id')
-    
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
-    
-    __mapper_args__ = {
-        'include_properties': [
-            'id', 'username', 'email', 'password_hash', 'is_admin', 'is_approved',
-            'registration_date', 'is_active', 'login_token', 'token_expiry',
-            'newsletter_subscription', 'default_location_id'
-        ]
-    }
+    preferences = db.relationship('UserPreferences', backref='user', uselist=False)
 
     def __repr__(self):
         return f'<User {self.username}>'

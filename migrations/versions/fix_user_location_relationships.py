@@ -17,10 +17,38 @@ depends_on = None
 
 
 def upgrade():
-    # No schema changes needed, just relationship fixes
-    pass
+    # Drop the default_location_id column from users table if it exists
+    op.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name='users' AND column_name='default_location_id'
+            ) THEN
+                ALTER TABLE users DROP COLUMN default_location_id;
+            END IF;
+        END
+        $$;
+    """)
+
+    # Ensure user_preferences table has correct columns
+    op.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name='user_preferences' AND column_name='default_location_id'
+            ) THEN
+                ALTER TABLE user_preferences ADD COLUMN default_location_id INTEGER REFERENCES locations(id);
+            END IF;
+        END
+        $$;
+    """)
 
 
 def downgrade():
-    # No schema changes needed, just relationship fixes
-    pass 
+    # Add back the default_location_id column to users table
+    op.add_column('users', sa.Column('default_location_id', sa.Integer(), nullable=True))
+    op.create_foreign_key(None, 'users', 'locations', ['default_location_id'], ['id']) 
