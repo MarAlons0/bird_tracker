@@ -38,7 +38,7 @@
                         </li>
                         {% if current_user.is_admin %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.index') }}">Admin Panel</a>
+                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin Panel</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.change_password') }}">Password Change</a>
