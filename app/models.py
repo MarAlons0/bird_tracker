@@ -77,4 +77,35 @@ class UserPreferences(db.Model):
     email_frequency = db.Column(db.String(20), default='daily')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    user = db.relationship('User', backref=db.backref('preferences', uselist=False)) 
+    user = db.relationship('User', backref=db.backref('preferences', uselist=False))
+
+class RegistrationRequest(db.Model):
+    """Model for handling user registration requests"""
+    __tablename__ = 'registration_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(80), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    request_date = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    
+    def __repr__(self):
+        return f'<RegistrationRequest {self.email}>'
+
+class CarouselImage(db.Model):
+    """Model for managing carousel images"""
+    __tablename__ = 'carousel_images'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(500), nullable=False)
+    title = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<CarouselImage {self.title}>' 
