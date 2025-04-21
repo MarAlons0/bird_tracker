@@ -1,7 +1,25 @@
 .hero-section {
-    background-color: #f8f9fa;
-    padding: 4rem 0;
+    background-image: url('../images/Banner.jpeg');
+    background-size: cover;
+    background-position: center;
+    padding: 6rem 0;
     margin-bottom: 2rem;
+    position: relative;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
 }
 
 .stats-card {
@@ -16,7 +34,8 @@
 }
 
 .navbar {
-    margin-bottom: 2rem;
+    margin-bottom: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .card-title {
@@ -25,10 +44,12 @@
 }
 
 .display-4 {
-    color: #2c3e50;
+    color: #fff;
     font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .lead {
-    color: #7f8c8d;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 } 
