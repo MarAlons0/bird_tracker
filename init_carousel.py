@@ -1,52 +1,43 @@
 from app import create_app
-from extensions import db
-from models import CarouselImage
-import os
+from app.models import CarouselImage, db
+from datetime import datetime
 
 def init_carousel_images():
     app = create_app()
     with app.app_context():
         # Clear existing carousel images
         CarouselImage.query.delete()
+        db.session.commit()
         
-        # List of images to add with their details
+        # Sample bird images from Cloudinary
         images = [
             {
-                'filename': 'photo1.jpg',
-                'title': 'Beautiful Bird in Nature',
-                'description': 'A stunning capture of a bird in its natural habitat',
+                'filename': 'https://res.cloudinary.com/dxgzx3wta/image/upload/v1/bird_tracker/carousel/american_robin.jpg',
+                'title': 'American Robin',
+                'description': 'A common sight in North American gardens',
                 'order': 1,
                 'is_active': True
             },
             {
-                'filename': 'photo2.jpeg',
-                'title': 'Bird in Flight',
-                'description': 'Majestic bird soaring through the sky',
+                'filename': 'https://res.cloudinary.com/dxgzx3wta/image/upload/v1/bird_tracker/carousel/blue_jay.jpg',
+                'title': 'Blue Jay',
+                'description': 'Known for its distinctive blue plumage',
                 'order': 2,
                 'is_active': True
             },
             {
-                'filename': 'photo3.jpeg',
-                'title': 'Bird Portrait',
-                'description': 'Close-up portrait of a beautiful bird',
+                'filename': 'https://res.cloudinary.com/dxgzx3wta/image/upload/v1/bird_tracker/carousel/cardinal.jpg',
+                'title': 'Northern Cardinal',
+                'description': 'The state bird of seven US states',
                 'order': 3,
-                'is_active': True
-            },
-            {
-                'filename': 'photo4.jpeg',
-                'title': 'Bird Watching',
-                'description': 'A peaceful moment observing birds in nature',
-                'order': 4,
                 'is_active': True
             }
         ]
         
         # Add images to database
         for image_data in images:
-            # Check if image file exists
-            if os.path.exists(f'static/images/birds/{image_data["filename"]}'):
-                image = CarouselImage(**image_data)
-                db.session.add(image)
+            image = CarouselImage(**image_data)
+            db.session.add(image)
         
         db.session.commit()
         print("Carousel images initialized successfully!")
