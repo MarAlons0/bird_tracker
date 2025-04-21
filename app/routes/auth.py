@@ -150,4 +150,27 @@ def request_registration():
         flash('Registration request submitted. Please wait for admin approval.')
         return redirect(url_for('auth.login'))
     
-    return render_template('auth/request_registration.html') 
+    return render_template('auth/request_registration.html')
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not current_user.check_password(current_password):
+            flash('Current password is incorrect', 'error')
+            return redirect(url_for('auth.change_password'))
+        
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'error')
+            return redirect(url_for('auth.change_password'))
+        
+        current_user.set_password(new_password)
+        db.session.commit()
+        flash('Password changed successfully', 'success')
+        return redirect(url_for('main.index'))
+    
+    return render_template('auth/change_password.html') 
