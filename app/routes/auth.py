@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import traceback
+from sqlalchemy import inspect
 
 # Configure logging with more detailed format
 logging.basicConfig(
@@ -29,7 +30,8 @@ def login():
         try:
             # Log database connection info
             logger.info(f"Database URI: {db.engine.url}")
-            logger.info(f"Database tables: {db.engine.table_names()}")
+            inspector = inspect(db.engine)
+            logger.info(f"Database tables: {inspector.get_table_names()}")
             
             # Check if user exists using SQLAlchemy ORM
             user = User.query.filter_by(email=email).first()
