@@ -25,18 +25,79 @@
         padding: 2rem 0;
         color: #6c757d;
     }
-    .carousel-item {
+    .carousel-container {
+        width: 100%;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .carousel-inner {
+        position: relative;
+        width: 100%;
         height: 400px;
     }
-    .carousel-item img {
-        object-fit: cover;
-        height: 100%;
+    .carousel-item {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
+        height: 100%;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .carousel-item.active {
+        display: block;
+        opacity: 1;
+    }
+    .carousel-image-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+    .carousel-item img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
     }
     .carousel-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 15px;
+        text-align: center;
+    }
+    .carousel-control-prev,
+    .carousel-control-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
         background: rgba(0, 0, 0, 0.5);
-        padding: 1rem;
-        border-radius: 5px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+    .carousel-control-prev {
+        left: 10px;
+    }
+    .carousel-control-next {
+        right: 10px;
+    }
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background: rgba(0, 0, 0, 0.8);
     }
 </style>
 {% endblock %}
@@ -63,21 +124,30 @@
             <div class="col-md-6">
                 <div class="carousel-section">
                     <h4 class="fw-bold mb-4">Featured Birds</h4>
-                    <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-indicators" id="carouselIndicators">
-                            <!-- Indicators will be added dynamically -->
+                    <div class="carousel-container">
+                        <div class="carousel-inner" id="birdCarousel">
+                            {% for image in carousel_images %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
+                                <div class="carousel-image-container">
+                                    <img src="{{ image.filename }}" alt="{{ image.title }}">
+                                </div>
+                                <div class="carousel-caption">
+                                    <h5>{{ image.title }}</h5>
+                                    {% if image.description %}
+                                    <p>{{ image.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="carousel-inner" id="carouselInner">
-                            <!-- Carousel items will be added dynamically -->
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
+                        {% if carousel_images|length > 1 %}
+                        <div class="carousel-control-prev" id="prevSlide">
                             <span class="carousel-control-prev-icon"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
+                        </div>
+                        <div class="carousel-control-next" id="nextSlide">
                             <span class="carousel-control-next-icon"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -90,52 +160,83 @@
     </div>
 
     <script>
-        // Load carousel images
-        fetch('/api/carousel-images')
-            .then(response => response.json())
-            .then(images => {
-                const carouselInner = document.getElementById('carouselInner');
-                const carouselIndicators = document.getElementById('carouselIndicators');
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.getElementById('birdCarousel');
+            const items = carousel.getElementsByClassName('carousel-item');
+            const totalItems = items.length;
+            let usedIndices = new Set();
+            let currentIndex = 0;
+            
+            // Function to get a random unused index
+            function getRandomUnusedIndex() {
+                if (usedIndices.size === totalItems) {
+                    usedIndices.clear(); // Reset if all indices have been used
+                }
                 
-                images.forEach((image, index) => {
-                    // Add indicator
-                    const indicator = document.createElement('button');
-                    indicator.type = 'button';
-                    indicator.setAttribute('data-bs-target', '#birdCarousel');
-                    indicator.setAttribute('data-bs-slide-to', index.toString());
-                    if (index === 0) indicator.classList.add('active');
-                    carouselIndicators.appendChild(indicator);
-                    
-                    // Add carousel item
-                    const carouselItem = document.createElement('div');
-                    carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-                    
-                    const img = document.createElement('img');
-                    img.src = image.url;
-                    img.className = 'd-block w-100';
-                    img.alt = image.title || 'Bird Image';
-                    
-                    const caption = document.createElement('div');
-                    caption.className = 'carousel-caption';
-                    
-                    if (image.title) {
-                        const title = document.createElement('h5');
-                        title.textContent = image.title;
-                        caption.appendChild(title);
-                    }
-                    
-                    if (image.description) {
-                        const description = document.createElement('p');
-                        description.textContent = image.description;
-                        caption.appendChild(description);
-                    }
-                    
-                    carouselItem.appendChild(img);
-                    carouselItem.appendChild(caption);
-                    carouselInner.appendChild(carouselItem);
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * totalItems);
+                } while (usedIndices.has(randomIndex));
+                
+                usedIndices.add(randomIndex);
+                return randomIndex;
+            }
+            
+            // Function to show a specific slide
+            function showSlide(index) {
+                // Remove active class from all slides
+                Array.from(items).forEach(item => {
+                    item.classList.remove('active');
+                    item.style.opacity = '0';
                 });
-            })
-            .catch(error => console.error('Error loading carousel images:', error));
+                
+                // Add active class to the selected slide
+                items[index].classList.add('active');
+                items[index].style.opacity = '1';
+            }
+            
+            // Function to show next random slide
+            function showNextRandomSlide() {
+                const nextIndex = getRandomUnusedIndex();
+                showSlide(nextIndex);
+                currentIndex = nextIndex;
+            }
+            
+            // Set up automatic rotation
+            let rotationInterval = setInterval(showNextRandomSlide, 3000);
+            
+            // Handle manual navigation
+            const prevButton = document.getElementById('prevSlide');
+            const nextButton = document.getElementById('nextSlide');
+            
+            if (prevButton && nextButton) {
+                prevButton.addEventListener('click', function() {
+                    clearInterval(rotationInterval);
+                    const nextIndex = getRandomUnusedIndex();
+                    showSlide(nextIndex);
+                    currentIndex = nextIndex;
+                    rotationInterval = setInterval(showNextRandomSlide, 3000);
+                });
+                
+                nextButton.addEventListener('click', function() {
+                    clearInterval(rotationInterval);
+                    const nextIndex = getRandomUnusedIndex();
+                    showSlide(nextIndex);
+                    currentIndex = nextIndex;
+                    rotationInterval = setInterval(showNextRandomSlide, 3000);
+                });
+            }
+            
+            // Pause rotation when hovering over carousel
+            carousel.addEventListener('mouseenter', function() {
+                clearInterval(rotationInterval);
+            });
+            
+            // Resume rotation when mouse leaves carousel
+            carousel.addEventListener('mouseleave', function() {
+                rotationInterval = setInterval(showNextRandomSlide, 3000);
+            });
+        });
 
         // Location change functionality
         document.getElementById('change-location').addEventListener('click', function() {
