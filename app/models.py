@@ -22,7 +22,6 @@ class User(UserMixin, db.Model):
     
     locations = db.relationship('Location', backref='user', foreign_keys='Location.user_id')
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
-    preferences = db.relationship('UserPreferences', backref='user', uselist=False)
 
     def __repr__(self):
         return f'<User {self.username}>'
