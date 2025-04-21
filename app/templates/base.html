@@ -9,7 +9,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         .hero-section {
-            background-image: url("{{ url_for('static', filename='images/Banner.jpeg') }}") !important;
+            width: 100%;
+            height: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
         }
     </style>
     {% block head %}{% endblock %}
@@ -73,14 +90,7 @@
     </nav>
 
     <div class="hero-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-8 mx-auto text-center">
-                    <h1 class="display-4 text-white">Bird Tracker</h1>
-                    <p class="lead text-white">Track and analyze bird sightings with AI-powered tools</p>
-                </div>
-            </div>
-        </div>
+        <img src="{{ url_for('static', filename='images/Banner.jpeg') }}" alt="Banner">
     </div>
 
     <div class="container mt-4">
