@@ -31,7 +31,7 @@ def init_db():
             logger.info("Creating admin user...")
             # Create admin user
             admin = User(
-                username='admin',
+                username=admin_email,  # Use email as username
                 email=admin_email,
                 password_hash=generate_password_hash(admin_password),
                 is_admin=True,
