@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename
 from utils.image_processing import process_image, upload_to_cloudinary
 from extensions import mail
 
-bp = Blueprint('admin', __name__)
+admin = Blueprint('admin', __name__)
 
 def admin_required(f):
     @wraps(f)
@@ -26,7 +26,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@bp.route('/dashboard')
+@admin.route('/dashboard')
 @login_required
 @admin_required
 def dashboard():
@@ -57,7 +57,7 @@ def dashboard():
                          total_carousel_images=total_carousel_images,
                          active_carousel_images=active_carousel_images)
 
-@bp.route('/users')
+@admin.route('/users')
 @login_required
 @admin_required
 def users():
@@ -89,7 +89,7 @@ def users():
     
     return render_template('admin/users.html', users=users)
 
-@bp.route('/registration-requests')
+@admin.route('/registration-requests')
 @admin_required
 def registration_requests():
     # Get registration requests using raw SQL
@@ -116,7 +116,7 @@ def registration_requests():
     
     return render_template('admin/registration_requests.html', requests=requests)
 
-@bp.route('/carousel')
+@admin.route('/carousel')
 @login_required
 @admin_required
 def manage_carousel():
