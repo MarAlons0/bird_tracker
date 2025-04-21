@@ -57,36 +57,11 @@ def login():
         logger.info(f"Login attempt for email: {email}")
         
         try:
-            # Check if user exists in database using raw SQL
-            logger.info("Checking if user exists in database...")
-            result = db.session.execute(
-                text("""
-                    SELECT id, username, email, password_hash, is_admin, is_approved,
-                           registration_date, is_active, login_token, token_expiry,
-                           newsletter_subscription
-                    FROM users
-                    WHERE email = :email
-                """),
-                {"email": email}
-            ).fetchone()
+            # Check if user exists using SQLAlchemy ORM
+            user = User.query.filter_by(email=email).first()
             
-            # If user exists, allow login regardless of ALLOWED_EMAILS
-            if result:
+            if user:
                 logger.info(f"User found in database: {email}")
-                user = User()
-                user.id = result[0]
-                user.username = result[1]
-                user.email = result[2]
-                user.password_hash = result[3]
-                user.is_admin = result[4]
-                user.is_approved = result[5]
-                user.registration_date = result[6]
-                user._is_active = result[7]  # Use _is_active instead of is_active
-                user.login_token = result[8]
-                user.token_expiry = result[9]
-                user.newsletter_subscription = result[10]
-                
-                logger.info(f"Checking password for user: {email}")
                 if not user.check_password(password):
                     logger.warning(f"Invalid password for user: {email}")
                     return render_template('login.html', 
@@ -127,85 +102,52 @@ def login():
                 return render_template('login.html', 
                     error="Sorry, this email is not authorized to access this application.")
             
-            # Create new user
+            # Create new user using SQLAlchemy ORM
             logger.info(f"Creating new user for email: {email}")
             
             # Generate username from email
             username = email.split('@')[0]
-            # Ensure username is unique using raw SQL
+            # Ensure username is unique
             base_username = username
             counter = 1
-            while db.session.execute(
-                text("SELECT id FROM users WHERE username = :username"),
-                {"username": username}
-            ).fetchone():
+            while User.query.filter_by(username=username).first():
                 username = f"{base_username}{counter}"
                 counter += 1
             
-            # Create user using raw SQL
+            # Create user
             default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
             logger.info(f"Creating user with default password: {default_password}")
-            db.session.execute(
-                text("""
-                    INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
-                    VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
-                """),
-                {
-                    "email": email,
-                    "username": username,
-                    "password_hash": generate_password_hash(default_password),
-                    "is_admin": False,
-                    "is_approved": True,
-                    "is_active": True,
-                    "newsletter_subscription": True
-                }
+            
+            new_user = User(
+                email=email,
+                username=username,
+                password_hash=generate_password_hash(default_password),
+                is_admin=False,
+                is_approved=True,
+                is_active=True,
+                newsletter_subscription=True
             )
+            db.session.add(new_user)
             db.session.commit()
             logger.info(f"Created new user with default password: {email}")
             
-            # Get the newly created user
-            result = db.session.execute(
-                text("""
-                    SELECT id, username, email, password_hash, is_admin, is_approved,
-                           registration_date, is_active, login_token, token_expiry,
-                           newsletter_subscription
-                    FROM users
-                    WHERE email = :email
-                """),
-                {"email": email}
-            ).fetchone()
-            
-            user = User()
-            user.id = result[0]
-            user.username = result[1]
-            user.email = result[2]
-            user.password_hash = result[3]
-            user.is_admin = result[4]
-            user.is_approved = result[5]
-            user.registration_date = result[6]
-            user._is_active = result[7]  # Use _is_active instead of is_active
-            user.login_token = result[8]
-            user.token_expiry = result[9]
-            user.newsletter_subscription = result[10]
-            
             # Log user in
             logger.info(f"Logging in new user: {email}")
-            login_user(user, remember=True)
+            login_user(new_user, remember=True)
             logger.info(f"New user logged in successfully: {email}")
             flash("Successfully logged in!", "success")
             
             # Set session as permanent
             session.permanent = True
             
+            # Redirect to home
             return redirect(url_for('main.index'))
             
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")
-            logger.exception("Full traceback:")
-            db.session.rollback()
             return render_template('login.html', 
                 error="An error occurred during login. Please try again.")
-        
+    
     return render_template('login.html')
 
 @bp.route('/logout')
