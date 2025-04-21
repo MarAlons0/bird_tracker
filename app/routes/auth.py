@@ -4,7 +4,15 @@ from app.models import User, db
 from werkzeug.security import generate_password_hash
 import logging
 import os
+import sys
+import traceback
 
+# Configure logging with more detailed format
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
 logger = logging.getLogger(__name__)
 
 auth = Blueprint('auth', __name__)
@@ -15,13 +23,22 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         logger.info(f"Login attempt for email: {email}")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Request headers: {dict(request.headers)}")
         
         try:
+            # Log database connection info
+            logger.info(f"Database URI: {db.engine.url}")
+            logger.info(f"Database tables: {db.engine.table_names()}")
+            
             # Check if user exists using SQLAlchemy ORM
             user = User.query.filter_by(email=email).first()
+            logger.info(f"User query result: {user}")
             
             if user:
                 logger.info(f"User found in database: {email}")
+                logger.info(f"User details: id={user.id}, email={user.email}, is_admin={user.is_admin}")
+                
                 if not user.check_password(password):
                     logger.warning(f"Invalid password for user: {email}")
                     flash("Invalid email or password", "error")
@@ -41,6 +58,7 @@ def login():
                 
                 # Set session as permanent
                 session.permanent = True
+                logger.info(f"Session details: {dict(session)}")
                 
                 # Redirect to the next page or home
                 next_page = request.args.get('next')
@@ -105,12 +123,14 @@ def login():
             
             # Set session as permanent
             session.permanent = True
+            logger.info(f"Session details: {dict(session)}")
             
             # Redirect to home
             return redirect(url_for('main.index'))
             
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
             flash("An error occurred during login. Please try again.", "error")
             return render_template('auth/login.html')
     
