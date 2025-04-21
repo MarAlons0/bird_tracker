@@ -2,13 +2,21 @@ from flask import Blueprint, render_template, jsonify, request
 from app.models import db, User, NewsletterSubscription, BirdSighting
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
+from flask_login import login_required
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
+@login_required
 def index():
     """Render the main page."""
     return render_template('index.html')
+
+@main.route('/profile')
+@login_required
+def profile():
+    """Render the user profile page."""
+    return render_template('profile.html')
 
 @main.route('/map')
 def map():
