@@ -4,22 +4,31 @@ from app.models import User, Location, UserPreferences
 import os
 import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def init_db():
     app = create_app()
     with app.app_context():
         try:
+            logger.info("Starting database initialization...")
+            logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+            
             # Drop all tables
+            logger.info("Dropping existing tables...")
             db.drop_all()
             
             # Create all tables
+            logger.info("Creating new tables...")
             db.create_all()
-
-            print("Database tables created")
+            logger.info("Database tables created")
 
             # Create admin user
             admin_email = 'alonsoencinci@gmail.com'
             admin_password = 'admin123'
             
+            logger.info("Creating admin user...")
             # Create admin user
             admin = User(
                 username='admin',
@@ -32,12 +41,12 @@ def init_db():
             db.session.add(admin)
             db.session.commit()
             
-            print("Admin user created")
-            print("Database initialization completed successfully")
+            logger.info("Admin user created")
+            logger.info("Database initialization completed successfully")
                 
         except Exception as e:
             db.session.rollback()
-            print(f"Error during database initialization: {str(e)}")
+            logger.error(f"Error during database initialization: {str(e)}")
             raise
 
 if __name__ == "__main__":
