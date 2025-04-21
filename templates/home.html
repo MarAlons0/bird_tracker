@@ -224,6 +224,9 @@
                         <label for="searchRadius" class="form-label">Search Radius (miles)</label>
                         <input type="number" class="form-control" id="searchRadius" value="25" min="1" max="100" required>
                     </div>
+                    <div class="mb-3">
+                        <div id="mapPreview" style="height: 300px; width: 100%; border-radius: 8px;"></div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -273,17 +276,59 @@
         const locationInput = document.getElementById('locationName');
         if (!locationInput) return;
 
-        // Create autocomplete with proper configuration for bird watching locations
+        // Create autocomplete with enhanced configuration for bird watching locations
         const autocomplete = new google.maps.places.Autocomplete(
             locationInput,
             {
-                types: ['park', 'natural_feature', 'point_of_interest'],
-                fields: ['formatted_address', 'geometry', 'name', 'address_components']
+                types: ['park', 'natural_feature', 'point_of_interest', 'establishment'],
+                componentRestrictions: { country: 'us' },
+                fields: ['formatted_address', 'geometry', 'name', 'address_components', 'types', 'photos'],
+                strictBounds: false
             }
         );
 
+        // Add loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'position-absolute end-0 top-50 translate-middle-y me-2 d-none';
+        loadingIndicator.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        locationInput.parentNode.style.position = 'relative';
+        locationInput.parentNode.appendChild(loadingIndicator);
+
+        // Show loading indicator when searching
+        locationInput.addEventListener('input', function() {
+            if (this.value.length > 2) {
+                loadingIndicator.classList.remove('d-none');
+            } else {
+                loadingIndicator.classList.add('d-none');
+            }
+        });
+
+        // Initialize map preview
+        const mapPreview = new google.maps.Map(document.getElementById('mapPreview'), {
+            zoom: 12,
+            center: { lat: 39.1031, lng: -84.5120 }, // Default to Cincinnati
+            mapTypeId: 'terrain',
+            styles: [
+                {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }]
+                },
+                {
+                    featureType: "transit",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }]
+                }
+            ]
+        });
+
+        // Add circle overlay for radius
+        let radiusCircle = null;
+
         // Handle place selection
         autocomplete.addListener('place_changed', function() {
+            loadingIndicator.classList.add('d-none');
+            
             const place = autocomplete.getPlace();
             if (!place.geometry) {
                 document.getElementById('locationError').textContent = 'Please select a valid location from the dropdown';
@@ -315,6 +360,50 @@
             locationInput.value = locationName;
             locationInput.dataset.lat = lat;
             locationInput.dataset.lng = lng;
+
+            // Update map preview
+            mapPreview.setCenter(place.geometry.location);
+            mapPreview.setZoom(12);
+
+            // Add a marker for the selected location
+            if (window.marker) {
+                window.marker.setMap(null);
+            }
+            window.marker = new google.maps.Marker({
+                position: place.geometry.location,
+                map: mapPreview,
+                title: locationName
+            });
+
+            // Update radius circle
+            const radius = parseFloat(document.getElementById('searchRadius').value) * 1609.34; // Convert miles to meters
+            if (radiusCircle) {
+                radiusCircle.setMap(null);
+            }
+            radiusCircle = new google.maps.Circle({
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#FF0000',
+                fillOpacity: 0.35,
+                map: mapPreview,
+                center: place.geometry.location,
+                radius: radius
+            });
+
+            // If the place has photos, add them to the location info
+            if (place.photos && place.photos.length > 0) {
+                const photoUrl = place.photos[0].getUrl({ maxWidth: 400 });
+                locationInput.dataset.photoUrl = photoUrl;
+            }
+        });
+
+        // Update radius circle when radius changes
+        document.getElementById('searchRadius').addEventListener('change', function() {
+            const radius = parseFloat(this.value) * 1609.34; // Convert miles to meters
+            if (radiusCircle && locationInput.dataset.lat && locationInput.dataset.lng) {
+                radiusCircle.setRadius(radius);
+            }
         });
 
         // Prevent form submission on enter
@@ -420,7 +509,6 @@
         const carousel = document.getElementById('birdCarousel');
         const items = carousel.getElementsByClassName('carousel-item');
         const totalItems = items.length;
-        let currentIndex = 0;
         let usedIndices = new Set();
         
         // Function to get a random unused index
