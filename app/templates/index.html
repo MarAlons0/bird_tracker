@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places"></script>
 <style>
     .intro-section {
         background-color: #f8f9fa;
@@ -243,7 +243,7 @@
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'form-control mb-2';
-            input.placeholder = 'Enter new location';
+            input.placeholder = 'Enter location (e.g., park, beach, nature reserve)';
             
             const results = document.createElement('div');
             results.className = 'list-group';
@@ -253,6 +253,7 @@
             container.appendChild(results);
             
             const service = new google.maps.places.AutocompleteService();
+            const placesService = new google.maps.places.PlacesService(document.createElement('div'));
             
             input.addEventListener('input', function() {
                 if (!input.value) {
@@ -262,7 +263,8 @@
                 
                 service.getPlacePredictions({
                     input: input.value,
-                    types: ['(cities)']
+                    types: ['park', 'natural_feature', 'point_of_interest'],
+                    componentRestrictions: { country: 'us' }
                 }, function(predictions, status) {
                     results.innerHTML = '';
                     
@@ -278,9 +280,72 @@
                         item.textContent = prediction.description;
                         item.addEventListener('click', function(e) {
                             e.preventDefault();
-                            // Here you would typically update the location in your backend
-                            // For now, we'll just update the display
-                            document.querySelector('.location-section p:first-child').textContent = 'Name: ' + prediction.description;
+                            
+                            // Get place details
+                            placesService.getDetails({
+                                placeId: prediction.place_id,
+                                fields: ['name', 'geometry', 'formatted_address', 'types']
+                            }, function(place, status) {
+                                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                    // Check if the place is a park or natural feature
+                                    const isNaturalPlace = place.types.some(type => 
+                                        ['park', 'natural_feature', 'point_of_interest'].includes(type)
+                                    );
+                                    
+                                    if (!isNaturalPlace) {
+                                        const alert = document.createElement('div');
+                                        alert.className = 'alert alert-warning mt-3';
+                                        alert.textContent = 'Please select a park, beach, or natural area.';
+                                        document.querySelector('.location-section').appendChild(alert);
+                                        setTimeout(() => alert.remove(), 3000);
+                                        return;
+                                    }
+
+                                    // Update location via API
+                                    fetch('/api/update-location', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            place_id: prediction.place_id,
+                                            name: place.name,
+                                            latitude: place.geometry.location.lat(),
+                                            longitude: place.geometry.location.lng(),
+                                            radius: 25 // Default radius
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            // Update the display
+                                            const locationSection = document.querySelector('.location-section');
+                                            locationSection.querySelector('p:nth-child(1)').textContent = `Name: ${data.location.name}`;
+                                            locationSection.querySelector('p:nth-child(2)').textContent = `Coordinates: ${data.location.latitude}, ${data.location.longitude}`;
+                                            locationSection.querySelector('p:nth-child(3)').textContent = `Radius: ${data.location.radius} miles`;
+                                            
+                                            // Show success message
+                                            const alert = document.createElement('div');
+                                            alert.className = 'alert alert-success mt-3';
+                                            alert.textContent = 'Location updated successfully!';
+                                            locationSection.appendChild(alert);
+                                            
+                                            // Remove alert after 3 seconds
+                                            setTimeout(() => alert.remove(), 3000);
+                                        } else {
+                                            throw new Error(data.error || 'Failed to update location');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        const alert = document.createElement('div');
+                                        alert.className = 'alert alert-danger mt-3';
+                                        alert.textContent = 'Failed to update location. Please try again.';
+                                        document.querySelector('.location-section').appendChild(alert);
+                                        setTimeout(() => alert.remove(), 3000);
+                                    });
+                                }
+                            });
                         });
                         results.appendChild(item);
                     });
