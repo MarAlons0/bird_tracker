@@ -47,4 +47,31 @@ class BirdSighting(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     observer = db.Column(db.String(255))
-    notes = db.Column(db.Text) 
+    notes = db.Column(db.Text)
+
+class Location(db.Model):
+    __tablename__ = 'locations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    radius = db.Column(db.Float, nullable=False)
+    is_active = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref='locations')
+
+class UserPreferences(db.Model):
+    __tablename__ = 'user_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
+    notification_enabled = db.Column(db.Boolean, default=True)
+    email_frequency = db.Column(db.String(20), default='daily')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('preferences', uselist=False))
+    default_location = db.relationship('Location') 
