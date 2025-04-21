@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, jsonify, request
-from app.models import db, User, NewsletterSubscription, BirdSighting, CarouselImage
+from app.models import db, User, NewsletterSubscription, BirdSighting, CarouselImage, Location, UserPreferences
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask import current_app
 
 main = Blueprint('main', __name__)
@@ -11,7 +11,13 @@ main = Blueprint('main', __name__)
 @login_required
 def index():
     """Render the main page."""
-    return render_template('index.html')
+    try:
+        # Get active carousel images ordered by their order field
+        carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        return render_template('index.html', carousel_images=carousel_images)
+    except Exception as e:
+        current_app.logger.error(f'Error in index route: {str(e)}')
+        return render_template('index.html', carousel_images=[])
 
 @main.route('/profile')
 @login_required
@@ -105,4 +111,54 @@ def get_carousel_images():
         } for img in images])
     except Exception as e:
         current_app.logger.error(f'Error fetching carousel images: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
+@main.route('/api/update-location', methods=['POST'])
+@login_required
+def update_location():
+    """Update the user's location."""
+    try:
+        data = request.get_json()
+        place_id = data.get('place_id')
+        name = data.get('name')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        radius = data.get('radius', 25)  # Default radius of 25 miles
+
+        if not all([place_id, name, latitude, longitude]):
+            return jsonify({'error': 'Missing required location data'}), 400
+
+        # Get or create location
+        location = Location.query.filter_by(place_id=place_id).first()
+        if not location:
+            location = Location(
+                place_id=place_id,
+                name=name,
+                latitude=latitude,
+                longitude=longitude,
+                radius=radius
+            )
+            db.session.add(location)
+            db.session.commit()
+
+        # Update user preferences
+        user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+        if not user_pref:
+            user_pref = UserPreferences(user_id=current_user.id)
+            db.session.add(user_pref)
+
+        user_pref.active_location_id = location.id
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'location': {
+                'name': location.name,
+                'latitude': location.latitude,
+                'longitude': location.longitude,
+                'radius': location.radius
+            }
+        })
+    except Exception as e:
+        current_app.logger.error(f'Error updating location: {str(e)}')
         return jsonify({'error': str(e)}), 500 
