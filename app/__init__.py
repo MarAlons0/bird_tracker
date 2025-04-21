@@ -22,7 +22,7 @@ def create_app():
     app = Flask(__name__)
     
     # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bird_tracker.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////app/bird_tracker.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Email configuration
