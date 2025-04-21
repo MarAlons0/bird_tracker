@@ -21,8 +21,10 @@ class User(UserMixin, db.Model):
     newsletter_subscription = db.Column(db.Boolean, default=True)
     
     default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
-    default_location = db.relationship('Location', foreign_keys=[default_location_id], uselist=False)
-
+    default_location = db.relationship('Location', foreign_keys=[default_location_id], uselist=False, backref='default_location_user')
+    
+    locations = db.relationship('Location', backref='user', foreign_keys='Location.user_id')
+    
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
     
     __mapper_args__ = {
@@ -75,7 +77,7 @@ class Location(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    user = db.relationship('User', backref='locations')
+    user_preferences = db.relationship('UserPreferences', backref='location', foreign_keys='UserPreferences.default_location_id')
 
 class UserPreferences(db.Model):
     __tablename__ = 'user_preferences'
@@ -87,5 +89,4 @@ class UserPreferences(db.Model):
     email_frequency = db.Column(db.String(20), default='daily')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    user = db.relationship('User', backref=db.backref('preferences', uselist=False))
-    default_location = db.relationship('Location') 
+    user = db.relationship('User', backref=db.backref('preferences', uselist=False)) 
