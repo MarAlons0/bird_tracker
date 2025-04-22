@@ -31,6 +31,12 @@ def create_carousel_images(db):
     try:
         logger.info("Starting carousel image creation...")
         
+        # Check for existing images
+        existing_images = CarouselImage.query.all()
+        if existing_images:
+            logger.info(f"Found {len(existing_images)} existing carousel images. Skipping creation.")
+            return
+        
         # Create first carousel image
         image1 = CarouselImage(
             title="Welcome to Bird Tracker",
@@ -117,16 +123,6 @@ def init_db():
         logger.info(f"Database engine: {engine}")
         
         with app.app_context():
-            # Drop all existing tables
-            logger.info("Dropping existing tables...")
-            Base.metadata.drop_all(engine)
-            logger.info("Tables dropped successfully")
-            
-            # Create all tables
-            logger.info("Creating new tables...")
-            Base.metadata.create_all(engine)
-            logger.info(f"Created tables: {Base.metadata.tables.keys()}")
-            
             # Create carousel images
             logger.info("Creating carousel images...")
             create_carousel_images(db)
@@ -138,19 +134,24 @@ def init_db():
             logger.info(f"Creating admin user with email: {admin_email}")
             
             if admin_email and admin_password:
-                # Extract username from email
-                username = admin_email.split('@')[0]
-                admin_user = User(
-                    username=username,
-                    email=admin_email,
-                    password_hash=generate_password_hash(admin_password),
-                    is_admin=True,
-                    is_approved=True
-                )
-                db.session.add(admin_user)
-                db.session.commit()
-                logger.info(f"Admin user created successfully: {admin_user.is_admin}")
-                logger.info(f"Admin user details: id={admin_user.id}, email={admin_user.email}, username={admin_user.username}, is_admin={admin_user.is_admin}")
+                # Check if admin user already exists
+                existing_admin = User.query.filter_by(email=admin_email).first()
+                if existing_admin:
+                    logger.info(f"Admin user already exists with email: {admin_email}")
+                else:
+                    # Extract username from email
+                    username = admin_email.split('@')[0]
+                    admin_user = User(
+                        username=username,
+                        email=admin_email,
+                        password_hash=generate_password_hash(admin_password),
+                        is_admin=True,
+                        is_approved=True
+                    )
+                    db.session.add(admin_user)
+                    db.session.commit()
+                    logger.info(f"Admin user created successfully: {admin_user.is_admin}")
+                    logger.info(f"Admin user details: id={admin_user.id}, email={admin_user.email}, username={admin_user.username}, is_admin={admin_user.is_admin}")
             else:
                 logger.warning("Admin credentials not found in environment variables")
             
