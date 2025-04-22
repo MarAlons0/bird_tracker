@@ -1,7 +1,7 @@
 from app import create_app, db
 from werkzeug.security import generate_password_hash
 from app.models import User, Location, UserPreferences, CarouselImage
-from app.scheduler import scheduler
+from app.scheduler import init_scheduler
 import os
 import logging
 import sys
@@ -95,7 +95,7 @@ def init_db():
         logger.info("Application initialized successfully")
         
         # Initialize scheduler
-        scheduler.init_app(app)
+        init_scheduler()
         logger.info("Scheduler initialized successfully")
         
         # Get current working directory
