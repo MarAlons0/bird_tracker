@@ -10,7 +10,6 @@ from app.utils import setup_logging
 from app.tasks import send_weekly_bird_sighting_report
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from app.init_carousel import init_carousel_images
 
 print("Starting script execution...")
 
@@ -37,7 +36,7 @@ def create_carousel_images(db):
             title="Welcome to Bird Tracker",
             description="Track and share your bird sightings with our community",
             filename="welcome.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/carousel/welcome.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/welcome_bird.jpg",
             is_active=True,
             order=1
         )
@@ -48,7 +47,7 @@ def create_carousel_images(db):
             title="Explore Bird Species",
             description="Discover and learn about different bird species in your area",
             filename="explore.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/carousel/explore.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/explore_birds.jpg",
             is_active=True,
             order=2
         )
@@ -59,7 +58,7 @@ def create_carousel_images(db):
             title="Share Your Sightings",
             description="Contribute to our growing database of bird sightings",
             filename="share.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/carousel/share.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/share_sightings.jpg",
             is_active=True,
             order=3
         )
