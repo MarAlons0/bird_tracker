@@ -3,8 +3,23 @@
 {% block head %}
 <script>
     console.log('Google Places API Key:', '{{ GOOGLE_PLACES_API_KEY }}');
+    
+    // Add error handler for Google Maps script loading
+    function handleGoogleMapsError() {
+        console.error('Failed to load Google Maps API script');
+    }
+    
+    // Add callback for when Google Maps is loaded
+    function initGoogleMaps() {
+        console.log('Google Maps API loaded successfully');
+        if (google && google.maps && google.maps.places) {
+            console.log('Google Places library is available');
+        } else {
+            console.error('Google Places library is not available');
+        }
+    }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&loading=async" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&loading=async&callback=initGoogleMaps" async defer onerror="handleGoogleMapsError()"></script>
 <style>
     .intro-section {
         background-color: #f8f9fa;
