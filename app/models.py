@@ -20,7 +20,6 @@ class User(UserMixin, db.Model):
     token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)
     
-    locations = db.relationship('Location', backref='user', foreign_keys='Location.user_id')
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
 
     def __repr__(self):
@@ -64,8 +63,21 @@ class Location(db.Model):
     is_active = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    place_id = db.Column(db.String(255), nullable=True)  # For Google Places API
     
-    user_preferences = db.relationship('UserPreferences', backref='location', foreign_keys='UserPreferences.default_location_id')
+    # Define relationships with explicit foreign keys
+    user = db.relationship('User', backref=db.backref('locations', lazy='dynamic'))
+    
+    preferences_as_default = db.relationship('UserPreferences',
+                                          foreign_keys='UserPreferences.default_location_id',
+                                          backref='default_location')
+    
+    preferences_as_active = db.relationship('UserPreferences',
+                                         foreign_keys='UserPreferences.active_location_id',
+                                         backref='active_location')
+
+    def __repr__(self):
+        return f'<Location {self.name}>'
 
 class UserPreferences(db.Model):
     __tablename__ = 'user_preferences'
@@ -73,11 +85,15 @@ class UserPreferences(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     default_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
+    active_location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
     notification_enabled = db.Column(db.Boolean, default=True)
     email_frequency = db.Column(db.String(20), default='daily')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     user = db.relationship('User', backref=db.backref('preferences', uselist=False))
+
+    def __repr__(self):
+        return f'<UserPreferences for user {self.user_id}>'
 
 class RegistrationRequest(db.Model):
     """Model for handling user registration requests"""

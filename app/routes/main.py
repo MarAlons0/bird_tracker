@@ -8,7 +8,6 @@ from flask import current_app
 main = Blueprint('main', __name__)
 
 @main.route('/')
-@login_required
 def index():
     """Render the main page."""
     try:
@@ -47,16 +46,19 @@ def profile():
     return render_template('profile.html')
 
 @main.route('/map')
+@login_required
 def map():
     """Render the map page."""
     return render_template('map.html')
 
 @main.route('/report')
+@login_required
 def report():
     """Render the AI analysis page."""
     return render_template('report.html')
 
 @main.route('/api/status')
+@login_required
 def status():
     """Return the application status."""
     return jsonify({
@@ -66,6 +68,7 @@ def status():
     })
 
 @main.route('/api/stats')
+@login_required
 def stats():
     """Return basic application statistics."""
     with db.session() as session:
@@ -83,6 +86,7 @@ def stats():
     })
 
 @main.route('/api/sightings')
+@login_required
 def get_sightings():
     """Return recent bird sightings."""
     with db.session() as session:
@@ -97,6 +101,7 @@ def get_sightings():
         } for sighting in sightings])
 
 @main.route('/api/analyze', methods=['POST'])
+@login_required
 def analyze():
     """Generate AI analysis of bird sightings."""
     data = request.get_json()
@@ -109,6 +114,7 @@ def analyze():
     return jsonify(analysis)
 
 @main.route('/api/recent-sightings')
+@login_required
 def recent_sightings():
     """Return recent bird sightings for the home page."""
     with db.session() as session:
@@ -120,6 +126,7 @@ def recent_sightings():
         } for sighting in sightings])
 
 @main.route('/api/carousel-images')
+@login_required
 def get_carousel_images():
     try:
         # Get active carousel images ordered by their order field
