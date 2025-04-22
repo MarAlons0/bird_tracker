@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&loading=async" async defer></script>
 <style>
     .intro-section {
         background-color: #f8f9fa;
@@ -110,9 +110,9 @@
                 <div class="location-section mb-4">
                     <h4 class="fw-bold mb-4">Current Location</h4>
                     <div class="mb-3">
-                        <p class="mb-1"><strong>Name:</strong> Hyde Park Square, OH</p>
-                        <p class="mb-1"><strong>Coordinates:</strong> 39.1396048, -84.4425126</p>
-                        <p class="mb-3"><strong>Radius:</strong> 25.0 miles</p>
+                        <p class="mb-1"><strong>Name:</strong> <span id="location-name">Loading...</span></p>
+                        <p class="mb-1"><strong>Coordinates:</strong> <span id="location-coords">Loading...</span></p>
+                        <p class="mb-3"><strong>Radius:</strong> <span id="location-radius">25.0</span> miles</p>
                         <button class="btn btn-primary" id="change-location">
                             <i class="fas fa-map-marker-alt me-2"></i>Change Location
                         </button>
@@ -126,19 +126,31 @@
                     <h4 class="fw-bold mb-4">Featured Birds</h4>
                     <div class="carousel-container">
                         <div class="carousel-inner" id="birdCarousel">
-                            {% for image in carousel_images %}
-                            <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
-                                <div class="carousel-image-container">
-                                    <img src="{{ image.filename }}" alt="{{ image.title }}">
+                            {% if carousel_images %}
+                                {% for image in carousel_images %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
+                                    <div class="carousel-image-container">
+                                        <img src="{{ image.cloudinary_url }}" alt="{{ image.title }}" onerror="this.onerror=null; this.src='/static/images/placeholder.jpg';">
+                                    </div>
+                                    <div class="carousel-caption">
+                                        <h5>{{ image.title }}</h5>
+                                        {% if image.description %}
+                                        <p>{{ image.description }}</p>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="carousel-caption">
-                                    <h5>{{ image.title }}</h5>
-                                    {% if image.description %}
-                                    <p>{{ image.description }}</p>
-                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="carousel-item active">
+                                    <div class="carousel-image-container">
+                                        <img src="/static/images/placeholder.jpg" alt="No images available">
+                                    </div>
+                                    <div class="carousel-caption">
+                                        <h5>No Featured Birds</h5>
+                                        <p>Check back later for featured bird sightings</p>
+                                    </div>
                                 </div>
-                            </div>
-                            {% endfor %}
+                            {% endif %}
                         </div>
                         {% if carousel_images|length > 1 %}
                         <div class="carousel-control-prev" id="prevSlide">
@@ -161,200 +173,133 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Carousel functionality
             const carousel = document.getElementById('birdCarousel');
+            if (!carousel) return; // Exit if carousel not found
+            
             const items = carousel.getElementsByClassName('carousel-item');
             const totalItems = items.length;
-            let usedIndices = new Set();
             let currentIndex = 0;
             
-            // Function to get a random unused index
-            function getRandomUnusedIndex() {
-                if (usedIndices.size === totalItems) {
-                    usedIndices.clear(); // Reset if all indices have been used
-                }
-                
-                let randomIndex;
-                do {
-                    randomIndex = Math.floor(Math.random() * totalItems);
-                } while (usedIndices.has(randomIndex));
-                
-                usedIndices.add(randomIndex);
-                return randomIndex;
-            }
-            
-            // Function to show a specific slide
             function showSlide(index) {
-                // Remove active class from all slides
+                if (totalItems === 0) return; // Exit if no items
+                
                 Array.from(items).forEach(item => {
                     item.classList.remove('active');
                     item.style.opacity = '0';
                 });
                 
-                // Add active class to the selected slide
-                items[index].classList.add('active');
-                items[index].style.opacity = '1';
+                if (items[index]) {
+                    items[index].classList.add('active');
+                    items[index].style.opacity = '1';
+                }
             }
             
-            // Function to show next random slide
-            function showNextRandomSlide() {
-                const nextIndex = getRandomUnusedIndex();
-                showSlide(nextIndex);
-                currentIndex = nextIndex;
+            function nextSlide() {
+                if (totalItems === 0) return; // Exit if no items
+                currentIndex = (currentIndex + 1) % totalItems;
+                showSlide(currentIndex);
             }
             
-            // Set up automatic rotation
-            let rotationInterval = setInterval(showNextRandomSlide, 3000);
+            function prevSlide() {
+                if (totalItems === 0) return; // Exit if no items
+                currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+                showSlide(currentIndex);
+            }
             
-            // Handle manual navigation
+            // Set up carousel controls
             const prevButton = document.getElementById('prevSlide');
             const nextButton = document.getElementById('nextSlide');
             
-            if (prevButton && nextButton) {
-                prevButton.addEventListener('click', function() {
-                    clearInterval(rotationInterval);
-                    const nextIndex = getRandomUnusedIndex();
-                    showSlide(nextIndex);
-                    currentIndex = nextIndex;
-                    rotationInterval = setInterval(showNextRandomSlide, 3000);
+            if (prevButton) prevButton.addEventListener('click', prevSlide);
+            if (nextButton) nextButton.addEventListener('click', nextSlide);
+            
+            // Auto-rotate carousel every 5 seconds if there are multiple items
+            if (totalItems > 1) {
+                setInterval(nextSlide, 5000);
+            }
+
+            // Location functionality
+            let autocomplete;
+            const locationButton = document.getElementById('change-location');
+            
+            function initAutocomplete() {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'location-input';
+                input.className = 'form-control mb-2';
+                input.placeholder = 'Search for a location...';
+                
+                locationButton.parentNode.insertBefore(input, locationButton);
+                
+                autocomplete = new google.maps.places.Autocomplete(input, {
+                    types: ['(regions)'],
+                    componentRestrictions: { country: 'us' }
                 });
                 
-                nextButton.addEventListener('click', function() {
-                    clearInterval(rotationInterval);
-                    const nextIndex = getRandomUnusedIndex();
-                    showSlide(nextIndex);
-                    currentIndex = nextIndex;
-                    rotationInterval = setInterval(showNextRandomSlide, 3000);
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    if (!place.geometry) {
+                        alert('No details available for input: ' + place.name);
+                        return;
+                    }
+                    
+                    const locationData = {
+                        place_id: place.place_id,
+                        name: place.name,
+                        latitude: place.geometry.location.lat(),
+                        longitude: place.geometry.location.lng()
+                    };
+                    
+                    // Update location via API
+                    fetch('/api/update-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(locationData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('location-name').textContent = data.location.name;
+                            document.getElementById('location-coords').textContent = 
+                                `${data.location.latitude.toFixed(6)}, ${data.location.longitude.toFixed(6)}`;
+                            document.getElementById('location-radius').textContent = data.location.radius;
+                            
+                            // Remove the input field
+                            input.remove();
+                            locationButton.style.display = 'block';
+                        } else {
+                            alert('Failed to update location: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to update location. Please try again.');
+                    });
                 });
             }
             
-            // Pause rotation when hovering over carousel
-            carousel.addEventListener('mouseenter', function() {
-                clearInterval(rotationInterval);
+            locationButton.addEventListener('click', function() {
+                this.style.display = 'none';
+                initAutocomplete();
             });
-            
-            // Resume rotation when mouse leaves carousel
-            carousel.addEventListener('mouseleave', function() {
-                rotationInterval = setInterval(showNextRandomSlide, 3000);
-            });
-        });
 
-        // Location change functionality
-        document.getElementById('change-location').addEventListener('click', function() {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'form-control mb-2';
-            input.placeholder = 'Enter location (e.g., park, beach, nature reserve)';
-            
-            const results = document.createElement('div');
-            results.className = 'list-group';
-            
-            const container = document.createElement('div');
-            container.appendChild(input);
-            container.appendChild(results);
-            
-            const service = new google.maps.places.AutocompleteService();
-            const placesService = new google.maps.places.PlacesService(document.createElement('div'));
-            
-            input.addEventListener('input', function() {
-                if (!input.value) {
-                    results.innerHTML = '';
-                    return;
-                }
-                
-                service.getPlacePredictions({
-                    input: input.value,
-                    types: ['park', 'natural_feature', 'point_of_interest'],
-                    componentRestrictions: { country: 'us' }
-                }, function(predictions, status) {
-                    results.innerHTML = '';
-                    
-                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                        results.innerHTML = '<div class="alert alert-warning">No locations found</div>';
-                        return;
+            // Load initial location
+            fetch('/api/user-preferences')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.location) {
+                        document.getElementById('location-name').textContent = data.location.name;
+                        document.getElementById('location-coords').textContent = 
+                            `${data.location.latitude.toFixed(6)}, ${data.location.longitude.toFixed(6)}`;
+                        document.getElementById('location-radius').textContent = data.location.radius;
                     }
-
-                    predictions.forEach(function(prediction) {
-                        const item = document.createElement('a');
-                        item.href = '#';
-                        item.className = 'list-group-item list-group-item-action';
-                        item.textContent = prediction.description;
-                        item.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            
-                            // Get place details
-                            placesService.getDetails({
-                                placeId: prediction.place_id,
-                                fields: ['name', 'geometry', 'formatted_address', 'types']
-                            }, function(place, status) {
-                                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                                    // Check if the place is a park or natural feature
-                                    const isNaturalPlace = place.types.some(type => 
-                                        ['park', 'natural_feature', 'point_of_interest'].includes(type)
-                                    );
-                                    
-                                    if (!isNaturalPlace) {
-                                        const alert = document.createElement('div');
-                                        alert.className = 'alert alert-warning mt-3';
-                                        alert.textContent = 'Please select a park, beach, or natural area.';
-                                        document.querySelector('.location-section').appendChild(alert);
-                                        setTimeout(() => alert.remove(), 3000);
-                                        return;
-                                    }
-
-                                    // Update location via API
-                                    fetch('/api/update-location', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            place_id: prediction.place_id,
-                                            name: place.name,
-                                            latitude: place.geometry.location.lat(),
-                                            longitude: place.geometry.location.lng(),
-                                            radius: 25 // Default radius
-                                        })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            // Update the display
-                                            const locationSection = document.querySelector('.location-section');
-                                            locationSection.querySelector('p:nth-child(1)').textContent = `Name: ${data.location.name}`;
-                                            locationSection.querySelector('p:nth-child(2)').textContent = `Coordinates: ${data.location.latitude}, ${data.location.longitude}`;
-                                            locationSection.querySelector('p:nth-child(3)').textContent = `Radius: ${data.location.radius} miles`;
-                                            
-                                            // Show success message
-                                            const alert = document.createElement('div');
-                                            alert.className = 'alert alert-success mt-3';
-                                            alert.textContent = 'Location updated successfully!';
-                                            locationSection.appendChild(alert);
-                                            
-                                            // Remove alert after 3 seconds
-                                            setTimeout(() => alert.remove(), 3000);
-                                        } else {
-                                            throw new Error(data.error || 'Failed to update location');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        const alert = document.createElement('div');
-                                        alert.className = 'alert alert-danger mt-3';
-                                        alert.textContent = 'Failed to update location. Please try again.';
-                                        document.querySelector('.location-section').appendChild(alert);
-                                        setTimeout(() => alert.remove(), 3000);
-                                    });
-                                }
-                            });
-                        });
-                        results.appendChild(item);
-                    });
+                })
+                .catch(error => {
+                    console.error('Error loading location:', error);
                 });
-            });
-            
-            // Replace the button with the input container
-            const button = document.getElementById('change-location');
-            button.parentNode.replaceChild(container, button);
         });
     </script>
 {% endblock %} 
