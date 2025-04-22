@@ -1,13 +1,12 @@
 from app import create_app, db
 from werkzeug.security import generate_password_hash
 from app.models import User, Location, UserPreferences, CarouselImage
-from app.scheduler import init_scheduler
+from app.scheduler import scheduler
 import os
 import logging
 import sys
 from datetime import datetime
 from app.utils import setup_logging
-from app.scheduler import scheduler
 from app.tasks import send_weekly_bird_sighting_report
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
