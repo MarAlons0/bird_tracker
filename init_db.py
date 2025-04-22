@@ -138,7 +138,10 @@ def init_db():
             logger.info(f"Creating admin user with email: {admin_email}")
             
             if admin_email and admin_password:
+                # Extract username from email
+                username = admin_email.split('@')[0]
                 admin_user = User(
+                    username=username,
                     email=admin_email,
                     password_hash=generate_password_hash(admin_password),
                     is_admin=True,
@@ -147,7 +150,7 @@ def init_db():
                 db.session.add(admin_user)
                 db.session.commit()
                 logger.info(f"Admin user created successfully: {admin_user.is_admin}")
-                logger.info(f"Admin user details: id={admin_user.id}, email={admin_user.email}, is_admin={admin_user.is_admin}")
+                logger.info(f"Admin user details: id={admin_user.id}, email={admin_user.email}, username={admin_user.username}, is_admin={admin_user.is_admin}")
             else:
                 logger.warning("Admin credentials not found in environment variables")
             
