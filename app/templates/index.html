@@ -24,6 +24,32 @@
     };
     console.log('Carousel Images:', carouselImages);
     
+    // Function to handle image load errors
+    function handleImageError(img) {
+        console.error('Failed to load image:', {
+            src: img.src,
+            id: img.closest('.carousel-item').dataset.imageId,
+            title: img.alt,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight,
+            currentTime: new Date().toISOString()
+        });
+        img.onerror = null;
+        img.src = 'https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg';
+    }
+
+    // Function to handle successful image loads
+    function handleImageLoad(img) {
+        console.log('Successfully loaded image:', {
+            src: img.src,
+            id: img.closest('.carousel-item').dataset.imageId,
+            title: img.alt,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight,
+            currentTime: new Date().toISOString()
+        });
+    }
+    
     // Add error handler for Google Maps script loading
     function handleGoogleMapsError() {
         console.error('Failed to load Google Maps API script');
@@ -170,7 +196,8 @@
                                     <div class="carousel-image-container">
                                         <img src="{{ image.cloudinary_url }}" 
                                              alt="{{ image.title }}" 
-                                             onerror="console.error('Failed to load image:', { src: this.src, id: this.closest('.carousel-item').dataset.imageId, title: '{{ image.title }}' }); this.onerror=null; this.src='https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg';">
+                                             onload="handleImageLoad(this)"
+                                             onerror="handleImageError(this)">
                                     </div>
                                     <div class="carousel-caption">
                                         <h5>{{ image.title }}</h5>
