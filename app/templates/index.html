@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block head %}
+<script>
+    console.log('Google Places API Key:', '{{ GOOGLE_PLACES_API_KEY }}');
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&loading=async" async defer></script>
 <style>
     .intro-section {
@@ -130,7 +133,9 @@
                                 {% for image in carousel_images %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}" data-image-id="{{ image.id }}">
                                     <div class="carousel-image-container">
-                                        <img src="{{ image.cloudinary_url }}" alt="{{ image.title }}" onerror="this.onerror=null; this.src='/static/images/placeholder.jpg';">
+                                        <img src="{{ image.cloudinary_url }}" 
+                                             alt="{{ image.title }}" 
+                                             onerror="this.onerror=null; this.src='https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg';">
                                     </div>
                                     <div class="carousel-caption">
                                         <h5>{{ image.title }}</h5>
@@ -143,7 +148,8 @@
                             {% else %}
                                 <div class="carousel-item active">
                                     <div class="carousel-image-container">
-                                        <img src="/static/images/placeholder.jpg" alt="No images available">
+                                        <img src="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg" 
+                                             alt="No images available">
                                     </div>
                                     <div class="carousel-caption">
                                         <h5>No Featured Birds</h5>

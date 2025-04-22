@@ -18,10 +18,21 @@ def index():
         current_app.logger.info(f"Found {len(carousel_images)} carousel images")
         for img in carousel_images:
             current_app.logger.info(f"Image: id={img.id}, title={img.title}, filename={img.filename}, cloudinary_url={img.cloudinary_url}")
-        return render_template('index.html', carousel_images=carousel_images)
+        
+        # Get API key and ensure it's not None
+        api_key = current_app.config.get('GOOGLE_PLACES_API_KEY')
+        if not api_key:
+            current_app.logger.error("Google Places API Key is not set!")
+            api_key = ''  # Set empty string instead of None
+        
+        return render_template('index.html', 
+                             carousel_images=carousel_images,
+                             GOOGLE_PLACES_API_KEY=api_key)
     except Exception as e:
         current_app.logger.error(f'Error in index route: {str(e)}')
-        return render_template('index.html', carousel_images=[])
+        return render_template('index.html', 
+                             carousel_images=[],
+                             GOOGLE_PLACES_API_KEY='')
 
 @main.route('/profile')
 @login_required
