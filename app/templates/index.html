@@ -2,7 +2,12 @@
 
 {% block head %}
 <script>
-    console.log('Google Places API Key:', '{{ GOOGLE_PLACES_API_KEY }}');
+    // Debug environment variables
+    console.log('Environment variables:', {
+        'GOOGLE_PLACES_API_KEY': '{{ GOOGLE_PLACES_API_KEY }}',
+        'API_KEY': '{{ API_KEY }}',
+        'config': '{{ config }}'
+    });
     
     // Add error handler for Google Maps script loading
     function handleGoogleMapsError() {

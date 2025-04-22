@@ -38,6 +38,14 @@ def create_app():
     # Secret key configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
     
+    # Google Maps API configuration
+    api_key = os.environ.get('GOOGLE_PLACES_API_KEY')
+    if not api_key:
+        logger.error("Google Places API Key is not set in environment variables!")
+    else:
+        logger.info(f"Google Places API Key loaded from environment: {api_key}")
+    app.config['GOOGLE_PLACES_API_KEY'] = api_key
+    
     # Session configuration
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True

@@ -24,15 +24,21 @@ def index():
         if not api_key:
             current_app.logger.error("Google Places API Key is not set!")
             api_key = ''  # Set empty string instead of None
+        else:
+            current_app.logger.info(f"Google Places API Key is set: {api_key}")
         
         return render_template('index.html', 
                              carousel_images=carousel_images,
-                             GOOGLE_PLACES_API_KEY=api_key)
+                             GOOGLE_PLACES_API_KEY=api_key,
+                             API_KEY=api_key,
+                             config=current_app.config)
     except Exception as e:
         current_app.logger.error(f'Error in index route: {str(e)}')
         return render_template('index.html', 
                              carousel_images=[],
-                             GOOGLE_PLACES_API_KEY='')
+                             GOOGLE_PLACES_API_KEY='',
+                             API_KEY='',
+                             config={})
 
 @main.route('/profile')
 @login_required
