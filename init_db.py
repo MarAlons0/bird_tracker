@@ -31,18 +31,17 @@ def create_carousel_images(db):
     try:
         logger.info("Starting carousel image creation...")
         
-        # Check for existing images
-        existing_images = CarouselImage.query.all()
-        if existing_images:
-            logger.info(f"Found {len(existing_images)} existing carousel images. Skipping creation.")
-            return
+        # Clear existing images
+        CarouselImage.query.delete()
+        db.session.commit()
+        logger.info("Cleared existing carousel images")
         
         # Create first carousel image
         image1 = CarouselImage(
             title="Welcome to Bird Tracker",
             description="Track and share your bird sightings with our community",
             filename="welcome.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/welcome_bird.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/welcome.jpg",
             is_active=True,
             order=1
         )
@@ -53,7 +52,7 @@ def create_carousel_images(db):
             title="Explore Bird Species",
             description="Discover and learn about different bird species in your area",
             filename="explore.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/explore_birds.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/explore.jpg",
             is_active=True,
             order=2
         )
@@ -64,7 +63,7 @@ def create_carousel_images(db):
             title="Share Your Sightings",
             description="Contribute to our growing database of bird sightings",
             filename="share.jpg",
-            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/share_sightings.jpg",
+            cloudinary_url="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/share.jpg",
             is_active=True,
             order=3
         )
@@ -84,7 +83,7 @@ def create_carousel_images(db):
         images = CarouselImage.query.all()
         logger.info(f"Total carousel images in database: {len(images)}")
         for img in images:
-            logger.info(f"Image: {img.title}, Active: {img.is_active}, Order: {img.order}")
+            logger.info(f"Image: {img.title}, Active: {img.is_active}, Order: {img.order}, URL: {img.cloudinary_url}")
             
     except Exception as e:
         logger.error(f"Error creating carousel images: {str(e)}")
