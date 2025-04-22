@@ -13,7 +13,11 @@ def index():
     """Render the main page."""
     try:
         # Get active carousel images ordered by their order field
+        current_app.logger.info("Fetching carousel images...")
         carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        current_app.logger.info(f"Found {len(carousel_images)} carousel images")
+        for img in carousel_images:
+            current_app.logger.info(f"Image: id={img.id}, title={img.title}, filename={img.filename}, cloudinary_url={img.cloudinary_url}")
         return render_template('index.html', carousel_images=carousel_images)
     except Exception as e:
         current_app.logger.error(f'Error in index route: {str(e)}')
@@ -105,7 +109,7 @@ def get_carousel_images():
         images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
         return jsonify([{
             'id': img.id,
-            'url': img.filename,  # Use the filename which contains the Cloudinary URL
+            'url': img.cloudinary_url,  # Use cloudinary_url instead of filename
             'title': img.title,
             'description': img.description
         } for img in images])
@@ -161,4 +165,33 @@ def update_location():
         })
     except Exception as e:
         current_app.logger.error(f'Error updating location: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
+@main.route('/api/user-preferences')
+@login_required
+def get_user_preferences():
+    """Get the user's preferences including current location."""
+    try:
+        user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+        if not user_pref or not user_pref.active_location_id:
+            return jsonify({
+                'location': None
+            })
+
+        location = Location.query.get(user_pref.active_location_id)
+        if not location:
+            return jsonify({
+                'location': None
+            })
+
+        return jsonify({
+            'location': {
+                'name': location.name,
+                'latitude': location.latitude,
+                'longitude': location.longitude,
+                'radius': location.radius
+            }
+        })
+    except Exception as e:
+        current_app.logger.error(f'Error fetching user preferences: {str(e)}')
         return jsonify({'error': str(e)}), 500 
