@@ -9,6 +9,21 @@
         'config': '{{ config }}'
     });
     
+    // Debug carousel images
+    var carouselImages = {
+        total: {{ carousel_images|length if carousel_images else 0 }},
+        images: [
+            {% for image in carousel_images %}
+            {
+                id: {{ image.id }},
+                url: "{{ image.cloudinary_url }}",
+                title: "{{ image.title }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+    console.log('Carousel Images:', carouselImages);
+    
     // Add error handler for Google Maps script loading
     function handleGoogleMapsError() {
         console.error('Failed to load Google Maps API script');
@@ -155,7 +170,7 @@
                                     <div class="carousel-image-container">
                                         <img src="{{ image.cloudinary_url }}" 
                                              alt="{{ image.title }}" 
-                                             onerror="this.onerror=null; this.src='https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg';">
+                                             onerror="console.error('Failed to load image:', { src: this.src, id: this.closest('.carousel-item').dataset.imageId, title: '{{ image.title }}' }); this.onerror=null; this.src='https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg';">
                                     </div>
                                     <div class="carousel-caption">
                                         <h5>{{ image.title }}</h5>
@@ -169,7 +184,8 @@
                                 <div class="carousel-item active">
                                     <div class="carousel-image-container">
                                         <img src="https://res.cloudinary.com/dov36rgse/image/upload/v1713750000/bird_tracker/placeholder.jpg" 
-                                             alt="No images available">
+                                             alt="No images available"
+                                             onerror="console.error('Failed to load placeholder image');">
                                     </div>
                                     <div class="carousel-caption">
                                         <h5>No Featured Birds</h5>
@@ -199,6 +215,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Debug carousel images
+            console.log('Carousel images:', {
+                count: document.querySelectorAll('.carousel-item').length,
+                urls: Array.from(document.querySelectorAll('.carousel-item img')).map(img => img.src)
+            });
+            
             // Carousel functionality
             const carousel = document.getElementById('birdCarousel');
             if (!carousel) return; // Exit if carousel not found
@@ -250,13 +272,38 @@
             const locationButton = document.getElementById('change-location');
             
             function initAutocomplete() {
+                const container = document.createElement('div');
+                container.className = 'mb-3';
+                
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.id = 'location-input';
                 input.className = 'form-control mb-2';
                 input.placeholder = 'Search for a location...';
                 
-                locationButton.parentNode.insertBefore(input, locationButton);
+                const radiusContainer = document.createElement('div');
+                radiusContainer.className = 'input-group mb-2';
+                
+                const radiusInput = document.createElement('input');
+                radiusInput.type = 'number';
+                radiusInput.id = 'radius-input';
+                radiusInput.className = 'form-control';
+                radiusInput.value = '25';
+                radiusInput.min = '1';
+                radiusInput.max = '100';
+                radiusInput.step = '1';
+                
+                const radiusLabel = document.createElement('span');
+                radiusLabel.className = 'input-group-text';
+                radiusLabel.textContent = 'miles';
+                
+                radiusContainer.appendChild(radiusInput);
+                radiusContainer.appendChild(radiusLabel);
+                
+                container.appendChild(input);
+                container.appendChild(radiusContainer);
+                
+                locationButton.parentNode.insertBefore(container, locationButton);
                 
                 autocomplete = new google.maps.places.Autocomplete(input, {
                     types: ['(regions)'],
@@ -270,11 +317,18 @@
                         return;
                     }
                     
+                    const radius = parseFloat(radiusInput.value);
+                    if (isNaN(radius) || radius < 1 || radius > 100) {
+                        alert('Please enter a valid radius between 1 and 100 miles');
+                        return;
+                    }
+                    
                     const locationData = {
                         place_id: place.place_id,
                         name: place.name,
                         latitude: place.geometry.location.lat(),
-                        longitude: place.geometry.location.lng()
+                        longitude: place.geometry.location.lng(),
+                        radius: radius
                     };
                     
                     // Update location via API
@@ -293,8 +347,8 @@
                                 `${data.location.latitude.toFixed(6)}, ${data.location.longitude.toFixed(6)}`;
                             document.getElementById('location-radius').textContent = data.location.radius;
                             
-                            // Remove the input field
-                            input.remove();
+                            // Remove the input container
+                            container.remove();
                             locationButton.style.display = 'block';
                         } else {
                             alert('Failed to update location: ' + data.error);
