@@ -1,115 +1,132 @@
 import os
-from app import create_app, db
-from models import CarouselImage
-from werkzeug.utils import secure_filename
-from utils.image_processing import process_image, upload_to_cloudinary
-from PIL import Image as PILImage
-import io
+from app import create_app
+from app.models import db, CarouselImage
+import cloudinary
+import cloudinary.api
+import re
 
-def ensure_carousel_directory():
-    """Ensure the carousel directory exists"""
-    carousel_dir = os.path.join('static', 'images', 'carousel')
-    if not os.path.exists(carousel_dir):
-        os.makedirs(carousel_dir)
-    return carousel_dir
+def get_species_name(filename):
+    """Extract species name from filename and format it properly."""
+    # Remove file extension and date/time pattern
+    base_name = re.sub(r'_\d{8}_\d{6}', '', filename)
+    base_name = os.path.splitext(base_name)[0]
+    # Replace underscores with spaces and capitalize words
+    species_name = ' '.join(word.capitalize() for word in base_name.split('_'))
+    
+    # Fix specific typos
+    species_name = species_name.replace('Eagret', 'Egret')
+    species_name = species_name.replace('Gho', 'Great Horned Owl')
+    species_name = species_name.replace('Esgle', 'Eagle')
+    
+    return species_name
+
+def get_scientific_name(species_name):
+    """Get scientific name for the species."""
+    scientific_names = {
+        'American Crow': '(Corvus brachyrhynchos)',
+        'American Goldfinch': '(Spinus tristis)',
+        'American Kestrel': '(Falco sparverius)',
+        'Bald Eagle': '(Haliaeetus leucocephalus)',
+        'Barred Owl': '(Strix varia)',
+        'Barred Owl Juvenile': '(Strix varia)',
+        'Belted Kingfisher': '(Megaceryle alcyon)',
+        'Blue-footed Booby': '(Sula nebouxii)',
+        'Boat-tailed Grackle': '(Quiscalus major)',
+        'Broad-tailed Hummingbird': '(Selasphorus platycercus)',
+        'Brown Booby': '(Sula leucogaster)',
+        'Brown Pelican': '(Pelecanus occidentalis)',
+        'Cardinal': '(Cardinalis cardinalis)',
+        'Carolina Wren': '(Thryothorus ludovicianus)',
+        'Caspian Gull': '(Larus cachinnans)',
+        'Cedar Waxwing': '(Bombycilla cedrorum)',
+        'Chickadee': '(Poecile atricapillus)',
+        'Coopers Hawk': '(Accipiter cooperii)',
+        'Downy Woodpecker': '(Dryobates pubescens)',
+        'Eastern Bluebird': '(Sialia sialis)',
+        'Eastern Screech Owl': '(Megascops asio)',
+        'Great Blue Heron': '(Ardea herodias)',
+        'Great Egret': '(Ardea alba)',
+        'Great Horned Owl': '(Bubo virginianus)',
+        'Great-tailed Grackle': '(Quiscalus mexicanus)',
+        'Green Heron': '(Butorides virescens)',
+        'Indigo Bunting': '(Passerina cyanea)',
+        'Mallard': '(Anas platyrhynchos)',
+        'Mourning Dove': '(Zenaida macroura)',
+        'Muscovy Duck': '(Cairina moschata)',
+        'Osprey': '(Pandion haliaetus)',
+        'Peregrine Falcon': '(Falco peregrinus)',
+        'Prothonotary Warbler': '(Protonotaria citrea)',
+        'Red-headed Woodpecker': '(Melanerpes erythrocephalus)',
+        'Red-shouldered Hawk': '(Buteo lineatus)',
+        'Red-tailed Hawk': '(Buteo jamaicensis)',
+        'Rough-winged Swallow': '(Stelgidopteryx serripennis)',
+        'Ruby-throated Hummingbird': '(Archilochus colubris)',
+        'Ruffed Grouse': '(Bonasa umbellus)',
+        'Snowy Owl': '(Bubo scandiacus)',
+        'Social Flycatcher': '(Myiozetetes similis)',
+        'Spruce Grouse': '(Falcipennis canadensis)',
+        'Tree Swallow': '(Tachycineta bicolor)',
+        'Turkey Vulture': '(Cathartes aura)',
+        'Wild Turkey': '(Meleagris gallopavo)',
+        'Wood Duck': '(Aix sponsa)'
+    }
+    return scientific_names.get(species_name, '(Scientific name unknown)')
 
 def add_carousel_images():
-    """Add carousel images to the database"""
-    app = create_app()
-    with app.app_context():
-        # Create all tables
-        db.create_all()
+    """Add carousel images to the database."""
+    try:
+        # List all images from Cloudinary
+        resources = cloudinary.api.resources(type="upload", max_results=100)
+        images = resources.get('resources', [])
         
-        # Ensure carousel directory exists
-        carousel_dir = ensure_carousel_directory()
-        
-        # List of images to add
-        images = [
-            {'filename': 'photo1.jpg', 'title': 'American Robin', 'description': 'A common sight in North American gardens'},
-            {'filename': 'photo2.jpeg', 'title': 'Blue Jay', 'description': 'Known for its distinctive blue plumage'},
-            {'filename': 'photo3.jpeg', 'title': 'Cardinal', 'description': 'The state bird of seven US states'},
-            {'filename': 'photo4.jpeg', 'title': 'Chickadee', 'description': 'Small, friendly birds with distinctive calls'},
-            {'filename': 'photo5.jpeg', 'title': 'Eagle', 'description': 'Majestic birds of prey'},
-            {'filename': 'photo6.jpeg', 'title': 'Finch', 'description': 'Small songbirds with colorful plumage'},
-            {'filename': 'photo7.jpeg', 'title': 'Goldfinch', 'description': 'Bright yellow songbirds'},
-            {'filename': 'photo8.jpeg', 'title': 'Hawk', 'description': 'Skilled hunters of the sky'},
-            {'filename': 'photo9.jpeg', 'title': 'Hummingbird', 'description': 'Tiny birds with incredible speed'},
-            {'filename': 'photo10.jpeg', 'title': 'Kingfisher', 'description': 'Expert fishers with distinctive calls'},
-            {'filename': 'photo11.jpeg', 'title': 'Mockingbird', 'description': 'Known for their ability to mimic other birds'},
-            {'filename': 'photo12.jpeg', 'title': 'Nuthatch', 'description': 'Birds that walk headfirst down trees'},
-            {'filename': 'photo13.jpeg', 'title': 'Owl', 'description': 'Nocturnal hunters with silent flight'},
-            {'filename': 'photo14.jpg', 'title': 'Parrot', 'description': 'Colorful birds known for their intelligence'},
-            {'filename': 'photo15.jpg', 'title': 'Pigeon', 'description': 'Common urban birds with surprising intelligence'},
-            {'filename': 'photo16.jpeg', 'title': 'Quail', 'description': 'Ground-dwelling birds with distinctive calls'},
-            {'filename': 'photo17.jpeg', 'title': 'Raven', 'description': 'Highly intelligent birds of the corvid family'},
-            {'filename': 'photo18.jpeg', 'title': 'Sparrow', 'description': 'Small, adaptable songbirds'},
-            {'filename': 'photo19.jpeg', 'title': 'Swallow', 'description': 'Agile aerial insectivores'},
-            {'filename': 'photo20.jpeg', 'title': 'Woodpecker', 'description': 'Birds that drum on trees for food'}
-        ]
-        
-        # Process each image
-        for i, image_data in enumerate(images):
-            filename = image_data['filename']
-            image_path = os.path.join('static', 'images', 'birds', filename)
+        if not images:
+            print("No images found in Cloudinary")
+            return
+
+        # First, deactivate all existing carousel images
+        CarouselImage.query.update({'is_active': False})
+        db.session.commit()
+
+        # Process and add each image
+        for idx, resource in enumerate(images, 1):
+            filename = os.path.basename(resource['public_id'])
+            species_name = get_species_name(filename)
+            scientific_name = get_scientific_name(species_name)
             
-            try:
-                # Open and process the image
-                with PILImage.open(image_path) as img:
-                    # Convert to RGB if necessary
-                    if img.mode != 'RGB':
-                        img = img.convert('RGB')
-                    
-                    # Process the image
-                    processed_img = process_image(img)
-                    
-                    # Convert processed image to bytes
-                    img_byte_arr = io.BytesIO()
-                    processed_img.save(img_byte_arr, format='JPEG')
-                    img_byte_arr.seek(0)
-                    
-                    # Upload to Cloudinary
-                    cloudinary_path = f"carousel/{filename}"
-                    upload_result = upload_to_cloudinary(img_byte_arr, cloudinary_path)
-                    
-                    if not upload_result or 'secure_url' not in upload_result:
-                        print(f"Warning: Failed to upload {filename} to Cloudinary")
-                        continue
-                    
-                    # Check if image already exists
-                    existing = CarouselImage.query.filter_by(filename=filename).first()
-                    
-                    if existing:
-                        # Update existing image
-                        existing.cloudinary_url = upload_result['secure_url']
-                        existing.title = image_data['title']
-                        existing.description = image_data['description']
-                        existing.order = i
-                        existing.is_active = True
-                        print(f"Updated image {filename} with Cloudinary URL: {upload_result['secure_url']}")
-                    else:
-                        # Create new carousel image
-                        image = CarouselImage(
-                            filename=filename,
-                            cloudinary_url=upload_result['secure_url'],
-                            title=image_data['title'],
-                            description=image_data['description'],
-                            order=i,
-                            is_active=True
-                        )
-                        db.session.add(image)
-                        print(f"Added image {filename} to database with Cloudinary URL: {upload_result['secure_url']}")
-                
-            except Exception as e:
-                print(f"Error processing image {filename}: {str(e)}")
-                db.session.rollback()
-                continue
+            image_data = {
+                'filename': filename,
+                'title': species_name,
+                'description': scientific_name,
+                'order': idx,
+                'is_active': True,
+                'cloudinary_url': resource['url']
+            }
+
+            # Check if image already exists by filename
+            image = CarouselImage.query.filter_by(filename=filename).first()
+            if not image:
+                # Create new image
+                image = CarouselImage(**image_data)
+                db.session.add(image)
+            else:
+                # Update existing image
+                for key, value in image_data.items():
+                    setattr(image, key, value)
+
+        db.session.commit()
+        print(f'Successfully processed {len(images)} carousel images')
         
-        try:
-            db.session.commit()
-            print("Successfully committed all changes to database")
-        except Exception as e:
-            print(f"Error committing to database: {str(e)}")
-            db.session.rollback()
+        # Print current active carousel images
+        active_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        print('\nActive carousel images:')
+        for img in active_images:
+            print(f'- {img.title} {img.description} (Order: {img.order})')
+            
+    except Exception as e:
+        print(f'Error adding carousel images: {str(e)}')
+        db.session.rollback()
 
 if __name__ == '__main__':
-    add_carousel_images() 
+    app = create_app()
+    with app.app_context():
+        add_carousel_images() 
