@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, RegistrationRequest
+from app.models import db, User, RegistrationRequest
 from datetime import datetime, timedelta
 import secrets
 from flask_mail import Message, current_app

@@ -31,8 +31,16 @@ def process_image(image_file):
     current_app.logger.info("Successfully processed image")
     return image
 
-def upload_to_cloudinary(image, public_id, transformations=None):
-    """Upload an image to Cloudinary."""
+def upload_to_cloudinary(image_path, folder=''):
+    """Upload an image to Cloudinary.
+    
+    Args:
+        image_path: Path to the image file or a file-like object
+        folder: Optional folder name in Cloudinary
+    
+    Returns:
+        str: The Cloudinary URL of the uploaded image
+    """
     # Configure Cloudinary
     cloudinary.config(
         cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
@@ -40,34 +48,32 @@ def upload_to_cloudinary(image, public_id, transformations=None):
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
     
-    # Determine format from public_id extension
-    format = os.path.splitext(public_id)[1][1:].upper() if os.path.splitext(public_id)[1] else 'JPEG'
-    
-    # If image is a file-like object, read it directly
-    if hasattr(image, 'read'):
-        img_data = image.read()
-    else:
-        # Convert PIL Image to bytes
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format=format)
-        img_data = img_byte_arr.getvalue()
-    
-    # Remove extension from public_id if it exists
-    public_id = os.path.splitext(public_id)[0]
-    
-    # Prepare upload parameters
-    upload_params = {
-        'public_id': public_id,
-        'overwrite': True,
-        'format': format.lower()
-    }
-    
-    # Add transformations if provided
-    if transformations:
-        upload_params['transformation'] = transformations
-    
-    # Upload the image
-    result = cloudinary.uploader.upload(img_data, **upload_params)
-    
-    current_app.logger.info(f"Successfully uploaded image to Cloudinary: {public_id}")
-    return result 
+    try:
+        # If image_path is a string (file path), read the file
+        if isinstance(image_path, str):
+            with open(image_path, 'rb') as f:
+                img_data = f.read()
+            # Use the filename as public_id
+            public_id = os.path.splitext(os.path.basename(image_path))[0]
+        else:
+            # If it's a file-like object, read it directly
+            img_data = image_path.read()
+            public_id = os.path.splitext(image_path.filename)[0]
+        
+        # Add folder to public_id if specified
+        if folder:
+            public_id = f"{folder}/{public_id}"
+        
+        # Upload the image
+        result = cloudinary.uploader.upload(
+            img_data,
+            public_id=public_id,
+            overwrite=True
+        )
+        
+        # Return the secure URL
+        return result['secure_url']
+        
+    except Exception as e:
+        current_app.logger.error(f"Error uploading to Cloudinary: {e}")
+        raise 

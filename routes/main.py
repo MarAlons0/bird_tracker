@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from models import db, User, CarouselImage, Location
+from app.models import db, User, CarouselImage, Location
 from bird_tracker import BirdSightingTracker
 import os
 import logging
@@ -11,113 +11,28 @@ logger = logging.getLogger(__name__)
 
 @bp.route('/')
 @login_required
-def index():
+def home():
     """Home page route"""
     try:
-        # Get active carousel images
-        carousel_images = db.session.execute(text('''
-            SELECT 
-                id as image_id,
-                filename as image_url,
-                cloudinary_url,
-                title as image_title,
-                description as image_description,
-                "order" as image_order,
-                is_active as image_active
-            FROM carousel_images 
-            WHERE is_active = true 
-            ORDER BY "order"
-        ''')).fetchall()
+        logger.info("Home route called")
+        logger.info(f"Template folder: {current_app.template_folder}")
+        logger.info(f"Template files: {os.listdir(current_app.template_folder)}")
         
-        # Convert Row objects to dictionaries
-        carousel_images = [{
-            'id': img.image_id,
-            'filename': img.cloudinary_url or img.image_url,  # Use cloudinary_url if available, fallback to filename
-            'title': img.image_title,
-            'description': img.image_description,
-            'order': img.image_order,
-            'is_active': img.image_active
-        } for img in carousel_images]
+        # Log the absolute path of the template we're trying to use
+        template_path = os.path.join(current_app.template_folder, 'home_new.html')
+        logger.info(f"Attempting to render template at: {template_path}")
+        logger.info(f"Template exists: {os.path.exists(template_path)}")
         
-        logger.info(f"Found {len(carousel_images)} active carousel images")
-        for img in carousel_images:
-            logger.debug(f"Carousel image: id={img['id']}, title={img['title']}, url={img['filename']}")
+        # Log the template loader's search paths
+        logger.info("Template loader search paths:")
+        for loader in current_app.jinja_loader.loaders:
+            logger.info(f"Loader: {loader}")
+            if hasattr(loader, 'searchpath'):
+                logger.info(f"Search paths: {loader.searchpath}")
         
-        # Get current user's location
-        location = db.session.execute(text('''
-            SELECT l.name, l.latitude, l.longitude, l.radius
-            FROM locations l
-            JOIN user_preferences up ON up.active_location_id = l.id
-            WHERE up.user_id = :user_id AND l.is_active = true
-            ORDER BY l.id DESC
-            LIMIT 1
-        '''), {'user_id': current_user.id}).fetchone()
-        
-        if not location:
-            logger.info("No active location found for user, creating default location")
-            # Create default location (Cincinnati) for this user
-            db.session.execute(text('''
-                INSERT INTO locations (name, latitude, longitude, radius, is_active, user_id)
-                VALUES (:name, :lat, :lng, :radius, true, :user_id)
-                RETURNING id
-            '''), {
-                'name': 'Cincinnati, OH',
-                'lat': 39.1031,
-                'lng': -84.5120,
-                'radius': 25,
-                'user_id': current_user.id
-            })
-            
-            # Get the new location ID
-            new_location_id = db.session.execute(text('''
-                SELECT id FROM locations 
-                WHERE user_id = :user_id AND is_active = true 
-                ORDER BY id DESC LIMIT 1
-            '''), {'user_id': current_user.id}).scalar()
-            
-            # Create or update user preferences
-            db.session.execute(text('''
-                INSERT INTO user_preferences (user_id, active_location_id)
-                VALUES (:user_id, :location_id)
-                ON CONFLICT (user_id) 
-                DO UPDATE SET active_location_id = :location_id
-            '''), {
-                'user_id': current_user.id,
-                'location_id': new_location_id
-            })
-            
-            db.session.commit()
-            
-            # Get the newly created location
-            location = db.session.execute(text('''
-                SELECT name, latitude, longitude, radius
-                FROM locations
-                WHERE id = :location_id
-            '''), {'location_id': new_location_id}).fetchone()
-        
-        # Convert location Row to dictionary
-        location_dict = {
-            'name': location.name,
-            'latitude': location.latitude,
-            'longitude': location.longitude,
-            'radius': location.radius
-        }
-        
-        logger.info(f"Current location for user {current_user.id}: {location_dict['name']} ({location_dict['latitude']}, {location_dict['longitude']})")
-        
-        # Get Google Places API key
-        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        if not google_places_key:
-            logger.error("Google Places API key not found!")
-            return render_template('error.html', error="Google Places API key not configured")
-        
-        return render_template('home.html', 
-                           carousel_images=carousel_images,
-                           location=location_dict,
-                           google_maps_api_key=google_places_key)
-                           
+        return render_template('home_new.html')
     except Exception as e:
-        logger.error(f"Error in index route: {str(e)}", exc_info=True)
+        logger.error(f"Error in home route: {str(e)}", exc_info=True)
         return render_template('error.html', error=str(e))
 
 @bp.route('/map')
