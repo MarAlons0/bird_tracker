@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Bird Tracker{% endblock %}
+
+{% block head %}
+<style>
+    .welcome-section {
+        text-align: left;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+    
+    .welcome-section h1 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 2.5rem;
+    }
+    
+    .welcome-section p {
+        color: #34495e;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .welcome-section ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .welcome-section li {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    
+    .welcome-section li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #2c3e50;
+    }
+    
+    .welcome-section strong {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .location-card {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .carousel-container {
+        margin-top: 30px;
+    }
+    
+    .carousel-item {
+        height: 400px;
+    }
+    
+    .carousel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .carousel-caption {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        border-radius: 10px;
+    }
+    
+    .action-buttons {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .action-buttons .btn {
+        min-width: 150px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1>Welcome to Mario's Bird Tracker</h1>
+    <p>This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:</p>
+    
+    <ul>
+        <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
+        <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
+        <li><strong>Newsletter:</strong> Receive email updates about new bird sightings in your area.</li>
+    </ul>
+    
+    <p>To get started, make sure your location is set correctly below. You can change it at any time.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="location-card">
+            <h2>Select Location</h2>
+            <p>Choose a location to view bird sightings and analysis</p>
+            <div class="input-group mb-3">
+                <input type="text" id="location-search" class="form-control" placeholder="Search for a location...">
+                <button class="btn btn-primary" type="button" id="search-button">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            <div id="selected-location" class="mt-3"></div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="carousel-container">
+            <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    {% for image in carousel_images %}
+                    <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
+                    {% endfor %}
+                </div>
+                <div class="carousel-inner">
+                    {% for image in carousel_images %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ image.cloudinary_url }}" class="d-block w-100" alt="{{ image.title }}">
+                        <div class="carousel-caption">
+                            <h5>{{ image.title }}</h5>
+                            <p>{{ image.description }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationInput = document.getElementById('location-search');
+        const searchButton = document.getElementById('search-button');
+        const selectedLocationDiv = document.getElementById('selected-location');
+        
+        // Initialize Google Places Autocomplete
+        const autocomplete = new google.maps.places.Autocomplete(locationInput);
+        
+        // Handle location selection
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                const location = {
+                    name: place.name,
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                };
+                
+                // Update selected location display
+                selectedLocationDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Selected Location:</strong> ${place.name}
+                    </div>
+                `;
+                
+                // Store location in session
+                fetch('/api/set-location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(location)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Location saved successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving location:', error);
+                });
+            }
+        });
+        
+        // Handle search button click
+        searchButton.addEventListener('click', function() {
+            if (locationInput.value) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: locationInput.value }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        const place = results[0];
+                        const location = {
+                            name: place.formatted_address,
+                            lat: place.geometry.location.lat(),
+                            lng: place.geometry.location.lng()
+                        };
+                        
+                        // Update selected location display
+                        selectedLocationDiv.innerHTML = `
+                            <div class="alert alert-success">
+                                <strong>Selected Location:</strong> ${place.formatted_address}
+                            </div>
+                        `;
+                        
+                        // Store location in session
+                        fetch('/api/set-location', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(location)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Location saved successfully');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error saving location:', error);
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %} 
