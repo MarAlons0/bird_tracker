@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title">Welcome to Mario's Bird Tracker</h1>
+                    <p class="card-text">
+                        This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:
+                    </p>
+                    <ul>
+                        <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
+                        <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
+                        <li><strong>Newsletter:</strong> Receive email updates about new bird sightings in your area.</li>
+                    </ul>
+                    <p class="card-text">
+                        To get started, make sure your location is set correctly below. You can change it at any time.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

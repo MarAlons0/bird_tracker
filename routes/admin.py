@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from models import db, User, RegistrationRequest, CarouselImage
+from app.models import db, User, RegistrationRequest, CarouselImage
 from flask_mail import Message
 from datetime import datetime
 from utils.file_upload import save_image, delete_image
@@ -11,8 +11,11 @@ from sqlalchemy import text
 from werkzeug.utils import secure_filename
 from utils.image_processing import process_image, upload_to_cloudinary
 from extensions import mail
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-bp = Blueprint('admin', __name__)
+admin = Blueprint('admin', __name__)
 
 def admin_required(f):
     @wraps(f)
@@ -26,7 +29,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@bp.route('/dashboard')
+@admin.route('/dashboard')
 @login_required
 @admin_required
 def dashboard():
@@ -57,7 +60,7 @@ def dashboard():
                          total_carousel_images=total_carousel_images,
                          active_carousel_images=active_carousel_images)
 
-@bp.route('/users')
+@admin.route('/users')
 @login_required
 @admin_required
 def users():
@@ -89,7 +92,7 @@ def users():
     
     return render_template('admin/users.html', users=users)
 
-@bp.route('/', methods=['GET', 'POST'])
+@admin.route('/', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_panel():
@@ -208,9 +211,11 @@ def admin_panel():
     
     return render_template('admin/users.html', users=users)
 
-@bp.route('/registration-requests')
+@admin.route('/registration-requests')
+@login_required
 @admin_required
 def registration_requests():
+    """Admin page for managing registration requests"""
     # Get registration requests using raw SQL
     result = db.session.execute(
         text("""
@@ -228,16 +233,15 @@ def registration_requests():
         request.username = row[2]
         request.status = row[3]
         request.request_date = row[4]
-        # Set processed_at and processed_by to None since they don't exist in the table
-        request.processed_at = None
-        request.processed_by = None
         requests.append(request)
     
     return render_template('admin/registration_requests.html', requests=requests)
 
-@bp.route('/registration-request/<int:request_id>/<action>', methods=['POST'])
+@admin.route('/registration-request/<int:request_id>/<action>', methods=['POST'])
+@login_required
 @admin_required
 def process_registration_request(request_id, action):
+    """Process a registration request (approve/reject)"""
     # Get registration request using raw SQL
     result = db.session.execute(
         text("""
@@ -345,239 +349,128 @@ def process_registration_request(request_id, action):
     
     return redirect(url_for('admin.registration_requests'))
 
-# Carousel Image Management
-@bp.route('/carousel')
+@admin.route('/carousel')
 @login_required
 @admin_required
 def manage_carousel():
     """Admin page for managing carousel images"""
-    result = db.session.execute(text("SELECT * FROM carousel_images ORDER BY \"order\""))
-    images = [dict(zip(result.keys(), row)) for row in result]
+    images = CarouselImage.query.order_by(CarouselImage.order).all()
     return render_template('admin/carousel.html', images=images)
 
-@bp.route('/carousel/add', methods=['POST'])
+@admin.route('/carousel/add', methods=['POST'])
 @login_required
 @admin_required
 def add_carousel_image():
+    """Add a new carousel image"""
     if 'image' not in request.files:
-        current_app.logger.error('No image file in request.files')
-        flash('No image file uploaded', 'error')
+        flash('No image file provided', 'error')
         return redirect(url_for('admin.manage_carousel'))
-
-    image_file = request.files['image']
-    if image_file.filename == '':
-        current_app.logger.error('Empty filename in uploaded file')
+    
+    file = request.files['image']
+    if file.filename == '':
         flash('No selected file', 'error')
         return redirect(url_for('admin.manage_carousel'))
-
-    title = request.form.get('title')
-    description = request.form.get('description')
     
-    current_app.logger.info(f'Processing carousel image upload: filename={image_file.filename}, title={title}')
-
-    try:
-        # Process and upload image to Cloudinary
-        filename = secure_filename(image_file.filename)
-        base_filename, ext = os.path.splitext(filename)
-        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        new_filename = f"{base_filename}_{timestamp}{ext}"
-        
-        current_app.logger.info(f'Processing image: original={filename}, new={new_filename}')
-        
-        # Process the image
-        processed_image = process_image(image_file)
-        
-        # Upload to Cloudinary
-        current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}')
-        upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}")
-        current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
-        
-        # Get the highest order value using raw SQL
-        result = db.session.execute(text("SELECT COALESCE(MAX(\"order\"), -1) FROM carousel_images")).fetchone()
-        max_order = result[0]
-        current_app.logger.info(f'Current max order: {max_order}')
-        
-        # Create new carousel image using raw SQL without ORM
-        current_app.logger.info('Creating new CarouselImage record')
-        with db.engine.connect() as conn:
-            conn.execute(
-                text("""
-                    INSERT INTO carousel_images (filename, title, description, "order", is_active)
-                    VALUES (:filename, :title, :description, :order, :is_active)
-                """),
-                {
-                    'filename': upload_result.get("secure_url"),  # Store the full Cloudinary URL
-                    'title': title,
-                    'description': description,
-                    'order': max_order + 1,
-                    'is_active': True
-                }
+    if file:
+        try:
+            # Upload to Cloudinary
+            result = cloudinary.uploader.upload(file)
+            image_url = result['secure_url']
+            
+            # Create new carousel image
+            new_image = CarouselImage(
+                filename=image_url,
+                title=request.form.get('title', '').strip(),
+                description=request.form.get('scientific_name', '').strip(),
+                is_active=bool(request.form.get('active')),
+                order=CarouselImage.query.count() + 1
             )
-            conn.commit()
-        
-        current_app.logger.info('Successfully added carousel image')
-        
-        flash('Image added successfully', 'success')
-    except Exception as e:
-        current_app.logger.error(f'Error adding carousel image: {str(e)}', exc_info=True)
-        flash(f'Error adding image: {str(e)}', 'error')
+            
+            db.session.add(new_image)
+            db.session.commit()
+            flash('Bird image added successfully', 'success')
+        except Exception as e:
+            flash(f'Error adding image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
-@bp.route('/carousel/edit/<int:id>', methods=['POST'])
+@admin.route('/carousel/edit/<int:id>', methods=['POST'])
 @login_required
 @admin_required
 def edit_carousel_image(id):
-    current_app.logger.info(f'Editing carousel image ID: {id}')
-    
-    # Get the image using raw SQL
-    result = db.session.execute(
-        text("SELECT * FROM carousel_images WHERE id = :id"),
-        {"id": id}
-    ).fetchone()
-    
-    if not result:
-        flash('Image not found', 'error')
-        return redirect(url_for('admin.manage_carousel'))
-    
-    title = request.form.get('title')
-    description = request.form.get('description')
-    is_active = 'active' in request.form
-    
-    current_app.logger.info(f'Updating image details: title={title}, description={description}, is_active={is_active}')
+    """Edit an existing carousel image"""
+    image = CarouselImage.query.get_or_404(id)
     
     try:
-        # If a new image is uploaded
-        if 'image' in request.files and request.files['image'].filename:
-            image_file = request.files['image']
-            current_app.logger.info(f'Processing new image upload: {image_file.filename}')
-            
-            filename = secure_filename(image_file.filename)
-            base_filename = os.path.splitext(filename)[0]
-            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-            new_filename = f"{base_filename}_{timestamp}"
-            
-            current_app.logger.info(f'Processing image: original={filename}, new={new_filename}')
-            
-            # Process the image
-            processed_image = process_image(image_file)
-            
-            # Upload to Cloudinary with text overlays if title or description is provided
-            transformation = []
-            if title:
-                transformation.append({
-                    'overlay': {'font_family': 'Arial', 'font_size': 60, 'text': title},
-                    'color': '#FFFFFF',
-                    'y': 20,
-                    'x': 20
-                })
-            if description:
-                transformation.append({
-                    'overlay': {'font_family': 'Arial', 'font_size': 40, 'text': description},
-                    'color': '#FFFFFF',
-                    'y': 100,
-                    'x': 20
-                })
-            
-            current_app.logger.info(f'Uploading to Cloudinary: path=carousel/{new_filename}, transformations={len(transformation)}')
-            upload_result = upload_to_cloudinary(processed_image, f"carousel/{new_filename}", transformation)
-            current_app.logger.info(f'Cloudinary upload successful: {upload_result.get("secure_url")}')
-            
-            # Update the database with new filename using raw SQL
-            with db.engine.connect() as conn:
-                conn.execute(
-                    text("""
-                        UPDATE carousel_images 
-                        SET filename = :filename,
-                            title = :title,
-                            description = :description,
-                            is_active = :is_active
-                        WHERE id = :id
-                    """),
-                    {
-                        'id': id,
-                        'filename': upload_result.get("secure_url"),  # Store the full Cloudinary URL
-                        'title': title,
-                        'description': description,
-                        'is_active': is_active
-                    }
-                )
-                conn.commit()
-        else:
-            # Just update the metadata using raw SQL
-            with db.engine.connect() as conn:
-                conn.execute(
-                    text("""
-                        UPDATE carousel_images 
-                        SET title = :title,
-                            description = :description,
-                            is_active = :is_active
-                        WHERE id = :id
-                    """),
-                    {
-                        'id': id,
-                        'title': title,
-                        'description': description,
-                        'is_active': is_active
-                    }
-                )
-                conn.commit()
+        # Update basic info
+        image.title = request.form.get('title', '').strip()
+        image.description = request.form.get('scientific_name', '').strip()
+        image.is_active = bool(request.form.get('active'))
         
-        current_app.logger.info(f'Successfully updated carousel image ID: {id}')
-        flash('Image updated successfully', 'success')
+        # Handle new image upload if provided
+        if 'image' in request.files and request.files['image'].filename:
+            file = request.files['image']
+            result = cloudinary.uploader.upload(file)
+            image.filename = result['secure_url']
+        
+        db.session.commit()
+        flash('Bird image updated successfully', 'success')
     except Exception as e:
-        current_app.logger.error(f'Error updating image: {str(e)}', exc_info=True)
         flash(f'Error updating image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
-@bp.route('/carousel/<int:id>/delete', methods=['POST'])
+@admin.route('/carousel/delete/<int:id>', methods=['POST'])
 @login_required
 @admin_required
 def delete_carousel_image(id):
     """Delete a carousel image"""
-    # Get the image using raw SQL
-    result = db.session.execute(
-        text("SELECT filename FROM carousel_images WHERE id = :id"),
-        {"id": id}
-    ).fetchone()
+    image = CarouselImage.query.get_or_404(id)
     
-    if not result:
-        flash('Image not found', 'error')
-        return redirect(url_for('admin.manage_carousel'))
-    
-    # Delete from Cloudinary
-    if delete_image(result[0], 'carousel'):
-        # Delete the database record using raw SQL
-        with db.engine.connect() as conn:
-            conn.execute(
-                text("DELETE FROM carousel_images WHERE id = :id"),
-                {"id": id}
-            )
-            conn.commit()
-        flash('Image deleted successfully', 'success')
-    else:
-        flash('Error deleting image file', 'error')
+    try:
+        # Delete from Cloudinary if it's a Cloudinary URL
+        if 'cloudinary.com' in image.filename:
+            public_id = image.filename.split('/')[-1].split('.')[0]
+            cloudinary.uploader.destroy(public_id)
+        
+        db.session.delete(image)
+        db.session.commit()
+        flash('Bird image deleted successfully', 'success')
+    except Exception as e:
+        flash(f'Error deleting image: {str(e)}', 'error')
     
     return redirect(url_for('admin.manage_carousel'))
 
-@bp.route('/carousel/reorder', methods=['POST'])
+@admin.route('/carousel/reorder', methods=['POST'])
 @login_required
 @admin_required
 def reorder_carousel_images():
     """Update the order of carousel images"""
-    new_order = request.json.get('order', [])
-    
     try:
-        # Update the order of each image using raw SQL
-        with db.engine.connect() as conn:
-            for index, image_id in enumerate(new_order):
-                conn.execute(
-                    text('UPDATE carousel_images SET "order" = :order WHERE id = :id'),
-                    {"id": image_id, "order": index}
-                )
-            conn.commit()
-        return jsonify({'status': 'success'})
+        order = request.json.get('order', [])
+        for index, image_id in enumerate(order, 1):
+            image = CarouselImage.query.get(image_id)
+            if image:
+                image.order = index
+        
+        db.session.commit()
+        return jsonify({'success': True})
     except Exception as e:
-        current_app.logger.error(f'Error reordering images: {str(e)}', exc_info=True)
-        return jsonify({'status': 'error', 'message': str(e)}), 500 
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin.route('/carousel/bulk-import', methods=['POST'])
+@login_required
+@admin_required
+def bulk_import_scientific_names():
+    """Bulk import scientific names for carousel images"""
+    try:
+        data = request.json.get('names', {})
+        for image_id, scientific_name in data.items():
+            image = CarouselImage.query.get(image_id)
+            if image:
+                image.description = scientific_name.strip()
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500 

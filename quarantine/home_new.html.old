@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Bird Tracker{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+<style>
+    .main-content {
+        margin-top: 2rem;
+    }
+    .debug-message {
+        background: green;
+        color: white;
+        padding: 20px;
+        margin: 20px;
+        border: 5px solid black;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container main-content">
+    <div class="debug-message">
+        NEW HOME TEMPLATE LOADED - VERSION {{ range(1, 10000) | random }}
+    </div>
+
+    <!-- Site Description -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Welcome to Mario's Bird Tracker</h2>
+                    <p class="card-text">
+                        This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:
+                    </p>
+                    <ul>
+                        <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
+                        <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
+                        <li><strong>Newsletter:</strong> Receive email updates about new bird sightings in your area.</li>
+                    </ul>
+                    <p class="card-text">
+                        To get started, make sure your location is set correctly below. You can change it at any time.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
