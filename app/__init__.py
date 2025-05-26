@@ -1,7 +1,6 @@
 # This file makes the app directory a Python package 
 
 from flask import Flask
-from config.config import Config
 import os
 import logging
 from datetime import timedelta
