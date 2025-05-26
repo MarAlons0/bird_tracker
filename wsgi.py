@@ -1,14 +1,14 @@
 import os
-from app.report_app import create_app
-from init_db import init_db
+import sys
+
+# Add the current directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+
+# Import the app from the root app.py file
+from app import create_app
 
 app = create_app()
 
-# Initialize database
-with app.app_context():
-    from app.models import db
-    db.create_all()
-    init_db()
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run() 

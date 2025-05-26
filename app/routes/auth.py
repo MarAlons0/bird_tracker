@@ -2,11 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User, db
 from werkzeug.security import generate_password_hash
+from urllib.parse import urlparse
 import logging
 import os
 import sys
 import traceback
 from sqlalchemy import inspect
+from flask import current_app
 
 # Configure logging with more detailed format
 logging.basicConfig(
@@ -64,8 +66,8 @@ def login():
                 
                 # Redirect to the next page or home
                 next_page = request.args.get('next')
-                if not next_page or not next_page.startswith('/'):
-                    next_page = url_for('main.index')
+                if not next_page or urlparse(next_page).netloc != '':
+                    next_page = url_for('main.home')
                 logger.info(f"Redirecting to: {next_page}")
                 return redirect(next_page)
             
@@ -128,7 +130,7 @@ def login():
             logger.info(f"Session details: {dict(session)}")
             
             # Redirect to home
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.home'))
             
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")

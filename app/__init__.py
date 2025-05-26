@@ -1,25 +1,19 @@
 # This file makes the app directory a Python package 
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
-from config import Config
-from app.models import db
-from app.scheduler import init_scheduler
-from app.routes.main import main
-from app.routes.auth import auth
-from app.routes.admin import admin
+from config.config import Config
 import os
 import logging
-from flask_migrate import Migrate
-from flask_login import LoginManager
 from datetime import timedelta
+from app.extensions import db, mail, migrate, login_manager
 
 logger = logging.getLogger(__name__)
 
 def create_app():
     """Create and configure the Flask application."""
-    app = Flask(__name__)
+    app = Flask(__name__, 
+                static_folder='static',
+                static_url_path='/static')
     
     # Database configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///bird_tracker.db')
@@ -38,6 +32,13 @@ def create_app():
     # Secret key configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
     
+    # File upload configuration
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'images')
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    
+    # Ensure upload directories exist
+    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'carousel'), exist_ok=True)
+    
     # Google Maps API configuration
     api_key = os.environ.get('GOOGLE_PLACES_API_KEY')
     if not api_key:
@@ -54,15 +55,16 @@ def create_app():
     
     # Initialize extensions
     db.init_app(app)
-    mail = Mail(app)
-    migrate = Migrate(app, db)
-    
-    # Initialize Flask-Login
-    login_manager = LoginManager()
+    mail.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
+    
+    # Create database tables
+    with app.app_context():
+        db.create_all()
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -70,15 +72,14 @@ def create_app():
         return User.query.get(int(user_id))
     
     # Register blueprints
+    from app.routes.main import main
+    from app.routes.auth import auth
+    from app.routes.admin import admin
     app.register_blueprint(main)
     app.register_blueprint(auth)
     app.register_blueprint(admin, url_prefix='/admin')
     
-    # Initialize scheduler in non-testing environment
-    if not app.config.get('TESTING'):
-        init_scheduler()
-    
     logger.info("Application initialized successfully")
     return app
 
-__all__ = ['create_app'] 
+__all__ = ['create_app', 'db'] 

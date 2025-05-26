@@ -14,7 +14,7 @@
         
         .banner-container {
             width: 100%;
-            height: 200px;
+            height: 150px;
             overflow: hidden;
             position: relative;
             margin-bottom: 2rem;
@@ -22,7 +22,7 @@
         
         .banner-image {
             width: 100%;
-            height: 100%;
+            height: 150px;
             object-fit: cover;
         }
         
@@ -55,7 +55,7 @@
 </head>
 <body>
     <div class="banner-container">
-        <img src="{{ url_for('static', filename='images/banner.jpeg') }}" alt="Bird Tracker Banner" class="banner-image">
+        <img src="{{ url_for('static', filename='images/Banner.jpeg') }}" alt="Bird Tracker Banner" class="banner-image">
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <a class="navbar-brand" href="{{ url_for('main.home') }}">Bird Tracker</a>
@@ -71,7 +71,7 @@
                             <a class="nav-link" href="{{ url_for('main.map') }}">Map</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.report') }}">AI Analysis</a>
+                            <a class="nav-link" href="{{ url_for('main.analysis') }}">AI Analysis</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">

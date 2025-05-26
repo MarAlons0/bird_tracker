@@ -26,8 +26,8 @@ import cloudinary.api
 from io import BytesIO
 import base64
 from sqlalchemy.sql import text
-import psycopg2
-from models import User, CarouselImage, Location, RegistrationRequest, ClaudePromptLog, Image
+import psycopg
+from app.models import User, CarouselImage, Location, RegistrationRequest
 
 # Load environment variables
 load_dotenv()
@@ -41,16 +41,30 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def create_app():
     print("Starting app creation...")
-    app = Flask(__name__)
+    template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
+    static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
+    print(f"Template directory: {template_dir}")
+    print(f"Static directory: {static_dir}")
+    
+    app = Flask(__name__, 
+                template_folder=template_dir,
+                static_folder=static_dir)
     print("Flask app created")
+    print("Template folder:", os.path.abspath(app.template_folder))
+    print("Available templates:", os.listdir(app.template_folder))
+    print("Admin templates:", os.listdir(os.path.join(app.template_folder, 'admin')))
     
     # Configure the app
     print("Configuring app...")
-    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://localhost/bird_tracker')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///bird_tracker.db')
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = True  # Enable template auto-reloading
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable static file caching
+    app.jinja_env.auto_reload = True  # Enable Jinja2 auto-reloading
+    app.jinja_env.cache_size = 0  # Disable Jinja2 template cache
     print("Basic app configuration complete")
 
     # Configure session settings for Safari
@@ -96,7 +110,7 @@ def create_app():
     from routes import main, auth, admin
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
-    app.register_blueprint(admin.bp, url_prefix='/admin')
+    app.register_blueprint(admin.admin, url_prefix='/admin')
     print("Blueprints registered")
     
     # Initialize bird tracker
@@ -116,167 +130,128 @@ def create_app():
     print("App creation complete")
     return app
 
+# Create the Flask application
 app = create_app()
-CORS(app)  # Enable CORS for all routes
 
 def init_db():
     with app.app_context():
         try:
-            # Get database URL from app config
-            db_url = app.config['SQLALCHEMY_DATABASE_URI']
+            # Ensure we're using the correct database
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bird_tracker.db')
+            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
             
-            # Connect to database
-            conn = psycopg2.connect(db_url)
-            cur = conn.cursor()
+            # Drop all tables
+            db.drop_all()
             
-            try:
-                # Drop all tables
-                cur.execute("""
-                    DROP TABLE IF EXISTS users CASCADE;
-                    DROP TABLE IF EXISTS location CASCADE;
-                """)
-                
-                # Create users table
-                cur.execute("""
-                    CREATE TABLE users (
-                        id SERIAL PRIMARY KEY,
-                        username VARCHAR(80) UNIQUE NOT NULL,
-                        email VARCHAR(120) UNIQUE NOT NULL,
-                        password_hash VARCHAR(255) NOT NULL,
-                        is_admin BOOLEAN DEFAULT FALSE,
-                        is_approved BOOLEAN DEFAULT FALSE,
-                        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        is_active BOOLEAN DEFAULT TRUE,
-                        login_token VARCHAR(100) UNIQUE,
-                        token_expiry TIMESTAMP,
-                        newsletter_subscription BOOLEAN DEFAULT TRUE
-                    )
-                """)
-                
-                # Create location table
-                cur.execute("""
-                    CREATE TABLE location (
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(120),
-                        latitude FLOAT,
-                        longitude FLOAT,
-                        radius FLOAT,
-                        is_active BOOLEAN DEFAULT FALSE
-                    )
-                """)
+            # Import models here to ensure they are registered before db.create_all()
+            from app.models import User, CarouselImage, Location, RegistrationRequest
+            
+            # Create all tables
+            db.create_all()
+            
+            # Create admin user
+            admin_email = os.getenv('ADMIN_EMAIL')
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            if admin_email and admin_password:
+                admin = User(
+                    email=admin_email,
+                    username="admin",
+                    password_hash=generate_password_hash(admin_password),
+                    is_admin=True,
+                    is_approved=True,
+                    is_active=True,
+                    newsletter_subscription=True
+                )
+                db.session.add(admin)
+                print(f"Created admin user: {admin_email}")
+            
+            # Create default locations
+            default_locations = [
+                {
+                    "name": "Cincinnati",
+                    "latitude": 39.1031,
+                    "longitude": -84.5120,
+                    "radius": 50.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Zion National Park",
+                    "latitude": 37.2982,
+                    "longitude": -113.0263,
+                    "radius": 50.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Cincinnati Nature Center",
+                    "latitude": 39.1753,
+                    "longitude": -84.2747,
+                    "radius": 5.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Moab",
+                    "latitude": 38.5733,
+                    "longitude": -109.5498,
+                    "radius": 50.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Zion Nat'l Pk Entrance",
+                    "latitude": 37.2017,
+                    "longitude": -112.9872,
+                    "radius": 5.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Bryce Canyon Visitor Ctr",
+                    "latitude": 37.6283,
+                    "longitude": -112.1687,
+                    "radius": 5.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Denver",
+                    "latitude": 39.7392,
+                    "longitude": -104.9903,
+                    "radius": 50.0,
+                    "is_active": True
+                },
+                {
+                    "name": "Baton Rouge",
+                    "latitude": 30.4515,
+                    "longitude": -91.1871,
+                    "radius": 50.0,
+                    "is_active": True
+                }
+            ]
 
-                print("Database tables created")
+            for location_data in default_locations:
+                location = Location(
+                    name=location_data["name"],
+                    latitude=location_data["latitude"],
+                    longitude=location_data["longitude"],
+                    radius=location_data["radius"],
+                    is_active=location_data["is_active"],
+                    user_id=None,  # Set user_id to NULL for default locations
+                    created_at=datetime.utcnow()  # Add created_at timestamp
+                )
+                db.session.add(location)
+                print(f"Created location: {location_data['name']}")
 
-                # Create admin user
-                admin_email = os.getenv('ADMIN_EMAIL')
-                admin_password = os.getenv('ADMIN_PASSWORD')
-                if admin_email and admin_password:
-                    # Create admin user using raw SQL
-                    cur.execute("""
-                        INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        admin_email,
-                        "admin",
-                        generate_password_hash(admin_password),
-                        True,
-                        True,
-                        True,
-                        True
-                    ))
-                    print(f"Created admin user: {admin_email}")
-                
-                # Create default locations
-                default_locations = [
-                    {
-                        "name": "Cincinnati",
-                        "latitude": 39.1031,
-                        "longitude": -84.5120,
-                        "radius": 50.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Zion National Park",
-                        "latitude": 37.2982,
-                        "longitude": -113.0263,
-                        "radius": 50.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Cincinnati Nature Center",
-                        "latitude": 39.1753,
-                        "longitude": -84.2747,
-                        "radius": 5.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Moab",
-                        "latitude": 38.5733,
-                        "longitude": -109.5498,
-                        "radius": 50.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Zion Nat'l Pk Entrance",
-                        "latitude": 37.2017,
-                        "longitude": -112.9872,
-                        "radius": 5.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Bryce Canyon Visitor Ctr",
-                        "latitude": 37.6283,
-                        "longitude": -112.1687,
-                        "radius": 5.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Denver",
-                        "latitude": 39.7392,
-                        "longitude": -104.9903,
-                        "radius": 50.0,
-                        "is_active": True
-                    },
-                    {
-                        "name": "Baton Rouge",
-                        "latitude": 30.4515,
-                        "longitude": -91.1871,
-                        "radius": 50.0,
-                        "is_active": True
-                    }
-                ]
-
-                for location_data in default_locations:
-                    # Create location using raw SQL
-                    cur.execute("""
-                        INSERT INTO location (name, latitude, longitude, radius, is_active)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (
-                        location_data["name"],
-                        location_data["latitude"],
-                        location_data["longitude"],
-                        location_data["radius"],
-                        location_data["is_active"]
-                    ))
-                    print(f"Created location: {location_data['name']}")
-
-                conn.commit()
-                print("Database initialization completed")
-            except Exception as e:
-                print(f"Error during database initialization: {str(e)}")
-                conn.rollback()
-            finally:
-                cur.close()
-                conn.close()
+            db.session.commit()
+            print("Database initialization completed")
+            
         except Exception as e:
-            print(f"Error connecting to database: {str(e)}")
+            db.session.rollback()
+            print(f"Error during database initialization: {str(e)}")
+            raise
 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
             flash('You need administrator privileges to access this page.', 'error')
-        return redirect(url_for('home'))
+            return redirect(url_for('home'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -298,65 +273,33 @@ def load_locations():
         return []
 
 def get_carousel_images():
-    image_dir = os.path.join('static', 'images', 'birds')
-    print(f"Looking for images in: {image_dir}")
-    images = []
-    if os.path.exists(image_dir):
-        for file in os.listdir(image_dir):
-            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                images.append(file)
-        print(f"Found images: {images}")
-    else:
-        print(f"Directory not found: {image_dir}")
-    return sorted(images)
-
-@app.route('/')
-@login_required
-def home():
+    """Get active carousel images"""
     try:
-        email_schedule = {
-            'hour': int(os.getenv('EMAIL_SCHEDULE_HOUR', '7')),
-            'minute': int(os.getenv('EMAIL_SCHEDULE_MINUTE', '0'))
-        }
-        carousel_images = get_carousel_images()
-        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        ebird_key = os.getenv('EBIRD_API_KEY')
-        
-        if not google_places_key:
-            logger.error("Google Places API key not found!")
-            return render_template('error.html', error="Google Places API key not configured")
-
-        if not ebird_key:
-            logger.error("eBird API key not found!")
-            return render_template('error.html', error="eBird API key not configured")
-        
-        # Get user-specific location
-        location = app.tracker.get_active_location(current_user.id)
-        observations = app.tracker.get_recent_observations(current_user.id)
-        logger.debug(f"Found {len(observations)} recent observations")
-        
-        return render_template('home.html', 
-                             location=location,
-                             email_schedule=email_schedule,
-                             carousel_images=carousel_images,
-                             google_places_api_key=google_places_key)
+        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
+        return [{
+            'id': img.id,
+            'filename': img.cloudinary_url or img.filename,
+            'title': img.title,
+            'description': img.description,
+            'order': img.order,
+            'is_active': img.is_active
+        } for img in images]
     except Exception as e:
-        logger.error(f"Error in home route: {e}")
-        return render_template('error.html', error=str(e))
+        logger.error(f"Error fetching carousel images: {e}")
+        return []
 
 @app.route('/map')
 @login_required
 def map():
+    """Map page route"""
     google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
     if not google_places_key:
         return render_template('error.html', error="Google Places API key not configured")
         
-    # Get user-specific location
-    location = app.tracker.get_active_location(current_user.id)
-    observations = app.tracker.get_recent_observations(current_user.id)
+    observations = app.tracker.get_recent_observations(user_id=current_user.id)
     return render_template('map.html', 
                          observations=observations,
-                         location=location,
+                         location=app.tracker.active_location,
                          google_maps_key=google_places_key)
 
 @app.route('/report')
@@ -488,7 +431,7 @@ def update_location():
         except Exception as e:
             current_app.logger.error(f"Error updating location: {str(e)}", exc_info=True)
             return jsonify({'error': 'Failed to update location'}), 500
-            
+
     except Exception as e:
         current_app.logger.error(f"Unexpected error in update_location: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error'}), 500
@@ -512,7 +455,7 @@ def chat():
         
         if not response:
             logger.warning("No response generated from chat_with_ai")
-            return jsonify({
+        return jsonify({
                 'error': 'No response generated',
                 'response': 'I apologize, but I was unable to process your question. Please try again.'
             }), 500
@@ -625,6 +568,13 @@ def delete_image(image_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/test')
+def test():
+    print("Test route called")
+    print("Template folder:", app.template_folder)
+    print("Template files:", os.listdir(app.template_folder))
+    return render_template('test.html')
+
 # Add error handlers
 @app.errorhandler(404)
 def not_found_error(error):
@@ -641,17 +591,11 @@ if __name__ == '__main__':
     parser.add_argument('--init-db', action='store_true', help='Initialize the database')
     args = parser.parse_args()
 
-    print("Starting application...")
-    
     if args.init_db:
         print("Initializing database...")
         init_db()
         print("Database initialization complete.")
         sys.exit(0)
 
-    print("Creating Flask application...")
-    app = create_app()
-    print("Flask application created")
-    
     print("Starting Flask server...")
-    app.run(host='127.0.0.1', port=5001, debug=False)  # Only listen on localhost 
+    app.run(host='127.0.0.1', port=5001, debug=True)  # Enable debug mode for development 

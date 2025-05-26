@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Subscription Required</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">To access this feature, you need to subscribe to our newsletter.</p>
+                    <div class="text-center">
+                        <div class="form-check form-switch d-inline-block">
+                            <input class="form-check-input" type="checkbox" id="newsletter-toggle" checked>
+                            <label class="form-check-label" for="newsletter-toggle">Subscribe to Newsletter</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %} 

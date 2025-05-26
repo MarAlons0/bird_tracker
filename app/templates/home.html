@@ -57,22 +57,29 @@
     
     .carousel-container {
         margin-top: 30px;
+        aspect-ratio: 1/1;
+        max-width: 100%;
     }
     
     .carousel-item {
-        height: 400px;
+        aspect-ratio: 1/1;
+        height: auto;
     }
     
     .carousel-item img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        aspect-ratio: 1/1;
     }
     
     .carousel-caption {
         background: rgba(0, 0, 0, 0.6);
         padding: 20px;
         border-radius: 10px;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
     }
     
     .action-buttons {
@@ -86,6 +93,94 @@
         min-width: 150px;
     }
 </style>
+<script>
+    // Debug logging utility
+    const DEBUG = true;
+    function debugLog(category, message, data = null) {
+        if (!DEBUG) return;
+        const timestamp = new Date().toISOString();
+        const logMessage = `[${timestamp}] [${category}] ${message}`;
+        if (data) {
+            console.log(logMessage, data);
+        } else {
+            console.log(logMessage);
+        }
+    }
+
+    // Global state
+    let currentLocation = null;
+    let googleMapsLoaded = false;
+    let domReady = false;
+    let locationElements = null;
+
+    // Initialize everything when both DOM and Google Maps are ready
+    function initializeWhenReady() {
+        debugLog('Init', 'Checking initialization requirements', {
+            domReady,
+            googleMapsLoaded
+        });
+
+        if (domReady && googleMapsLoaded) {
+            debugLog('Init', 'Both DOM and Google Maps are ready, initializing...');
+            
+            // Ensure we have all required elements
+            debugLog('DOM', 'Collecting required DOM elements');
+            locationElements = {
+                name: document.getElementById('location-name'),
+                coords: document.getElementById('location-coords'),
+                radius: document.getElementById('location-radius'),
+                updated: document.getElementById('location-updated'),
+                status: document.getElementById('location-status'),
+                radiusInput: document.getElementById('radius-input'),
+                searchInput: document.getElementById('location-search'),
+                searchButton: document.getElementById('search-button')
+            };
+
+            // Check if all elements exist
+            const missingElements = Object.entries(locationElements)
+                .filter(([_, element]) => !element)
+                .map(([key]) => key);
+
+            if (missingElements.length > 0) {
+                debugLog('Error', 'Missing required elements', missingElements);
+                return;
+            }
+
+            debugLog('DOM', 'All required elements found', Object.keys(locationElements));
+            initLocationDisplay();
+            initLocationSearch();
+        } else {
+            debugLog('Init', 'Waiting for initialization requirements', {
+                domReady,
+                googleMapsLoaded
+            });
+        }
+    }
+
+    // Global callback for Google Maps API
+    function initGoogleMaps() {
+        debugLog('GoogleMaps', 'API loaded');
+        googleMapsLoaded = true;
+        initializeWhenReady();
+    }
+
+    // Check if DOM is ready
+    if (document.readyState === 'loading') {
+        debugLog('DOM', 'Document still loading, adding event listener');
+        document.addEventListener('DOMContentLoaded', () => {
+            debugLog('DOM', 'Content loaded');
+            domReady = true;
+            initializeWhenReady();
+        });
+    } else {
+        debugLog('DOM', 'Document already loaded');
+        domReady = true;
+        initializeWhenReady();
+    }
+</script>
+<script async defer 
+    src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&callback=initGoogleMaps">
+</script>
 {% endblock %}
 
 {% block content %}
@@ -106,14 +201,25 @@
     <div class="col-md-6">
         <div class="location-card">
             <h2>Select Location</h2>
-            <p>Choose a location to view bird sightings and analysis</p>
-            <div class="input-group mb-3">
-                <input type="text" id="location-search" class="form-control" placeholder="Search for a location...">
-                <button class="btn btn-primary" type="button" id="search-button">
-                    <i class="fas fa-search"></i> Search
-                </button>
+            <div id="location-status" class="alert alert-info mb-3">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <strong>Current Location:</strong> <span id="location-name">Loading...</span>
             </div>
-            <div id="selected-location" class="mt-3"></div>
+            <div class="mb-3">
+                <p class="mb-1"><strong>Coordinates:</strong> <span id="location-coords">Loading...</span></p>
+                <p class="mb-1"><strong>Radius:</strong> <span id="location-radius">Loading...</span> miles</p>
+                <p class="mb-3"><strong>Last Updated:</strong> <span id="location-updated">Loading...</span></p>
+                <div class="input-group mb-3">
+                    <input type="text" id="location-search" class="form-control" placeholder="Search for a location...">
+                    <button class="btn btn-primary" type="button" id="search-button">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="number" id="radius-input" class="form-control" value="25" min="1" max="100" step="1">
+                    <span class="input-group-text">miles</span>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -151,94 +257,168 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const locationInput = document.getElementById('location-search');
-        const searchButton = document.getElementById('search-button');
-        const selectedLocationDiv = document.getElementById('selected-location');
+    // Update location display
+    function updateLocationDisplay(locationData) {
+        debugLog('Location', 'Updating display', locationData);
+        
+        if (!locationElements) {
+            debugLog('Error', 'Location elements not initialized');
+            return;
+        }
+
+        // Store the current location
+        currentLocation = locationData;
+        localStorage.setItem('currentLocation', JSON.stringify(locationData));
+        debugLog('Storage', 'Location saved to localStorage', locationData);
+
+        // Update the elements
+        const now = new Date().toLocaleString();
+        debugLog('DOM', 'Updating element contents');
+        
+        try {
+            locationElements.name.textContent = locationData.name;
+            locationElements.coords.textContent = `${locationData.lat.toFixed(6)}, ${locationData.lng.toFixed(6)}`;
+            locationElements.radius.textContent = locationData.radius;
+            locationElements.updated.textContent = now;
+            locationElements.radiusInput.value = locationData.radius;
+            
+            // Update status message
+            locationElements.status.className = 'alert alert-success mb-3';
+            locationElements.status.innerHTML = `
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <strong>Current Location:</strong> ${locationData.name}
+            `;
+
+            debugLog('DOM', 'Elements updated successfully');
+        } catch (error) {
+            debugLog('Error', 'Failed to update elements', error);
+        }
+
+        // Dispatch a custom event that the map can listen for
+        debugLog('Event', 'Dispatching locationUpdated event');
+        const event = new CustomEvent('locationUpdated', { detail: locationData });
+        document.dispatchEvent(event);
+    }
+
+    // Initialize location display
+    function initLocationDisplay() {
+        debugLog('Location', 'Initializing display');
+        const defaultLocation = {
+            name: 'Cincinnati, OH',
+            lat: 39.1031,
+            lng: -84.5120,
+            radius: 25
+        };
+
+        // Get stored location or use default
+        const storedLocation = localStorage.getItem('currentLocation');
+        debugLog('Storage', 'Retrieved stored location', storedLocation);
+        
+        const locationData = storedLocation ? JSON.parse(storedLocation) : defaultLocation;
+        debugLog('Location', 'Using location data', locationData);
+
+        // Store default if not already stored
+        if (!storedLocation) {
+            debugLog('Storage', 'Storing default location');
+            localStorage.setItem('currentLocation', JSON.stringify(defaultLocation));
+        }
+
+        // Update display
+        updateLocationDisplay(locationData);
+    }
+
+    // Initialize location search functionality
+    function initLocationSearch() {
+        debugLog('Search', 'Initializing search functionality');
         
         // Initialize Google Places Autocomplete
-        const autocomplete = new google.maps.places.Autocomplete(locationInput);
+        let autocomplete;
+        try {
+            debugLog('GoogleMaps', 'Initializing Places Autocomplete');
+            autocomplete = new google.maps.places.Autocomplete(locationElements.searchInput);
+            debugLog('GoogleMaps', 'Places Autocomplete initialized successfully');
+        } catch (error) {
+            debugLog('Error', 'Failed to initialize Google Places', error);
+            locationElements.status.className = 'alert alert-danger mb-3';
+            locationElements.status.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error:</strong> Could not initialize location search. Please try refreshing the page.
+            `;
+            return;
+        }
         
         // Handle location selection
+        debugLog('Search', 'Setting up place_changed listener');
         autocomplete.addListener('place_changed', function() {
+            debugLog('Search', 'Place selection changed');
             const place = autocomplete.getPlace();
+            debugLog('Search', 'Selected place', place);
+            
             if (place.geometry) {
-                const location = {
-                    name: place.name,
+                const radius = parseInt(locationElements.radiusInput.value) || 25;
+                const locationData = {
+                    name: place.formatted_address || place.name,
                     lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng()
+                    lng: place.geometry.location.lng(),
+                    radius: radius
                 };
                 
-                // Update selected location display
-                selectedLocationDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <strong>Selected Location:</strong> ${place.name}
-                    </div>
-                `;
-                
-                // Store location in session
-                fetch('/api/set-location', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(location)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Location saved successfully');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error saving location:', error);
-                });
+                debugLog('Location', 'New location selected', locationData);
+                updateLocationDisplay(locationData);
+            } else {
+                debugLog('Error', 'Selected place has no geometry', place);
             }
         });
         
         // Handle search button click
-        searchButton.addEventListener('click', function() {
-            if (locationInput.value) {
+        debugLog('Search', 'Setting up search button click handler');
+        locationElements.searchButton.addEventListener('click', function() {
+            debugLog('Search', 'Search button clicked');
+            if (locationElements.searchInput.value) {
+                debugLog('Search', 'Initiating geocode search', locationElements.searchInput.value);
                 const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: locationInput.value }, function(results, status) {
+                geocoder.geocode({ address: locationElements.searchInput.value }, function(results, status) {
+                    debugLog('Search', 'Geocode results', { status, results });
+                    
                     if (status === 'OK' && results[0]) {
                         const place = results[0];
-                        const location = {
+                        const radius = parseInt(locationElements.radiusInput.value) || 25;
+                        const locationData = {
                             name: place.formatted_address,
                             lat: place.geometry.location.lat(),
-                            lng: place.geometry.location.lng()
+                            lng: place.geometry.location.lng(),
+                            radius: radius
                         };
                         
-                        // Update selected location display
-                        selectedLocationDiv.innerHTML = `
-                            <div class="alert alert-success">
-                                <strong>Selected Location:</strong> ${place.formatted_address}
-                            </div>
+                        debugLog('Location', 'New location from geocode', locationData);
+                        updateLocationDisplay(locationData);
+                    } else {
+                        debugLog('Error', 'Geocode failed', { status, results });
+                        locationElements.status.className = 'alert alert-danger mb-3';
+                        locationElements.status.innerHTML = `
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> Could not find location. Please try a different search term.
                         `;
-                        
-                        // Store location in session
-                        fetch('/api/set-location', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(location)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                console.log('Location saved successfully');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error saving location:', error);
-                        });
                     }
                 });
+            } else {
+                debugLog('Search', 'Search attempted with empty input');
             }
         });
-    });
+
+        // Handle radius changes
+        debugLog('Search', 'Setting up radius change handler');
+        locationElements.radiusInput.addEventListener('change', function() {
+            debugLog('Search', 'Radius changed', this.value);
+            if (currentLocation) {
+                currentLocation.radius = parseInt(this.value) || 25;
+                debugLog('Location', 'Updating location with new radius', currentLocation);
+                updateLocationDisplay(currentLocation);
+            } else {
+                debugLog('Error', 'Attempted to update radius with no current location');
+            }
+        });
+    }
 </script>
 {% endblock %} 

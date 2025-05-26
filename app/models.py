@@ -1,17 +1,15 @@
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from app.extensions import db
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
-db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255))
+    username = db.Column(db.String(64), unique=True, index=True)
+    email = db.Column(db.String(120), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
     is_approved = db.Column(db.Boolean, default=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
@@ -19,6 +17,7 @@ class User(UserMixin, db.Model):
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
     newsletter_subscription = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
 
@@ -61,7 +60,7 @@ class Location(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     radius = db.Column(db.Float, nullable=False)
     is_active = db.Column(db.Boolean, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     place_id = db.Column(db.String(255), nullable=True)  # For Google Places API
     
@@ -126,4 +125,55 @@ class CarouselImage(db.Model):
     user_id = db.Column(db.Integer)
     
     def __repr__(self):
-        return f'<CarouselImage {self.title}>' 
+        return f'<CarouselImage {self.title}>'
+
+class BirdSightingCache(db.Model):
+    """Cache for eBird observations to reduce API calls."""
+    __tablename__ = 'bird_sighting_cache'
+
+    id = db.Column(db.Integer, primary_key=True)
+    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    observations = db.Column(db.JSON, nullable=False)  # Store the full eBird response
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)  # When the cache should be invalidated
+
+    # Relationships
+    location = db.relationship('Location', backref='sighting_caches')
+    user = db.relationship('User', backref='sighting_caches')
+
+    def __repr__(self):
+        return f'<BirdSightingCache {self.id} for location {self.location_id}>'
+
+    @classmethod
+    def get_valid_cache(cls, user_id, location_id):
+        """Get valid cache entry for user and location."""
+        now = datetime.utcnow()
+        return cls.query.filter(
+            cls.user_id == user_id,
+            cls.location_id == location_id,
+            cls.expires_at > now
+        ).first()
+
+    @classmethod
+    def create_cache(cls, user_id, location_id, observations, cache_duration=3600):
+        """Create a new cache entry."""
+        now = datetime.utcnow()
+        expires_at = now + timedelta(seconds=cache_duration)
+        
+        # Delete any existing cache for this user and location
+        cls.query.filter_by(
+            user_id=user_id,
+            location_id=location_id
+        ).delete()
+        
+        # Create new cache entry
+        cache = cls(
+            user_id=user_id,
+            location_id=location_id,
+            observations=observations,
+            expires_at=expires_at
+        )
+        db.session.add(cache)
+        db.session.commit()
+        return cache 
