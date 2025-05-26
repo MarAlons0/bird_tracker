@@ -14,6 +14,7 @@ config = context.config
 fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
 
+
 def get_engine():
     try:
         # this works with Flask-SQLAlchemy<3 and Alchemical
@@ -33,10 +34,8 @@ def get_engine_url():
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.extensions import db
-# Import all models to ensure they are registered with SQLAlchemy
-from app.models import User, Location, BirdSighting, UserPreferences, RegistrationRequest, CarouselImage, BirdSightingCache, NewsletterSubscription
-target_metadata = db.metadata
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
 config.set_main_option('sqlalchemy.url', get_engine_url())
 target_db = current_app.extensions['migrate'].db
 
