@@ -50,15 +50,27 @@
         /* Mobile navigation menu styles */
         @media (max-width: 991.98px) {
             .navbar-collapse {
-                background-color: rgba(0, 0, 0, 0.9);
+                background-color: #000 !important;
                 padding: 1rem;
                 border-radius: 0.5rem;
                 margin-top: 0.5rem;
+                position: absolute;
+                width: 100%;
+                left: 0;
+                z-index: 1000;
+            }
+            
+            .navbar-nav {
+                background-color: #000 !important;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
             }
             
             .navbar-nav .nav-link {
                 color: white !important;
-                padding: 0.5rem 1rem;
+                padding: 0.75rem 1rem;
+                font-size: 1.1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             
             .navbar-nav .nav-link:hover {
@@ -68,6 +80,10 @@
             
             .navbar-nav .nav-item {
                 margin: 0.25rem 0;
+            }
+            
+            .navbar-nav .nav-item:last-child .nav-link {
+                border-bottom: none;
             }
         }
         
