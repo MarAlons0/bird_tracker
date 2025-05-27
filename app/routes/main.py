@@ -306,17 +306,25 @@ def update_location():
             return jsonify({'error': 'Missing required location data'}), 400
 
         # Get or create location
-        location = Location.query.filter_by(place_id=place_id).first()
+        location = Location.query.filter_by(place_id=place_id, user_id=current_user.id).first()
         if not location:
             location = Location(
                 place_id=place_id,
                 name=name,
                 latitude=latitude,
                 longitude=longitude,
-                radius=radius
+                radius=radius,
+                is_active=True,
+                user_id=current_user.id  # Ensure user_id is set
             )
             db.session.add(location)
-            db.session.commit()
+        else:
+            # Update existing location
+            location.name = name
+            location.latitude = latitude
+            location.longitude = longitude
+            location.radius = radius
+            location.is_active = True
 
         # Update user preferences
         user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
