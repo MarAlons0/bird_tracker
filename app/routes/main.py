@@ -415,4 +415,51 @@ def refresh_sightings():
         current_app.logger.error(f"Error refreshing sightings: {str(e)}")
         return jsonify({
             'error': str(e)
+        }), 500
+
+@main.route('/api/chat', methods=['POST'])
+@login_required
+def chat():
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        current_app.logger.info(f"Processing chat message: {message}")
+        
+        # Get recent observations for context
+        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+        current_app.logger.info(f"Retrieved {len(observations)} observations for context")
+        
+        # Format observations for context
+        context = None
+        if observations:
+            formatted_observations = []
+            for obs in observations:
+                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                formatted_observations.append(formatted_obs)
+            context = "\n".join(formatted_observations)
+        
+        # Use the tracker's chat_with_ai method
+        response = current_app.tracker.chat_with_ai(message, context)
+        current_app.logger.info(f"Received response from chat_with_ai, length: {len(response) if response else 0}")
+        
+        if not response:
+            current_app.logger.warning("No response generated from chat_with_ai")
+            return jsonify({
+                'error': 'No response generated',
+                'response': 'I apologize, but I was unable to process your question. Please try again.'
+            }), 500
+        
+        return jsonify({'response': response})
+
+    except Exception as e:
+        current_app.logger.error(f"Chat error: {str(e)}")
+        current_app.logger.error(f"Error type: {type(e)}")
+        import traceback
+        current_app.logger.error(f"Stack trace: {traceback.format_exc()}")
+        return jsonify({
+            'error': str(e),
+            'response': 'I apologize, but I encountered an error while processing your question. Please try again later.'
         }), 500 
