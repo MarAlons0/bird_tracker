@@ -99,7 +99,7 @@ function sendMessage() {
     const typingIndicator = addMessage('...', 'bot');
     
     // Send to backend and get response
-    fetch('/api/chat', {
+    fetch('/main/api/chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
