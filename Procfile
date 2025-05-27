@@ -1,2 +1,2 @@
 web: gunicorn "app:create_app()"
-scheduler: python scheduler.py % 
+scheduler: python -c "from app.scheduler import init_scheduler; init_scheduler()" 
