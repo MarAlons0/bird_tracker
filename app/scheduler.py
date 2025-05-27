@@ -5,6 +5,7 @@ from app import create_app
 from app.newsletter.services import NewsletterService
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,13 @@ def init_scheduler():
         
         scheduler.start()
         logger.info("Started weekly report scheduler (runs every Monday at 9:00 AM)")
+        
+        # Keep the scheduler running
+        try:
+            while True:
+                time.sleep(60)
+        except (KeyboardInterrupt, SystemExit):
+            scheduler.shutdown()
         
     except Exception as e:
         logger.error(f"Error starting weekly reports: {str(e)}")
