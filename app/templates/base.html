@@ -54,10 +54,13 @@
                 padding: 1rem;
                 border-radius: 0.5rem;
                 margin-top: 0.5rem;
-                position: absolute;
-                width: 100%;
+                position: fixed;
+                top: 56px; /* Height of the navbar */
                 left: 0;
+                right: 0;
                 z-index: 1000;
+                max-height: calc(100vh - 56px);
+                overflow-y: auto;
             }
             
             .navbar-nav {
@@ -84,6 +87,16 @@
             
             .navbar-nav .nav-item:last-child .nav-link {
                 border-bottom: none;
+            }
+
+            /* Ensure the navbar has a fixed height */
+            .navbar {
+                height: 56px;
+            }
+
+            /* Add padding to the main content to account for fixed navbar */
+            .main-content {
+                padding-top: 56px;
             }
         }
         
