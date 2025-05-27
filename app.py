@@ -376,101 +376,45 @@ def get_basic_analysis():
 @app.route('/api/location', methods=['POST'])
 @login_required
 def update_location():
-    """Update the user's location"""
     try:
-        if not request.is_json:
-            current_app.logger.error("No JSON data received in location update request")
-            return jsonify({'error': 'No data received'}), 400
-            
         data = request.get_json()
-        current_app.logger.info(f"Received location update request: {data}")
+        location = data.get('location')
+        if not location:
+            return jsonify({'error': 'No location provided'}), 400
         
-        # Extract location data
-        lat = data.get('latitude')
-        lng = data.get('longitude')
-        name = data.get('name')
-        radius = data.get('radius', 25)  # Default to 25 miles if not specified
+        # Update user's active location
+        user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+        if not user_pref:
+            user_pref = UserPreferences(user_id=current_user.id)
+            db.session.add(user_pref)
         
-        # Validate required data
-        if not all([lat, lng, name]):
-            current_app.logger.error(f"Missing required location data: lat={lat}, lng={lng}, name={name}")
-            return jsonify({'error': 'Missing required location data'}), 400
-            
-        try:
-            # Update location
-            success = app.tracker.set_location(
-                user_id=current_user.id,
-                name=name,
-                lat=lat,
-                lng=lng,
-                radius=radius
+        # Check if location exists
+        existing_location = Location.query.filter_by(
+            name=location['name'],
+            latitude=location['lat'],
+            longitude=location['lng']
+        ).first()
+        
+        if existing_location:
+            user_pref.active_location_id = existing_location.id
+        else:
+            # Create new location
+            new_location = Location(
+                name=location['name'],
+                latitude=location['lat'],
+                longitude=location['lng'],
+                radius=location.get('radius', 25.0),
+                is_active=True
             )
-            
-            if not success:
-                current_app.logger.error("Failed to update location in tracker")
-                return jsonify({'error': 'Failed to update location'}), 500
-                
-            # Get updated location and recent observations
-            try:
-                location = app.tracker.get_active_location(current_user.id)
-                if not location:
-                    current_app.logger.error("Failed to get updated location")
-                    return jsonify({'error': 'Failed to get updated location'}), 500
-                    
-                recent_observations = app.tracker.get_recent_observations(user_id=current_user.id)
-                
-                return jsonify({
-                    'location': location,
-                    'observations': recent_observations
-                })
-                
-            except Exception as e:
-                current_app.logger.error(f"Error getting location data: {str(e)}", exc_info=True)
-                return jsonify({'error': 'Failed to get location data'}), 500
-                
-        except Exception as e:
-            current_app.logger.error(f"Error updating location: {str(e)}", exc_info=True)
-            return jsonify({'error': 'Failed to update location'}), 500
-
+            db.session.add(new_location)
+            db.session.flush()  # Get the ID of the new location
+            user_pref.active_location_id = new_location.id
+        
+        db.session.commit()
+        return jsonify({'message': 'Location updated successfully'})
     except Exception as e:
-        current_app.logger.error(f"Unexpected error in update_location: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error'}), 500
-
-@app.route('/api/chat', methods=['POST'])
-def chat():
-    try:
-        message = request.json.get('message')
-        if not message:
-            return jsonify({'error': 'No message provided'}), 400
-
-        logger.info(f"Processing chat message: {message}")
-        
-        # Get recent observations for context
-        observations = app.tracker.get_recent_observations(current_user.id if current_user.is_authenticated else None)
-        logger.info(f"Retrieved {len(observations)} observations for context")
-        
-        # Use the tracker's chat_with_ai method
-        response = app.tracker.chat_with_ai(message, current_user.id if current_user.is_authenticated else None)
-        logger.info(f"Received response from chat_with_ai, length: {len(response) if response else 0}")
-        
-        if not response:
-            logger.warning("No response generated from chat_with_ai")
-        return jsonify({
-                'error': 'No response generated',
-                'response': 'I apologize, but I was unable to process your question. Please try again.'
-            }), 500
-        
-        return jsonify({'response': response})
-
-    except Exception as e:
-        logger.error(f"Chat error: {str(e)}")
-        logger.error(f"Error type: {type(e)}")
-        import traceback
-        logger.error(f"Stack trace: {traceback.format_exc()}")
-        return jsonify({
-            'error': str(e),
-            'response': 'I apologize, but I encountered an error while processing your question. Please try again later.'
-        }), 500
+        logger.error(f"Error updating location: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/email-schedule', methods=['POST'])
 def update_email_schedule():
