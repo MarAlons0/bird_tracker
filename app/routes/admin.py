@@ -57,11 +57,54 @@ def dashboard():
                          total_carousel_images=total_carousel_images,
                          active_carousel_images=active_carousel_images)
 
-@admin.route('/users')
+@admin.route('/users', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def users():
     """Admin page for managing users"""
+    if request.method == 'POST':
+        action = request.form.get('action')
+        user_id = request.form.get('user_id')
+        
+        if action == 'toggle_status':
+            # Update user status using raw SQL
+            db.session.execute(
+                text("""
+                    UPDATE users
+                    SET is_active = NOT is_active
+                    WHERE id = :user_id
+                """),
+                {"user_id": user_id}
+            )
+            db.session.commit()
+            flash('User status updated successfully.', 'success')
+                
+        elif action == 'delete_user':
+            # Delete user using raw SQL
+            db.session.execute(
+                text("DELETE FROM users WHERE id = :user_id"),
+                {"user_id": user_id}
+            )
+            db.session.commit()
+            flash('User deleted successfully.', 'success')
+            
+        elif action == 'reset_password':
+            # Reset user password to default
+            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'admin123')
+            db.session.execute(
+                text("""
+                    UPDATE users
+                    SET password_hash = :password_hash
+                    WHERE id = :user_id
+                """),
+                {
+                    "password_hash": generate_password_hash(default_password),
+                    "user_id": user_id
+                }
+            )
+            db.session.commit()
+            flash('User password has been reset to default.', 'success')
+    
     # Get all users using raw SQL
     result = db.session.execute(
         text("""
