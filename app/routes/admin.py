@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from app.models import db, User, RegistrationRequest, CarouselImage
+from app.models import db, User, RegistrationRequest, CarouselImage, Location, UserPreferences
 from flask_mail import Message
 from datetime import datetime
 from utils.file_upload import save_image, delete_image
@@ -96,6 +96,20 @@ def users():
                     }
                 )
                 db.session.commit()
+                
+                # Ensure Cincinnati exists as a location
+                cincinnati = Location.query.filter_by(name='Cincinnati, OH').first()
+                if not cincinnati:
+                    cincinnati = Location(name='Cincinnati, OH', latitude=39.1031, longitude=-84.5120, radius=25, is_active=True)
+                    db.session.add(cincinnati)
+                    db.session.commit()
+                
+                # Create UserPreferences for the new user with Cincinnati as default and active location
+                new_user_id = db.session.execute(text("SELECT id FROM users WHERE email = :email"), {"email": email}).fetchone()[0]
+                prefs = UserPreferences(user_id=new_user_id, active_location_id=cincinnati.id, default_location_id=cincinnati.id)
+                db.session.add(prefs)
+                db.session.commit()
+                
                 flash('User created successfully.', 'success')
                 
         elif action == 'toggle_status':
