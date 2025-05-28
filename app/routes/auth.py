@@ -143,8 +143,16 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
-    logout_user()
-    return redirect(url_for('main.index'))
+    try:
+        logger.info(f"User logged out: {current_user.email}")
+        session.clear()  # Clear all session data
+        logout_user()
+        flash("You have been logged out.", "success")
+        return redirect(url_for('auth.login'))
+    except Exception as e:
+        logger.error(f"Error during logout: {str(e)}")
+        flash("An error occurred during logout. Please try again.", "error")
+        return redirect(url_for('main.index'))
 
 @auth.route('/request_registration', methods=['GET', 'POST'])
 def request_registration():
