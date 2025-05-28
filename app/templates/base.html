@@ -129,6 +129,12 @@
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         {% if current_user.is_authenticated %}
+                            <!-- DEBUG: Show current user and admin status -->
+                            <li class="nav-item">
+                                <span class="nav-link text-warning" style="font-size: 0.9em;">
+                                    [DEBUG] {{ current_user.email }} | Admin: {{ current_user.is_admin }}
+                                </span>
+                            </li>
                             {% if current_user.is_admin %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin Panel</a>
