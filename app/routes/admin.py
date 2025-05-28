@@ -381,4 +381,49 @@ def delete_carousel_image(image_id):
         db.session.rollback()
         flash(f'Error deleting image: {str(e)}', 'error')
     
-    return redirect(url_for('admin.manage_carousel')) 
+    return redirect(url_for('admin.manage_carousel'))
+
+# Add this route temporarily to fix user preferences
+@admin.route('/fix-preferences/<email>')
+@login_required
+@admin_required
+def fix_preferences(email):
+    """Temporary route to fix user preferences"""
+    try:
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Get or create Cincinnati location
+        cincinnati = Location.query.filter_by(name='Cincinnati, OH').first()
+        if not cincinnati:
+            cincinnati = Location(
+                name='Cincinnati, OH',
+                latitude=39.1031,
+                longitude=-84.5120,
+                radius=25,
+                is_active=True
+            )
+            db.session.add(cincinnati)
+            db.session.commit()
+
+        # Get or create user preferences
+        prefs = UserPreferences.query.filter_by(user_id=user.id).first()
+        if not prefs:
+            prefs = UserPreferences(user_id=user.id)
+            db.session.add(prefs)
+
+        # Set Cincinnati as both active and default location
+        prefs.active_location_id = cincinnati.id
+        prefs.default_location_id = cincinnati.id
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Updated preferences for {email} with Cincinnati location',
+            'user_id': user.id,
+            'preferences_id': prefs.id,
+            'location_id': cincinnati.id
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500 
