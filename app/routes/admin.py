@@ -66,7 +66,39 @@ def users():
         action = request.form.get('action')
         user_id = request.form.get('user_id')
         
-        if action == 'toggle_status':
+        if action == 'create_user':
+            email = request.form.get('email')
+            username = request.form.get('username')
+            password = request.form.get('password')
+            is_admin = request.form.get('is_admin') == 'true'
+            
+            # Check if user already exists
+            existing_user = db.session.execute(
+                text("SELECT id FROM users WHERE email = :email OR username = :username"),
+                {"email": email, "username": username}
+            ).fetchone()
+            
+            if existing_user:
+                flash('A user with this email or username already exists.', 'error')
+            else:
+                # Create new user
+                db.session.execute(
+                    text("""
+                        INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, registration_date)
+                        VALUES (:email, :username, :password_hash, :is_admin, true, true, :registration_date)
+                    """),
+                    {
+                        "email": email,
+                        "username": username,
+                        "password_hash": generate_password_hash(password),
+                        "is_admin": is_admin,
+                        "registration_date": datetime.utcnow()
+                    }
+                )
+                db.session.commit()
+                flash('User created successfully.', 'success')
+                
+        elif action == 'toggle_status':
             # Update user status using raw SQL
             db.session.execute(
                 text("""
