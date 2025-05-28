@@ -41,15 +41,6 @@
                     {% for image in images %}
                     <div class="col-md-4 mb-4">
                         <div class="card">
-                            <!-- Debug info -->
-                            <div class="small text-muted mb-2">
-                                ID: {{ image.id }}<br>
-                                Filename: {{ image.filename }}<br>
-                                Cloudinary URL: {{ image.cloudinary_url }}<br>
-                                Order: {{ image.order }}<br>
-                                Active: {{ image.is_active }}
-                            </div>
-                            
                             <img src="{{ image.cloudinary_url }}" 
                                  class="card-img-top" 
                                  alt="{{ image.title }}" 
