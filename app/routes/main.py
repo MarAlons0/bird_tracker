@@ -53,92 +53,99 @@ def profile():
 @login_required
 def map():
     """Render the map page showing bird observations for the selected location."""
-    # Get API key and ensure it's not None
-    api_key = current_app.config.get('GOOGLE_PLACES_API_KEY')
-    if not api_key:
-        current_app.logger.error("Google Places API Key is not set!")
-        api_key = os.environ.get('GOOGLE_PLACES_API_KEY', '')
-    
-    if not api_key:
-        return render_template('error.html', error="Google Places API key not configured")
-    
-    # Get user's location from preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    
+    # If no preferences exist or no active location is set, create them with Cincinnati as default
     if not user_pref or not user_pref.active_location_id:
-        # Set default location to Cincinnati, OH
-        default_location = Location.query.filter_by(name='Cincinnati, OH').first()
+        # Check if Cincinnati location exists
+        default_location = Location.query.filter_by(name="Cincinnati, OH").first()
+        
+        # If Cincinnati doesn't exist, create it
         if not default_location:
             default_location = Location(
-                name='Cincinnati, OH',
+                name="Cincinnati, OH",
                 latitude=39.1031,
-                longitude=-84.5120,
+                longitude=-84.512,
                 radius=25,
-                is_active=True
+                is_active=True,
+                user_id=current_user.id  # Set the user_id to the current user
             )
             db.session.add(default_location)
-            db.session.commit()
+            db.session.flush()  # Flush to get the location ID
         
         # Create user preferences if they don't exist
         if not user_pref:
-            user_pref = UserPreferences(user_id=current_user.id)
+            user_pref = UserPreferences(
+                user_id=current_user.id,
+                active_location_id=default_location.id,
+                default_location_id=default_location.id
+            )
             db.session.add(user_pref)
+        else:
+            # Update existing preferences
+            user_pref.active_location_id = default_location.id
+            user_pref.default_location_id = default_location.id
         
-        # Set Cincinnati as both active and default location
-        user_pref.active_location_id = default_location.id
-        user_pref.default_location_id = default_location.id
         db.session.commit()
     
-    location = Location.query.get(user_pref.active_location_id)
+    # Get the active location
+    active_location = Location.query.get(user_pref.active_location_id)
     
-    # Get recent observations
-    tracker = BirdSightingTracker()
-    observations = tracker.get_recent_observations(current_user.id)
+    # Get all locations for the user
+    locations = Location.query.filter_by(user_id=current_user.id).all()
     
     return render_template('map.html', 
-                         location=location,
-                         observations=observations,
-                         config=current_app.config)
+                         active_location=active_location,
+                         locations=locations)
 
 @main.route('/analysis')
 @login_required
 def analysis():
     """Render the AI analysis page with chatbot interface."""
-    # Get user's location from preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    
+    # If no preferences exist or no active location is set, create them with Cincinnati as default
     if not user_pref or not user_pref.active_location_id:
-        # Set default location to Cincinnati, OH
-        default_location = Location.query.filter_by(name='Cincinnati, OH').first()
+        # Check if Cincinnati location exists
+        default_location = Location.query.filter_by(name="Cincinnati, OH").first()
+        
+        # If Cincinnati doesn't exist, create it
         if not default_location:
             default_location = Location(
-                name='Cincinnati, OH',
+                name="Cincinnati, OH",
                 latitude=39.1031,
-                longitude=-84.5120,
+                longitude=-84.512,
                 radius=25,
-                is_active=True
+                is_active=True,
+                user_id=current_user.id  # Set the user_id to the current user
             )
             db.session.add(default_location)
-            db.session.commit()
+            db.session.flush()  # Flush to get the location ID
         
         # Create user preferences if they don't exist
         if not user_pref:
-            user_pref = UserPreferences(user_id=current_user.id)
+            user_pref = UserPreferences(
+                user_id=current_user.id,
+                active_location_id=default_location.id,
+                default_location_id=default_location.id
+            )
             db.session.add(user_pref)
+        else:
+            # Update existing preferences
+            user_pref.active_location_id = default_location.id
+            user_pref.default_location_id = default_location.id
         
-        # Set Cincinnati as both active and default location
-        user_pref.active_location_id = default_location.id
-        user_pref.default_location_id = default_location.id
         db.session.commit()
     
-    location = Location.query.get(user_pref.active_location_id)
+    # Get the active location
+    active_location = Location.query.get(user_pref.active_location_id)
     
-    # Get recent observations for initial analysis
-    tracker = BirdSightingTracker()
-    observations = tracker.get_recent_observations(current_user.id)
+    # Get all locations for the user
+    locations = Location.query.filter_by(user_id=current_user.id).all()
     
-    return render_template('analysis.html',
-                         location=location,
-                         observations=observations,
-                         config=current_app.config)
+    return render_template('analysis.html', 
+                         active_location=active_location,
+                         locations=locations)
 
 @main.route('/api/status')
 @login_required
