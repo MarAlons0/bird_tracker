@@ -222,8 +222,12 @@
                     </button>
                 </div>
                 <div class="input-group mb-3">
-                    <input type="number" id="radius-input" class="form-control" value="25" min="1" max="100" step="1">
-                    <span class="input-group-text">miles</span>
+                    <select id="radius-input" class="form-control">
+                        <option value="1">1 mile</option>
+                        <option value="5">5 miles</option>
+                        <option value="25" selected>25 miles</option>
+                        <option value="50">50 miles</option>
+                    </select>
                 </div>
             </div>
         </div>

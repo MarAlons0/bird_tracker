@@ -171,14 +171,14 @@ def init_db():
                     "name": "Cincinnati",
                     "latitude": 39.1031,
                     "longitude": -84.5120,
-                    "radius": 50.0,
+                    "radius": 25.0,
                     "is_active": True
                 },
                 {
                     "name": "Zion National Park",
                     "latitude": 37.2982,
                     "longitude": -113.0263,
-                    "radius": 50.0,
+                    "radius": 25.0,
                     "is_active": True
                 },
                 {
@@ -192,7 +192,7 @@ def init_db():
                     "name": "Moab",
                     "latitude": 38.5733,
                     "longitude": -109.5498,
-                    "radius": 50.0,
+                    "radius": 25.0,
                     "is_active": True
                 },
                 {
@@ -213,14 +213,14 @@ def init_db():
                     "name": "Denver",
                     "latitude": 39.7392,
                     "longitude": -104.9903,
-                    "radius": 50.0,
+                    "radius": 25.0,
                     "is_active": True
                 },
                 {
                     "name": "Baton Rouge",
                     "latitude": 30.4515,
                     "longitude": -91.1871,
-                    "radius": 50.0,
+                    "radius": 25.0,
                     "is_active": True
                 }
             ]

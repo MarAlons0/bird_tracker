@@ -66,7 +66,7 @@ def map():
                 name="Cincinnati, OH",
                 latitude=39.1031,
                 longitude=-84.512,
-                radius=25,
+                radius=25,  # Default radius of 25 miles
                 is_active=True,
                 user_id=current_user.id  # Set the user_id to the current user
             )
@@ -115,7 +115,7 @@ def analysis():
                 name="Cincinnati, OH",
                 latitude=39.1031,
                 longitude=-84.512,
-                radius=25,
+                radius=25,  # Default radius of 25 miles
                 is_active=True,
                 user_id=current_user.id  # Set the user_id to the current user
             )
@@ -350,6 +350,11 @@ def update_location():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         radius = data.get('radius', 25)  # Default radius of 25 miles
+
+        # Validate radius is one of the allowed values
+        allowed_radii = [1, 5, 25, 50]
+        if radius not in allowed_radii:
+            return jsonify({'error': 'Invalid radius. Must be one of: 1, 5, 25, or 50 miles'}), 400
 
         if not all([place_id, name, latitude, longitude]):
             return jsonify({'error': 'Missing required location data'}), 400
