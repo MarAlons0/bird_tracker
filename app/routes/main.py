@@ -65,7 +65,28 @@ def map():
     # Get user's location from preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
     if not user_pref or not user_pref.active_location_id:
-        return redirect(url_for('main.home'))  # Redirect to home if no location selected
+        # Set default location to Cincinnati, OH
+        default_location = Location.query.filter_by(name='Cincinnati, OH').first()
+        if not default_location:
+            default_location = Location(
+                name='Cincinnati, OH',
+                latitude=39.1031,
+                longitude=-84.5120,
+                radius=25,
+                is_active=True
+            )
+            db.session.add(default_location)
+            db.session.commit()
+        
+        # Create user preferences if they don't exist
+        if not user_pref:
+            user_pref = UserPreferences(user_id=current_user.id)
+            db.session.add(user_pref)
+        
+        # Set Cincinnati as both active and default location
+        user_pref.active_location_id = default_location.id
+        user_pref.default_location_id = default_location.id
+        db.session.commit()
     
     location = Location.query.get(user_pref.active_location_id)
     
@@ -85,7 +106,28 @@ def analysis():
     # Get user's location from preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
     if not user_pref or not user_pref.active_location_id:
-        return redirect(url_for('main.home'))  # Redirect to home if no location selected
+        # Set default location to Cincinnati, OH
+        default_location = Location.query.filter_by(name='Cincinnati, OH').first()
+        if not default_location:
+            default_location = Location(
+                name='Cincinnati, OH',
+                latitude=39.1031,
+                longitude=-84.5120,
+                radius=25,
+                is_active=True
+            )
+            db.session.add(default_location)
+            db.session.commit()
+        
+        # Create user preferences if they don't exist
+        if not user_pref:
+            user_pref = UserPreferences(user_id=current_user.id)
+            db.session.add(user_pref)
+        
+        # Set Cincinnati as both active and default location
+        user_pref.active_location_id = default_location.id
+        user_pref.default_location_id = default_location.id
+        db.session.commit()
     
     location = Location.query.get(user_pref.active_location_id)
     
