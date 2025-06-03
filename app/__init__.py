@@ -8,7 +8,7 @@ from app.extensions import db, mail, migrate, login_manager
 
 logger = logging.getLogger(__name__)
 
-def create_app(config_class=Config):
+def create_app():
     """Create and configure the Flask application."""
     app = Flask(__name__, 
                 static_folder='static',
