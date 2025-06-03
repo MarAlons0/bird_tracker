@@ -491,7 +491,8 @@ def chat():
         if observations:
             formatted_observations = []
             for obs in observations:
-                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                how_many = obs.get('howMany', 1)  # Default to 1 if howMany is not present
+                formatted_obs = f"{obs['comName']} ({how_many}) at {obs['locName']} on {obs['obsDt']}"
                 formatted_observations.append(formatted_obs)
             context = "\n".join(formatted_observations)
         
