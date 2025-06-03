@@ -499,9 +499,16 @@ def chat():
         if observations:
             formatted_observations = []
             for obs in observations:
-                how_many = obs.get('howMany', 1)  # Default to 1 if howMany is not present
-                formatted_obs = f"{obs['comName']} ({how_many}) at {obs['locName']} on {obs['obsDt']}"
-                formatted_observations.append(formatted_obs)
+                # Handle both eBird API format and frontend format
+                bird_name = obs.get('comName') or obs.get('bird_name')
+                location = obs.get('locName') or obs.get('location')
+                timestamp = obs.get('obsDt') or obs.get('timestamp')
+                how_many = obs.get('howMany') or obs.get('count', 1)
+                
+                if bird_name and location and timestamp:
+                    formatted_obs = f"{bird_name} ({how_many}) at {location} on {timestamp}"
+                    formatted_observations.append(formatted_obs)
+            
             context = "\n".join(formatted_observations)
             current_app.logger.info(f"Formatted {len(formatted_observations)} observations for context")
         
