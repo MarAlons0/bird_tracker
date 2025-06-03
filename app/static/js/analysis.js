@@ -60,6 +60,10 @@ async function loadAIAnalysis() {
         const observations = await response.json();
         console.log('Fetched observations:', observations);
         
+        // Store observations for chat
+        window.analysisObservations = observations;
+        console.log('Stored observations for chat:', window.analysisObservations);
+        
         if (!observations || observations.length === 0) {
             analysisContent.innerHTML = `
                 <div class="alert alert-warning">
@@ -139,13 +143,20 @@ async function sendMessage() {
     addMessage(message, 'user');
     input.value = '';
     
+    // Retrieve the observations that were fetched for the AI analysis
+    const observations = window.analysisObservations || [];
+    console.log('Using observations for chat:', observations);
+    
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ 
+                message: message,
+                observations: observations
+            })
         });
         
         if (!response.ok) {

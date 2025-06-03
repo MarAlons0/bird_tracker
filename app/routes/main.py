@@ -482,9 +482,17 @@ def chat():
         
         current_app.logger.info(f"Processing chat message: {message}")
         
-        # Get recent observations for context
-        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
-        current_app.logger.info(f"Retrieved {len(observations)} observations for context")
+        # Check if observations were provided in the request
+        observations = data.get('observations')
+        current_app.logger.info(f"Received observations in request: {observations is not None}")
+        if observations:
+            current_app.logger.info(f"Number of observations provided: {len(observations)}")
+        
+        if not observations:
+            # If no observations provided, fetch recent observations for context
+            current_app.logger.info("No observations provided, fetching from eBird")
+            observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+            current_app.logger.info(f"Retrieved {len(observations)} observations from eBird")
         
         # Format observations for context
         context = None
@@ -495,6 +503,7 @@ def chat():
                 formatted_obs = f"{obs['comName']} ({how_many}) at {obs['locName']} on {obs['obsDt']}"
                 formatted_observations.append(formatted_obs)
             context = "\n".join(formatted_observations)
+            current_app.logger.info(f"Formatted {len(formatted_observations)} observations for context")
         
         # Use the tracker's chat_with_ai method
         response = current_app.tracker.chat_with_ai(message, context)
