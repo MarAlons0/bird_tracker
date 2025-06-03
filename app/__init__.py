@@ -8,7 +8,7 @@ from app.extensions import db, mail, migrate, login_manager
 
 logger = logging.getLogger(__name__)
 
-def create_app():
+def create_app(config_class=Config):
     """Create and configure the Flask application."""
     app = Flask(__name__, 
                 static_folder='static',
@@ -61,22 +61,16 @@ def create_app():
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
     
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-    
-    @login_manager.user_loader
-    def load_user(user_id):
-        from app.models import User
-        return User.query.get(int(user_id))
+    # Initialize the bird tracker
+    from app.bird_tracker import BirdSightingTracker
+    app.tracker = BirdSightingTracker(app=app)
+    app.tracker._initialize_claude()  # Explicitly initialize Claude
     
     # Register blueprints
-    from app.routes.main import main
-    from app.routes.auth import auth
-    from app.routes.admin import admin
-    app.register_blueprint(main)
-    app.register_blueprint(auth)
-    app.register_blueprint(admin, url_prefix='/admin')
+    from app.routes import main, auth, api
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(api.bp)
     
     logger.info("Application initialized successfully")
     return app
