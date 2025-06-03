@@ -67,10 +67,9 @@ def create_app():
     app.tracker._initialize_claude()  # Explicitly initialize Claude
     
     # Register blueprints
-    from app.routes import main, auth, api
+    from app.routes import main, auth
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
-    app.register_blueprint(api.bp)
     
     logger.info("Application initialized successfully")
     return app
