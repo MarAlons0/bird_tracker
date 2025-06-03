@@ -420,3 +420,58 @@ Requirements:
         except Exception as e:
             logger.error(f"Error getting observations: {str(e)}")
             return [] 
+
+    def chat_with_ai(self, message, context=None):
+        """Chat with Claude about bird sightings."""
+        try:
+            if not self.claude:
+                logger.error("Claude client not initialized")
+                return None
+
+            # Prepare the prompt with context if available
+            prompt = f"""You are an expert ornithologist assistant. Answer questions about bird sightings and bird behavior.
+            
+Context of recent bird sightings:
+{context if context else 'No recent sightings available.'}
+
+User question: {message}
+
+Please provide a helpful and informative response based on the context and your expertise. If the question is about specific birds mentioned in the context, use that information. If not, provide general information about the birds mentioned in the question."""
+
+            # Get response from Claude
+            response = self.claude.messages.create(
+                model="claude-3-opus-20240229",
+                max_tokens=1000,
+                temperature=0.7,
+                system="You are an expert ornithologist assistant. Provide accurate and helpful information about birds and bird sightings.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            if not response or not response.content:
+                logger.error("Empty response from Claude")
+                return None
+
+            # Extract the text content from the response
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
+                    text_content = ""
+                    for block in response.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
+                elif hasattr(response.content, 'text'):
+                    return response.content.text
+                elif isinstance(response.content, str):
+                    return response.content
+                else:
+                    logger.error("Unexpected response content type")
+                    return str(response.content)
+            else:
+                logger.error("Response has no content attribute")
+                return "Sorry, I couldn't generate a response."
+
+        except Exception as e:
+            logger.error(f"Error in chat_with_ai: {e}", exc_info=True)
+            return None 
