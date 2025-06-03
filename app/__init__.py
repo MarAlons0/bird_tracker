@@ -61,6 +61,12 @@ def create_app():
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
     
+    # Add user loader
+    from app.models import User
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+    
     # Initialize the bird tracker
     from app.bird_tracker import BirdSightingTracker
     app.tracker = BirdSightingTracker(app=app)
