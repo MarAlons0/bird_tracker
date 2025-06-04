@@ -5,6 +5,7 @@ from app.models import User, Location
 from app.newsletter.models import NewsletterSubscription
 from app.bird_tracker import BirdSightingTracker
 import logging
+from flask_mail import Message
 
 logger = logging.getLogger(__name__)
 
@@ -14,22 +15,28 @@ class NewsletterService:
         
     def get_subscribed_users(self):
         """Get all users with active newsletter subscriptions."""
-        return User.query.join(NewsletterSubscription).filter(
-            NewsletterSubscription.is_active == True
-        ).all()
+        try:
+            users = User.query.join(NewsletterSubscription).filter(
+                NewsletterSubscription.is_active == True
+            ).all()
+            logger.info(f"Found {len(users)} subscribed users")
+            return users
+        except Exception as e:
+            logger.error(f"Error getting subscribed users: {str(e)}")
+            return []
         
     def get_user_observations(self, user, days=7):
         """Get recent observations for a user's default location."""
-        location = user.default_location
-        if not location:
-            logger.warning(f"User {user.email} has no default location set, using Cincinnati")
-            # Use Cincinnati as default location
-            location = Location.query.filter_by(name="Cincinnati").first()
-            if not location:
-                logger.error("Default Cincinnati location not found")
-                return []
-            
         try:
+            location = user.default_location
+            if not location:
+                logger.warning(f"User {user.email} has no default location set, using Cincinnati")
+                # Use Cincinnati as default location
+                location = Location.query.filter_by(name="Cincinnati").first()
+                if not location:
+                    logger.error("Default Cincinnati location not found")
+                    return []
+            
             end_date = datetime.utcnow()
             start_date = end_date - timedelta(days=days)
             
@@ -38,6 +45,7 @@ class NewsletterService:
                 start_date=start_date,
                 end_date=end_date
             )
+            logger.info(f"Retrieved {len(observations)} observations for user {user.email}")
             return observations
         except Exception as e:
             logger.error(f"Error getting observations for user {user.email}: {str(e)}")
@@ -49,11 +57,22 @@ class NewsletterService:
             analysis = self.tracker.analyze_recent_sightings(observations, user_id=user.id)
             location = user.default_location or Location.query.filter_by(name="Cincinnati").first()
             
+            # Generate HTML email content
+            html_content = render_template(
+                'email/newsletter.html',
+                user=user,
+                location=location,
+                observations=observations,
+                analysis=analysis,
+                date=datetime.now().strftime('%B %d, %Y')
+            )
+            
             return {
                 'user': user,
                 'location': location,
                 'observations': observations,
-                'analysis': analysis
+                'analysis': analysis,
+                'html_content': html_content
             }
         except Exception as e:
             logger.error(f"Error generating report for user {user.email}: {str(e)}")
@@ -66,23 +85,15 @@ class NewsletterService:
                 logger.warning(f"No report data for user {user.email}")
                 return False
                 
-            # Create email template
-            template = self.tracker.create_email_template(
-                user=user,
-                observations=report_data['observations'],
-                analysis=report_data['analysis']
+            # Create email message
+            msg = Message(
+                subject=f"Weekly Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}",
+                recipients=[user.email],
+                html=report_data['html_content']
             )
-            
-            if not template:
-                logger.error(f"Failed to create email template for {user.email}")
-                return False
             
             # Send email
-            self.tracker.send_email(
-                to=[user.email],
-                subject=f"Weekly Bird Sighting Report - {datetime.now().strftime('%Y-%m-%d')}",
-                html=template
-            )
+            mail.send(msg)
             
             # Update last sent timestamp
             subscription = user.newsletter_subscription
@@ -100,7 +111,10 @@ class NewsletterService:
         """Send weekly reports to all subscribed users."""
         try:
             users = self.get_subscribed_users()
-            logger.info(f"Found {len(users)} subscribed users")
+            logger.info(f"Starting weekly report generation for {len(users)} users")
+            
+            success_count = 0
+            error_count = 0
             
             for user in users:
                 try:
@@ -114,19 +128,21 @@ class NewsletterService:
                     report_data = self.generate_report(user, observations)
                     if not report_data:
                         logger.error(f"Failed to generate report for {user.email}")
+                        error_count += 1
                         continue
                     
                     # Send report
                     if self.send_report(user, report_data):
-                        logger.info(f"Successfully sent report to {user.email}")
+                        success_count += 1
                     else:
-                        logger.error(f"Failed to send report to {user.email}")
+                        error_count += 1
                         
                 except Exception as e:
                     logger.error(f"Error processing user {user.email}: {str(e)}")
+                    error_count += 1
                     continue
             
-            logger.info("Weekly report generation completed")
+            logger.info(f"Weekly report generation completed. Success: {success_count}, Errors: {error_count}")
             
         except Exception as e:
             logger.error(f"Error in weekly report generation: {str(e)}")
