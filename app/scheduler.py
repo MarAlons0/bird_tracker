@@ -42,6 +42,14 @@ def init_scheduler():
         
         scheduler.start()
         logger.info("Started weekly report scheduler (runs every Monday at 9:00 AM)")
+        
+        # Keep the scheduler running
+        try:
+            while True:
+                time.sleep(60)  # Sleep for 1 minute
+        except (KeyboardInterrupt, SystemExit):
+            scheduler.shutdown()
+            logger.info("Scheduler shutdown")
     else:
         logger.info("Skipping scheduler setup in non-production environment")
 
