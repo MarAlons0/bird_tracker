@@ -22,14 +22,15 @@ def init_scheduler():
         # Check if we're in production environment
         is_production = (
             os.getenv('FLASK_ENV') == 'production' or
-            os.getenv('HEROKU_APP_NAME') in ['bird-tracker-app', 'bird-tracker-dev']
+            os.getenv('HEROKU_APP_NAME') is not None or
+            os.getenv('DYNO') is not None  # Heroku specific environment variable
         )
         
         if not is_production:
             logger.info("Skipping scheduler setup in non-production environment")
             return
 
-        logger.info("Initializing scheduler...")
+        logger.info("Initializing scheduler in production environment...")
         scheduler = BackgroundScheduler()
         
         # Schedule weekly report email (every Monday at 9:00 AM)
@@ -37,7 +38,8 @@ def init_scheduler():
             func=send_weekly_reports,
             trigger=CronTrigger(day_of_week='mon', hour=9, minute=0),
             id='weekly_report',
-            replace_existing=True
+            replace_existing=True,
+            misfire_grace_time=3600  # Allow jobs to run up to 1 hour late
         )
         
         # Add error listener
@@ -57,15 +59,15 @@ def init_scheduler():
         except (KeyboardInterrupt, SystemExit):
             logger.info("Shutting down scheduler...")
             scheduler.shutdown()
-        
+            
     except Exception as e:
-        logger.error(f"Error starting weekly reports: {str(e)}")
+        logger.error(f"Error initializing scheduler: {str(e)}")
         raise
 
 def handle_job_error(event):
     """Handle scheduler job errors."""
     if event.exception:
-        logger.error(f"Job {event.job_id} failed: {str(event.exception)}")
+        logger.error(f"Job {event.job_id} failed with error: {str(event.exception)}")
     else:
         logger.error(f"Job {event.job_id} was missed")
 
