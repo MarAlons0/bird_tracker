@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
-from app.models import db, User, NewsletterSubscription, BirdSighting, CarouselImage, Location, UserPreferences
+from app.models import db, User, BirdSighting, CarouselImage, Location, UserPreferences
+from app.newsletter.models import NewsletterSubscription
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
 from flask_login import login_required, current_user
@@ -215,21 +216,48 @@ def get_sightings():
 
 def get_bird_category(bird_name):
     """Helper function to categorize birds for marker colors."""
-    # This is a simple categorization - you might want to expand this
-    waterfowl = ['duck', 'goose', 'swan', 'grebe', 'coot', 'heron', 'egret', 'crane', 'loon', 'gallinule', 'rail']
-    raptor = ['hawk', 'eagle', 'falcon', 'owl', 'vulture', 'osprey', 'kite', 'harrier']
-    shorebird = ['sandpiper', 'plover', 'snipe', 'killdeer', 'gull', 'tern', 'shorebird']
-    
     bird_name_lower = bird_name.lower()
     
-    if any(term in bird_name_lower for term in raptor):
+    # Waterbirds
+    waterbirds = [
+        'duck', 'goose', 'swan', 'loon', 'grebe', 'heron', 'egret', 'crane', 'pelican', 
+        'cormorant', 'rail', 'kingfisher', 'gull', 'tern', 'shorebird', 'sandpiper', 
+        'plover', 'snipe', 'killdeer', 'phalarope', 'stilt', 'avocet', 'coot', 'gallinule'
+    ]
+    
+    # Raptors
+    raptors = [
+        'hawk', 'eagle', 'falcon', 'owl', 'vulture', 'kite', 'harrier', 'osprey'
+    ]
+    
+    # Ground Birds
+    ground_birds = [
+        'quail', 'grouse', 'turkey', 'dove', 'pigeon', 'roadrunner', 'woodcock'
+    ]
+    
+    # Aerial Specialists
+    aerial_specialists = [
+        'hummingbird', 'swift', 'swallow', 'nighthawk', 'flycatcher', 'phoebe', 'pewee'
+    ]
+    
+    # Tree Specialists
+    tree_specialists = [
+        'woodpecker', 'sapsucker', 'flicker', 'nuthatch', 'creeper'
+    ]
+    
+    # Check each category
+    if any(term in bird_name_lower for term in waterbirds):
+        return 'waterbird'
+    elif any(term in bird_name_lower for term in raptors):
         return 'raptor'
-    elif any(term in bird_name_lower for term in waterfowl):
-        return 'waterfowl'
-    elif any(term in bird_name_lower for term in shorebird):
-        return 'shorebird'
+    elif any(term in bird_name_lower for term in ground_birds):
+        return 'ground_bird'
+    elif any(term in bird_name_lower for term in aerial_specialists):
+        return 'aerial_specialist'
+    elif any(term in bird_name_lower for term in tree_specialists):
+        return 'tree_specialist'
     else:
-        return 'songbird'  # Default category
+        return 'songbird'  # Default category for Passeriformes
 
 @main.route('/api/analyze', methods=['POST'])
 @login_required

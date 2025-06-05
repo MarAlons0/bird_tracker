@@ -38,10 +38,12 @@
     }
     
     .category-raptor { background-color: #e41a1c; }
-    .category-waterfowl { background-color: #377eb8; }
+    .category-waterbird { background-color: #377eb8; }
     .category-songbird { background-color: #4daf4a; }
-    .category-shorebird { background-color: #984ea3; }
-    .category-other { background-color: #ff7f00; }
+    .category-ground_bird { background-color: #984ea3; }
+    .category-aerial_specialist { background-color: #ff7f00; }
+    .category-tree_specialist { background-color: #ffff33; }
+    .category-other { background-color: #a65628; }
     
     .badge {
         padding: 5px 10px;
@@ -50,10 +52,12 @@
     }
     
     .badge.bg-raptor { background-color: #e41a1c; }
-    .badge.bg-waterfowl { background-color: #377eb8; }
+    .badge.bg-waterbird { background-color: #377eb8; }
     .badge.bg-songbird { background-color: #4daf4a; }
-    .badge.bg-shorebird { background-color: #984ea3; }
-    .badge.bg-other { background-color: #ff7f00; }
+    .badge.bg-ground_bird { background-color: #984ea3; }
+    .badge.bg-aerial_specialist { background-color: #ff7f00; }
+    .badge.bg-tree_specialist { background-color: #ffff33; }
+    .badge.bg-other { background-color: #a65628; }
     
     .location-info {
         background-color: white;
@@ -139,10 +143,12 @@
                 const div = L.DomUtil.create('div', 'legend');
                 div.innerHTML = `
                     <h4>Bird Categories</h4>
+                    <div><i class="category-waterbird"></i> Waterbirds</div>
                     <div><i class="category-raptor"></i> Raptors</div>
-                    <div><i class="category-waterfowl"></i> Waterfowl</div>
+                    <div><i class="category-ground_bird"></i> Ground Birds</div>
+                    <div><i class="category-aerial_specialist"></i> Aerial Specialists</div>
                     <div><i class="category-songbird"></i> Songbirds</div>
-                    <div><i class="category-shorebird"></i> Shorebirds</div>
+                    <div><i class="category-tree_specialist"></i> Tree Specialists</div>
                     <div><i class="category-other"></i> Other</div>
                 `;
                 return div;
@@ -185,11 +191,13 @@
         // Function to get marker color based on category
         function getMarkerColor(category) {
             const colors = {
+                'waterbird': '#377eb8',
                 'raptor': '#e41a1c',
-                'waterfowl': '#377eb8',
+                'ground_bird': '#984ea3',
+                'aerial_specialist': '#ff7f00',
                 'songbird': '#4daf4a',
-                'shorebird': '#984ea3',
-                'other': '#ff7f00'
+                'tree_specialist': '#ffff33',
+                'other': '#a65628'
             };
             return colors[category] || colors.other;
         }
