@@ -18,7 +18,7 @@ class User(UserMixin, db.Model):
     token_expiry = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    newsletter_subscription = db.relationship('NewsletterSubscription', backref='user', uselist=False)
+    newsletter_subscription = db.relationship('NewsletterSubscription', back_populates='user', uselist=False)
 
     def __repr__(self):
         return f'<User {self.username}>'
