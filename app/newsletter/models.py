@@ -9,7 +9,8 @@ class NewsletterSubscription(db.Model):
     last_sent = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # No relationship to User here
+    # Define the relationship with User
+    user = db.relationship('User', back_populates='newsletter_subscription')
     
     def __repr__(self):
         return f'<NewsletterSubscription {self.user_id}>' 
