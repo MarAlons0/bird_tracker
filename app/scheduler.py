@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import time
+import pytz
 
 # Configure logging
 logging.basicConfig(
@@ -28,28 +29,37 @@ def init_scheduler():
     """Initialize the scheduler if in production environment."""
     if is_production():
         logger.info("Initializing scheduler in production environment...")
-        scheduler = BackgroundScheduler()
+        scheduler = BackgroundScheduler(timezone=pytz.UTC)
         
-        # Schedule weekly reports to run every Monday at 9:00 AM
+        # Add error handler
+        scheduler.add_listener(handle_job_error, EVENT_JOB_ERROR | EVENT_JOB_MISSED)
+        
+        # Schedule weekly reports to run every Monday at 9:00 AM UTC
         scheduler.add_job(
             send_weekly_reports,
-            trigger=CronTrigger(day_of_week='mon', hour=9, minute=0),
+            trigger=CronTrigger(day_of_week='mon', hour=9, minute=0, timezone=pytz.UTC),
             id='send_weekly_reports',
             name='Send weekly bird sighting reports',
             replace_existing=True,
             misfire_grace_time=3600  # Allow jobs to run up to 1 hour late
         )
         
-        scheduler.start()
-        logger.info("Started weekly report scheduler (runs every Monday at 9:00 AM)")
-        
-        # Keep the scheduler running
         try:
+            scheduler.start()
+            logger.info("Started weekly report scheduler (runs every Monday at 9:00 AM UTC)")
+            
+            # Keep the scheduler running
             while True:
                 time.sleep(60)  # Sleep for 1 minute
         except (KeyboardInterrupt, SystemExit):
+            logger.info("Shutting down scheduler...")
             scheduler.shutdown()
-            logger.info("Scheduler shutdown")
+            logger.info("Scheduler shutdown complete")
+        except Exception as e:
+            logger.error(f"Error in scheduler: {str(e)}")
+            if scheduler.running:
+                scheduler.shutdown()
+            sys.exit(1)
     else:
         logger.info("Skipping scheduler setup in non-production environment")
 
