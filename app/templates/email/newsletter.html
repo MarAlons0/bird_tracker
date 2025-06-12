@@ -46,6 +46,16 @@
             font-size: 12px;
             color: #666;
         }
+        .analysis {
+            margin-bottom: 30px;
+        }
+        .analysis ul {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .analysis li {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -56,9 +66,16 @@
 
     <div class="content">
         <div class="section">
-            <h2>Hello {{ user.username }},</h2>
+            <h2>Hello {{ user.email }},</h2>
             <p>Here's your weekly bird sighting report for {{ location.name }}:</p>
         </div>
+
+        {% if analysis %}
+        <div class="section analysis">
+            <h2>Analysis</h2>
+            {{ analysis|safe }}
+        </div>
+        {% endif %}
 
         {% if observations %}
         <div class="section">
@@ -72,13 +89,6 @@
                 Date: {{ obs.obsDt }}
             </div>
             {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if analysis %}
-        <div class="section">
-            <h2>Analysis</h2>
-            <p>{{ analysis }}</p>
         </div>
         {% endif %}
     </div>

@@ -16,10 +16,9 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True)
     login_token = db.Column(db.String(100), unique=True, nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
-    newsletter_subscription = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
+    newsletter_subscription = db.relationship('NewsletterSubscription', backref='user', uselist=False)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -29,15 +28,6 @@ class User(UserMixin, db.Model):
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-class NewsletterSubscription(db.Model):
-    __tablename__ = 'newsletter_subscriptions'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    last_sent = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class BirdSighting(db.Model):
     __tablename__ = 'bird_sightings'
@@ -158,6 +148,13 @@ class BirdSightingCache(db.Model):
     @classmethod
     def create_cache(cls, user_id, location_id, observations, cache_duration=3600):
         """Create a new cache entry."""
+        from flask import current_app
+        if user_id is None or location_id is None:
+            if hasattr(current_app, 'logger'):
+                current_app.logger.warning(f"Skipping cache creation: user_id={user_id}, location_id={location_id}")
+            else:
+                print(f"[WARNING] Skipping cache creation: user_id={user_id}, location_id={location_id}")
+            return None
         now = datetime.utcnow()
         expires_at = now + timedelta(seconds=cache_duration)
         

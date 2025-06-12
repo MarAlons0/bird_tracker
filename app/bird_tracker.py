@@ -186,12 +186,24 @@ class BirdSightingTracker:
     def create_email_template(self, user, observations, analysis):
         """Create HTML email template for the report."""
         try:
+            # Get user's active location
+            location = self.get_active_location(user.id)
+            location_name = "your area"
+            if location:
+                from app.models import Location
+                loc = Location.query.filter_by(
+                    latitude=location['latitude'],
+                    longitude=location['longitude']
+                ).first()
+                if loc:
+                    location_name = loc.name
+            
             template = f"""
             <html>
                 <body>
                     <h2>Weekly Bird Sighting Report</h2>
                     <p>Hello {user.email},</p>
-                    <p>Here's your weekly bird sighting report for {user.default_location}:</p>
+                    <p>Here's your weekly bird sighting report for {location_name}:</p>
                     
                     <h3>Summary</h3>
                     <ul>
@@ -475,3 +487,57 @@ Please provide a helpful and informative response based on the context and your 
         except Exception as e:
             logger.error(f"Error in chat_with_ai: {e}", exc_info=True)
             return None 
+
+    def analyze_recent_sightings(self, observations, user_id=None):
+        """Analyze recent bird sightings and generate a report."""
+        try:
+            if not observations:
+                return "No observations to analyze."
+            
+            if not self.claude:
+                logger.warning("Claude client not initialized, cannot analyze sightings")
+                return "Unable to generate AI analysis: Claude client not initialized"
+            
+            # Format observations for AI analysis
+            formatted_observations = []
+            for obs in observations:
+                # Handle both BirdSighting objects and dictionary observations
+                if isinstance(obs, dict):
+                    formatted_obs = {
+                        'species': obs.get('comName', obs.get('bird_name', 'Unknown')),
+                        'count': obs.get('howMany', obs.get('count', 1)),
+                        'location': obs.get('locName', obs.get('location', 'Unknown')),
+                        'timestamp': obs.get('obsDt', obs.get('timestamp', datetime.utcnow().isoformat())),
+                        'weather': obs.get('weather', ''),
+                        'notes': obs.get('notes', '')
+                    }
+                else:  # BirdSighting object
+                    formatted_obs = {
+                        'species': obs.bird_name,
+                        'count': 1,  # Default count for BirdSighting objects
+                        'location': obs.location,
+                        'timestamp': obs.timestamp.isoformat() if obs.timestamp else datetime.utcnow().isoformat(),
+                        'weather': '',
+                        'notes': obs.notes or ''
+                    }
+                formatted_observations.append(formatted_obs)
+            
+            # Get AI analysis
+            logger.info("Attempting to get AI analysis...")
+            location = self.get_active_location(user_id)
+            if location:
+                location_name = f"{location.get('latitude')}, {location.get('longitude')}"
+            else:
+                location_name = "Unknown Location"
+            
+            analysis = self.get_ai_analysis(formatted_observations, location_name)
+            
+            if not analysis:
+                logger.error("AI analysis returned None, falling back to basic analysis")
+                return self.generate_analysis(formatted_observations)
+            
+            logger.info("Successfully received AI analysis")
+            return analysis
+        except Exception as e:
+            logger.error(f"Error analyzing sightings: {e}", exc_info=True)
+            return self.generate_analysis(formatted_observations) 

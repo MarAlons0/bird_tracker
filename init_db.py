@@ -1,6 +1,7 @@
 from app import create_app
 from app.extensions import db
-from app.models import User, Location, BirdSighting, UserPreferences, RegistrationRequest, CarouselImage, BirdSightingCache, NewsletterSubscription
+from app.models import User, Location, BirdSighting, UserPreferences, RegistrationRequest, CarouselImage, BirdSightingCache
+from app.newsletter.models import NewsletterSubscription
 import os
 
 app = create_app()
