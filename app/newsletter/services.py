@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import current_app, render_template
 from app.extensions import db, mail
-from app.models import User, Location
+from app.models import User, Location, UserPreferences
 from app.newsletter.models import NewsletterSubscription
 from app.bird_tracker import BirdSightingTracker
 import logging
@@ -25,21 +25,28 @@ class NewsletterService:
             logger.error(f"Error getting subscribed users: {str(e)}")
             return []
         
+    def get_user_active_location(self, user):
+        """Get the user's active location, or Cincinnati if not set."""
+        user_pref = UserPreferences.query.filter_by(user_id=user.id).first()
+        location = None
+        if user_pref and user_pref.active_location_id:
+            location = Location.query.get(user_pref.active_location_id)
+        if not location:
+            location = Location.query.filter_by(name="Cincinnati, OH").first()
+        return location
+
     def get_user_observations(self, user, days=7):
-        """Get recent observations for a user's default location."""
+        """Get recent observations for a user's active location."""
         try:
-            location = user.default_location
+            location = self.get_user_active_location(user)
             if not location:
-                logger.warning(f"User {user.email} has no default location set, using Cincinnati")
-                # Use Cincinnati as default location
-                location = Location.query.filter_by(name="Cincinnati").first()
+                logger.warning(f"User {user.email} has no active location set, using Cincinnati")
+                location = Location.query.filter_by(name="Cincinnati, OH").first()
                 if not location:
                     logger.error("Default Cincinnati location not found")
                     return []
-            
             end_date = datetime.utcnow()
             start_date = end_date - timedelta(days=days)
-            
             observations = self.tracker.get_observations(
                 location=location,
                 start_date=start_date,
@@ -55,9 +62,9 @@ class NewsletterService:
         """Generate personalized report content."""
         try:
             analysis = self.tracker.analyze_recent_sightings(observations, user_id=user.id)
-            location = user.default_location or Location.query.filter_by(name="Cincinnati").first()
-            
-            # Generate HTML email content
+            location = self.get_user_active_location(user)
+            if not location:
+                location = Location.query.filter_by(name="Cincinnati, OH").first()
             html_content = render_template(
                 'email/newsletter.html',
                 user=user,
@@ -66,7 +73,6 @@ class NewsletterService:
                 analysis=analysis,
                 date=datetime.now().strftime('%B %d, %Y')
             )
-            
             return {
                 'user': user,
                 'location': location,

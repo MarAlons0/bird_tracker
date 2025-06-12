@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
-from config import Config
+# from config import Config  # Removed, not needed
 from app.models import db
 from app.scheduler import init_scheduler
 from app.routes.main import main
