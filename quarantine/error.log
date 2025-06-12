@@ -1,0 +1,221 @@
+Address already in use
+Port 5001 is in use by another program. Either identify and stop that program, or start the server with a different port.
+Address already in use
+Port 5001 is in use by another program. Either identify and stop that program, or start the server with a different port.
+Address already in use
+Port 5001 is in use by another program. Either identify and stop that program, or start the server with a different port.
+Address already in use
+Port 5001 is in use by another program. Either identify and stop that program, or start the server with a different port.
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+192.168.1.207 - - [14/Mar/2025 11:19:12] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+192.168.1.207 - - [14/Mar/2025 11:19:12] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+192.168.1.207 - - [14/Mar/2025 11:19:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+192.168.1.207 - - [14/Mar/2025 11:19:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:13] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:13] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:19:14] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:14] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:14] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:19:14] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:19:15] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:33] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:19:36] "GET /api/analysis HTTP/1.1" 200 -
+ * Detected change in '/Users/Mario/Documents/bird_tracker/webapp/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-n8vgzwmb'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 11:23:36] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:23:36] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:23:37] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:24:10] "GET /api/analysis HTTP/1.1" 200 -
+ * Detected change in '/Users/Mario/Documents/bird_tracker/webapp/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-1u507j1d'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 11:48:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:48:43] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:48:43] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+127.0.0.1 - - [14/Mar/2025 11:48:43] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+127.0.0.1 - - [14/Mar/2025 11:49:21] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:49:21] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:52:23] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:52:23] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:53:11] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:53:11] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 11:53:12] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 11:53:31] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-p6e_6d12'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 12:00:32] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:00:32] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 12:00:33] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:00:55] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-hg2sjd7h'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 12:07:49] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:07:49] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 12:07:50] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:08:06] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-56o8zg2y'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 12:15:49] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:15:49] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:15:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [14/Mar/2025 12:15:51] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 12:16:09] "GET /api/analysis HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 13:09:58] "GET / HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 13:09:58] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.148 - - [14/Mar/2025 13:09:59] "GET /api/observations HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 13:10:21] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 13:57:29] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 13:57:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 13:57:31] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 13:57:53] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:34:35] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:34:35] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 14:34:36] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:34:52] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:38:59] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:38:59] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 14:38:59] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:39:15] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:39:15] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:39:15] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:39:38] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 14:39:42] "GET /api/analysis HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:55:35] "GET / HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:55:35] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.148 - - [14/Mar/2025 14:55:36] "GET /api/observations HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:55:57] "GET /api/analysis HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:57:14] "GET / HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:57:14] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.148 - - [14/Mar/2025 14:57:14] "GET /api/observations HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 14:57:32] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-endnjavi'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 16:47:02] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:47:02] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:47:04] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:47:23] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-pvnp3enk'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 16:49:27] "GET /?lat=&lng=&location-name=&radius=50 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:49:27] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:49:57] "GET /?lat=&lng=&location-name=&radius=40 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 16:49:57] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.207 - - [14/Mar/2025 16:51:26] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+192.168.1.207 - - [14/Mar/2025 16:51:26] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+192.168.1.207 - - [14/Mar/2025 16:51:26] "GET / HTTP/1.1" 200 -
+192.168.1.207 - - [14/Mar/2025 16:51:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [14/Mar/2025 17:09:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:09:51] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:09:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [14/Mar/2025 17:12:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:12:11] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 17:12:12] "GET /api/observations HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:12:29] "GET /api/analysis HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:13:48] "GET /?lat=&lng=&location-name=&radius=40 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:13:48] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 17:13:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:13:50] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 17:16:05] "GET /?lat=&lng=&location-name=&radius=30 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:16:05] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [14/Mar/2025 17:16:08] "GET /?lat=&lng=&location-name=&radius=30 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:16:08] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-v5ae1tho'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 17:34:02] "GET /?lat=&lng=&location-name=&radius=30 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:34:02] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-18022kzv'}
+  warnings.warn(
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.207:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 332-010-075
+127.0.0.1 - - [14/Mar/2025 17:38:28] "GET /?lat=&lng=&location-name=&radius=30 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2025 17:38:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.148 - - [14/Mar/2025 17:38:40] "GET /api/observations HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 17:38:43] "GET / HTTP/1.1" 200 -
+192.168.1.148 - - [14/Mar/2025 17:38:43] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+192.168.1.148 - - [14/Mar/2025 17:39:00] "GET /api/analysis HTTP/1.1" 200 -
+/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/resource_tracker.py:277: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-4uc0iqrk'}
+  warnings.warn(
