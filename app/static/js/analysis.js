@@ -71,10 +71,12 @@ async function loadAIAnalysis() {
         }
         
         // Make API request to analyze the data
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const analysisResponse = await fetch('/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
             },
             body: JSON.stringify({
                 location: location,
@@ -139,13 +141,18 @@ async function sendMessage() {
     addMessage(message, 'user');
     input.value = '';
     
+    // Get current location from localStorage
+    const location = getCurrentLocation();
+    
     try {
-        const response = await fetch('/main/api/chat', {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
             },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, location })
         });
         
         if (!response.ok) {

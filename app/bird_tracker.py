@@ -257,7 +257,7 @@ class BirdSightingTracker:
             # Get AI analysis
             return self.get_ai_analysis(formatted_observations, location)
         except Exception as e:
-            self.logger.error(f"Error analyzing sightings: {e}")
+            logger.error(f"Error analyzing sightings: {e}")
             return f"Error analyzing sightings: {str(e)}"
 
     def get_ai_analysis(self, sightings_data, location):
@@ -331,7 +331,7 @@ Requirements:
 
             # Get response from Claude
             response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
+                model="claude-3-5-sonnet-20241022",
                 max_tokens=4000,
                 temperature=0.7,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
@@ -420,3 +420,60 @@ Requirements:
         except Exception as e:
             logger.error(f"Error getting observations: {str(e)}")
             return [] 
+
+    def chat_with_ai(self, message: str, context: str = None) -> str:
+        """Chat with the AI assistant about bird sightings."""
+        try:
+            if not self.claude:
+                logger.error("Claude client not initialized")
+                return "I apologize, but I'm not available at the moment. Please try again later."
+
+            # Prepare the system message
+            system_message = """You are an expert ornithologist and bird watching assistant. \
+            Your role is to help users understand bird sightings, provide information about different species, \
+            and answer questions about bird behavior, migration patterns, and identification.\
+            Be informative but concise, and always maintain a helpful and friendly tone."""
+
+            # Prepare the context and user message
+            prompt = message
+            if context:
+                prompt = f"""Recent bird sightings in your area:\n{context}\n\nUser question: {message}"""
+
+            # Get response from Claude
+            response = self.claude.messages.create(
+                model="claude-3-opus-20240229",
+                max_tokens=4000,
+                temperature=0.7,
+                system=system_message,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            if not response or not response.content:
+                logger.error("Empty response from Claude")
+                return "I apologize, but I couldn't generate a response. Please try again."
+
+            # Extract the text content from the response
+            if hasattr(response, 'content'):
+                if isinstance(response.content, list):
+                    # Handle list of ContentBlock objects
+                    text_content = ""
+                    for block in response.content:
+                        if hasattr(block, 'text'):
+                            text_content += block.text + "\n"
+                    return text_content.strip()
+                elif hasattr(response.content, 'text'):
+                    # Handle single ContentBlock object
+                    return response.content.text
+                elif isinstance(response.content, str):
+                    # Handle string content
+                    return response.content
+                else:
+                    # Try to convert to string if it's some other type
+                    return str(response.content)
+            else:
+                return "I apologize, but I couldn't generate a response. Please try again."
+        except Exception as e:
+            logger.error(f"Error in chat_with_ai: {e}", exc_info=True)
+            return "I encountered an error while processing your question. Please try again later." 

@@ -1,44 +1,55 @@
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for
-from app.models import db, User, NewsletterSubscription, BirdSighting, CarouselImage, Location, UserPreferences
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, session, make_response
+from app.models import db, User, BirdSighting, Location, UserPreferences
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user, logout_user
 from flask import current_app
 import os
+import logging
+from urllib.parse import urlparse
+from app.forms import LoginForm
+
+logger = logging.getLogger(__name__)
 
 main = Blueprint('main', __name__)
+
+@main.before_request
+def before_request():
+    """Log request information for debugging."""
+    current_app.logger.info(f"Request path: {request.path}")
+    current_app.logger.info(f"User authenticated: {current_user.is_authenticated}")
+    current_app.logger.info(f"Session: {session}")
+    if current_user.is_authenticated:
+        current_app.logger.info(f"Current user: {current_user.username}")
 
 @main.route('/')
 @login_required
 def home():
-    """Render the home page where users select their location."""
+    print("GOOGLE_PLACES_API_KEY (route):", current_app.config['GOOGLE_PLACES_API_KEY'])
     try:
-        # Get active carousel images ordered by their order field
-        current_app.logger.info("Fetching carousel images...")
-        carousel_images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
-        current_app.logger.info(f"Found {len(carousel_images)} carousel images")
-        
+        current_app.logger.info(f"Home route accessed by user: {current_user.username if current_user.is_authenticated else 'Not authenticated'}")
+        current_app.logger.info(f"User authenticated: {current_user.is_authenticated}")
+        current_app.logger.info(f"User active: {current_user.is_active if current_user.is_authenticated else False}")
+        # Removed carousel image fetching
         # Get API key and ensure it's not None
-        api_key = current_app.config.get('GOOGLE_PLACES_API_KEY')
-        if not api_key:
+        GOOGLE_PLACES_API_KEY = current_app.config.get('GOOGLE_PLACES_API_KEY')
+        current_app.logger.info(f"Google Places API Key from config: {GOOGLE_PLACES_API_KEY}")
+        if not GOOGLE_PLACES_API_KEY:
             current_app.logger.error("Google Places API Key is not set!")
-            api_key = ''  # Set empty string instead of None
-        
+            GOOGLE_PLACES_API_KEY = ''  # Set empty string instead of None
         # Get user's current location
         user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
         location = None
         if user_pref and user_pref.active_location_id:
             location = Location.query.get(user_pref.active_location_id)
-        
+        current_app.logger.info(f"Rendering template with API key: {GOOGLE_PLACES_API_KEY}")
         return render_template('home.html', 
-                             carousel_images=carousel_images,
                              location=location,
-                             GOOGLE_PLACES_API_KEY=api_key,
+                             GOOGLE_PLACES_API_KEY=GOOGLE_PLACES_API_KEY,
                              config=current_app.config)
     except Exception as e:
         current_app.logger.error(f'Error in home route: {str(e)}')
         return render_template('home.html', 
-                             carousel_images=[],
                              location=None,
                              GOOGLE_PLACES_API_KEY='',
                              config={})
@@ -163,15 +174,12 @@ def stats():
     """Return basic application statistics."""
     with db.session() as session:
         total_users = session.query(User).count()
-        active_subscriptions = session.query(NewsletterSubscription).filter_by(is_active=True).count()
-        
+        # Removed newsletter subscription stats
         # Get recent activity (last 7 days)
         week_ago = datetime.utcnow() - timedelta(days=7)
         recent_users = session.query(User).filter(User.created_at >= week_ago).count()
-        
     return jsonify({
         'total_users': total_users,
-        'active_subscriptions': active_subscriptions,
         'recent_users': recent_users
     })
 
@@ -263,6 +271,8 @@ def analyze():
         current_app.logger.info(f"Number of observations: {len(observations)}")
         
         tracker = BirdSightingTracker()
+        current_app.logger.info(f"BirdSightingTracker initialized, Claude client: {tracker.claude is not None}")
+        
         if not tracker.claude:
             current_app.logger.error("Claude client not initialized")
             return jsonify({
@@ -292,8 +302,14 @@ def analyze():
                 'error': 'No valid observations to analyze'
             }), 400
         
+        # Extract location name from location_data (could be object or string)
+        location_name = location_data.get('name') if isinstance(location_data, dict) else str(location_data)
+        
         # Generate analysis
-        analysis = tracker.get_ai_analysis(formatted_observations, location_data)
+        current_app.logger.info(f"Calling get_ai_analysis with {len(formatted_observations)} observations for location: {location_name}")
+        analysis = tracker.get_ai_analysis(formatted_observations, location_name)
+        
+        current_app.logger.info(f"Analysis result: {analysis[:200] if analysis else 'None'}...")
         
         if not analysis:
             current_app.logger.error("No analysis generated")
@@ -322,22 +338,6 @@ def recent_sightings():
             'location': sighting.location,
             'timestamp': sighting.timestamp.isoformat()
         } for sighting in sightings])
-
-@main.route('/api/carousel-images')
-@login_required
-def get_carousel_images():
-    try:
-        # Get active carousel images ordered by their order field
-        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
-        return jsonify([{
-            'id': img.id,
-            'url': img.cloudinary_url,  # Use cloudinary_url instead of filename
-            'title': img.title,
-            'description': img.description
-        } for img in images])
-    except Exception as e:
-        current_app.logger.error(f'Error fetching carousel images: {str(e)}')
-        return jsonify({'error': str(e)}), 500
 
 @main.route('/api/update-location', methods=['POST'])
 @login_required
@@ -472,13 +472,25 @@ def chat():
     try:
         data = request.get_json()
         message = data.get('message')
+        location = data.get('location')  # <-- new
         if not message:
             return jsonify({'error': 'No message provided'}), 400
-        
+
         current_app.logger.info(f"Processing chat message: {message}")
-        
-        # Get recent observations for context
-        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+
+        tracker = BirdSightingTracker()
+
+        # Use location from frontend if provided, else fallback to user active location
+        if location and all(k in location for k in ['lat', 'lng', 'radius']):
+            observations = tracker.get_recent_observations_by_location(
+                lat=location['lat'],
+                lng=location['lng'],
+                radius=location['radius'],
+                days_back=7
+            )
+        else:
+            observations = tracker.get_recent_observations(user_id=current_user.id)
+
         current_app.logger.info(f"Retrieved {len(observations)} observations for context")
         
         # Format observations for context
@@ -486,12 +498,12 @@ def chat():
         if observations:
             formatted_observations = []
             for obs in observations:
-                formatted_obs = f"{obs['comName']} ({obs['howMany']}) at {obs['locName']} on {obs['obsDt']}"
+                formatted_obs = f"{obs.get('comName', 'Unknown species')} ({obs.get('howMany', '?')}) at {obs.get('locName', 'Unknown location')} on {obs.get('obsDt', 'Unknown date')}"
                 formatted_observations.append(formatted_obs)
             context = "\n".join(formatted_observations)
         
         # Use the tracker's chat_with_ai method
-        response = current_app.tracker.chat_with_ai(message, context)
+        response = tracker.chat_with_ai(message, context)
         current_app.logger.info(f"Received response from chat_with_ai, length: {len(response) if response else 0}")
         
         if not response:

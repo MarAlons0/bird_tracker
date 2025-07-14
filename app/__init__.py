@@ -5,6 +5,7 @@ import os
 import logging
 from datetime import timedelta
 from app.extensions import db, mail, migrate, login_manager
+from flask_wtf import CSRFProtect
 
 logger = logging.getLogger(__name__)
 
@@ -29,14 +30,18 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     
     # Secret key configuration
+    # IMPORTANT: Set a strong, unique SECRET_KEY in your environment for production
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
+    
+    # CSRF protection
+    csrf = CSRFProtect()
+    csrf.init_app(app)
     
     # File upload configuration
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'images')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
     
-    # Ensure upload directories exist
-    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'carousel'), exist_ok=True)
+    # Removed carousel and newsletter/email schedule config
     
     # Google Maps API configuration
     api_key = os.environ.get('GOOGLE_PLACES_API_KEY')
@@ -47,7 +52,8 @@ def create_app():
     app.config['GOOGLE_PLACES_API_KEY'] = api_key
     
     # Session configuration
-    app.config['SESSION_COOKIE_SECURE'] = True
+    # IMPORTANT: Set to True in production (HTTPS), but False for local development (HTTP)
+    app.config['SESSION_COOKIE_SECURE'] = False
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
