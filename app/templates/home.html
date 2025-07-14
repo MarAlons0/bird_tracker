@@ -3,6 +3,7 @@
 {% block title %}Home - Bird Tracker{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <style>
     .welcome-section {
         text-align: left;
@@ -92,6 +93,54 @@
     .action-buttons .btn {
         min-width: 150px;
     }
+    
+    /* Map styling */
+    #map {
+        height: 600px !important;
+        width: 100% !important;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        z-index: 1;
+    }
+    
+    .leaflet-container {
+        height: 100% !important;
+        width: 100% !important;
+    }
+    
+    /* Legend styling */
+    .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    
+    .legend h4 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+    }
+    
+    .legend div {
+        margin: 5px 0;
+        font-size: 12px;
+    }
+    
+    .category-waterbirds, .category-raptors, .category-ground-birds, .category-aerial-specialists, .category-tree-specialists, .category-perching-birds, .category-other {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+        border-radius: 50%;
+    }
+    
+    .category-waterbirds { background-color: #377eb8; }
+    .category-raptors { background-color: #e41a1c; }
+    .category-ground-birds { background-color: #8b4513; }
+    .category-aerial-specialists { background-color: #ff69b4; }
+    .category-tree-specialists { background-color: #228b22; }
+    .category-perching-birds { background-color: #4daf4a; }
+    .category-other { background-color: #ff7f00; }
 </style>
 <script>
     // Debug logging utility
@@ -178,6 +227,7 @@
         initializeWhenReady();
     }
 </script>
+<!-- GOOGLE_PLACES_API_KEY:  -->
 <script async defer 
     src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&callback=initGoogleMaps">
 </script>
@@ -191,7 +241,6 @@
     <ul>
         <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
         <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
-        <li><strong>Newsletter:</strong> Receive email updates about new bird sightings in your area.</li>
     </ul>
     
     <p>To get started, make sure your location is set correctly below. You can change it at any time.</p>
@@ -230,32 +279,40 @@
     </div>
     
     <div class="col-md-6">
-        <div class="carousel-container">
-            <div id="birdCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    {% for image in carousel_images %}
-                    <button type="button" data-bs-target="#birdCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
-                    {% endfor %}
-                </div>
-                <div class="carousel-inner">
-                    {% for image in carousel_images %}
-                    <div class="carousel-item {% if loop.first %}active{% endif %}">
-                        <img src="{{ image.cloudinary_url }}" class="d-block w-100" alt="{{ image.title }}">
-                        <div class="carousel-caption">
-                            <h5>{{ image.title }}</h5>
-                            <p>{{ image.description }}</p>
+        <!-- Removed carousel-related HTML and references -->
+    </div>
+</div>
+
+<!-- Map and Sightings Section (moved from map.html) -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Bird Sightings Map</h4>
+                    <p class="card-text">
+                        View recent bird sightings in your selected area. Click on markers to see details.
+                    </p>
+                    <div id="map" style="height: 600px; width: 100%; border-radius: 10px; margin-bottom: 20px;"></div>
+                    <div class="sightings-table">
+                        <h5>Recent Sightings</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Bird</th>
+                                        <th>Location</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sightingsTableBody">
+                                    <!-- Sightings will be populated here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#birdCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#birdCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
             </div>
         </div>
     </div>
@@ -426,5 +483,235 @@
             }
         });
     }
+</script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let map;
+        let markers = [];
+        // Initialize map
+        function initMap() {
+            const locationData = getCurrentLocation();
+            map = L.map('map').setView([locationData.lat, locationData.lng], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            // Add legend
+            const legend = L.control({position: 'bottomright'});
+            legend.onAdd = function(map) {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4>Bird Categories</h4>
+                    <div><i class="category-waterbirds"></i> Waterbirds</div>
+                    <div><i class="category-raptors"></i> Raptors</div>
+                    <div><i class="category-ground-birds"></i> Ground Birds</div>
+                    <div><i class="category-aerial-specialists"></i> Aerial Specialists</div>
+                    <div><i class="category-tree-specialists"></i> Tree Specialists</div>
+                    <div><i class="category-perching-birds"></i> Perching Birds</div>
+                    <div><i class="category-other"></i> Other</div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+        }
+        function getBirdCategory(birdName) {
+            if (!birdName) return 'other';
+            
+            // 1. Waterbirds - Everything that swims, wades, or lives primarily near water
+            const waterbirds = [
+                'duck', 'goose', 'swan', 'loon', 'grebe', 'heron', 'egret', 'crane', 'pelican', 
+                'cormorant', 'rail', 'kingfisher', 'coot', 'ibis', 'bittern', 'gull', 'tern', 
+                'shorebird', 'sandpiper', 'plover', 'snipe', 'killdeer', 'phalarope', 'stilt', 
+                'avocet', 'oystercatcher', 'curlew', 'godwit', 'willet', 'yellowlegs', 'dowitcher'
+            ];
+            
+            // 2. Raptors - All birds of prey
+            const raptors = [
+                'hawk', 'eagle', 'falcon', 'owl', 'vulture', 'kite', 'osprey', 'harrier', 
+                'buzzard', 'accipiter', 'buteo', 'peregrine', 'merlin', 'kestrel', 'cooper', 
+                'sharp-shinned', 'red-tailed', 'red-shouldered', 'broad-winged', 'rough-legged'
+            ];
+            
+            // 3. Ground Birds - Birds that primarily feed and nest on the ground
+            const groundBirds = [
+                'quail', 'grouse', 'turkey', 'dove', 'pigeon', 'roadrunner', 'pheasant', 
+                'partridge', 'bobwhite', 'mourning dove', 'rock pigeon', 'common ground dove'
+            ];
+            
+            // 4. Aerial Specialists - Birds that catch food while flying
+            const aerialSpecialists = [
+                'hummingbird', 'swift', 'swallow', 'nighthawk', 'flycatcher', 'nightjar', 
+                'whip-poor-will', 'chimney swift', 'barn swallow', 'tree swallow', 'cliff swallow'
+            ];
+            
+            // 5. Tree Specialists - Birds specifically adapted for life on tree trunks and branches
+            const treeSpecialists = [
+                'woodpecker', 'sapsucker', 'flicker', 'nuthatch', 'creeper', 'downy', 'hairy', 
+                'red-bellied', 'pileated', 'red-headed', 'yellow-bellied', 'northern flicker'
+            ];
+            
+            birdName = birdName.toLowerCase();
+            
+            // Check each category in order of specificity
+            if (waterbirds.some(term => birdName.includes(term))) return 'waterbirds';
+            if (raptors.some(term => birdName.includes(term))) return 'raptors';
+            if (groundBirds.some(term => birdName.includes(term))) return 'ground-birds';
+            if (aerialSpecialists.some(term => birdName.includes(term))) return 'aerial-specialists';
+            if (treeSpecialists.some(term => birdName.includes(term))) return 'tree-specialists';
+            
+            // 6. Perching Birds (Songbirds) - The huge order Passeriformes - default for most small birds
+            return 'perching-birds';
+        }
+        function getMarkerColor(category) {
+            const colors = {
+                'waterbirds': '#377eb8',      // Blue for water
+                'raptors': '#e41a1c',         // Red for predators
+                'ground-birds': '#8b4513',    // Brown for ground
+                'aerial-specialists': '#ff69b4', // Pink for aerial
+                'tree-specialists': '#228b22',   // Forest green for tree
+                'perching-birds': '#4daf4a',     // Green for songbirds
+                'other': '#ff7f00'               // Orange for unknown
+            };
+            return colors[category] || colors.other;
+        }
+        function updateMapLocation(locationData) {
+            if (map) {
+                map.setView([locationData.lat, locationData.lng], 10);
+            }
+        }
+        function getCurrentLocation() {
+            const storedLocation = localStorage.getItem('currentLocation');
+            if (storedLocation) {
+                return JSON.parse(storedLocation);
+            }
+            const defaultLocation = {
+                name: 'Cincinnati, OH',
+                lat: 39.1031,
+                lng: -84.5120,
+                radius: 25
+            };
+            localStorage.setItem('currentLocation', JSON.stringify(defaultLocation));
+            return defaultLocation;
+        }
+        async function loadObservations() {
+            debugLog('Map', 'Loading observations');
+            const locationData = getCurrentLocation();
+            debugLog('Map', 'Using location data for API call', locationData);
+            
+            try {
+                const params = new URLSearchParams({
+                    lat: locationData.lat,
+                    lng: locationData.lng,
+                    radius: locationData.radius,
+                    timeframe: '7d'
+                });
+                const apiUrl = `/api/sightings?${params.toString()}`;
+                debugLog('Map', 'Making API request', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                debugLog('Map', 'API response received', { status: response.status, ok: response.ok });
+                
+                const data = await response.json();
+                debugLog('Map', 'API data received', { dataLength: Array.isArray(data) ? data.length : 'not array' });
+                
+                if (!response.ok) throw new Error(data.error || 'Failed to load observations');
+                const observations = Array.isArray(data) ? data : (data.observations || []);
+                debugLog('Map', 'Processing observations', { count: observations.length });
+                if (observations.length > 0) {
+                    console.log('First observation object:', observations[0]);
+                }
+                markers.forEach(marker => map.removeLayer(marker));
+                markers = [];
+                const sightingsTableBody = document.getElementById('sightingsTableBody');
+                sightingsTableBody.innerHTML = '';
+                observations.forEach((obs, index) => {
+                    try {
+                        // Try all possible bird name fields
+                        const birdName = obs.bird_name || obs.comName || obs.species || obs.speciesCode || 'Unknown Bird';
+                        const category = getBirdCategory(birdName); // Always use new classification
+                        const color = getMarkerColor(category);
+                        const lat = parseFloat(obs.latitude || obs.lat);
+                        const lng = parseFloat(obs.longitude || obs.lng);
+                        if (isNaN(lat) || isNaN(lng)) return;
+                        const marker = L.circleMarker([lat, lng], {
+                            radius: 8,
+                            fillColor: color,
+                            color: '#fff',
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+                        marker.bindPopup(`
+                            <strong>${birdName}</strong><br>
+                            Location: ${obs.location || obs.locName || 'Unknown Location'}<br>
+                            Category: ${category.replace(/-/g, ' ')}
+                        `);
+                        markers.push(marker);
+                        const row = document.createElement('tr');
+                        // Determine background and text color for the cell
+                        const bgColor = getMarkerColor(category);
+                        // Simple luminance check for text color
+                        function getTextColor(hex) {
+                            if (!hex) return '#fff';
+                            hex = hex.replace('#', '');
+                            if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+                            const r = parseInt(hex.substr(0,2),16);
+                            const g = parseInt(hex.substr(2,2),16);
+                            const b = parseInt(hex.substr(4,2),16);
+                            // Perceived luminance
+                            const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
+                            return luminance > 0.6 ? '#222' : '#fff';
+                        }
+                        const textColor = getTextColor(bgColor);
+                        row.innerHTML = `
+                            <td>${birdName}</td>
+                            <td>${obs.location || obs.locName || 'Unknown Location'}</td>
+                            <td>${obs.obsDt ? new Date(obs.obsDt).toLocaleDateString() : new Date().toLocaleDateString()}</td>
+                            <td style="background:${bgColor}; color:${textColor}; font-weight:bold; text-align:center;">${category.replace(/-/g, ' ')}</td>
+                        `;
+                        sightingsTableBody.appendChild(row);
+                    } catch (error) { console.error('Error rendering observation:', error, obs); }
+                });
+                debugLog('Map', 'Successfully processed all observations', { markerCount: markers.length });
+            } catch (error) {
+                debugLog('Error', 'Failed to load observations', error);
+                alert('Failed to load observations. Please try again.');
+            }
+        }
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const d = R * c;
+            return d;
+        }
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+        initMap();
+        loadObservations();
+        
+        // Listen for location updates from the first script section
+        document.addEventListener('locationUpdated', function(event) {
+            debugLog('Map', 'Location updated event received', event.detail);
+            updateMapLocation(event.detail);
+            loadObservations();
+        });
+        
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'currentLocation') {
+                const newLocation = JSON.parse(event.newValue);
+                if (newLocation) {
+                    updateMapLocation(newLocation);
+                    loadObservations();
+                }
+            }
+        });
+    });
 </script>
 {% endblock %} 

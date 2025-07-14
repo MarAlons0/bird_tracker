@@ -22,22 +22,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Pending Requests</h5>
-                            <p class="card-text display-4">{{ pending_requests }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Carousel Images</h5>
-                            <p class="card-text">{{ active_carousel_images }} / {{ total_carousel_images }} active</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -51,12 +35,6 @@
                     <div class="list-group">
                         <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-users me-2"></i>Manage Users
-                        </a>
-                        <a href="{{ url_for('admin.registration_requests') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-user-plus me-2"></i>Review Registration Requests
-                        </a>
-                        <a href="{{ url_for('admin.manage_carousel') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-images me-2"></i>Manage Carousel Images
                         </a>
                     </div>
                 </div>

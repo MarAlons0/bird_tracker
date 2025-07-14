@@ -13,10 +13,6 @@
             <form action="{{ url_for('admin.users') }}" method="POST" class="row g-3">
                 <input type="hidden" name="action" value="create_user">
                 <div class="col-md-4">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                <div class="col-md-4">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required>
                 </div>
@@ -48,9 +44,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Username</th>
-                            <th>Email</th>
                             <th>Admin</th>
-                            <th>Approved</th>
                             <th>Active</th>
                             <th>Registration Date</th>
                             <th>Actions</th>
@@ -61,19 +55,11 @@
                         <tr>
                             <td>{{ user.id }}</td>
                             <td>{{ user.username }}</td>
-                            <td>{{ user.email }}</td>
                             <td>
                                 {% if user.is_admin %}
                                     <span class="badge bg-primary">Yes</span>
                                 {% else %}
                                     <span class="badge bg-secondary">No</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.is_approved %}
-                                    <span class="badge bg-success">Yes</span>
-                                {% else %}
-                                    <span class="badge bg-warning">No</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -83,7 +69,17 @@
                                     <span class="badge bg-danger">Inactive</span>
                                 {% endif %}
                             </td>
-                            <td>{{ user.registration_date.strftime('%Y-%m-%d %H:%M') if user.registration_date else 'N/A' }}</td>
+                            <td>
+                                {% if user.registration_date %}
+                                    {% if user.registration_date is string %}
+                                        {{ user.registration_date }}
+                                    {% else %}
+                                        {{ user.registration_date.strftime('%Y-%m-%d %H:%M') }}
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
                             <td>
                                 <form action="{{ url_for('admin.users') }}" method="POST" class="d-inline">
                                     <input type="hidden" name="action" value="toggle_status">

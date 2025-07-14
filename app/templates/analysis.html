@@ -3,6 +3,7 @@
 {% block title %}AI Analysis - Bird Tracker{% endblock %}
 
 {% block head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
     .analysis-section {
         background: #f8f9fa;

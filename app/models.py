@@ -7,37 +7,33 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    email = db.Column(db.String(120), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
+    username = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    is_approved = db.Column(db.Boolean, default=False)
-    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
-    login_token = db.Column(db.String(100), unique=True, nullable=True)
-    token_expiry = db.Column(db.DateTime, nullable=True)
-    newsletter_subscription = db.Column(db.Boolean, default=True)
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    newsletter_subscription_rel = db.relationship('NewsletterSubscription', backref='user', uselist=False)
-
     def __repr__(self):
         return f'<User {self.username}>'
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-class NewsletterSubscription(db.Model):
-    __tablename__ = 'newsletter_subscriptions'
     
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    last_sent = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    def get_id(self):
+        return str(self.id)
+    
+    @property
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return True  # Always return True if the user object exists
+    
+    def get_auth_token(self):
+        """Generate a token for this user."""
+        return str(self.id)
 
 class BirdSighting(db.Model):
     __tablename__ = 'bird_sightings'
@@ -93,39 +89,6 @@ class UserPreferences(db.Model):
 
     def __repr__(self):
         return f'<UserPreferences for user {self.user_id}>'
-
-class RegistrationRequest(db.Model):
-    """Model for handling user registration requests"""
-    __tablename__ = 'registration_requests'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    username = db.Column(db.String(80), nullable=False)
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
-    request_date = db.Column(db.DateTime, default=datetime.utcnow)
-    processed_at = db.Column(db.DateTime)
-    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    
-    def __repr__(self):
-        return f'<RegistrationRequest {self.email}>'
-
-class CarouselImage(db.Model):
-    """Model for managing carousel images"""
-    __tablename__ = 'carousel_images'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(255))
-    cloudinary_url = db.Column(db.String(255))
-    title = db.Column(db.String(255))
-    description = db.Column(db.Text)
-    order = db.Column(db.Integer, nullable=False, default=0)
-    is_active = db.Column(db.Boolean, default=True)
-    filepath = db.Column(db.String(255))
-    upload_date = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer)
-    
-    def __repr__(self):
-        return f'<CarouselImage {self.title}>'
 
 class BirdSightingCache(db.Model):
     """Cache for eBird observations to reduce API calls."""
