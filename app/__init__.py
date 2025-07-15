@@ -22,12 +22,16 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Email configuration
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_SERVER'] = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('SMTP_PORT', '587'))
     app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+    app.config['MAIL_USERNAME'] = os.environ.get('SMTP_USER')
+    app.config['MAIL_PASSWORD'] = os.environ.get('SMTP_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('SMTP_USER')
+    
+    # Log email configuration (without sensitive data)
+    logger.info(f"Email configuration: Server={app.config['MAIL_SERVER']}, Port={app.config['MAIL_PORT']}, TLS={app.config['MAIL_USE_TLS']}")
+    logger.info(f"Email sender configured: {bool(app.config['MAIL_USERNAME'])}")
     
     # Secret key configuration
     # IMPORTANT: Set a strong, unique SECRET_KEY in your environment for production
@@ -67,22 +71,22 @@ def create_app():
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
     
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-    
+    # Add user loader
+    from app.models import User
     @login_manager.user_loader
     def load_user(user_id):
-        from app.models import User
         return User.query.get(int(user_id))
     
+    # Initialize the bird tracker
+    from app.bird_tracker import BirdSightingTracker
+    app.tracker = BirdSightingTracker(app=app)
+    app.tracker._initialize_claude()  # Explicitly initialize Claude
+    
     # Register blueprints
-    from app.routes.main import main
-    from app.routes.auth import auth
-    from app.routes.admin import admin
-    app.register_blueprint(main)
-    app.register_blueprint(auth)
-    app.register_blueprint(admin, url_prefix='/admin')
+    from app.routes import main, auth, admin
+    app.register_blueprint(main.main)
+    app.register_blueprint(auth.auth)
+    app.register_blueprint(admin.admin)
     
     logger.info("Application initialized successfully")
     return app
