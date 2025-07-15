@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MISSED
 from app import create_app
-from app.newsletter.services import NewsletterService
+# Removed newsletter import since we removed that functionality
 import logging
 import os
 import sys
@@ -35,6 +35,7 @@ def init_scheduler():
         scheduler.add_listener(handle_job_error, EVENT_JOB_ERROR | EVENT_JOB_MISSED)
         
         # Schedule weekly reports to run every Monday at 9:00 AM UTC
+        # Note: This is a placeholder since we removed newsletter functionality
         scheduler.add_job(
             send_weekly_reports,
             trigger=CronTrigger(day_of_week='mon', hour=9, minute=0, timezone=pytz.UTC),
@@ -77,9 +78,8 @@ def send_weekly_reports():
     
     with app.app_context():
         try:
-            service = NewsletterService()
-            service.send_weekly_reports()
-            logger.info("Weekly report generation completed successfully")
+            # Placeholder for weekly reports - newsletter functionality was removed
+            logger.info("Weekly report generation completed successfully (placeholder)")
         except Exception as e:
             logger.error(f"Error in weekly report generation: {str(e)}")
             raise

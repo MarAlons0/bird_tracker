@@ -8,6 +8,7 @@ import os
 import logging
 from urllib.parse import urlparse
 from app.forms import LoginForm
+from flask import session
 
 logger = logging.getLogger(__name__)
 
