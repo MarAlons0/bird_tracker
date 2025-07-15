@@ -520,7 +520,8 @@ def chat():
         if not observations:
             # If no observations provided, fetch recent observations for context
             current_app.logger.info("No observations provided, fetching from eBird")
-            observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+            tracker = BirdSightingTracker()
+            observations = tracker.get_recent_observations(user_id=current_user.id)
             current_app.logger.info(f"Retrieved {len(observations)} observations from eBird")
         
         # Format observations for context
@@ -540,6 +541,9 @@ def chat():
             
             context = "\n".join(formatted_observations)
             current_app.logger.info(f"Formatted {len(formatted_observations)} observations for context")
+        
+        # Create tracker instance for chat
+        tracker = BirdSightingTracker()
         
         # Use the tracker's chat_with_ai method
         response = tracker.chat_with_ai(message, context)
