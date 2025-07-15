@@ -1,0 +1,3839 @@
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 2245
+DEBUG: Claude response received
+DEBUG: Analysis length: 2361
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 2434
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged BlackbirdDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged BlackbirdDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged BlackbirdDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 1920
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for BuffleheadDEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 2204
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 116
+DEBUG: Previous week species: 5
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 2420
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped WarblerDEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 117
+DEBUG: Previous week species: 4
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 1720
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 117
+DEBUG: Previous week species: 4
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 117
+DEBUG: Previous week species: 4
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: Claude response received
+DEBUG: Analysis length: 1964
+DEBUG: Claude response received
+DEBUG: Analysis length: 2122
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 117
+DEBUG: Previous week species: 4
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Claude response received
+DEBUG: Analysis length: 2202
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine WarblerDEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree SparrowDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: Data prepared successfully
+DEBUG: Current week species: 117
+DEBUG: Previous week species: 4
+DEBUG: Birds of prey found: 14
+DEBUG: Sending request to Claude...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted KingfisherDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common GrackleDEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Making API request...
+DEBUG: Making API request...
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle
+DEBUG: Processing observation for Pileated Woodpecker
+DEBUG: Processing observation for Blue Jay
+DEBUG: Processing observation for Cooper's Hawk
+DEBUG: Processing observation for Red-breasted Nuthatch
+DEBUG: Processing observation for Pine Warbler
+DEBUG: Processing observation for Brown Thrasher
+DEBUG: Processing observation for Eastern Bluebird
+DEBUG: Processing observation for White-crowned Sparrow
+DEBUG: Processing observation for Swamp Sparrow
+DEBUG: Processing observation for Black Vulture
+DEBUG: Processing observation for Red-shouldered Hawk
+DEBUG: Processing observation for Gadwall
+DEBUG: Processing observation for Northern Pintail
+DEBUG: Processing observation for Green-winged Teal
+DEBUG: Processing observation for Redhead
+DEBUG: Processing observation for Killdeer
+DEBUG: Processing observation for Greater Yellowlegs
+DEBUG: Processing observation for Ring-billed Gull
+DEBUG: Processing observation for Double-crested Cormorant
+DEBUG: Processing observation for Red-tailed Hawk
+DEBUG: Processing observation for Eastern Screech-Owl
+DEBUG: Processing observation for American Kestrel
+DEBUG: Processing observation for White-throated Sparrow
+DEBUG: Processing observation for Brown-headed Cowbird
+DEBUG: Processing observation for Yellow-rumped Warbler
+DEBUG: Processing observation for American Pipit
+DEBUG: Processing observation for Eastern Meadowlark
+DEBUG: Processing observation for Northern Mockingbird
+DEBUG: Processing observation for Blue-winged Teal
+DEBUG: Processing observation for Savannah Sparrow
+DEBUG: Processing observation for Rusty Blackbird
+DEBUG: Processing observation for Wilson's Snipe
+DEBUG: Processing observation for Rock Pigeon
+DEBUG: Processing observation for Brown Creeper
+DEBUG: Processing observation for Chipping Sparrow
+DEBUG: Processing observation for American Coot
+DEBUG: Processing observation for Cedar Waxwing
+DEBUG: Processing observation for Field Sparrow
+DEBUG: Processing observation for Fox Sparrow
+DEBUG: Processing observation for American Wigeon
+DEBUG: Processing observation for American Black Duck
+DEBUG: Processing observation for Purple Finch
+DEBUG: Processing observation for Bufflehead
+DEBUG: Processing observation for Red-breasted Merganser
+DEBUG: Processing observation for Pectoral Sandpiper
+DEBUG: Processing observation for American Tree Sparrow
+DEBUG: Processing observation for Yellow-bellied Sapsucker
+DEBUG: Processing observation for Great Horned Owl
+DEBUG: Processing observation for Barred Owl
+DEBUG: Processing observation for American Woodcock
+DEBUG: Processing observation for Ross's Goose
+DEBUG: Processing observation for Winter Wren
+DEBUG: Processing observation for Greater Scaup
+DEBUG: Processing observation for Lesser Scaup
+DEBUG: Processing observation for Ruddy Duck
+DEBUG: Processing observation for Ruby-crowned Kinglet
+DEBUG: Processing observation for Mute Swan
+DEBUG: Processing observation for Short-eared Owl
+DEBUG: Processing observation for Northern Harrier
+DEBUG: Processing observation for Osprey
+DEBUG: Processing observation for Red-headed Woodpecker
+DEBUG: Processing observation for Wild Turkey
+DEBUG: Processing observation for Horned Grebe
+DEBUG: Processing observation for Bonaparte's Gull
+DEBUG: Processing observation for Sandhill Crane
+DEBUG: Processing observation for Golden-crowned Kinglet
+DEBUG: Processing observation for Hermit Thrush
+DEBUG: Processing observation for Common Goldeneye
+DEBUG: Processing observation for Pine Siskin
+DEBUG: Processing observation for Common Merganser
+DEBUG: Processing observation for Horned Lark
+DEBUG: Processing observation for Great Egret
+DEBUG: Processing observation for Canvasback
+DEBUG: Processing observation for Lesser Yellowlegs
+DEBUG: Processing observation for Sharp-shinned Hawk
+DEBUG: Processing observation for Muscovy Duck x Mallard (hybrid)
+DEBUG: Processing observation for Ring-necked Pheasant
+DEBUG: Processing observation for Common Loon
+DEBUG: Processing observation for Muscovy Duck
+DEBUG: Processing observation for Merlin
+DEBUG: Processing observation for American White Pelican
+DEBUG: Processing observation for American Herring Gull
+DEBUG: Processing observation for Greater White-fronted Goose
+DEBUG: Processing observation for Tundra Swan
+DEBUG: Processing observation for Peregrine Falcon
+DEBUG: Processing observation for Gray Catbird
+DEBUG: Processing observation for Snow Goose
+DEBUG: API Response Status Code: 200
+DEBUG: Successfully parsed 121 observations
+DEBUG: Processing observation for Northern Shoveler
+DEBUG: Processing observation for Mallard
+DEBUG: Processing observation for Eastern Phoebe
+DEBUG: Processing observation for Mourning Dove
+DEBUG: Processing observation for Turkey Vulture
+DEBUG: Processing observation for Red-bellied Woodpecker
+DEBUG: Processing observation for Downy Woodpecker
+DEBUG: Processing observation for Hairy Woodpecker
+DEBUG: Processing observation for American Crow
+DEBUG: Processing observation for Carolina Chickadee
+DEBUG: Processing observation for Tufted Titmouse
+DEBUG: Processing observation for Tree Swallow
+DEBUG: Processing observation for American Robin
+DEBUG: Processing observation for House Finch
+DEBUG: Processing observation for Song Sparrow
+DEBUG: Processing observation for Eastern Towhee
+DEBUG: Processing observation for Red-winged Blackbird
+DEBUG: Processing observation for Northern Cardinal
+DEBUG: Processing observation for White-breasted Nuthatch
+DEBUG: Processing observation for European Starling
+DEBUG: Processing observation for House Sparrow
+DEBUG: Processing observation for American Goldfinch
+DEBUG: Processing observation for Dark-eyed Junco
+DEBUG: Processing observation for Canada Goose
+DEBUG: Processing observation for Wood Duck
+DEBUG: Processing observation for Ring-necked Duck
+DEBUG: Processing observation for Hooded Merganser
+DEBUG: Processing observation for Pied-billed Grebe
+DEBUG: Processing observation for Great Blue Heron
+DEBUG: Processing observation for Bald Eagle
+DEBUG: Processing observation for Belted Kingfisher
+DEBUG: Processing observation for Northern Flicker
+DEBUG: Processing observation for Carolina Wren
+DEBUG: Processing observation for Common Grackle

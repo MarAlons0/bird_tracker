@@ -186,12 +186,24 @@ class BirdSightingTracker:
     def create_email_template(self, user, observations, analysis):
         """Create HTML email template for the report."""
         try:
+            # Get user's active location
+            location = self.get_active_location(user.id)
+            location_name = "your area"
+            if location:
+                from app.models import Location
+                loc = Location.query.filter_by(
+                    latitude=location['latitude'],
+                    longitude=location['longitude']
+                ).first()
+                if loc:
+                    location_name = loc.name
+            
             template = f"""
             <html>
                 <body>
                     <h2>Weekly Bird Sighting Report</h2>
                     <p>Hello {user.email},</p>
-                    <p>Here's your weekly bird sighting report for {user.default_location}:</p>
+                    <p>Here's your weekly bird sighting report for {location_name}:</p>
                     
                     <h3>Summary</h3>
                     <ul>
@@ -421,30 +433,29 @@ Requirements:
             logger.error(f"Error getting observations: {str(e)}")
             return [] 
 
-    def chat_with_ai(self, message: str, context: str = None) -> str:
-        """Chat with the AI assistant about bird sightings."""
+    def chat_with_ai(self, message, context=None):
+        """Chat with Claude about bird sightings."""
         try:
             if not self.claude:
                 logger.error("Claude client not initialized")
-                return "I apologize, but I'm not available at the moment. Please try again later."
+                return None
 
-            # Prepare the system message
-            system_message = """You are an expert ornithologist and bird watching assistant. \
-            Your role is to help users understand bird sightings, provide information about different species, \
-            and answer questions about bird behavior, migration patterns, and identification.\
-            Be informative but concise, and always maintain a helpful and friendly tone."""
+            # Prepare the prompt with context if available
+            prompt = f"""You are an expert ornithologist assistant. Answer questions about bird sightings and bird behavior.
+            
+Context of recent bird sightings:
+{context if context else 'No recent sightings available.'}
 
-            # Prepare the context and user message
-            prompt = message
-            if context:
-                prompt = f"""Recent bird sightings in your area:\n{context}\n\nUser question: {message}"""
+User question: {message}
+
+Please provide a helpful and informative response based on the context and your expertise. If the question is about specific birds mentioned in the context, use that information. If not, provide general information about the birds mentioned in the question."""
 
             # Get response from Claude
             response = self.claude.messages.create(
                 model="claude-3-opus-20240229",
-                max_tokens=4000,
+                max_tokens=1000,
                 temperature=0.7,
-                system=system_message,
+                system="You are an expert ornithologist assistant. Provide accurate and helpful information about birds and bird sightings.",
                 messages=[
                     {"role": "user", "content": prompt}
                 ]
@@ -452,28 +463,81 @@ Requirements:
 
             if not response or not response.content:
                 logger.error("Empty response from Claude")
-                return "I apologize, but I couldn't generate a response. Please try again."
+                return None
 
             # Extract the text content from the response
             if hasattr(response, 'content'):
                 if isinstance(response.content, list):
-                    # Handle list of ContentBlock objects
                     text_content = ""
                     for block in response.content:
                         if hasattr(block, 'text'):
                             text_content += block.text + "\n"
                     return text_content.strip()
                 elif hasattr(response.content, 'text'):
-                    # Handle single ContentBlock object
                     return response.content.text
                 elif isinstance(response.content, str):
-                    # Handle string content
                     return response.content
                 else:
-                    # Try to convert to string if it's some other type
+                    logger.error("Unexpected response content type")
                     return str(response.content)
             else:
-                return "I apologize, but I couldn't generate a response. Please try again."
+                logger.error("Response has no content attribute")
+                return "Sorry, I couldn't generate a response."
+
         except Exception as e:
             logger.error(f"Error in chat_with_ai: {e}", exc_info=True)
-            return "I encountered an error while processing your question. Please try again later." 
+            return None 
+
+    def analyze_recent_sightings(self, observations, user_id=None):
+        """Analyze recent bird sightings and generate a report."""
+        try:
+            if not observations:
+                return "No observations to analyze."
+            
+            if not self.claude:
+                logger.warning("Claude client not initialized, cannot analyze sightings")
+                return "Unable to generate AI analysis: Claude client not initialized"
+            
+            # Format observations for AI analysis
+            formatted_observations = []
+            for obs in observations:
+                # Handle both BirdSighting objects and dictionary observations
+                if isinstance(obs, dict):
+                    formatted_obs = {
+                        'species': obs.get('comName', obs.get('bird_name', 'Unknown')),
+                        'count': obs.get('howMany', obs.get('count', 1)),
+                        'location': obs.get('locName', obs.get('location', 'Unknown')),
+                        'timestamp': obs.get('obsDt', obs.get('timestamp', datetime.utcnow().isoformat())),
+                        'weather': obs.get('weather', ''),
+                        'notes': obs.get('notes', '')
+                    }
+                else:  # BirdSighting object
+                    formatted_obs = {
+                        'species': obs.bird_name,
+                        'count': 1,  # Default count for BirdSighting objects
+                        'location': obs.location,
+                        'timestamp': obs.timestamp.isoformat() if obs.timestamp else datetime.utcnow().isoformat(),
+                        'weather': '',
+                        'notes': obs.notes or ''
+                    }
+                formatted_observations.append(formatted_obs)
+            
+            # Get AI analysis
+            logger.info("Attempting to get AI analysis...")
+            location = self.get_active_location(user_id)
+            if location:
+                location_name = f"{location.get('latitude')}, {location.get('longitude')}"
+            else:
+                location_name = "Unknown Location"
+            
+            analysis = self.get_ai_analysis(formatted_observations, location_name)
+            
+            if not analysis:
+                logger.error("AI analysis returned None, falling back to basic analysis")
+                return self.generate_analysis(formatted_observations)
+            
+            logger.info("Successfully received AI analysis")
+            return analysis
+        except Exception as e:
+            logger.error(f"Error analyzing sightings: {e}", exc_info=True)
+            return self.generate_analysis(formatted_observations) 

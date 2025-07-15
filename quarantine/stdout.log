@@ -1,0 +1,16 @@
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+DEBUG: Loading config from: /Users/Mario/Documents/bird_tracker/config.ini
+DEBUG: Config file loaded successfully
+DEBUG: Sections found: ['ebird', 'locations', 'location_cincinnati', 'email', 'anthropic']
+DEBUG: Starting Flask server...
+ * Serving Flask app 'app'
+ * Debug mode: on

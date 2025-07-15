@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, session, make_response
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from app.models import db, User, BirdSighting, Location, UserPreferences
 from datetime import datetime, timedelta
 from app.bird_tracker import BirdSightingTracker
@@ -77,7 +77,7 @@ def map():
                 name="Cincinnati, OH",
                 latitude=39.1031,
                 longitude=-84.512,
-                radius=25,
+                radius=25,  # Default radius of 25 miles
                 is_active=True,
                 user_id=current_user.id  # Set the user_id to the current user
             )
@@ -126,7 +126,7 @@ def analysis():
                 name="Cincinnati, OH",
                 latitude=39.1031,
                 longitude=-84.512,
-                radius=25,
+                radius=25,  # Default radius of 25 miles
                 is_active=True,
                 user_id=current_user.id  # Set the user_id to the current user
             )
@@ -223,21 +223,48 @@ def get_sightings():
 
 def get_bird_category(bird_name):
     """Helper function to categorize birds for marker colors."""
-    # This is a simple categorization - you might want to expand this
-    waterfowl = ['duck', 'goose', 'swan', 'grebe', 'coot', 'heron', 'egret', 'crane', 'loon', 'gallinule', 'rail']
-    raptor = ['hawk', 'eagle', 'falcon', 'owl', 'vulture', 'osprey', 'kite', 'harrier']
-    shorebird = ['sandpiper', 'plover', 'snipe', 'killdeer', 'gull', 'tern', 'shorebird']
-    
     bird_name_lower = bird_name.lower()
     
-    if any(term in bird_name_lower for term in raptor):
+    # Waterbirds
+    waterbirds = [
+        'duck', 'goose', 'swan', 'loon', 'grebe', 'heron', 'egret', 'crane', 'pelican', 
+        'cormorant', 'rail', 'kingfisher', 'gull', 'tern', 'shorebird', 'sandpiper', 
+        'plover', 'snipe', 'killdeer', 'phalarope', 'stilt', 'avocet', 'coot', 'gallinule'
+    ]
+    
+    # Raptors
+    raptors = [
+        'hawk', 'eagle', 'falcon', 'owl', 'vulture', 'kite', 'harrier', 'osprey'
+    ]
+    
+    # Ground Birds
+    ground_birds = [
+        'quail', 'grouse', 'turkey', 'dove', 'pigeon', 'roadrunner', 'woodcock'
+    ]
+    
+    # Aerial Specialists
+    aerial_specialists = [
+        'hummingbird', 'swift', 'swallow', 'nighthawk', 'flycatcher', 'phoebe', 'pewee'
+    ]
+    
+    # Tree Specialists
+    tree_specialists = [
+        'woodpecker', 'sapsucker', 'flicker', 'nuthatch', 'creeper'
+    ]
+    
+    # Check each category
+    if any(term in bird_name_lower for term in waterbirds):
+        return 'waterbird'
+    elif any(term in bird_name_lower for term in raptors):
         return 'raptor'
-    elif any(term in bird_name_lower for term in waterfowl):
-        return 'waterfowl'
-    elif any(term in bird_name_lower for term in shorebird):
-        return 'shorebird'
+    elif any(term in bird_name_lower for term in ground_birds):
+        return 'ground_bird'
+    elif any(term in bird_name_lower for term in aerial_specialists):
+        return 'aerial_specialist'
+    elif any(term in bird_name_lower for term in tree_specialists):
+        return 'tree_specialist'
     else:
-        return 'songbird'  # Default category
+        return 'songbird'  # Default category for Passeriformes
 
 @main.route('/api/analyze', methods=['POST'])
 @login_required
@@ -350,6 +377,11 @@ def update_location():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         radius = data.get('radius', 25)  # Default radius of 25 miles
+
+        # Validate radius is one of the allowed values
+        allowed_radii = [1, 5, 25, 50]
+        if radius not in allowed_radii:
+            return jsonify({'error': 'Invalid radius. Must be one of: 1, 5, 25, or 50 miles'}), 400
 
         if not all([place_id, name, latitude, longitude]):
             return jsonify({'error': 'Missing required location data'}), 400
@@ -477,30 +509,36 @@ def chat():
             return jsonify({'error': 'No message provided'}), 400
 
         current_app.logger.info(f"Processing chat message: {message}")
-
-        tracker = BirdSightingTracker()
-
-        # Use location from frontend if provided, else fallback to user active location
-        if location and all(k in location for k in ['lat', 'lng', 'radius']):
-            observations = tracker.get_recent_observations_by_location(
-                lat=location['lat'],
-                lng=location['lng'],
-                radius=location['radius'],
-                days_back=7
-            )
-        else:
-            observations = tracker.get_recent_observations(user_id=current_user.id)
-
-        current_app.logger.info(f"Retrieved {len(observations)} observations for context")
+        
+        # Check if observations were provided in the request
+        observations = data.get('observations')
+        current_app.logger.info(f"Received observations in request: {observations is not None}")
+        if observations:
+            current_app.logger.info(f"Number of observations provided: {len(observations)}")
+        
+        if not observations:
+            # If no observations provided, fetch recent observations for context
+            current_app.logger.info("No observations provided, fetching from eBird")
+            observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+            current_app.logger.info(f"Retrieved {len(observations)} observations from eBird")
         
         # Format observations for context
         context = None
         if observations:
             formatted_observations = []
             for obs in observations:
-                formatted_obs = f"{obs.get('comName', 'Unknown species')} ({obs.get('howMany', '?')}) at {obs.get('locName', 'Unknown location')} on {obs.get('obsDt', 'Unknown date')}"
-                formatted_observations.append(formatted_obs)
+                # Handle both eBird API format and frontend format
+                bird_name = obs.get('comName') or obs.get('bird_name')
+                location = obs.get('locName') or obs.get('location')
+                timestamp = obs.get('obsDt') or obs.get('timestamp')
+                how_many = obs.get('howMany') or obs.get('count', 1)
+                
+                if bird_name and location and timestamp:
+                    formatted_obs = f"{bird_name} ({how_many}) at {location} on {timestamp}"
+                    formatted_observations.append(formatted_obs)
+            
             context = "\n".join(formatted_observations)
+            current_app.logger.info(f"Formatted {len(formatted_observations)} observations for context")
         
         # Use the tracker's chat_with_ai method
         response = tracker.chat_with_ai(message, context)

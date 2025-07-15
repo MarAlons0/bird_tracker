@@ -31,10 +31,11 @@ def load_user(user_id):
     logger.info(f"User loaded: {user.email if user else 'None'}")
     return user
 
-def create_app(config_class=Config):
+def create_app(config_class=None):
     """Create and configure the Flask application for report generation."""
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    if config_class:
+        app.config.from_object(config_class)
     
     # Configure logging
     logging.basicConfig(level=logging.INFO)
@@ -58,8 +59,9 @@ def create_app(config_class=Config):
     app.register_blueprint(api)
     
     # Initialize Redis connection
-    redis_client = redis.from_url(app.config['SESSION_REDIS'].connection_pool.connection_kwargs['url'])
-    app.config['SESSION_REDIS'] = redis_client
+    if 'SESSION_REDIS' in app.config and hasattr(app.config['SESSION_REDIS'], 'connection_pool'):
+        redis_client = redis.from_url(app.config['SESSION_REDIS'].connection_pool.connection_kwargs['url'])
+        app.config['SESSION_REDIS'] = redis_client
     
     # Initialize scheduler in non-testing environment
     if not app.config.get('TESTING'):
