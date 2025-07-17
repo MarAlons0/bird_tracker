@@ -23,6 +23,7 @@ Birds are automatically categorized into four main groups:
 - **User Management**: View, activate/deactivate, and delete user accounts
 - **Dashboard**: Overview of system statistics and user activity
 - **Password Management**: Reset user passwords to default values
+- **Grant Admin Rights**: When creating a new user, check the "Admin User" box to grant admin rights. You can also promote an existing user to admin using the provided script (see below).
 
 ## Tech Stack
 
@@ -82,6 +83,31 @@ flask run --port 8000
 ```
 
 The application will be available at `http://localhost:8000`
+
+### Creating an Admin User
+
+After deploying the app (locally or to Heroku), you need to ensure at least one user has admin rights to access the admin panel.
+
+**Option 1: During User Creation**
+- When creating a new user via the Admin Panel, check the “Admin User” box to grant admin rights.
+
+**Option 2: Grant Admin Rights to an Existing User**
+- If you need to promote an existing user to admin (for example, after deploying to Heroku), use the provided script:
+
+```bash
+# 1. Push the set_admin.py script to your Heroku app (if not already present)
+git add set_admin.py
+git commit -m "Add admin setup script"
+git push heroku main
+
+# 2. Run the script on Heroku (replace with your app name if needed)
+heroku run --app bird-tracker-app python set_admin.py
+```
+
+- The script will set the user with the email specified in `set_admin.py` as an admin. You can edit the script to target a different email if needed.
+
+**Note:**  
+After being granted admin rights, you must log out and log back in for the admin panel to appear.
 
 ## Environment Variables
 
@@ -163,7 +189,8 @@ Administrators can:
 - View system statistics and user counts
 - Manage user accounts (activate/deactivate/delete)
 - Reset user passwords
-- Monitor application activity
+- Grant admin rights to new users at creation by checking the “Admin User” box
+- If you encounter issues with user creation or admin rights, check your Heroku logs for debug output (e.g., using `heroku logs --app bird-tracker-app --tail`)
 
 ## API Endpoints
 
@@ -198,74 +225,10 @@ Administrators can:
 - **UserPreferences**: User settings and preferences
 - **BirdSightingCache**: Cached eBird observations
 
-## Development
-
-### Running Tests
-```bash
-python -m pytest
-```
-
-### Database Migrations
-```bash
-flask db migrate -m "Description of changes"
-flask db upgrade
-```
-
-### Code Style
-The project follows PEP 8 guidelines. Use a linter like `flake8` to check code style.
-
-## Deployment
-
-### Local Development
-```bash
-flask run --port 8000
-```
-
-### Production Deployment
-1. Set `FLASK_ENV=production`
-2. Configure production database (PostgreSQL recommended)
-3. Set up proper environment variables
-4. Use a production WSGI server like Gunicorn
-
 ## Troubleshooting
 
-### Common Issues
-1. **CSRF Token Errors**: Ensure all forms include `{{ csrf_token() }}`
-2. **API Key Issues**: Verify all required API keys are set in `.env`
-3. **Database Errors**: Run `flask db upgrade` to ensure migrations are applied
-4. **Map Not Loading**: Check Google Places API key and referrer settings
+### Troubleshooting Admin User Creation
 
-### Logs
-Application logs are available in the console output. Check for:
-- Authentication issues
-- API request failures
-- Database connection problems
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For questions, issues, or support:
-- Open an issue in the GitHub repository
-- Check the troubleshooting section above
-- Review the application logs for error details
-
-## Changelog
-
-### Recent Updates
-- Removed carousel and newsletter features for simplified interface
-- Consolidated map functionality into home page
-- Implemented new bird classification system with color coding
-- Updated admin panel with streamlined user management
-- Fixed CSRF token issues and authentication flows
-- Improved error handling and user experience 
+- If you create a user with admin rights but do not see the admin panel, ensure you have logged out and logged back in.
+- If you need to manually promote a user to admin, use the `set_admin.py` script as described above.
+- For debugging, check the Heroku logs for lines starting with `DEBUG:` to see form submission details. 
