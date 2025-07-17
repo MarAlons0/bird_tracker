@@ -79,9 +79,9 @@ def login():
             logger.info(f"Creating user with default password: {default_password}")
             new_user = User(
                 username=username,
+                email=f"{username}@example.com",
                 password_hash=generate_password_hash(default_password),
                 is_admin=False,
-                is_approved=True,
                 is_active=True,
             )
             db.session.add(new_user)

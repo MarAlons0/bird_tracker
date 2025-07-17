@@ -54,26 +54,28 @@ def users():
         
         if action == 'create_user':
             username = request.form.get('username')
+            email = request.form.get('email')
             password = request.form.get('password')
             is_admin = request.form.get('is_admin') == 'true'
             
             # Check if user already exists
             existing_user = db.session.execute(
-                text("SELECT id FROM users WHERE username = :username"),
-                {"username": username}
+                text("SELECT id FROM users WHERE username = :username OR email = :email"),
+                {"username": username, "email": email}
             ).fetchone()
             
             if existing_user:
-                flash('A user with this username already exists.', 'error')
+                flash('A user with this username or email already exists.', 'error')
             else:
                 # Create new user
                 db.session.execute(
                     text("""
-                        INSERT INTO users (username, password_hash, is_admin, is_active, registration_date)
-                        VALUES (:username, :password_hash, :is_admin, true, :registration_date)
+                        INSERT INTO users (username, email, password_hash, is_admin, is_active, registration_date)
+                        VALUES (:username, :email, :password_hash, :is_admin, true, :registration_date)
                     """),
                     {
                         "username": username,
+                        "email": email,
                         "password_hash": generate_password_hash(password),
                         "is_admin": is_admin,
                         "registration_date": datetime.utcnow()
@@ -138,7 +140,7 @@ def users():
     # Get all users using raw SQL - only query existing columns
     result = db.session.execute(
         text("""
-            SELECT id, username, password_hash, is_admin, is_active, registration_date, created_at
+            SELECT id, username, email, password_hash, is_admin, is_active, registration_date, created_at
             FROM users
             ORDER BY id
         """)
@@ -149,11 +151,12 @@ def users():
         user = User()
         user.id = row[0]
         user.username = row[1]
-        user.password_hash = row[2]
-        user.is_admin = row[3]
-        user.is_active = row[4]
-        user.registration_date = row[5]
-        user.created_at = row[6]
+        user.email = row[2]
+        user.password_hash = row[3]
+        user.is_admin = row[4]
+        user.is_active = row[5]
+        user.registration_date = row[6]
+        user.created_at = row[7]
         users.append(user)
     
     return render_template('admin/users.html', users=users)
