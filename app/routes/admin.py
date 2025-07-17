@@ -56,7 +56,15 @@ def users():
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
-            is_admin = request.form.get('is_admin') == 'true'
+            is_admin_raw = request.form.get('is_admin')
+            is_admin = is_admin_raw == 'true'
+            
+            # Debug logging
+            print(f"DEBUG: Creating user with admin rights")
+            print(f"DEBUG: username={username}")
+            print(f"DEBUG: email={email}")
+            print(f"DEBUG: is_admin_raw={is_admin_raw}")
+            print(f"DEBUG: is_admin={is_admin}")
             
             # Check if user already exists
             existing_user = db.session.execute(
