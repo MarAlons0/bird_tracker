@@ -23,7 +23,7 @@ from anthropic import Anthropic
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config.extensions import migrate, init_extensions, login_manager, mail, db
-from bird_tracker import BirdSightingTracker
+from app.bird_tracker import BirdSightingTracker
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
