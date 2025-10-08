@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from app.models import db, User, RegistrationRequest, CarouselImage
+from app.models import db, User, RegistrationRequest
 from flask_mail import Message
 from datetime import datetime
 from utils.file_upload import save_image, delete_image
@@ -46,19 +46,10 @@ def dashboard():
     result = db.session.execute(text("SELECT COUNT(*) FROM registration_requests WHERE status = 'pending'")).fetchone()
     pending_requests = result[0] if result else 0
     
-    # Get carousel images counts using raw SQL
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_images")).fetchone()
-    total_carousel_images = result[0] if result else 0
-    
-    result = db.session.execute(text("SELECT COUNT(*) FROM carousel_images WHERE is_active = true")).fetchone()
-    active_carousel_images = result[0] if result else 0
-    
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          active_users=active_users,
-                         pending_requests=pending_requests,
-                         total_carousel_images=total_carousel_images,
-                         active_carousel_images=active_carousel_images)
+                         pending_requests=pending_requests)
 
 @admin.route('/users')
 @login_required
@@ -349,128 +340,14 @@ def process_registration_request(request_id, action):
     
     return redirect(url_for('admin.registration_requests'))
 
-@admin.route('/carousel')
-@login_required
-@admin_required
-def manage_carousel():
-    """Admin page for managing carousel images"""
-    images = CarouselImage.query.order_by(CarouselImage.order).all()
-    return render_template('admin/carousel.html', images=images)
+# Carousel feature removed
 
-@admin.route('/carousel/add', methods=['POST'])
-@login_required
-@admin_required
-def add_carousel_image():
-    """Add a new carousel image"""
-    if 'image' not in request.files:
-        flash('No image file provided', 'error')
-        return redirect(url_for('admin.manage_carousel'))
-    
-    file = request.files['image']
-    if file.filename == '':
-        flash('No selected file', 'error')
-        return redirect(url_for('admin.manage_carousel'))
-    
-    if file:
-        try:
-            # Upload to Cloudinary
-            result = cloudinary.uploader.upload(file)
-            image_url = result['secure_url']
-            
-            # Create new carousel image
-            new_image = CarouselImage(
-                filename=image_url,
-                title=request.form.get('title', '').strip(),
-                description=request.form.get('scientific_name', '').strip(),
-                is_active=bool(request.form.get('active')),
-                order=CarouselImage.query.count() + 1
-            )
-            
-            db.session.add(new_image)
-            db.session.commit()
-            flash('Bird image added successfully', 'success')
-        except Exception as e:
-            flash(f'Error adding image: {str(e)}', 'error')
-    
-    return redirect(url_for('admin.manage_carousel'))
+# Carousel feature removed
 
-@admin.route('/carousel/edit/<int:id>', methods=['POST'])
-@login_required
-@admin_required
-def edit_carousel_image(id):
-    """Edit an existing carousel image"""
-    image = CarouselImage.query.get_or_404(id)
-    
-    try:
-        # Update basic info
-        image.title = request.form.get('title', '').strip()
-        image.description = request.form.get('scientific_name', '').strip()
-        image.is_active = bool(request.form.get('active'))
-        
-        # Handle new image upload if provided
-        if 'image' in request.files and request.files['image'].filename:
-            file = request.files['image']
-            result = cloudinary.uploader.upload(file)
-            image.filename = result['secure_url']
-        
-        db.session.commit()
-        flash('Bird image updated successfully', 'success')
-    except Exception as e:
-        flash(f'Error updating image: {str(e)}', 'error')
-    
-    return redirect(url_for('admin.manage_carousel'))
+# Carousel feature removed
 
-@admin.route('/carousel/delete/<int:id>', methods=['POST'])
-@login_required
-@admin_required
-def delete_carousel_image(id):
-    """Delete a carousel image"""
-    image = CarouselImage.query.get_or_404(id)
-    
-    try:
-        # Delete from Cloudinary if it's a Cloudinary URL
-        if 'cloudinary.com' in image.filename:
-            public_id = image.filename.split('/')[-1].split('.')[0]
-            cloudinary.uploader.destroy(public_id)
-        
-        db.session.delete(image)
-        db.session.commit()
-        flash('Bird image deleted successfully', 'success')
-    except Exception as e:
-        flash(f'Error deleting image: {str(e)}', 'error')
-    
-    return redirect(url_for('admin.manage_carousel'))
+# Carousel feature removed
 
-@admin.route('/carousel/reorder', methods=['POST'])
-@login_required
-@admin_required
-def reorder_carousel_images():
-    """Update the order of carousel images"""
-    try:
-        order = request.json.get('order', [])
-        for index, image_id in enumerate(order, 1):
-            image = CarouselImage.query.get(image_id)
-            if image:
-                image.order = index
-        
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+# Carousel feature removed
 
-@admin.route('/carousel/bulk-import', methods=['POST'])
-@login_required
-@admin_required
-def bulk_import_scientific_names():
-    """Bulk import scientific names for carousel images"""
-    try:
-        data = request.json.get('names', {})
-        for image_id, scientific_name in data.items():
-            image = CarouselImage.query.get(image_id)
-            if image:
-                image.description = scientific_name.strip()
-        
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500 
+# Carousel feature removed

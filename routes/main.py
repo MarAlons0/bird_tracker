@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from app.models import db, User, CarouselImage, Location
-from bird_tracker import BirdSightingTracker
+from app.models import db, User, Location
+from app.bird_tracker import BirdSightingTracker
 import os
 import logging
 from sqlalchemy import text
@@ -346,17 +346,4 @@ def get_ai_analysis():
             'message': 'An unexpected error occurred while generating the analysis.'
         }), 500
 
-@bp.route('/api/carousel-images')
-def get_carousel_images():
-    try:
-        # Get active carousel images ordered by their order field
-        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
-        return jsonify([{
-            'id': img.id,
-            'url': img.cloudinary_url or img.filename,  # Use Cloudinary URL if available, fallback to filename
-            'title': img.title,
-            'description': img.description
-        } for img in images])
-    except Exception as e:
-        current_app.logger.error(f'Error fetching carousel images: {str(e)}')
-        return jsonify({'error': str(e)}), 500 
+# Carousel feature removed
