@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 """
 WSGI entry point for Render deployment
+
+Loads the Flask app object from the top-level app.py file explicitly,
+avoiding the name conflict with the package directory `app/`.
 """
 import os
 import sys
+import runpy
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(__file__))
+# Ensure project root is on sys.path
+PROJECT_ROOT = os.path.dirname(__file__)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+APP_PY_PATH = os.path.join(PROJECT_ROOT, "app.py")
 
 try:
-    from app import app
-    print("Successfully imported app from app.py")
-except ImportError as e:
-    print(f"Failed to import app: {e}")
-    # Create a minimal Flask app as fallback
+    # Execute app.py as a script and retrieve the created Flask app
+    module_globals = runpy.run_path(APP_PY_PATH)
+    app = module_globals.get("app")
+    if app is None:
+        raise RuntimeError("'app' variable not found in app.py")
+except Exception as e:
+    # Fallback minimal Flask app with an informative message
     from flask import Flask
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-for-render')
-    
     @app.route('/')
-    def hello():
-        return '<h1>Bird Tracker App</h1><p>App is starting up...</p>'
+    def _fallback():
+        return f"<h1>Bird Tracker</h1><p>Startup error: {e}</p>"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
