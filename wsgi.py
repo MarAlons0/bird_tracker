@@ -26,9 +26,10 @@ except Exception as e:
     # Fallback minimal Flask app with an informative message
     from flask import Flask
     app = Flask(__name__)
+    error_message = str(e)
     @app.route('/')
     def _fallback():
-        return f"<h1>Bird Tracker</h1><p>Startup error: {e}</p>"
+        return f"<h1>Bird Tracker</h1><p>Startup error: {error_message}</p>"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
