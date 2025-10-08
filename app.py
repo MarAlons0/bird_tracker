@@ -31,7 +31,7 @@ from io import BytesIO
 import base64
 from sqlalchemy.sql import text
 import psycopg
-from app.models import User, Location, RegistrationRequest
+from app.models import User, Location
 
 # Load environment variables
 load_dotenv()
@@ -148,7 +148,7 @@ def init_db():
             db.drop_all()
             
             # Import models here to ensure they are registered before db.create_all()
-            from app.models import User, CarouselImage, Location, RegistrationRequest
+            from app.models import User, Location
             
             # Create all tables
             db.create_all()
