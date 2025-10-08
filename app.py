@@ -22,7 +22,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from anthropic import Anthropic
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from extensions import migrate, init_extensions, login_manager, mail, db
+from config.extensions import migrate, init_extensions, login_manager, mail, db
 from bird_tracker import BirdSightingTracker
 import cloudinary
 import cloudinary.uploader
