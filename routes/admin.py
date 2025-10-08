@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from app.models import db, User, RegistrationRequest
+from app.models import db, User
 from flask_mail import Message
 from datetime import datetime
 from utils.file_upload import save_image, delete_image
