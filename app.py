@@ -7,7 +7,11 @@ import os
 import json
 import logging
 from dotenv import load_dotenv
-from config.logging_config import setup_logging
+try:
+    from config.logging_config import setup_logging
+except ImportError:
+    def setup_logging():
+        pass
 import anthropic
 import secrets
 from flask_mail import Mail, Message
