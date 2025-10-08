@@ -31,7 +31,7 @@ from io import BytesIO
 import base64
 from sqlalchemy.sql import text
 import psycopg
-from app.models import User, CarouselImage, Location, RegistrationRequest
+from app.models import User, Location, RegistrationRequest
 
 # Load environment variables
 load_dotenv()
@@ -277,20 +277,8 @@ def load_locations():
         return []
 
 def get_carousel_images():
-    """Get active carousel images"""
-    try:
-        images = CarouselImage.query.filter_by(is_active=True).order_by(CarouselImage.order).all()
-        return [{
-            'id': img.id,
-            'filename': img.cloudinary_url or img.filename,
-            'title': img.title,
-            'description': img.description,
-            'order': img.order,
-            'is_active': img.is_active
-        } for img in images]
-    except Exception as e:
-        logger.error(f"Error fetching carousel images: {e}")
-        return []
+    """Carousel feature removed; return empty list."""
+    return []
 
 @app.route('/map')
 @login_required
