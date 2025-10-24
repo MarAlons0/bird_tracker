@@ -346,4 +346,10 @@ def get_ai_analysis():
             'message': 'An unexpected error occurred while generating the analysis.'
         }), 500
 
+@bp.route('/analysis')
+@login_required
+def analysis():
+    """Render the AI analysis page with chatbot interface."""
+    return render_template('analysis.html')
+
 # Carousel feature removed

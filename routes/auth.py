@@ -64,7 +64,7 @@ def login():
                 logger.info(f"User found in database: {email}")
                 if not user.check_password(password):
                     logger.warning(f"Invalid password for user: {email}")
-                    return render_template('login.html', 
+                    return render_template('auth/login.html', 
                         error="Invalid email or password")
                 
                 # Log user in
@@ -90,7 +90,7 @@ def login():
             
             if not allowed_emails_str:
                 logger.error("ALLOWED_EMAILS environment variable is not set!")
-                return render_template('login.html', 
+                return render_template('auth/login.html', 
                     error="System configuration error. Please contact support.")
             
             allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
@@ -99,7 +99,7 @@ def login():
             if email not in allowed_emails:
                 logger.warning(f"Unauthorized login attempt for email: {email}")
                 logger.warning(f"Email not found in allowed list: {allowed_emails}")
-                return render_template('login.html', 
+                return render_template('auth/login.html', 
                     error="Sorry, this email is not authorized to access this application.")
             
             # Create new user using SQLAlchemy ORM
@@ -145,10 +145,10 @@ def login():
             
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")
-            return render_template('login.html', 
+            return render_template('auth/login.html', 
                 error="An error occurred during login. Please try again.")
     
-    return render_template('login.html')
+    return render_template('auth/login.html')
 
 @bp.route('/logout')
 @login_required
