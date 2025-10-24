@@ -138,3 +138,19 @@ class BirdSightingCache(db.Model):
         db.session.add(cache)
         db.session.commit()
         return cache 
+
+class Image(db.Model):
+    """Model for storing uploaded images."""
+    __tablename__ = 'images'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    filepath = db.Column(db.String(500), nullable=False)  # Cloudinary URL
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('images', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<Image {self.id}: {self.filename}>' 
