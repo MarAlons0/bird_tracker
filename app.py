@@ -31,7 +31,7 @@ from io import BytesIO
 import base64
 from sqlalchemy.sql import text
 import psycopg
-from app.models import User, Location
+from app.models import User, Location, UserPreferences, Image
 
 # Load environment variables
 load_dotenv()
@@ -45,10 +45,29 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def create_app():
     print("Starting app creation...")
-    template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
-    static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
+    # Get the project root directory (where app.py is located)
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    
+    # Set template and static directories relative to project root
+    template_dir = os.path.join(project_root, 'app', 'templates')
+    static_dir = os.path.join(project_root, 'app', 'static')
+    
+    print(f"Project root: {project_root}")
     print(f"Template directory: {template_dir}")
     print(f"Static directory: {static_dir}")
+    
+    # Verify directories exist
+    if not os.path.exists(template_dir):
+        print(f"ERROR: Template directory does not exist: {template_dir}")
+        # Fallback to current directory structure
+        template_dir = os.path.join(project_root, 'templates')
+        print(f"Fallback template directory: {template_dir}")
+    
+    if not os.path.exists(static_dir):
+        print(f"ERROR: Static directory does not exist: {static_dir}")
+        # Fallback to current directory structure
+        static_dir = os.path.join(project_root, 'static')
+        print(f"Fallback static directory: {static_dir}")
     
     app = Flask(__name__, 
                 template_folder=template_dir,
@@ -148,7 +167,7 @@ def init_db():
             db.drop_all()
             
             # Import models here to ensure they are registered before db.create_all()
-            from app.models import User, Location
+            from app.models import User, Location, UserPreferences, Image
             
             # Create all tables
             db.create_all()
@@ -279,6 +298,12 @@ def load_locations():
 def get_carousel_images():
     """Carousel feature removed; return empty list."""
     return []
+
+def allowed_file(filename):
+    """Check if file extension is allowed."""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/map')
 @login_required

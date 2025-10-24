@@ -1,0 +1,31 @@
+# Environment Variables for Render Deployment
+# Copy these to Render's Environment Variables section
+
+# Required Flask Settings
+SECRET_KEY=your-secret-key-here
+FLASK_ENV=production
+
+# Database (will be set automatically by Render if using PostgreSQL)
+# DATABASE_URL=postgresql://... (Render will provide this)
+
+# Email Configuration (replace with your actual values)
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# API Keys (replace with your actual keys)
+EBIRD_API_KEY=your-ebird-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+GOOGLE_PLACES_API_KEY=your-google-places-api-key
+
+# Cloudinary (replace with your actual values)
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+
+# Admin Configuration
+ADMIN_EMAIL=alonsoencinci@gmail.com
+ADMIN_PASSWORD=your-admin-password
+DEFAULT_USER_PASSWORD=admin123
+ALLOWED_EMAILS=gmail.com,example.com

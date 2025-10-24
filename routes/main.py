@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from app.models import db, User, Location
+from app.models import db, User, Location, UserPreferences
 from app.bird_tracker import BirdSightingTracker
 import os
 import logging
@@ -19,7 +19,7 @@ def home():
         logger.info(f"Template files: {os.listdir(current_app.template_folder)}")
         
         # Log the absolute path of the template we're trying to use
-        template_path = os.path.join(current_app.template_folder, 'home_new.html')
+        template_path = os.path.join(current_app.template_folder, 'home.html')
         logger.info(f"Attempting to render template at: {template_path}")
         logger.info(f"Template exists: {os.path.exists(template_path)}")
         
@@ -30,7 +30,7 @@ def home():
             if hasattr(loader, 'searchpath'):
                 logger.info(f"Search paths: {loader.searchpath}")
         
-        return render_template('home_new.html')
+        return render_template('home.html')
     except Exception as e:
         logger.error(f"Error in home route: {str(e)}", exc_info=True)
         return render_template('error.html', error=str(e))
