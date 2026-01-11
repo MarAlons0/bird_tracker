@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request, url_for, redirect, flash, send_file
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_wtf import CSRFProtect
 from datetime import datetime, timedelta
 import sys
 import os
@@ -31,7 +32,7 @@ from io import BytesIO
 import base64
 from sqlalchemy.sql import text
 import psycopg
-from app.models import User, Location, UserPreferences, Image
+from app.models import User, Location, UserPreferences, Image, AllowedEmail
 
 # Load environment variables
 load_dotenv()
@@ -108,6 +109,12 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('SMTP_USER')
     print("Flask-Mail configured")
     
+    # Initialize CSRF protection
+    print("Initializing CSRF protection...")
+    csrf = CSRFProtect()
+    csrf.init_app(app)
+    print("CSRF protection initialized")
+    
     # Initialize extensions
     print("Initializing extensions...")
     init_extensions(app)
@@ -116,9 +123,16 @@ def create_app():
     # Configure CORS
     print("Configuring CORS...")
     if os.getenv('FLASK_ENV') == 'production':
+        # Support both Heroku and Render domains
+        allowed_origins = [
+            "https://bird-tracker-app-9af5a4fb26d3.herokuapp.com",
+            os.getenv('RENDER_EXTERNAL_URL', ''),  # Render provides this automatically
+        ]
+        # Filter out empty strings
+        allowed_origins = [o for o in allowed_origins if o]
         cors = CORS(app, resources={
             r"/*": {
-                "origins": ["https://bird-tracker-app-9af5a4fb26d3.herokuapp.com"],
+                "origins": allowed_origins,
                 "supports_credentials": True,
                 "allow_headers": ["Content-Type", "Authorization"],
                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -167,7 +181,7 @@ def init_db():
             db.drop_all()
             
             # Import models here to ensure they are registered before db.create_all()
-            from app.models import User, Location, UserPreferences, Image
+            from app.models import User, Location, UserPreferences, Image, AllowedEmail
             
             # Create all tables
             db.create_all()

@@ -1,4 +1,4 @@
-from app.extensions import db
+from config.extensions import db
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -138,6 +138,44 @@ class BirdSightingCache(db.Model):
         db.session.add(cache)
         db.session.commit()
         return cache 
+
+class AllowedEmail(db.Model):
+    """Model for storing allowed email addresses that can register/login."""
+    __tablename__ = 'allowed_emails'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    added_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    notes = db.Column(db.String(255), nullable=True)
+
+    # Relationship to track who added the email
+    added_by_user = db.relationship('User', backref='allowed_emails_added', foreign_keys=[added_by])
+
+    def __repr__(self):
+        return f'<AllowedEmail {self.email}>'
+
+    @classmethod
+    def is_email_allowed(cls, email):
+        """Check if an email is in the allowed list and active."""
+        return cls.query.filter_by(email=email.lower().strip(), is_active=True).first() is not None
+
+    @classmethod
+    def add_email(cls, email, added_by_id=None, notes=None):
+        """Add a new allowed email."""
+        email = email.lower().strip()
+        existing = cls.query.filter_by(email=email).first()
+        if existing:
+            if not existing.is_active:
+                existing.is_active = True
+                db.session.commit()
+            return existing
+        new_email = cls(email=email, added_by=added_by_id, notes=notes)
+        db.session.add(new_email)
+        db.session.commit()
+        return new_email
+
 
 class Image(db.Model):
     """Model for storing uploaded images."""

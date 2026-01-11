@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from app.models import db, User, Location, UserPreferences
+from app.models import db, User, Location, UserPreferences, AllowedEmail
 from flask_mail import Message
 from datetime import datetime
 from utils.file_upload import save_image, delete_image
@@ -216,4 +216,84 @@ def fix_preferences(email):
             'location_id': cincinnati.id
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({'error': str(e)}), 500
+
+
+@admin.route('/allowed-emails', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def allowed_emails():
+    """Admin page for managing allowed emails"""
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'add_email':
+            email = request.form.get('email', '').lower().strip()
+            notes = request.form.get('notes', '').strip()
+
+            if not email or '@' not in email:
+                flash('Please enter a valid email address.', 'error')
+            else:
+                existing = AllowedEmail.query.filter_by(email=email).first()
+                if existing:
+                    if not existing.is_active:
+                        existing.is_active = True
+                        existing.notes = notes or existing.notes
+                        db.session.commit()
+                        flash(f'Email {email} has been reactivated.', 'success')
+                    else:
+                        flash(f'Email {email} is already in the allowed list.', 'warning')
+                else:
+                    new_allowed = AllowedEmail(
+                        email=email,
+                        added_by=current_user.id,
+                        notes=notes
+                    )
+                    db.session.add(new_allowed)
+                    db.session.commit()
+                    flash(f'Email {email} has been added to the allowed list.', 'success')
+
+        elif action == 'toggle_status':
+            email_id = request.form.get('email_id')
+            allowed_email = AllowedEmail.query.get(email_id)
+            if allowed_email:
+                allowed_email.is_active = not allowed_email.is_active
+                db.session.commit()
+                status = 'activated' if allowed_email.is_active else 'deactivated'
+                flash(f'Email {allowed_email.email} has been {status}.', 'success')
+
+        elif action == 'delete_email':
+            email_id = request.form.get('email_id')
+            allowed_email = AllowedEmail.query.get(email_id)
+            if allowed_email:
+                email_addr = allowed_email.email
+                db.session.delete(allowed_email)
+                db.session.commit()
+                flash(f'Email {email_addr} has been removed from the allowed list.', 'success')
+
+        elif action == 'import_from_env':
+            # Import emails from ALLOWED_EMAILS env var
+            allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+            if allowed_emails_str:
+                emails = [e.strip().lower() for e in allowed_emails_str.split(',')]
+                imported = 0
+                for email in emails:
+                    if email and '@' in email:
+                        existing = AllowedEmail.query.filter_by(email=email).first()
+                        if not existing:
+                            new_allowed = AllowedEmail(
+                                email=email,
+                                added_by=current_user.id,
+                                notes='Imported from environment variable'
+                            )
+                            db.session.add(new_allowed)
+                            imported += 1
+                db.session.commit()
+                flash(f'Imported {imported} new email(s) from environment variable.', 'success')
+            else:
+                flash('No ALLOWED_EMAILS environment variable found.', 'warning')
+
+    # Get all allowed emails
+    emails = AllowedEmail.query.order_by(AllowedEmail.created_at.desc()).all()
+
+    return render_template('admin/allowed_emails.html', emails=emails)

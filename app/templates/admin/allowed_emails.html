@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Allowed Emails Management</h2>
+
+    <div class="alert alert-info mb-4">
+        <strong>Note:</strong> Only users with email addresses in this list can register and log in to the app.
+        New users enter their email as their username during login to create an account automatically.
+    </div>
+
+    <!-- Import from Environment -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Import from Environment Variable</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Import emails from the ALLOWED_EMAILS environment variable into the database.</p>
+            <form action="{{ url_for('admin.allowed_emails') }}" method="POST" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="import_from_env">
+                <button type="submit" class="btn btn-secondary">Import from Environment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Email Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Add New Allowed Email</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('admin.allowed_emails') }}" method="POST" class="row g-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="add_email">
+                <div class="col-md-5">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="user@example.com" required>
+                </div>
+                <div class="col-md-5">
+                    <label for="notes" class="form-label">Notes (optional)</label>
+                    <input type="text" class="form-control" id="notes" name="notes" placeholder="e.g., Family member, Friend">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Add Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allowed Emails Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Allowed Emails ({{ emails|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if emails %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Added By</th>
+                            <th>Added On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email in emails %}
+                        <tr>
+                            <td>{{ email.id }}</td>
+                            <td>{{ email.email }}</td>
+                            <td>
+                                {% if email.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ email.notes or '-' }}</td>
+                            <td>
+                                {% if email.added_by_user %}
+                                    {{ email.added_by_user.username }}
+                                {% else %}
+                                    System
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if email.created_at %}
+                                    {{ email.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin.allowed_emails') }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="email_id" value="{{ email.id }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">
+                                        {% if email.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('admin.allowed_emails') }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="delete_email">
+                                    <input type="hidden" name="email_id" value="{{ email.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to remove this email from the allowed list?')">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning mb-0">
+                <strong>No allowed emails yet.</strong> Add emails above or import from the environment variable.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

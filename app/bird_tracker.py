@@ -1,63 +1,76 @@
+"""
+Bird Tracker - Main coordinator class.
+
+This class coordinates between the eBird API, AI analysis, and email services.
+For direct access to individual services, import from app.services:
+    - EBirdClient: eBird API interactions
+    - AIService: Claude AI analysis
+    - EmailService: Email sending
+"""
 from flask import current_app
 import logging
-from datetime import datetime, timedelta
-import requests
+from datetime import datetime
 from configparser import ConfigParser
 import os
 
+from app.services.ebird_client import EBirdClient
+from app.services.ai_service import AIService
+from app.services.email_service import EmailService
+
 logger = logging.getLogger(__name__)
 
+
 class BirdSightingTracker:
+    """
+    Main tracker class that coordinates bird sighting operations.
+
+    This class maintains backward compatibility while delegating to focused services.
+    """
+
     def __init__(self, db_instance=None, app=None):
+        """Initialize the tracker with all services."""
         self.db = db_instance
-        self.app = app or current_app
+        self.app = app or current_app._get_current_object() if current_app else None
+
+        # Initialize services
+        self.ebird = EBirdClient()
+        self.ai = AIService()
+        self.email = EmailService()
+
+        # Backward compatibility: expose claude client
+        self.claude = self.ai.client
+
+        # Legacy config loading
         self.config = self._load_config()
-        self.ebird_api_key = os.getenv('EBIRD_API_KEY') or self.config.get('ebird', 'api_key')
-        self.base_url = 'https://api.ebird.org/v2'
-        self.claude = None
-        self._initialize_claude()
-        logger.info(f"BirdSightingTracker initialized with API key: {self.ebird_api_key[:4]}...")
-        
+        self.ebird_api_key = self.ebird.api_key
+        self.base_url = EBirdClient.BASE_URL
+
+        logger.info(f"BirdSightingTracker initialized")
+
     def _load_config(self):
+        """Load legacy config file if present."""
         config = ConfigParser()
         config_path = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
         config.read(config_path)
         return config
-        
+
     def _initialize_claude(self):
-        """Initialize Claude API client."""
-        try:
-            api_key = os.getenv('ANTHROPIC_API_KEY')
-            if not api_key:
-                logger.error("ANTHROPIC_API_KEY not found in environment variables")
-                return
-            
-            logger.info(f"Found ANTHROPIC_API_KEY: {api_key[:4]}...")
-            
-            from anthropic import Anthropic
-            self.claude = Anthropic(api_key=api_key)
-            logger.info("Claude client initialized successfully")
-        except Exception as e:
-            logger.error(f"Error initializing Claude client: {e}")
-            self.claude = None
+        """Initialize Claude client (backward compatibility)."""
+        if not self.ai.client:
+            self.ai._initialize_client()
+        self.claude = self.ai.client
+
+    # =========================================================================
+    # eBird API Methods
+    # =========================================================================
 
     def get_recent_observations(self, user_id=None, days_back=7):
-        """Get recent bird observations from eBird API or cache."""
+        """Get recent bird observations for a user's active location."""
         try:
-            if not self.ebird_api_key:
-                logger.error("eBird API key is missing")
-                raise ValueError("eBird API key is missing")
-
-            # Get active location for the user
             active_location = self.get_active_location(user_id)
             if not active_location:
                 logger.error(f"No active location found for user {user_id}")
-                raise ValueError("No active location found")
-
-            # Validate location data
-            if not all(key in active_location for key in ['latitude', 'longitude', 'radius']):
-                logger.error(f"Invalid location data: {active_location}")
-                raise ValueError("Invalid location data in active location")
+                return []
 
             # Check cache first
             from app.models import BirdSightingCache, Location
@@ -65,479 +78,194 @@ class BirdSightingTracker:
                 latitude=active_location['latitude'],
                 longitude=active_location['longitude']
             ).first()
-            
+
             if location:
                 cache = BirdSightingCache.get_valid_cache(user_id, location.id)
                 if cache:
-                    logger.info(f"Using cached observations for user {user_id} and location {location.id}")
+                    logger.info(f"Using cached observations for user {user_id}")
                     return cache.observations
 
-            # If no valid cache, fetch from eBird API
-            logger.info("No valid cache found, fetching from eBird API")
-            
-            # Calculate date range
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=days_back)
+            # Fetch from eBird
+            observations = self.ebird.get_recent_observations(
+                lat=active_location['latitude'],
+                lng=active_location['longitude'],
+                radius=active_location['radius'],
+                days_back=days_back
+            )
 
-            # Format dates for eBird API
-            start_date_str = start_date.strftime('%Y-%m-%d')
-            end_date_str = end_date.strftime('%Y-%m-%d')
-
-            # Construct request URL
-            base_url = 'https://api.ebird.org/v2/data/obs/geo/recent'
-            params = {
-                'lat': active_location['latitude'],
-                'lng': active_location['longitude'],
-                'dist': active_location['radius'],
-                'back': days_back,
-                'fmt': 'json'
-            }
-
-            # Log the request details
-            logger.info(f"Making eBird API request with params: {params}")
-
-            # Make request to eBird API
-            headers = {'X-eBirdApiToken': self.ebird_api_key}
-            response = requests.get(base_url, params=params, headers=headers)
-
-            # Log the response status and data
-            logger.info(f"eBird API response status: {response.status_code}")
-            logger.info(f"eBird API response data: {response.text[:1000]}")  # Log first 1000 chars to avoid huge logs
-
-            if response.status_code != 200:
-                logger.error(f"eBird API error: {response.status_code} - {response.text}")
-                raise Exception(f"eBird API returned status code {response.status_code}")
-
-            observations = response.json()
-            logger.info(f"Retrieved {len(observations)} observations from eBird API")
-
-            # Cache the observations
-            if location:
+            # Cache the results
+            if location and observations:
                 BirdSightingCache.create_cache(
                     user_id=user_id,
                     location_id=location.id,
                     observations=observations,
-                    cache_duration=3600  # Cache for 1 hour
+                    cache_duration=3600
                 )
-                logger.info(f"Cached observations for user {user_id} and location {location.id}")
 
             return observations
 
         except Exception as e:
-            logger.error(f"Error getting observations: {str(e)}")
+            logger.error(f"Error getting observations: {e}")
             return []
+
+    def get_recent_observations_by_location(self, lat, lng, radius, days_back=7):
+        """Get recent observations for a specific location."""
+        return self.ebird.get_recent_observations(lat, lng, radius, days_back)
 
     def get_active_location(self, user_id):
         """Get the active location for a user."""
         try:
-            from app.models import UserPreferences, Location
-            with self.app.app_context():
-                user_pref = UserPreferences.query.filter_by(user_id=user_id).first()
-                if not user_pref or not user_pref.active_location_id:
-                    # Set default location to Cincinnati, OH
-                    default_location = Location.query.filter_by(name='Cincinnati, OH').first()
-                    if not default_location:
-                        default_location = Location(
-                            place_id='ChIJwYPGcU2tQIgR8zFPo6Sl7qk',
-                            name='Cincinnati, OH',
-                            latitude=39.1031,
-                            longitude=-84.5120,
-                            radius=25
-                        )
-                        self.db.session.add(default_location)
-                        self.db.session.commit()
+            from app.models import UserPreferences, Location, db
+
+            user_pref = UserPreferences.query.filter_by(user_id=user_id).first()
+            if not user_pref or not user_pref.active_location_id:
+                # Create default Cincinnati location
+                default_location = Location.query.filter_by(name='Cincinnati, OH').first()
+                if not default_location:
+                    default_location = Location(
+                        place_id='ChIJwYPGcU2tQIgR8zFPo6Sl7qk',
+                        name='Cincinnati, OH',
+                        latitude=39.1031,
+                        longitude=-84.5120,
+                        radius=25
+                    )
+                    db.session.add(default_location)
+                    db.session.commit()
+
+                if not user_pref:
                     user_pref = UserPreferences(user_id=user_id, active_location_id=default_location.id)
-                    self.db.session.add(user_pref)
-                    self.db.session.commit()
-                location = Location.query.get(user_pref.active_location_id)
-                return {
-                    'latitude': location.latitude,
-                    'longitude': location.longitude,
-                    'radius': location.radius
-                }
+                    db.session.add(user_pref)
+                else:
+                    user_pref.active_location_id = default_location.id
+                db.session.commit()
+
+            location = Location.query.get(user_pref.active_location_id)
+            return {
+                'latitude': location.latitude,
+                'longitude': location.longitude,
+                'radius': location.radius
+            }
         except Exception as e:
-            logger.error(f"Error getting active location: {str(e)}")
+            logger.error(f"Error getting active location: {e}")
             return None
 
-    def generate_analysis(self, observations):
-        """Generate analysis of bird observations."""
-        try:
-            # Group observations by species
-            species_counts = {}
-            for obs in observations:
-                species = obs.get('comName')
-                if species:
-                    species_counts[species] = species_counts.get(species, 0) + 1
-            
-            # Sort by count
-            sorted_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)
-            
-            return {
-                'total_species': len(species_counts),
-                'total_observations': len(observations),
-                'top_species': sorted_species[:10],
-                'observation_dates': list(set(obs.get('obsDt') for obs in observations))
-            }
-            
-        except Exception as e:
-            logger.error(f"Error generating analysis: {str(e)}")
-            return {}
-            
-    def create_email_template(self, user, observations, analysis):
-        """Create HTML email template for the report."""
-        try:
-            # Get user's active location
-            location = self.get_active_location(user.id)
-            location_name = "your area"
-            if location:
-                from app.models import Location
-                loc = Location.query.filter_by(
-                    latitude=location['latitude'],
-                    longitude=location['longitude']
-                ).first()
-                if loc:
-                    location_name = loc.name
-            
-            template = f"""
-            <html>
-                <body>
-                    <h2>Weekly Bird Sighting Report</h2>
-                    <p>Hello {user.email},</p>
-                    <p>Here's your weekly bird sighting report for {location_name}:</p>
-                    
-                    <h3>Summary</h3>
-                    <ul>
-                        <li>Total Species Observed: {analysis.get('total_species', 0)}</li>
-                        <li>Total Observations: {analysis.get('total_observations', 0)}</li>
-                    </ul>
-                    
-                    <h3>Top Species</h3>
-                    <ul>
-                        {''.join(f'<li>{species}: {count} sightings</li>' for species, count in analysis.get('top_species', []))}
-                    </ul>
-                    
-                    <p>Thank you for using Bird Tracker!</p>
-                </body>
-            </html>
-            """
-            return template
-            
-        except Exception as e:
-            logger.error(f"Error creating email template: {str(e)}")
-            return ""
-            
-    def send_email(self, to, subject, html):
-        """Send email using Flask-Mail."""
-        try:
-            from flask_mail import Message
-            mail = current_app.extensions.get('mail')
-            
-            msg = Message(
-                subject=subject,
-                recipients=to,
-                html=html
-            )
-            
-            mail.send(msg)
-            logger.info(f"Email sent successfully to {to}")
-            
-        except Exception as e:
-            logger.error(f"Error sending email: {str(e)}")
-            raise 
+    # =========================================================================
+    # AI Analysis Methods
+    # =========================================================================
+
+    def get_ai_analysis(self, sightings_data, location):
+        """Get AI analysis of bird sightings."""
+        return self.ai.analyze_observations(sightings_data, location)
+
+    def chat_with_ai(self, message, context=None):
+        """Chat with AI about bird sightings."""
+        return self.ai.chat(message, context)
 
     def analyze_sightings(self, location, timeframe=7):
-        """Analyze bird sightings for a specific location and timeframe."""
+        """Analyze bird sightings for a location."""
         try:
-            # Get recent observations
             observations = self.get_recent_observations(location, timeframe)
             if not observations:
                 return "No observations found for the specified location and timeframe."
 
-            # Format observations for AI analysis
-            formatted_observations = []
-            for obs in observations:
-                formatted_obs = {
-                    'species': obs['comName'],
-                    'count': obs['howMany'],
-                    'location': obs['locName'],
-                    'timestamp': obs['obsDt'],
-                    'weather': obs.get('weather', ''),
-                    'notes': obs.get('notes', '')
-                }
-                formatted_observations.append(formatted_obs)
-
-            # Get AI analysis
-            return self.get_ai_analysis(formatted_observations, location)
+            formatted = self._format_observations_for_ai(observations)
+            return self.ai.analyze_observations(formatted, location)
         except Exception as e:
             logger.error(f"Error analyzing sightings: {e}")
             return f"Error analyzing sightings: {str(e)}"
 
-    def get_ai_analysis(self, sightings_data, location):
-        """Get AI analysis of bird sightings using Claude."""
-        try:
-            if not self.claude:
-                logger.error("Claude client not initialized")
-                return None
-
-            logger.info(f"Preparing to analyze {len(sightings_data)} sightings for location: {location}")
-            
-            # Format observations for display
-            formatted_observations = []
-            for obs in sightings_data:
-                observation = f"- {obs['species']} ({obs['count']}) at {obs['location']} on {obs['timestamp']}"
-                if obs.get('weather'):
-                    observation += f" (Weather: {obs['weather']})"
-                if obs.get('notes'):
-                    observation += f" (Notes: {obs['notes']})"
-                formatted_observations.append(observation)
-            observation_text = "\n".join(formatted_observations)
-
-            logger.info("Sending request to Claude API...")
-            
-            prompt = f"""You are an expert Naturalist analyzing bird sighting data for {location}. Analyze these observations and provide insights.
-
-{observation_text}
-
-Format your response EXACTLY as follows:
-
-<p>Start with a comprehensive summary paragraph that covers the overall bird activity in the area, including any notable patterns, unusual sightings, and migration activity. Consider the location and time of year in your analysis.</p>
-
-<ul style="margin-left: 20px;">
-    <li>Unusual or rare species for this location:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Migratory species observed:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-<ul style="margin-left: 20px;">
-    <li>Summary of Birds of Prey:
-        <ul style="margin-left: 20px;">
-            <li>Species Name (Location)</li>
-            <li>Another Species (Location)</li>
-        </ul>
-    </li>
-</ul>
-
-Requirements:
-1. Start the main summary paragraph immediately - no introductory statements
-2. Include TWO blank lines after the main summary paragraph
-3. Include ONE blank line between each bulleted section
-4. Keep the main summary paragraph concise but informative
-5. Focus on the species and locations without dates
-6. Use proper HTML formatting for readability
-7. Ensure each section is visually distinct with proper spacing
-8. Consider the location and time of year in your analysis
-9. Highlight any unusual or rare sightings
-10. DO NOT include any meta-commentary about the format or structure"""
-
-            # Get response from Claude
-            response = self.claude.messages.create(
-                model="claude-3-5-sonnet-20241022",
-                max_tokens=4000,
-                temperature=0.7,
-                system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
-
-            logger.info("Received response from Claude API")
-            
-            if not response or not response.content:
-                logger.error("Empty response from Claude")
-                return None
-
-            # Extract the text content from the response
-            if hasattr(response, 'content'):
-                if isinstance(response.content, list):
-                    text_content = ""
-                    for block in response.content:
-                        if hasattr(block, 'text'):
-                            text_content += block.text + "\n"
-                    logger.info("Successfully extracted text content from Claude response")
-                    return text_content.strip()
-                elif hasattr(response.content, 'text'):
-                    logger.info("Successfully extracted text content from Claude response")
-                    return response.content.text
-                elif isinstance(response.content, str):
-                    logger.info("Successfully extracted text content from Claude response")
-                    return response.content
-                else:
-                    logger.error("Unexpected response content type")
-                    return str(response.content)
-            else:
-                logger.error("Response has no content attribute")
-                return "Sorry, I couldn't generate a response."
-
-        except Exception as e:
-            logger.error(f"Error getting AI analysis: {e}", exc_info=True)
-            return None 
-
-    def get_recent_observations_by_location(self, lat, lng, radius, days_back=7):
-        """Get recent bird observations from eBird API for a specific location."""
-        try:
-            if not self.ebird_api_key:
-                logger.error("eBird API key is missing")
-                raise ValueError("eBird API key is missing")
-
-            # Calculate date range
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=days_back)
-
-            # Format dates for eBird API
-            start_date_str = start_date.strftime('%Y-%m-%d')
-            end_date_str = end_date.strftime('%Y-%m-%d')
-
-            # Construct request URL
-            base_url = 'https://api.ebird.org/v2/data/obs/geo/recent'
-            params = {
-                'lat': lat,
-                'lng': lng,
-                'dist': radius,
-                'back': days_back,
-                'fmt': 'json'
-            }
-
-            # Log the request details
-            logger.info(f"Making eBird API request with params: {params}")
-
-            # Make request to eBird API
-            headers = {'X-eBirdApiToken': self.ebird_api_key}
-            response = requests.get(base_url, params=params, headers=headers)
-
-            # Log the response status and data
-            logger.info(f"eBird API response status: {response.status_code}")
-            logger.info(f"eBird API response data: {response.text[:1000]}")  # Log first 1000 chars to avoid huge logs
-
-            if response.status_code != 200:
-                logger.error(f"eBird API error: {response.status_code} - {response.text}")
-                raise Exception(f"eBird API returned status code {response.status_code}")
-
-            observations = response.json()
-            logger.info(f"Retrieved {len(observations)} observations from eBird API")
-
-            return observations
-
-        except Exception as e:
-            logger.error(f"Error getting observations: {str(e)}")
-            return [] 
-
-    def chat_with_ai(self, message, context=None):
-        """Chat with Claude about bird sightings."""
-        try:
-            if not self.claude:
-                logger.error("Claude client not initialized")
-                return None
-
-            # Prepare the prompt with context if available
-            prompt = f"""You are an expert ornithologist assistant. Answer questions about bird sightings and bird behavior.
-            
-Context of recent bird sightings:
-{context if context else 'No recent sightings available.'}
-
-User question: {message}
-
-Please provide a helpful and informative response based on the context and your expertise. If the question is about specific birds mentioned in the context, use that information. If not, provide general information about the birds mentioned in the question."""
-
-            # Get response from Claude
-            response = self.claude.messages.create(
-                model="claude-3-opus-20240229",
-                max_tokens=1000,
-                temperature=0.7,
-                system="You are an expert ornithologist assistant. Provide accurate and helpful information about birds and bird sightings.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
-
-            if not response or not response.content:
-                logger.error("Empty response from Claude")
-                return None
-
-            # Extract the text content from the response
-            if hasattr(response, 'content'):
-                if isinstance(response.content, list):
-                    text_content = ""
-                    for block in response.content:
-                        if hasattr(block, 'text'):
-                            text_content += block.text + "\n"
-                    return text_content.strip()
-                elif hasattr(response.content, 'text'):
-                    return response.content.text
-                elif isinstance(response.content, str):
-                    return response.content
-                else:
-                    logger.error("Unexpected response content type")
-                    return str(response.content)
-            else:
-                logger.error("Response has no content attribute")
-                return "Sorry, I couldn't generate a response."
-
-        except Exception as e:
-            logger.error(f"Error in chat_with_ai: {e}", exc_info=True)
-            return None 
-
     def analyze_recent_sightings(self, observations, user_id=None):
-        """Analyze recent bird sightings and generate a report."""
+        """Analyze recent sightings and generate a report."""
         try:
             if not observations:
                 return "No observations to analyze."
-            
-            if not self.claude:
-                logger.warning("Claude client not initialized, cannot analyze sightings")
-                return "Unable to generate AI analysis: Claude client not initialized"
-            
-            # Format observations for AI analysis
-            formatted_observations = []
-            for obs in observations:
-                # Handle both BirdSighting objects and dictionary observations
-                if isinstance(obs, dict):
-                    formatted_obs = {
-                        'species': obs.get('comName', obs.get('bird_name', 'Unknown')),
-                        'count': obs.get('howMany', obs.get('count', 1)),
-                        'location': obs.get('locName', obs.get('location', 'Unknown')),
-                        'timestamp': obs.get('obsDt', obs.get('timestamp', datetime.utcnow().isoformat())),
-                        'weather': obs.get('weather', ''),
-                        'notes': obs.get('notes', '')
-                    }
-                else:  # BirdSighting object
-                    formatted_obs = {
-                        'species': obs.bird_name,
-                        'count': 1,  # Default count for BirdSighting objects
-                        'location': obs.location,
-                        'timestamp': obs.timestamp.isoformat() if obs.timestamp else datetime.utcnow().isoformat(),
-                        'weather': '',
-                        'notes': obs.notes or ''
-                    }
-                formatted_observations.append(formatted_obs)
-            
-            # Get AI analysis
-            logger.info("Attempting to get AI analysis...")
+
+            if not self.ai.is_available:
+                logger.warning("AI service not available, using basic analysis")
+                return self._generate_basic_analysis(observations)
+
+            formatted = self._format_observations_for_ai(observations)
             location = self.get_active_location(user_id)
-            if location:
-                location_name = f"{location.get('latitude')}, {location.get('longitude')}"
-            else:
-                location_name = "Unknown Location"
-            
-            analysis = self.get_ai_analysis(formatted_observations, location_name)
-            
-            if not analysis:
-                logger.error("AI analysis returned None, falling back to basic analysis")
-                return self.generate_analysis(formatted_observations)
-            
-            logger.info("Successfully received AI analysis")
-            return analysis
+            location_name = f"{location['latitude']}, {location['longitude']}" if location else "Unknown Location"
+
+            analysis = self.ai.analyze_observations(formatted, location_name)
+            return analysis if analysis else self._generate_basic_analysis(observations)
+
         except Exception as e:
-            logger.error(f"Error analyzing sightings: {e}", exc_info=True)
-            return self.generate_analysis(formatted_observations) 
+            logger.error(f"Error analyzing sightings: {e}")
+            return self._generate_basic_analysis(observations)
+
+    def _format_observations_for_ai(self, observations):
+        """Format observations for AI analysis."""
+        formatted = []
+        for obs in observations:
+            if isinstance(obs, dict):
+                formatted.append({
+                    'species': obs.get('comName', obs.get('bird_name', 'Unknown')),
+                    'count': obs.get('howMany', obs.get('count', 1)),
+                    'location': obs.get('locName', obs.get('location', 'Unknown')),
+                    'timestamp': obs.get('obsDt', obs.get('timestamp', '')),
+                    'weather': obs.get('weather', ''),
+                    'notes': obs.get('notes', '')
+                })
+            else:
+                # BirdSighting model object
+                formatted.append({
+                    'species': obs.bird_name,
+                    'count': 1,
+                    'location': obs.location,
+                    'timestamp': obs.timestamp.isoformat() if obs.timestamp else '',
+                    'weather': '',
+                    'notes': obs.notes or ''
+                })
+        return formatted
+
+    # =========================================================================
+    # Analysis Methods (Non-AI)
+    # =========================================================================
+
+    def generate_analysis(self, observations):
+        """Generate basic statistical analysis of observations."""
+        return self._generate_basic_analysis(observations)
+
+    def _generate_basic_analysis(self, observations):
+        """Generate basic analysis without AI."""
+        try:
+            species_counts = {}
+            for obs in observations:
+                if isinstance(obs, dict):
+                    species = obs.get('comName', obs.get('species', obs.get('bird_name')))
+                else:
+                    species = obs.bird_name
+
+                if species:
+                    species_counts[species] = species_counts.get(species, 0) + 1
+
+            sorted_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)
+
+            return {
+                'total_species': len(species_counts),
+                'total_observations': len(observations),
+                'top_species': sorted_species[:10],
+                'observation_dates': list(set(
+                    obs.get('obsDt', obs.get('timestamp', '')) if isinstance(obs, dict) else ''
+                    for obs in observations
+                ))
+            }
+        except Exception as e:
+            logger.error(f"Error generating basic analysis: {e}")
+            return {}
+
+    # =========================================================================
+    # Email Methods
+    # =========================================================================
+
+    def create_email_template(self, user, observations, analysis):
+        """Create HTML email template for the report."""
+        return self.email.create_weekly_report(user, observations, analysis)
+
+    def send_email(self, to, subject, html):
+        """Send email using Flask-Mail."""
+        if isinstance(to, str):
+            to = [to]
+        return self.email.send(to, subject, html)

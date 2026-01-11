@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.models import db, User
+from app.models import User, AllowedEmail
+from app.forms import LoginForm
+from config.extensions import db
 from datetime import datetime, timedelta
 import secrets
 from flask_mail import Message, current_app
@@ -14,6 +16,11 @@ from sqlalchemy import text
 
 bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
+
+@bp.route('/test')
+def test():
+    """Simple test route to verify server is responding"""
+    return "<h1>Auth blueprint is working!</h1>"
 
 def test_smtp_connection():
     try:
@@ -51,26 +58,42 @@ def test_smtp_connection():
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
+    try:
+        form = LoginForm()
+    except Exception as e:
+        logger.error(f"Error creating LoginForm: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return f"Error creating form: {str(e)}", 500
+    
     if request.method == 'POST':
-        email = request.form.get('email')
+        # Try to get username or email from form
+        username_or_email = request.form.get('username') or request.form.get('email')
         password = request.form.get('password')
-        logger.info(f"Login attempt for email: {email}")
+        logger.info(f"Login attempt for username/email: {username_or_email}")
+        
+        # If form has username field, use it
+        if form.username.data:
+            username_or_email = form.username.data
         
         try:
-            # Check if user exists using SQLAlchemy ORM
-            user = User.query.filter_by(email=email).first()
+            # Try to find user by email first, then by username
+            user = User.query.filter_by(email=username_or_email).first()
+            if not user:
+                user = User.query.filter_by(username=username_or_email).first()
             
             if user:
-                logger.info(f"User found in database: {email}")
+                logger.info(f"User found in database: {user.email}")
                 if not user.check_password(password):
-                    logger.warning(f"Invalid password for user: {email}")
-                    return render_template('auth/login.html', 
-                        error="Invalid email or password")
+                    logger.warning(f"Invalid password for user: {user.email}")
+                    flash("Invalid username or password", "error")
+                    return render_template('auth/login.html', form=form)
                 
                 # Log user in
-                logger.info(f"Logging in user: {email}")
-                login_user(user, remember=True)
-                logger.info(f"User logged in successfully: {email}")
+                remember = form.remember.data if form.remember else True
+                logger.info(f"Logging in user: {user.email}")
+                login_user(user, remember=remember)
+                logger.info(f"User logged in successfully: {user.email}")
                 flash("Successfully logged in!", "success")
                 
                 # Set session as permanent
@@ -79,28 +102,30 @@ def login():
                 # Redirect to the next page or home
                 next_page = request.args.get('next')
                 if not next_page or not next_page.startswith('/'):
-                    next_page = url_for('main.index')
+                    next_page = url_for('main.home')
                 logger.info(f"Redirecting to: {next_page}")
                 return redirect(next_page)
             
-            # For new users, check ALLOWED_EMAILS
-            logger.info("User not found in database, checking ALLOWED_EMAILS")
-            allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
-            logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
-            
-            if not allowed_emails_str:
-                logger.error("ALLOWED_EMAILS environment variable is not set!")
-                return render_template('auth/login.html', 
-                    error="System configuration error. Please contact support.")
-            
-            allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
-            logger.info(f"Processed allowed emails: {allowed_emails}")
-            
-            if email not in allowed_emails:
+            # For new users, check allowed_emails table in database
+            # Use username_or_email as email for new user creation
+            email = username_or_email if '@' in username_or_email else None
+            if not email:
+                logger.warning("Invalid email format for new user")
+                flash("Invalid username or password", "error")
+                return render_template('auth/login.html', form=form)
+
+            logger.info("User not found in database, checking allowed_emails table")
+
+            # Check if email is in allowed_emails table
+            allowed_email = AllowedEmail.query.filter_by(email=email, is_active=True).first()
+
+            if not allowed_email:
                 logger.warning(f"Unauthorized login attempt for email: {email}")
-                logger.warning(f"Email not found in allowed list: {allowed_emails}")
-                return render_template('auth/login.html', 
-                    error="Sorry, this email is not authorized to access this application.")
+                logger.warning(f"Email not found in allowed_emails table")
+                flash("Sorry, this email is not authorized to access this application.", "error")
+                return render_template('auth/login.html', form=form)
+
+            logger.info(f"Email {email} found in allowed_emails table")
             
             # Create new user using SQLAlchemy ORM
             logger.info(f"Creating new user for email: {email}")
@@ -123,17 +148,16 @@ def login():
                 username=username,
                 password_hash=generate_password_hash(default_password),
                 is_admin=False,
-                is_approved=True,
-                is_active=True,
-                newsletter_subscription=True
+                is_active=True
             )
             db.session.add(new_user)
             db.session.commit()
             logger.info(f"Created new user with default password: {email}")
             
             # Log user in
+            remember = form.remember.data if form.remember else True
             logger.info(f"Logging in new user: {email}")
-            login_user(new_user, remember=True)
+            login_user(new_user, remember=remember)
             logger.info(f"New user logged in successfully: {email}")
             flash("Successfully logged in!", "success")
             
@@ -141,14 +165,39 @@ def login():
             session.permanent = True
             
             # Redirect to home
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.home'))
             
         except Exception as e:
-            logger.error(f"Error during login: {str(e)}")
-            return render_template('auth/login.html', 
-                error="An error occurred during login. Please try again.")
+            error_msg = str(e)
+            error_type = type(e).__name__
+            logger.error(f"Error during login ({error_type}): {error_msg}")
+            import traceback
+            logger.error(traceback.format_exc())
+            
+            # Show more helpful error in development
+            if os.getenv('FLASK_ENV') == 'development' or os.getenv('FLASK_ENV') != 'production':
+                flash(f"Error during login: {error_type} - {error_msg}. Check server logs for details.", "error")
+            else:
+                flash("An error occurred during login. Please try again.", "error")
+            return render_template('auth/login.html', form=form)
     
-    return render_template('auth/login.html')
+    try:
+        return render_template('auth/login.html', form=form)
+    except Exception as e:
+        logger.error(f"Error rendering login template: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        # Return a simple HTML page with the error for debugging
+        return f"""
+        <html>
+        <body>
+            <h1>Login Page Error</h1>
+            <p>Error: {str(e)}</p>
+            <pre>{traceback.format_exc()}</pre>
+            <p>Check server logs for more details.</p>
+        </body>
+        </html>
+        """, 500
 
 @bp.route('/logout')
 @login_required

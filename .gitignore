@@ -4,5 +4,7 @@ __pycache__/
 .env
 .DS_Store
 *.db
-*.log instance/
-.env
+*.log
+instance/
+node_modules/
+.pytest_cache/
