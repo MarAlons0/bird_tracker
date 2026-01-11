@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from functools import wraps
-from app.models import User
+from app.models import User, AllowedEmail
 from config.extensions import db
 from flask_mail import Message
 from datetime import datetime
@@ -43,45 +43,64 @@ def dashboard():
     result = db.session.execute(text("SELECT COUNT(*) FROM users WHERE is_active = true")).fetchone()
     active_users = result[0] if result else 0
     
-    # Get pending requests count using raw SQL
-    result = db.session.execute(text("SELECT COUNT(*) FROM registration_requests WHERE status = 'pending'")).fetchone()
-    pending_requests = result[0] if result else 0
+    # Get pending requests count using raw SQL (table may not exist)
+    try:
+        result = db.session.execute(text("SELECT COUNT(*) FROM registration_requests WHERE status = 'pending'")).fetchone()
+        pending_requests = result[0] if result else 0
+    except Exception:
+        pending_requests = 0
     
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          active_users=active_users,
                          pending_requests=pending_requests)
 
-@admin.route('/users')
+@admin.route('/users', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def users():
     """Admin page for managing users"""
-    # Get all users using raw SQL
-    result = db.session.execute(
-        text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
-                   login_token, token_expiry, newsletter_subscription
-            FROM users
-            ORDER BY id
-        """)
-    ).fetchall()
-    
-    users = []
-    for row in result:
-        user = User()
-        user.id = row[0]
-        user.username = row[1]
-        user.email = row[2]
-        user.is_admin = row[3]
-        user.is_approved = row[4]
-        user.registration_date = row[5]
-        user.is_active = row[6]
-        user.login_token = row[7]
-        user.token_expiry = row[8]
-        user.newsletter_subscription = row[9]
-        users.append(user)
-    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        user_id = request.form.get('user_id')
+
+        if action == 'delete_user' and user_id:
+            user = User.query.get(user_id)
+            if user:
+                if user.id == current_user.id:
+                    flash('You cannot delete your own account.', 'error')
+                else:
+                    # Delete related records first
+                    from app.models import UserPreferences
+                    UserPreferences.query.filter_by(user_id=user.id).delete()
+                    db.session.delete(user)
+                    db.session.commit()
+                    flash(f'User {user.username} has been deleted.', 'success')
+
+        elif action == 'toggle_admin' and user_id:
+            user = User.query.get(user_id)
+            if user:
+                if user.id == current_user.id:
+                    flash('You cannot modify your own admin status.', 'error')
+                else:
+                    user.is_admin = not user.is_admin
+                    db.session.commit()
+                    status = 'granted' if user.is_admin else 'revoked'
+                    flash(f'Admin rights {status} for {user.username}.', 'success')
+
+        elif action == 'toggle_status' and user_id:
+            user = User.query.get(user_id)
+            if user:
+                if user.id == current_user.id:
+                    flash('You cannot deactivate your own account.', 'error')
+                else:
+                    user.is_active = not user.is_active
+                    db.session.commit()
+                    status = 'activated' if user.is_active else 'deactivated'
+                    flash(f'User {user.username} has been {status}.', 'success')
+
+    # Get all users using ORM
+    users = User.query.order_by(User.id).all()
     return render_template('admin/users.html', users=users)
 
 @admin.route('/', methods=['GET', 'POST'])
@@ -341,14 +360,79 @@ def process_registration_request(request_id, action):
     
     return redirect(url_for('admin.registration_requests'))
 
-# Carousel feature removed
+@admin.route('/allowed-emails', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def allowed_emails():
+    """Admin page for managing allowed emails"""
+    if request.method == 'POST':
+        action = request.form.get('action')
 
-# Carousel feature removed
+        if action == 'add_email':
+            email = request.form.get('email', '').lower().strip()
+            notes = request.form.get('notes', '').strip()
 
-# Carousel feature removed
+            if not email or '@' not in email:
+                flash('Please enter a valid email address.', 'error')
+            else:
+                existing = AllowedEmail.query.filter_by(email=email).first()
+                if existing:
+                    if not existing.is_active:
+                        existing.is_active = True
+                        existing.notes = notes or existing.notes
+                        db.session.commit()
+                        flash(f'Email {email} has been reactivated.', 'success')
+                    else:
+                        flash(f'Email {email} is already in the allowed list.', 'warning')
+                else:
+                    new_allowed = AllowedEmail(
+                        email=email,
+                        added_by=current_user.id,
+                        notes=notes
+                    )
+                    db.session.add(new_allowed)
+                    db.session.commit()
+                    flash(f'Email {email} has been added to the allowed list.', 'success')
 
-# Carousel feature removed
+        elif action == 'toggle_status':
+            email_id = request.form.get('email_id')
+            allowed_email_obj = AllowedEmail.query.get(email_id)
+            if allowed_email_obj:
+                allowed_email_obj.is_active = not allowed_email_obj.is_active
+                db.session.commit()
+                status = 'activated' if allowed_email_obj.is_active else 'deactivated'
+                flash(f'Email {allowed_email_obj.email} has been {status}.', 'success')
 
-# Carousel feature removed
+        elif action == 'delete_email':
+            email_id = request.form.get('email_id')
+            allowed_email_obj = AllowedEmail.query.get(email_id)
+            if allowed_email_obj:
+                email_addr = allowed_email_obj.email
+                db.session.delete(allowed_email_obj)
+                db.session.commit()
+                flash(f'Email {email_addr} has been removed from the allowed list.', 'success')
 
-# Carousel feature removed
+        elif action == 'import_from_env':
+            allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+            if allowed_emails_str:
+                emails_list = [e.strip().lower() for e in allowed_emails_str.split(',')]
+                imported = 0
+                for email in emails_list:
+                    if email and '@' in email:
+                        existing = AllowedEmail.query.filter_by(email=email).first()
+                        if not existing:
+                            new_allowed = AllowedEmail(
+                                email=email,
+                                added_by=current_user.id,
+                                notes='Imported from environment variable'
+                            )
+                            db.session.add(new_allowed)
+                            imported += 1
+                db.session.commit()
+                flash(f'Imported {imported} new email(s) from environment variable.', 'success')
+            else:
+                flash('No ALLOWED_EMAILS environment variable found.', 'warning')
+
+    # Get all allowed emails
+    emails = AllowedEmail.query.order_by(AllowedEmail.created_at.desc()).all()
+    return render_template('admin/allowed_emails.html', emails=emails)

@@ -371,10 +371,12 @@ def change_password():
         # Verify current password
         if not current_user.check_password(current_password):
             return render_template('auth/change_password.html', error="Current password is incorrect")
-        
-        # Update password
-        current_user.set_password(new_password)
+
+        # Update password - fetch user from db to ensure proper tracking
+        user = User.query.get(current_user.id)
+        user.set_password(new_password)
         db.session.commit()
+        logger.info(f"Password changed for user: {user.email}")
         
         # Log out the user to force them to log in with the new password
         logout_user()
