@@ -230,7 +230,7 @@ def request_registration():
         ).fetchone()
         
         if result and result[1]:  # is_active is True
-            return render_template('request_registration.html', 
+            return render_template('auth/request_registration.html', 
                 error="This email is already registered.")
         
         # Check if there's already a pending request using raw SQL
@@ -240,7 +240,7 @@ def request_registration():
         ).fetchone()
         
         if result:
-            return render_template('request_registration.html', 
+            return render_template('auth/request_registration.html', 
                 error="A registration request for this email is already pending.")
         
         # Generate username from email
@@ -307,10 +307,10 @@ def request_registration():
         """
         current_app.mail.send(msg)
         
-        return render_template('request_registration.html', 
+        return render_template('auth/request_registration.html', 
             success="Your registration request has been submitted. You will receive an email once it has been processed.")
             
-    return render_template('request_registration.html')
+    return render_template('auth/request_registration.html')
 
 @bp.route('/register/<token>', methods=['GET', 'POST'])
 def register(token):
@@ -330,10 +330,10 @@ def register(token):
         
         # Validate inputs
         if not password or not confirm_password:
-            return render_template('register.html', error="All fields are required")
+            return render_template('auth/register.html', error="All fields are required")
         
         if password != confirm_password:
-            return render_template('register.html', error="Passwords do not match")
+            return render_template('auth/register.html', error="Passwords do not match")
         
         # Create new user
         user = User(email=request.email)
@@ -351,7 +351,7 @@ def register(token):
         flash("Registration successful! Welcome to Bird Tracker.", "success")
         return redirect(url_for('main.index'))
     
-    return render_template('register.html', email=request.email)
+    return render_template('auth/register.html', email=request.email)
 
 @bp.route('/change-password', methods=['GET', 'POST'])
 @login_required
@@ -363,14 +363,14 @@ def change_password():
         
         # Validate inputs
         if not current_password or not new_password or not confirm_password:
-            return render_template('change_password.html', error="All fields are required")
+            return render_template('auth/change_password.html', error="All fields are required")
         
         if new_password != confirm_password:
-            return render_template('change_password.html', error="New passwords do not match")
+            return render_template('auth/change_password.html', error="New passwords do not match")
         
         # Verify current password
         if not current_user.check_password(current_password):
-            return render_template('change_password.html', error="Current password is incorrect")
+            return render_template('auth/change_password.html', error="Current password is incorrect")
         
         # Update password
         current_user.set_password(new_password)
@@ -381,4 +381,4 @@ def change_password():
         flash("Password updated successfully! Please log in with your new password.", "success")
         return redirect(url_for('auth.login'))
     
-    return render_template('change_password.html') 
+    return render_template('auth/change_password.html') 
