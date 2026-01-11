@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from app.models import db, User, Location, UserPreferences
+from app.models import User, Location, UserPreferences
+from config.extensions import db
 from app.bird_tracker import BirdSightingTracker
+from datetime import datetime
 import os
 import logging
 from sqlalchemy import text
@@ -25,12 +27,20 @@ def home():
         
         # Log the template loader's search paths
         logger.info("Template loader search paths:")
-        for loader in current_app.jinja_loader.loaders:
-            logger.info(f"Loader: {loader}")
-            if hasattr(loader, 'searchpath'):
-                logger.info(f"Search paths: {loader.searchpath}")
+        if hasattr(current_app.jinja_loader, 'searchpath'):
+            # FileSystemLoader has searchpath attribute
+            logger.info(f"Search path: {current_app.jinja_loader.searchpath}")
+        elif hasattr(current_app.jinja_loader, 'loaders'):
+            # ChoiceLoader has loaders attribute
+            for loader in current_app.jinja_loader.loaders:
+                logger.info(f"Loader: {loader}")
+                if hasattr(loader, 'searchpath'):
+                    logger.info(f"Search path: {loader.searchpath}")
+        else:
+            logger.info(f"Loader type: {type(current_app.jinja_loader)}")
         
-        return render_template('home.html')
+        google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
+        return render_template('home.html', GOOGLE_PLACES_API_KEY=google_places_key)
     except Exception as e:
         logger.error(f"Error in home route: {str(e)}", exc_info=True)
         return render_template('error.html', error=str(e))
@@ -289,6 +299,176 @@ def get_observations():
     except Exception as e:
         logger.error(f"Error fetching observations: {e}")
         return jsonify({'error': 'Failed to fetch observations'}), 500
+
+@bp.route('/api/sightings')
+@login_required
+def get_sightings():
+    """Return recent bird sightings from eBird API with location parameters."""
+    try:
+        # Get location parameters from request
+        lat = request.args.get('lat', type=float)
+        lng = request.args.get('lng', type=float)
+        radius = request.args.get('radius', type=int)
+        
+        if not all([lat, lng, radius]):
+            logger.error("Missing required location parameters")
+            return jsonify([])
+            
+        logger.info(f"Fetching sightings for lat: {lat}, lng: {lng}, radius: {radius}")
+        
+        # Get sightings from eBird API using the tracker
+        tracker = current_app.tracker
+        observations = tracker.get_recent_observations_by_location(lat, lng, radius)
+        
+        # Transform observations to match the frontend's expected format
+        sightings = []
+        for obs in observations:
+            sightings.append({
+                'bird_name': obs.get('comName', obs.get('bird_name', 'Unknown')),
+                'location': obs.get('locName', obs.get('location', 'Unknown')),
+                'latitude': obs.get('lat', obs.get('latitude', 0)),
+                'longitude': obs.get('lng', obs.get('longitude', 0)),
+                'timestamp': obs.get('obsDt', obs.get('timestamp', '')),
+                'observer': obs.get('observer', 'eBird User'),
+                'category': _get_bird_category(obs.get('comName', obs.get('bird_name', '')))
+            })
+        
+        return jsonify(sightings)
+    except Exception as e:
+        logger.error(f"Error fetching sightings: {e}", exc_info=True)
+        return jsonify([])
+
+def _get_bird_category(bird_name):
+    """Helper function to categorize birds for marker colors."""
+    if not bird_name:
+        return 'songbird'
+    
+    bird_name_lower = bird_name.lower()
+    
+    # Waterfowl
+    waterfowl_keywords = ['duck', 'goose', 'swan', 'teal', 'wigeon', 'pintail', 'shoveler', 'gadwall', 'mallard']
+    if any(keyword in bird_name_lower for keyword in waterfowl_keywords):
+        return 'waterfowl'
+    
+    # Raptors
+    raptor_keywords = ['hawk', 'eagle', 'falcon', 'owl', 'osprey', 'vulture', 'kite', 'harrier']
+    if any(keyword in bird_name_lower for keyword in raptor_keywords):
+        return 'raptor'
+    
+    # Shorebirds
+    shorebird_keywords = ['sandpiper', 'plover', 'curlew', 'godwit', 'dunlin', 'killdeer', 'snipe', 'stilt', 'avocet']
+    if any(keyword in bird_name_lower for keyword in shorebird_keywords):
+        return 'shorebird'
+    
+    # Default to songbird
+    return 'songbird'
+
+@bp.route('/api/analyze', methods=['POST'])
+@login_required
+def analyze():
+    """Generate AI analysis of bird sightings."""
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data received")
+            return jsonify({
+                'error': 'No data provided'
+            }), 400
+
+        location_data = data.get('location')
+        observations = data.get('observations')
+        timeframe = int(data.get('timeframe', 7))
+        
+        if not location_data:
+            logger.error("Location data is required but not provided")
+            return jsonify({
+                'error': 'Location data is required'
+            }), 400
+        
+        if not observations:
+            logger.error("Observations data is required but not provided")
+            return jsonify({
+                'error': 'Observations data is required'
+            }), 400
+        
+        logger.info(f"Generating analysis for location: {location_data}, timeframe: {timeframe} days")
+        logger.info(f"Number of observations: {len(observations)}")
+        
+        tracker = current_app.tracker
+        logger.info(f"BirdSightingTracker initialized, Claude client: {tracker.claude is not None}")
+        
+        if not tracker.claude:
+            logger.error("Claude client not initialized")
+            return jsonify({
+                'error': 'AI service is not available at the moment'
+            }), 503
+        
+        # Format observations for analysis
+        formatted_observations = []
+        for obs in observations:
+            try:
+                # Handle different observation formats from different endpoints
+                species = obs.get('species') or obs.get('comName') or obs.get('bird_name') or 'Unknown'
+                count = obs.get('count') or obs.get('howMany') or 1
+                location = obs.get('location') or obs.get('locName') or 'Unknown'
+                timestamp = obs.get('timestamp') or obs.get('obsDt') or datetime.utcnow().isoformat()
+                weather = obs.get('weather') or obs.get('weather_conditions') or ''
+                notes = obs.get('notes') or ''
+                
+                formatted_obs = {
+                    'species': str(species),
+                    'count': int(count) if count else 1,
+                    'location': str(location),
+                    'timestamp': str(timestamp),
+                    'weather': str(weather),
+                    'notes': str(notes)
+                }
+                formatted_observations.append(formatted_obs)
+            except Exception as e:
+                logger.warning(f"Error formatting observation: {str(e)}", exc_info=True)
+                continue
+        
+        if not formatted_observations:
+            logger.error("No valid observations after formatting")
+            return jsonify({
+                'error': 'No valid observations to analyze'
+            }), 400
+        
+        # Extract location name from location_data (could be object or string)
+        location_name = location_data.get('name') if isinstance(location_data, dict) else str(location_data)
+        
+        # Generate analysis
+        logger.info(f"Calling get_ai_analysis with {len(formatted_observations)} observations for location: {location_name}")
+        analysis = tracker.get_ai_analysis(formatted_observations, location_name)
+        
+        logger.info(f"Analysis result: {analysis[:200] if analysis else 'None'}...")
+        
+        if not analysis:
+            logger.error("No analysis generated")
+            return jsonify({
+                'error': 'Unable to generate analysis'
+            }), 500
+        
+        logger.info("Analysis generated successfully")
+        return jsonify({
+            'analysis': analysis
+        })
+    except Exception as e:
+        logger.error(f"Error in analyze route: {str(e)}", exc_info=True)
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"Full traceback: {error_details}")
+        
+        # Return more details in development mode
+        if os.getenv('FLASK_ENV') == 'development' or os.getenv('FLASK_ENV') != 'production':
+            return jsonify({
+                'error': f'Error generating analysis: {str(e)}',
+                'type': type(e).__name__
+            }), 500
+        else:
+            return jsonify({
+                'error': 'An unexpected error occurred while generating the analysis.'
+            }), 500
 
 @bp.route('/api/ai-analysis')
 @login_required

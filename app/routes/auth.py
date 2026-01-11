@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User, db
+from app.models import User, AllowedEmail, db
 from werkzeug.security import generate_password_hash
 from urllib.parse import urlparse
 import logging
@@ -61,38 +61,64 @@ def login():
                     next_page = url_for('main.home')
                 logger.info(f"Redirecting to: {next_page}")
                 return redirect(next_page)
-            logger.info("User not found in database, checking ALLOWED_EMAILS")
-            allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
-            logger.info(f"Raw ALLOWED_EMAILS from env: {allowed_emails_str}")
-            if not allowed_emails_str:
-                logger.error("ALLOWED_EMAILS environment variable is not set!")
-                flash("System configuration error. Please contact support.", "error")
+            # User not found - check if this is an allowed email for auto-registration
+            logger.info("User not found in database, checking if email is allowed")
+
+            # Treat the username as email if it looks like one
+            email_to_check = username if '@' in username else None
+
+            if not email_to_check:
+                logger.warning(f"Login failed - user not found and input is not an email: {username}")
+                flash("Invalid username or password", "error")
                 return render_template('auth/login.html', form=form)
-            allowed_emails = [e.strip() for e in allowed_emails_str.split(',')]
-            logger.info(f"Processed allowed emails: {allowed_emails}")
-            base_username = username
+
+            email_to_check = email_to_check.lower().strip()
+
+            # Check database first for allowed emails
+            is_allowed = AllowedEmail.is_email_allowed(email_to_check)
+
+            # Fallback to env var if database table is empty (migration support)
+            if not is_allowed:
+                allowed_emails_str = os.getenv('ALLOWED_EMAILS', '')
+                if allowed_emails_str:
+                    allowed_emails = [e.strip().lower() for e in allowed_emails_str.split(',')]
+                    is_allowed = email_to_check in allowed_emails
+                    logger.info(f"Checked env ALLOWED_EMAILS, is_allowed: {is_allowed}")
+
+            if not is_allowed:
+                logger.warning(f"Email not in allowed list: {email_to_check}")
+                flash("Your email is not authorized. Please contact an administrator.", "error")
+                return render_template('auth/login.html', form=form)
+
+            logger.info(f"Email is allowed, creating new user: {email_to_check}")
+
+            # Generate unique username from email
+            base_username = email_to_check.split('@')[0]
+            new_username = base_username
             counter = 1
-            while User.query.filter_by(username=username).first():
-                username = f"{base_username}{counter}"
+            while User.query.filter_by(username=new_username).first():
+                new_username = f"{base_username}{counter}"
                 counter += 1
-            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-            logger.info(f"Creating user with default password: {default_password}")
+
+            # Check if provided password meets minimum requirements
+            if len(password) < 6:
+                flash("Password must be at least 6 characters", "error")
+                return render_template('auth/login.html', form=form)
+
             new_user = User(
-                username=username,
-                email=f"{username}@example.com",
-                password_hash=generate_password_hash(default_password),
+                username=new_username,
+                email=email_to_check,
+                password_hash=generate_password_hash(password),
                 is_admin=False,
                 is_active=True,
             )
             db.session.add(new_user)
             db.session.commit()
-            logger.info(f"Created new user with default password: {username}")
-            logger.info(f"Logging in new user: {username}")
+            logger.info(f"Created new user: {new_username} with email: {email_to_check}")
             login_user(new_user, remember=form.remember.data)
-            logger.info(f"New user logged in successfully: {username}")
-            flash("Successfully logged in!", "success")
+            logger.info(f"New user logged in successfully: {new_username}")
+            flash("Account created successfully! Welcome!", "success")
             session.permanent = True
-            logger.info(f"Session details: {dict(session)}")
             return redirect(url_for('main.home'))
         except Exception as e:
             logger.error(f"Error during login: {str(e)}")

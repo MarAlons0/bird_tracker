@@ -22,7 +22,7 @@ def init_extensions(app):
     
     @login_manager.user_loader
     def load_user(user_id):
-        from models import User  # Import here to avoid circular import
+        from app.models import User  # Import here to avoid circular import
         from flask import current_app
         
         # Create a new session for this operation

@@ -84,9 +84,10 @@ def create_app():
     
     # Register blueprints
     from app.routes import main, auth, admin
-    app.register_blueprint(main.main)
+    # Use the new modular route registration
+    main.init_app(app)
     app.register_blueprint(auth.auth)
-    app.register_blueprint(admin.admin)
+    app.register_blueprint(admin.admin, url_prefix='/admin')
     
     logger.info("Application initialized successfully")
     return app

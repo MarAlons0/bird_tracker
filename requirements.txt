@@ -33,8 +33,8 @@ folium==0.15.1
 staticmap==0.5.5
 httpx>=0.26.0
 psycopg[binary]==3.2.9
-psycopg2-binary==2.9.9
-SQLAlchemy==2.0.28
+# psycopg2-binary removed - not compatible with Python 3.13, use psycopg instead
+SQLAlchemy>=2.0.35
 py-staticmaps==0.4.0
 Pillow>=10.2.0
 cloudinary==1.37.0
