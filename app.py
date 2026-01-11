@@ -119,6 +119,35 @@ def create_app():
     print("Initializing extensions...")
     init_extensions(app)
     print("Extensions initialized")
+
+    # Create database tables if they don't exist
+    with app.app_context():
+        try:
+            print("Checking database tables...")
+            from app.models import User, Location, UserPreferences, Image, AllowedEmail
+            db.create_all()
+            print("Database tables created/verified")
+
+            # Create admin user if doesn't exist
+            admin_email = os.getenv('ADMIN_EMAIL')
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            if admin_email and admin_password:
+                existing_admin = User.query.filter_by(email=admin_email).first()
+                if not existing_admin:
+                    admin = User(
+                        email=admin_email,
+                        username="admin",
+                        password_hash=generate_password_hash(admin_password),
+                        is_admin=True,
+                        is_active=True
+                    )
+                    db.session.add(admin)
+                    db.session.commit()
+                    print(f"Created admin user: {admin_email}")
+                else:
+                    print(f"Admin user already exists: {admin_email}")
+        except Exception as e:
+            print(f"Database initialization error: {e}")
     
     # Configure CORS
     print("Configuring CORS...")
