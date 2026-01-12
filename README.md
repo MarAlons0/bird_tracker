@@ -2,6 +2,8 @@
 
 A Flask-based web application that helps users track and discover bird sightings in their area using eBird data and AI-powered analysis. The application provides real-time bird observation data, interactive mapping, and intelligent analysis powered by Claude AI.
 
+**Live Demo**: [https://bird-tracker.onrender.com](https://bird-tracker.onrender.com)
+
 ## Features
 
 ### Core Functionality
@@ -21,9 +23,10 @@ Birds are automatically categorized into four main groups:
 
 ### Admin Panel
 - **User Management**: View, activate/deactivate, and delete user accounts
+- **Allowed Emails Management**: Database-driven whitelist of authorized email addresses
 - **Dashboard**: Overview of system statistics and user activity
 - **Password Management**: Reset user passwords to default values
-- **Grant Admin Rights**: When creating a new user, check the "Admin User" box to grant admin rights. You can also promote an existing user to admin using the provided script (see below).
+- **Registration Requests**: Review and approve/reject new user registration requests
 
 ## Tech Stack
 
@@ -65,11 +68,12 @@ Create a `.env` file in the root directory with the following variables:
 FLASK_APP=app
 FLASK_ENV=development
 SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///instance/bird_tracker.db
 EBIRD_API_KEY=your-ebird-api-key
 GOOGLE_PLACES_API_KEY=your-google-places-api-key
 ANTHROPIC_API_KEY=your-claude-api-key
-DEFAULT_USER_PASSWORD=admin123
-ALLOWED_EMAILS=user@example.com,admin@example.com
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-admin-password
 ```
 
 5. **Initialize the database:**
@@ -79,34 +83,16 @@ flask db upgrade
 
 6. **Run the development server:**
 ```bash
-flask run --port 8000
+python app.py
 ```
 
-The application will be available at `http://localhost:8000`
+The application will be available at `http://localhost:5001`
 
 ### Creating an Admin User
 
-After deploying the app (locally or to Heroku), you need to ensure at least one user has admin rights to access the admin panel.
+The application automatically creates an admin user on startup if `ADMIN_EMAIL` and `ADMIN_PASSWORD` environment variables are set. This admin user will be created with full admin rights.
 
-**Option 1: During User Creation**
-- When creating a new user via the Admin Panel, check the “Admin User” box to grant admin rights.
-
-**Option 2: Grant Admin Rights to an Existing User**
-- If you need to promote an existing user to admin (for example, after deploying to Heroku), use the provided script:
-
-```bash
-# 1. Push the set_admin.py script to your Heroku app (if not already present)
-git add set_admin.py
-git commit -m "Add admin setup script"
-git push heroku main
-
-# 2. Run the script on Heroku (replace with your app name if needed)
-heroku run --app bird-tracker-app python set_admin.py
-```
-
-- The script will set the user with the email specified in `set_admin.py` as an admin. You can edit the script to target a different email if needed.
-
-**Note:**  
+**Note:**
 After being granted admin rights, you must log out and log back in for the admin panel to appear.
 
 ## Environment Variables
@@ -116,11 +102,13 @@ After being granted admin rights, you must log out and log back in for the admin
 | `FLASK_APP` | Application entry point | Yes |
 | `FLASK_ENV` | Development/Production environment | Yes |
 | `SECRET_KEY` | Flask secret key for session management | Yes |
+| `DATABASE_URL` | Database connection URL (SQLite for local, PostgreSQL for production) | Yes |
 | `EBIRD_API_KEY` | eBird API key for bird sighting data | Yes |
 | `GOOGLE_PLACES_API_KEY` | Google Places API key for location search | Yes |
 | `ANTHROPIC_API_KEY` | Claude AI API key for analysis and chat | Yes |
-| `DEFAULT_USER_PASSWORD` | Default password for new users | Yes |
-| `ALLOWED_EMAILS` | Comma-separated list of allowed email addresses | Yes |
+| `ADMIN_EMAIL` | Email for the auto-created admin user | Yes |
+| `ADMIN_PASSWORD` | Password for the auto-created admin user | Yes |
+| `DEFAULT_USER_PASSWORD` | Default password for new users created via registration | No |
 
 ## Project Structure
 
@@ -136,28 +124,32 @@ bird_tracker/
 │   │       └── Banner.jpeg
 │   ├── templates/
 │   │   ├── admin/
-│   │   │   ├── base.html
 │   │   │   ├── dashboard.html
-│   │   │   └── users.html
+│   │   │   ├── users.html
+│   │   │   └── allowed_emails.html
 │   │   ├── auth/
 │   │   │   ├── login.html
-│   │   │   └── change_password.html
+│   │   │   ├── change_password.html
+│   │   │   └── request_registration.html
 │   │   ├── base.html
 │   │   ├── home.html
-│   │   ├── analysis.html
-│   │   └── profile.html
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── admin.py
-│   │   ├── auth.py
-│   │   └── main.py
+│   │   └── analysis.html
+│   ├── services/
+│   │   ├── ai_service.py
+│   │   ├── bird_service.py
+│   │   └── map_service.py
 │   ├── models.py
-│   ├── forms.py
-│   ├── extensions.py
-│   └── bird_tracker.py
-├── migrations/
+│   └── forms.py
+├── routes/
+│   ├── admin.py
+│   ├── auth.py
+│   └── main.py
+├── config/
+│   └── extensions.py
 ├── instance/
+├── app.py
 ├── requirements.txt
+├── render.yaml
 ├── .env
 └── README.md
 ```
@@ -188,9 +180,9 @@ The application automatically categorizes birds using a comprehensive classifica
 Administrators can:
 - View system statistics and user counts
 - Manage user accounts (activate/deactivate/delete)
+- Manage allowed emails (add/remove email addresses that can register)
+- Review and process registration requests
 - Reset user passwords
-- Grant admin rights to new users at creation by checking the “Admin User” box
-- If you encounter issues with user creation or admin rights, check your Heroku logs for debug output (e.g., using `heroku logs --app bird-tracker-app --tail`)
 
 ## API Endpoints
 
@@ -216,6 +208,10 @@ Administrators can:
 - `GET /admin/dashboard` - Admin dashboard
 - `GET /admin/users` - User management page
 - `POST /admin/users` - User management actions
+- `GET /admin/allowed-emails` - Allowed emails management
+- `POST /admin/allowed-emails` - Add/remove allowed emails
+- `GET /admin/registration-requests` - Registration requests list
+- `POST /admin/registration-request/<id>/<action>` - Approve/reject requests
 
 ## Database Models
 
@@ -223,12 +219,40 @@ Administrators can:
 - **User**: User accounts with authentication
 - **Location**: User-defined locations for bird tracking
 - **UserPreferences**: User settings and preferences
-- **BirdSightingCache**: Cached eBird observations
+- **AllowedEmail**: Whitelist of email addresses permitted to register
+- **Image**: User-uploaded bird images
+
+## Deployment
+
+### Render (Recommended)
+
+The application is configured for deployment on Render with PostgreSQL. A `render.yaml` blueprint is included for easy deployment.
+
+1. Push your code to GitHub
+2. Connect your GitHub repository to Render
+3. Create a new PostgreSQL database on Render
+4. Add environment variables in Render dashboard
+5. Deploy the web service
+
+The application automatically creates database tables and an admin user on startup.
+
+### Local Development
+
+For local development, use SQLite:
+```bash
+DATABASE_URL=sqlite:///instance/bird_tracker.db
+```
 
 ## Troubleshooting
 
-### Troubleshooting Admin User Creation
+### Admin Panel Not Visible
+- Ensure you have logged out and logged back in after being granted admin rights
+- Verify the `ADMIN_EMAIL` matches your login email
 
-- If you create a user with admin rights but do not see the admin panel, ensure you have logged out and logged back in.
-- If you need to manually promote a user to admin, use the `set_admin.py` script as described above.
-- For debugging, check the Heroku logs for lines starting with `DEBUG:` to see form submission details. 
+### Database Issues
+- For local development, ensure the `instance/` directory exists
+- For Render, verify `DATABASE_URL` is correctly set from the PostgreSQL database
+
+### API Key Restrictions
+- Google Maps API: Add your deployment URL and localhost to allowed referrers in Google Cloud Console
+- eBird API: No referrer restrictions needed 
