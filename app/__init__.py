@@ -82,11 +82,10 @@ def create_app():
     app.tracker = BirdSightingTracker(app=app)
     app.tracker._initialize_claude()  # Explicitly initialize Claude
     
-    # Register blueprints
-    from app.routes import main, auth, admin
-    # Use the new modular route registration
-    main.init_app(app)
-    app.register_blueprint(auth.auth)
+    # Register blueprints (using root-level routes)
+    from routes import main, auth, admin
+    app.register_blueprint(main.bp)
+    app.register_blueprint(auth.bp)
     app.register_blueprint(admin.admin, url_prefix='/admin')
     
     logger.info("Application initialized successfully")
