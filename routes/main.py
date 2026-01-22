@@ -126,12 +126,16 @@ def chat():
         message = data.get('message')
         if not message:
             return jsonify({'error': 'No message provided'}), 400
-        
+
         logger.info(f"Processing chat message: {message}")
-        
-        # Get recent observations for context
-        observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
-        logger.info(f"Retrieved {len(observations)} observations for context")
+
+        # Use observations from frontend if provided, otherwise fetch new ones
+        observations = data.get('observations')
+        if observations:
+            logger.info(f"Using {len(observations)} observations from frontend")
+        else:
+            observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
+            logger.info(f"Retrieved {len(observations)} observations from API")
         
         # Format observations for context
         context = None
