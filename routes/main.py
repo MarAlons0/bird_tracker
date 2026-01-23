@@ -138,13 +138,24 @@ def chat():
             logger.info(f"Retrieved {len(observations)} observations from API")
         
         # Format observations for context
+        # Handle both eBird API format (comName, locName, obsDt) and transformed format (bird_name, location, timestamp)
         context = None
         if observations:
             formatted_observations = []
             for obs in observations:
-                formatted_obs = f"{obs.get('comName', 'Unknown')} ({obs.get('howMany', 'X')}) at {obs.get('locName', 'Unknown')} on {obs.get('obsDt', '')}"
+                # Get bird name - try both formats
+                bird_name = obs.get('comName') or obs.get('bird_name') or 'Unknown'
+                # Get count if available
+                count = obs.get('howMany') or obs.get('count') or 'X'
+                # Get location - try both formats
+                location = obs.get('locName') or obs.get('location') or 'Unknown'
+                # Get date - try both formats
+                date = obs.get('obsDt') or obs.get('timestamp') or ''
+
+                formatted_obs = f"{bird_name} ({count}) at {location} on {date}"
                 formatted_observations.append(formatted_obs)
             context = "\n".join(formatted_observations)
+            logger.info(f"Formatted context with {len(formatted_observations)} observations")
         
         # Use the tracker's chat_with_ai method
         response = current_app.tracker.chat_with_ai(message, context)
@@ -333,6 +344,7 @@ def get_sightings():
                 'latitude': obs.get('lat', obs.get('latitude', 0)),
                 'longitude': obs.get('lng', obs.get('longitude', 0)),
                 'timestamp': obs.get('obsDt', obs.get('timestamp', '')),
+                'count': obs.get('howMany', obs.get('count', 1)),
                 'observer': obs.get('observer', 'eBird User'),
                 'category': _get_bird_category(obs.get('comName', obs.get('bird_name', '')))
             })
