@@ -270,6 +270,9 @@
                         <i class="fas fa-search"></i> Search
                     </button>
                 </div>
+                <button class="btn btn-outline-secondary w-100 mb-3" type="button" id="geolocate-button">
+                    <i class="fas fa-location-arrow me-2"></i>Use My Current Location
+                </button>
                 <div class="input-group mb-3">
                     <select id="radius-input" class="form-control">
                         <option value="1">1 mile</option>
@@ -472,6 +475,48 @@
             } else {
                 debugLog('Search', 'Search attempted with empty input');
             }
+        });
+
+        // Handle "Use My Current Location" button
+        document.getElementById('geolocate-button').addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                locationElements.status.className = 'alert alert-danger mb-3';
+                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Geolocation is not supported by your browser.';
+                return;
+            }
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Getting location...';
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: { lat, lng } }, function(results, status) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Use My Current Location';
+                    if (status === 'OK' && results[0]) {
+                        const radius = parseInt(locationElements.radiusInput.value) || 25;
+                        updateLocationDisplay({
+                            name: results[0].formatted_address,
+                            lat: lat,
+                            lng: lng,
+                            radius: radius
+                        });
+                    } else {
+                        updateLocationDisplay({
+                            name: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+                            lat: lat,
+                            lng: lng,
+                            radius: parseInt(locationElements.radiusInput.value) || 25
+                        });
+                    }
+                });
+            }, function(error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Use My Current Location';
+                locationElements.status.className = 'alert alert-danger mb-3';
+                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Could not get your location. Please check your browser permissions.';
+            });
         });
 
         // Handle radius changes
