@@ -1,6 +1,6 @@
 # This file makes the app directory a Python package 
 
-from flask import Flask
+from flask import Flask, send_from_directory
 import os
 import logging
 from datetime import timedelta
@@ -88,6 +88,10 @@ def create_app():
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.admin, url_prefix='/admin')
     
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon')
+
     logger.info("Application initialized successfully")
     return app
 
