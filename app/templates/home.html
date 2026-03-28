@@ -111,20 +111,27 @@
     
     /* Legend styling */
     .legend {
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    }
-    
-    .legend h4 {
-        margin: 0 0 10px 0;
-        font-size: 14px;
-    }
-    
-    .legend div {
-        margin: 5px 0;
+        background: rgba(26, 26, 46, 0.92);
+        color: #e0e0e0;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #444;
         font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .legend h4 {
+        margin: 0 0 6px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 2px 0;
     }
     
     .category-waterbirds, .category-raptors, .category-ground-birds, .category-aerial-specialists, .category-tree-specialists, .category-perching-birds, .category-other {
@@ -550,7 +557,7 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             // Add legend
-            const legend = L.control({position: 'bottomright'});
+            const legend = L.control({position: 'topright'});
             legend.onAdd = function(map) {
                 const div = L.DomUtil.create('div', 'legend');
                 div.innerHTML = `

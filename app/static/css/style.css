@@ -289,17 +289,32 @@ thead th {
     color: var(--text-primary);
 }
 
+/* Leaflet dark theme */
+.leaflet-popup-content-wrapper {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid #444;
+}
+
+.leaflet-popup-tip {
+    background: var(--bg-primary);
+}
+
+.leaflet-popup-content a {
+    color: #66b2ff;
+}
+
 /* Fullscreen map toggle button */
 #btn-fullscreen-map {
     position: absolute;
-    bottom: 24px;
+    bottom: 16px;
     right: 10px;
     z-index: 1000;
-    background: rgba(26, 26, 46, 0.88);
-    border: 1px solid #777;
-    color: var(--text-primary);
+    background: rgba(18, 18, 18, 0.92);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 8px 14px;
     font-size: 13px;
     cursor: pointer;
     line-height: 1;
@@ -307,13 +322,15 @@ thead th {
     align-items: center;
     gap: 6px;
     font-family: system-ui, -apple-system, sans-serif;
-    font-weight: 500;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    transition: background 0.15s;
 }
 
 #btn-fullscreen-map:hover {
-    background: rgba(40, 40, 70, 0.95);
+    background: rgba(30, 30, 30, 0.98);
     color: #fff;
+    border-color: #fff;
 }
 
 body.map-is-fullscreen #map-panel {
