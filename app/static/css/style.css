@@ -338,6 +338,18 @@ thead th {
     border-color: #fff;
 }
 
+/* On mobile: lift button above the fixed bottom nav */
+@media (max-width: 767px) {
+    #btn-fullscreen-map {
+        bottom: calc(56px + env(safe-area-inset-bottom) + 12px);
+    }
+
+    /* In fullscreen the bottom nav is hidden — reset to safe area only */
+    body.map-is-fullscreen #btn-fullscreen-map {
+        bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+}
+
 body.map-is-fullscreen #map-panel {
     position: fixed;
     top: 0;
