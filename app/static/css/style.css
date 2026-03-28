@@ -22,6 +22,11 @@ body {
     body {
         padding-bottom: calc(56px + env(safe-area-inset-bottom));
     }
+
+    /* Filters panel hidden by default on mobile */
+    #filters-panel.filters-hidden {
+        display: none !important;
+    }
 }
 
 /* Navbar */
