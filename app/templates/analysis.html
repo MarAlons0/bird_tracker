@@ -6,41 +6,19 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
     .analysis-section {
-        background: #f8f9fa;
+        background: var(--bg-secondary);
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 2rem;
         width: 100%;
     }
-    .analysis-section .card {
-        height: auto;
-        min-height: 200px;
-        max-height: none;
-    }
-    .analysis-section .card-body {
-        height: auto;
-        min-height: 200px;
-        max-height: none;
-        overflow: visible;
-    }
     .observation-card {
         margin-bottom: 15px;
     }
-    .chat-container {
-        margin-top: 30px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        height: 400px;
-        display: flex;
-        flex-direction: column;
-    }
     .chat-messages {
-        flex-grow: 1;
+        min-height: 200px;
+        max-height: 50vh;
         overflow-y: auto;
-        padding: 15px;
-    }
-    .chat-input {
-        border-top: 1px solid #dee2e6;
         padding: 15px;
     }
     .message {
@@ -48,34 +26,37 @@
         padding: 8px 12px;
         border-radius: 15px;
         max-width: 80%;
+        word-wrap: break-word;
     }
     .user-message {
-        background: #007bff;
-        color: white;
+        background: #2a4a7f;
+        color: var(--text-primary);
         margin-left: auto;
     }
     .bot-message {
-        background: #e9ecef;
+        background: var(--bg-nav);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
         margin-right: auto;
     }
     .analysis-content {
         min-height: 200px;
-        background-color: #f8f9fa;
+        background-color: var(--bg-secondary);
         overflow: visible;
-        max-height: none;
         height: auto;
         white-space: normal;
         word-wrap: break-word;
         display: block;
         padding: 1rem;
         margin-bottom: 1rem;
+        color: var(--text-primary);
     }
     .analysis-content:empty {
-        border: 2px dashed #dee2e6 !important;
+        border: 2px dashed var(--border) !important;
     }
     .current-location {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--text-secondary);
         margin-bottom: 1rem;
     }
     .loading-overlay {
@@ -84,7 +65,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(26, 26, 46, 0.9);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -95,39 +76,18 @@
         width: 3rem;
         height: 3rem;
     }
-    .chat-suggestions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
     .chat-suggestion {
-        background: #e9ecef;
-        border: none;
+        background: var(--bg-nav);
+        border: 1px solid var(--border);
         border-radius: 15px;
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
+        color: var(--text-primary);
         cursor: pointer;
         transition: background-color 0.2s;
     }
     .chat-suggestion:hover {
-        background: #dee2e6;
-    }
-    .container {
-        margin-top: 5rem;
-        padding-top: 2rem;
-    }
-    .card {
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        padding: 1rem;
-    }
-    .card-body {
-        padding: 1.5rem;
+        background: var(--border);
     }
 </style>
 {% endblock %}
