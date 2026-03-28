@@ -71,6 +71,10 @@
             <i class="fas fa-map"></i>
             <span>Map</span>
         </a>
+        <button class="bottom-nav-tab" id="btn-filters-toggle">
+            <i class="fas fa-sliders"></i>
+            <span>Filters</span>
+        </button>
         <a class="bottom-nav-tab" href="{{ url_for('main.analysis') }}">
             <i class="fas fa-robot"></i>
             <span>Analysis</span>
@@ -125,6 +129,17 @@
         document.querySelectorAll('.bottom-nav-tab[href], .navbar .nav-link[href]').forEach(link => {
             if (link.getAttribute('href') === path) link.classList.add('active');
         });
+
+        // Filters toggle (map page only — gracefully does nothing on other pages)
+        const filtersBtn = document.getElementById('btn-filters-toggle');
+        if (filtersBtn) {
+            filtersBtn.addEventListener('click', () => {
+                const panel = document.getElementById('filters-panel');
+                if (!panel) return;
+                const hidden = panel.classList.toggle('filters-hidden');
+                filtersBtn.classList.toggle('active', !hidden);
+            });
+        }
     </script>
     {% block scripts %}{% endblock %}
 </body>
