@@ -301,7 +301,13 @@
                     <p class="card-text">
                         View recent bird sightings in your selected area. Click on markers to see details.
                     </p>
-                    <div id="map" style="height: 600px; width: 100%; border-radius: 10px; margin-bottom: 20px;"></div>
+                    <div id="map-panel" style="position: relative; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+                        <div id="map" style="height: 600px; width: 100%;"></div>
+                        <button id="btn-fullscreen-map" title="Toggle fullscreen map">
+                            <i class="fas fa-expand"></i>
+                            <span class="d-md-none ms-1">Full screen</span>
+                        </button>
+                    </div>
                     <div class="sightings-table">
                         <h5>Recent Sightings</h5>
                         <div class="table-responsive">
@@ -745,6 +751,15 @@
         }
         initMap();
         loadObservations();
+
+        // Fullscreen map toggle
+        document.getElementById('btn-fullscreen-map').addEventListener('click', function() {
+            const isFullscreen = document.body.classList.toggle('map-is-fullscreen');
+            this.innerHTML = isFullscreen
+                ? '<i class="fas fa-compress"></i><span class="d-md-none ms-1"> Exit</span>'
+                : '<i class="fas fa-expand"></i><span class="d-md-none ms-1"> Full screen</span>';
+            setTimeout(() => map.invalidateSize(), 50);
+        });
         
         // Listen for location updates from the first script section
         document.addEventListener('locationUpdated', function(event) {

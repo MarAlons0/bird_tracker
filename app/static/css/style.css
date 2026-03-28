@@ -289,6 +289,55 @@ thead th {
     color: var(--text-primary);
 }
 
+/* Fullscreen map toggle button */
+#btn-fullscreen-map {
+    position: absolute;
+    bottom: 24px;
+    right: 10px;
+    z-index: 1000;
+    background: rgba(26, 26, 46, 0.88);
+    border: 1px solid #777;
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+#btn-fullscreen-map:hover {
+    background: rgba(40, 40, 70, 0.95);
+    color: #fff;
+}
+
+body.map-is-fullscreen #map-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 500;
+    border-radius: 0 !important;
+    margin: 0;
+}
+
+body.map-is-fullscreen #map {
+    height: 100dvh !important;
+    border-radius: 0 !important;
+}
+
+body.map-is-fullscreen .navbar,
+body.map-is-fullscreen .banner-container,
+body.map-is-fullscreen .bottom-nav {
+    display: none !important;
+}
+
 /* Input groups */
 .input-group-text {
     background-color: var(--bg-nav);
