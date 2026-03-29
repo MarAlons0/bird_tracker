@@ -100,15 +100,18 @@
                     <p class="mb-1" style="color: var(--accent); font-weight: 600;">How to use</p>
                     <ol class="mb-3">
                         <li>Tap <strong>Use My Current Location</strong> or search for a place on the Map tab.</li>
-                        <li>Select a search radius and the map will load nearby sightings.</li>
+                        <li>Select a search radius — the map loads nearby sightings colored by category.</li>
                         <li>Tap any marker to see the bird name, location, and date.</li>
-                        <li>Go to <strong>AI Analysis</strong> for a summary of what's been seen in your area.</li>
-                        <li>Chat with the AI assistant to ask specific questions about local birds.</li>
+                        <li>Tap <strong>Filters</strong> to show the filter panel. Check/uncheck categories to show or hide them.</li>
+                        <li>Tap a category <strong>label</strong> (e.g. Raptors) to drill down — the map switches to per-species colors for that group.</li>
+                        <li>Tap <strong>← All Categories</strong> to return to the group overview.</li>
+                        <li>Go to <strong>AI Analysis</strong> for a summary and to chat about local birds.</li>
                     </ol>
                     <p class="mb-1" style="color: var(--accent); font-weight: 600;">Tips</p>
                     <ul class="mb-0">
                         <li>Use <strong>My Current Location</strong> for the fastest start.</li>
                         <li>Tap the <strong>expand icon</strong> on the map for fullscreen view.</li>
+                        <li>Nearby sightings at the same spot spread into a small cluster so you can tap each one.</li>
                     </ul>
                 </div>
                 <div class="modal-footer" style="border-color: var(--border);">
@@ -138,6 +141,19 @@
                 if (!panel) return;
                 const hidden = panel.classList.toggle('filters-hidden');
                 filtersBtn.classList.toggle('active', !hidden);
+            });
+        }
+
+        // Map tab: if already on map page, just close filters instead of reloading
+        const mapTab = document.querySelector('.bottom-nav-tab[href="/"]');
+        if (mapTab && window.location.pathname === '/') {
+            mapTab.addEventListener('click', (e) => {
+                e.preventDefault();
+                const panel = document.getElementById('filters-panel');
+                if (panel && !panel.classList.contains('filters-hidden')) {
+                    panel.classList.add('filters-hidden');
+                    if (filtersBtn) filtersBtn.classList.remove('active');
+                }
             });
         }
     </script>
