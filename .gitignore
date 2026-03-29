@@ -15,3 +15,7 @@ config/config.ini
 render_env_vars.txt
 *.env
 .env*
+config/config.txt                                                                                         
+  config/config.ini                                         
+  render_env_vars.txt
+  quarantine/test_newsletter.py
