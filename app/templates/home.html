@@ -611,11 +611,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Tier 2: back button + per-species checkboxes
             let html = `
-            <button class="btn btn-outline-secondary btn-sm mb-3 w-100" id="btn-back-to-groups">
-                <i class="fas fa-arrow-left me-1"></i> All Categories
-            </button>
-            <div style="color:var(--accent);font-weight:600;margin-bottom:10px;font-size:15px;">
-                ${GROUP_LABELS[drilldownGroup]}
+            <div style="position:sticky;top:0;z-index:2;background:var(--bg-secondary);padding-bottom:8px;">
+                <button class="btn btn-outline-secondary btn-sm w-100" id="btn-back-to-groups">
+                    <i class="fas fa-arrow-left me-1"></i> All Categories
+                </button>
+                <div style="color:var(--accent);font-weight:600;margin-top:8px;font-size:15px;">
+                    ${GROUP_LABELS[drilldownGroup]}
+                </div>
             </div>`;
 
             for (const [species, color] of Object.entries(currentSpeciesColors)) {
@@ -674,7 +676,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = currentSpeciesColors[birdName] || '#aaa';
             }
 
-            const marker = L.circleMarker([lat, lng], {
+            // Jitter to prevent stacking at identical coordinates
+            const jLat = lat + (Math.random() - 0.5) * 0.002;
+            const jLng = lng + (Math.random() - 0.5) * 0.002;
+            const marker = L.circleMarker([jLat, jLng], {
                 radius: 8,
                 fillColor: color,
                 color: '#ffffff',
