@@ -47,7 +47,7 @@
         color: var(--accent);
         font-weight: 600;
     }
-    
+
     .location-card {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border);
@@ -56,45 +56,7 @@
         margin-bottom: 2rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-    
-    .carousel-container {
-        margin-top: 30px;
-        aspect-ratio: 1/1;
-        max-width: 100%;
-    }
-    
-    .carousel-item {
-        aspect-ratio: 1/1;
-        height: auto;
-    }
-    
-    .carousel-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        aspect-ratio: 1/1;
-    }
-    
-    .carousel-caption {
-        background: rgba(0, 0, 0, 0.6);
-        padding: 20px;
-        border-radius: 10px;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-    }
-    
-    .action-buttons {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-    
-    .action-buttons .btn {
-        min-width: 150px;
-    }
-    
+
     /* Map styling */
     #map {
         height: 600px !important;
@@ -103,12 +65,12 @@
         margin-bottom: 20px;
         z-index: 1;
     }
-    
+
     .leaflet-container {
         height: 100% !important;
         width: 100% !important;
     }
-    
+
     /* Legend styling */
     .legend {
         background: rgba(26, 26, 46, 0.92);
@@ -118,6 +80,8 @@
         border: 1px solid #444;
         font-size: 12px;
         line-height: 1.6;
+        max-height: 60vh;
+        overflow-y: auto;
     }
 
     .legend h4 {
@@ -132,23 +96,19 @@
         align-items: center;
         gap: 6px;
         margin: 2px 0;
+        white-space: nowrap;
     }
-    
-    .category-waterbirds, .category-raptors, .category-ground-birds, .category-aerial-specialists, .category-tree-specialists, .category-perching-birds, .category-other {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        margin-right: 5px;
-        border-radius: 50%;
+
+    /* Category filter panel */
+    #category-filters {
+        max-height: 400px;
+        overflow-y: auto;
     }
-    
-    .category-waterbirds { background-color: #377eb8; }
-    .category-raptors { background-color: #e41a1c; }
-    .category-ground-birds { background-color: #8b4513; }
-    .category-aerial-specialists { background-color: #ff69b4; }
-    .category-tree-specialists { background-color: #228b22; }
-    .category-perching-birds { background-color: #4daf4a; }
-    .category-other { background-color: #ff7f00; }
+
+    .group-drilldown-link:hover {
+        color: var(--accent) !important;
+        text-decoration: underline;
+    }
 </style>
 <script>
     // Debug logging utility
@@ -170,18 +130,8 @@
     let domReady = false;
     let locationElements = null;
 
-    // Initialize everything when both DOM and Google Maps are ready
     function initializeWhenReady() {
-        debugLog('Init', 'Checking initialization requirements', {
-            domReady,
-            googleMapsLoaded
-        });
-
         if (domReady && googleMapsLoaded) {
-            debugLog('Init', 'Both DOM and Google Maps are ready, initializing...');
-            
-            // Ensure we have all required elements
-            debugLog('DOM', 'Collecting required DOM elements');
             locationElements = {
                 name: document.getElementById('location-name'),
                 coords: document.getElementById('location-coords'),
@@ -192,51 +142,31 @@
                 searchInput: document.getElementById('location-search'),
                 searchButton: document.getElementById('search-button')
             };
-
-            // Check if all elements exist
             const missingElements = Object.entries(locationElements)
-                .filter(([_, element]) => !element)
-                .map(([key]) => key);
-
-            if (missingElements.length > 0) {
-                debugLog('Error', 'Missing required elements', missingElements);
-                return;
-            }
-
-            debugLog('DOM', 'All required elements found', Object.keys(locationElements));
+                .filter(([_, el]) => !el).map(([key]) => key);
+            if (missingElements.length > 0) return;
             initLocationDisplay();
             initLocationSearch();
-        } else {
-            debugLog('Init', 'Waiting for initialization requirements', {
-                domReady,
-                googleMapsLoaded
-            });
         }
     }
 
-    // Global callback for Google Maps API
     function initGoogleMaps() {
-        debugLog('GoogleMaps', 'API loaded');
         googleMapsLoaded = true;
         initializeWhenReady();
     }
 
-    // Check if DOM is ready
     if (document.readyState === 'loading') {
-        debugLog('DOM', 'Document still loading, adding event listener');
         document.addEventListener('DOMContentLoaded', () => {
-            debugLog('DOM', 'Content loaded');
             domReady = true;
             initializeWhenReady();
         });
     } else {
-        debugLog('DOM', 'Document already loaded');
         domReady = true;
         initializeWhenReady();
     }
 </script>
 <!-- GOOGLE_PLACES_API_KEY:  -->
-<script async defer 
+<script async defer
     src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_PLACES_API_KEY }}&libraries=places&callback=initGoogleMaps">
 </script>
 {% endblock %}
@@ -244,15 +174,11 @@
 {% block content %}
 <div class="welcome-section d-none d-md-block">
     <h1>Welcome to Mario's Bird Tracker</h1>
-    <p>This application helps you track and discover bird sightings in your area, by using reports in the eBird for the past 7 days and leveraging Claude AI for summarization. Here's how it works:</p>
-    
+    <p>This application helps you track and discover bird sightings in your area, using eBird reports for the past 7 days and Claude AI for summarization.</p>
     <ul>
-        <li><strong>Map:</strong> View bird sightings on an interactive map of your selected location.</li>
+        <li><strong>Map:</strong> View bird sightings on an interactive map, filtered by category or species.</li>
         <li><strong>AI Analysis:</strong> Get insights about bird populations and trends in your area.</li>
     </ul>
-    
-    <p>To get started, make sure your location is set correctly below. You can change it at any time.</p>
-    
     <p class="mt-3">
         <a href="https://github.com/MarAlons0/bird_tracker/blob/main/README.md" target="_blank" class="btn btn-outline-primary">
             <i class="fab fa-github me-2"></i>View Documentation
@@ -261,6 +187,7 @@
 </div>
 
 <div class="row filters-hidden" id="filters-panel">
+    <!-- Location selector -->
     <div class="col-md-6">
         <div class="location-card">
             <h2>Select Location</h2>
@@ -292,13 +219,19 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Category filters -->
     <div class="col-md-6">
-        <!-- Removed carousel-related HTML and references -->
+        <div class="location-card">
+            <h2>Filter by Category</h2>
+            <div id="category-filters">
+                <p style="color:var(--text-secondary);font-size:14px;">Loading sightings...</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Map and Sightings Section (moved from map.html) -->
+<!-- Map Section -->
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-12">
@@ -324,9 +257,7 @@
                                         <th>Category</th>
                                     </tr>
                                 </thead>
-                                <tbody id="sightingsTableBody">
-                                    <!-- Sightings will be populated here -->
-                                </tbody>
+                                <tbody id="sightingsTableBody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -339,160 +270,85 @@
 
 {% block scripts %}
 <script>
-    // Update location display
     function updateLocationDisplay(locationData) {
-        debugLog('Location', 'Updating display', locationData);
-        
-        if (!locationElements) {
-            debugLog('Error', 'Location elements not initialized');
-            return;
-        }
-
-        // Store the current location
+        if (!locationElements) return;
         currentLocation = locationData;
         localStorage.setItem('currentLocation', JSON.stringify(locationData));
-        debugLog('Storage', 'Location saved to localStorage', locationData);
-
-        // Update the elements
         const now = new Date().toLocaleString();
-        debugLog('DOM', 'Updating element contents');
-        
         try {
             locationElements.name.textContent = locationData.name;
             locationElements.coords.textContent = `${locationData.lat.toFixed(6)}, ${locationData.lng.toFixed(6)}`;
             locationElements.radius.textContent = locationData.radius;
             locationElements.updated.textContent = now;
             locationElements.radiusInput.value = locationData.radius;
-            
-            // Update status message
             locationElements.status.className = 'alert alert-success mb-3';
             locationElements.status.innerHTML = `
                 <i class="fas fa-map-marker-alt me-2"></i>
                 <strong>Current Location:</strong> ${locationData.name}
             `;
-
-            debugLog('DOM', 'Elements updated successfully');
         } catch (error) {
             debugLog('Error', 'Failed to update elements', error);
         }
-
-        // Dispatch a custom event that the map can listen for
-        debugLog('Event', 'Dispatching locationUpdated event');
         const event = new CustomEvent('locationUpdated', { detail: locationData });
         document.dispatchEvent(event);
     }
 
-    // Initialize location display
     function initLocationDisplay() {
-        debugLog('Location', 'Initializing display');
-        const defaultLocation = {
-            name: 'Cincinnati, OH',
-            lat: 39.1031,
-            lng: -84.5120,
-            radius: 25
-        };
-
-        // Get stored location or use default
+        const defaultLocation = { name: 'Cincinnati, OH', lat: 39.1031, lng: -84.5120, radius: 25 };
         const storedLocation = localStorage.getItem('currentLocation');
-        debugLog('Storage', 'Retrieved stored location', storedLocation);
-        
         const locationData = storedLocation ? JSON.parse(storedLocation) : defaultLocation;
-        debugLog('Location', 'Using location data', locationData);
-
-        // Store default if not already stored
-        if (!storedLocation) {
-            debugLog('Storage', 'Storing default location');
-            localStorage.setItem('currentLocation', JSON.stringify(defaultLocation));
-        }
-
-        // Update display
+        if (!storedLocation) localStorage.setItem('currentLocation', JSON.stringify(defaultLocation));
         updateLocationDisplay(locationData);
     }
 
-    // Initialize location search functionality
     function initLocationSearch() {
-        debugLog('Search', 'Initializing search functionality');
-        
-        // Initialize Google Places Autocomplete
         let autocomplete;
         try {
-            debugLog('GoogleMaps', 'Initializing Places Autocomplete');
             autocomplete = new google.maps.places.Autocomplete(locationElements.searchInput);
-            debugLog('GoogleMaps', 'Places Autocomplete initialized successfully');
         } catch (error) {
-            debugLog('Error', 'Failed to initialize Google Places', error);
             locationElements.status.className = 'alert alert-danger mb-3';
-            locationElements.status.innerHTML = `
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Error:</strong> Could not initialize location search. Please try refreshing the page.
-            `;
+            locationElements.status.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Could not initialize location search.`;
             return;
         }
-        
-        // Handle location selection
-        debugLog('Search', 'Setting up place_changed listener');
+
         autocomplete.addListener('place_changed', function() {
-            debugLog('Search', 'Place selection changed');
             const place = autocomplete.getPlace();
-            debugLog('Search', 'Selected place', place);
-            
             if (place.geometry) {
                 const radius = parseInt(locationElements.radiusInput.value) || 25;
-                const locationData = {
+                updateLocationDisplay({
                     name: place.formatted_address || place.name,
                     lat: place.geometry.location.lat(),
                     lng: place.geometry.location.lng(),
-                    radius: radius
-                };
-                
-                debugLog('Location', 'New location selected', locationData);
-                updateLocationDisplay(locationData);
-            } else {
-                debugLog('Error', 'Selected place has no geometry', place);
-            }
-        });
-        
-        // Handle search button click
-        debugLog('Search', 'Setting up search button click handler');
-        locationElements.searchButton.addEventListener('click', function() {
-            debugLog('Search', 'Search button clicked');
-            if (locationElements.searchInput.value) {
-                debugLog('Search', 'Initiating geocode search', locationElements.searchInput.value);
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: locationElements.searchInput.value }, function(results, status) {
-                    debugLog('Search', 'Geocode results', { status, results });
-                    
-                    if (status === 'OK' && results[0]) {
-                        const place = results[0];
-                        const radius = parseInt(locationElements.radiusInput.value) || 25;
-                        const locationData = {
-                            name: place.formatted_address,
-                            lat: place.geometry.location.lat(),
-                            lng: place.geometry.location.lng(),
-                            radius: radius
-                        };
-                        
-                        debugLog('Location', 'New location from geocode', locationData);
-                        updateLocationDisplay(locationData);
-                    } else {
-                        debugLog('Error', 'Geocode failed', { status, results });
-                        locationElements.status.className = 'alert alert-danger mb-3';
-                        locationElements.status.innerHTML = `
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Error:</strong> Could not find location. Please try a different search term.
-                        `;
-                    }
+                    radius
                 });
-            } else {
-                debugLog('Search', 'Search attempted with empty input');
             }
         });
 
-        // Handle "Use My Current Location" button
+        locationElements.searchButton.addEventListener('click', function() {
+            if (locationElements.searchInput.value) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: locationElements.searchInput.value }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        const place = results[0];
+                        const radius = parseInt(locationElements.radiusInput.value) || 25;
+                        updateLocationDisplay({
+                            name: place.formatted_address,
+                            lat: place.geometry.location.lat(),
+                            lng: place.geometry.location.lng(),
+                            radius
+                        });
+                    } else {
+                        locationElements.status.className = 'alert alert-danger mb-3';
+                        locationElements.status.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Could not find location.`;
+                    }
+                });
+            }
+        });
+
         document.getElementById('geolocate-button').addEventListener('click', function() {
             if (!navigator.geolocation) {
                 locationElements.status.className = 'alert alert-danger mb-3';
-                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Geolocation is not supported by your browser.';
+                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Geolocation not supported.';
                 return;
             }
             const btn = this;
@@ -505,282 +361,411 @@
                 geocoder.geocode({ location: { lat, lng } }, function(results, status) {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Use My Current Location';
-                    if (status === 'OK' && results[0]) {
-                        const radius = parseInt(locationElements.radiusInput.value) || 25;
-                        updateLocationDisplay({
-                            name: results[0].formatted_address,
-                            lat: lat,
-                            lng: lng,
-                            radius: radius
-                        });
-                    } else {
-                        updateLocationDisplay({
-                            name: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-                            lat: lat,
-                            lng: lng,
-                            radius: parseInt(locationElements.radiusInput.value) || 25
-                        });
-                    }
+                    const radius = parseInt(locationElements.radiusInput.value) || 25;
+                    updateLocationDisplay({
+                        name: (status === 'OK' && results[0]) ? results[0].formatted_address : `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+                        lat, lng, radius
+                    });
                 });
-            }, function(error) {
+            }, function() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Use My Current Location';
                 locationElements.status.className = 'alert alert-danger mb-3';
-                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Could not get your location. Please check your browser permissions.';
+                locationElements.status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>Error:</strong> Could not get location.';
             });
         });
 
-        // Handle radius changes
-        debugLog('Search', 'Setting up radius change handler');
         locationElements.radiusInput.addEventListener('change', function() {
-            debugLog('Search', 'Radius changed', this.value);
             if (currentLocation) {
                 currentLocation.radius = parseInt(this.value) || 25;
-                debugLog('Location', 'Updating location with new radius', currentLocation);
                 updateLocationDisplay(currentLocation);
-            } else {
-                debugLog('Error', 'Attempted to update radius with no current location');
             }
         });
     }
 </script>
+
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let map;
-        let markers = [];
-        // Initialize map
-        function initMap() {
-            const locationData = getCurrentLocation();
-            map = L.map('map').setView([locationData.lat, locationData.lng], 10);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-            // Add legend
-            const legend = L.control({position: 'topright'});
-            legend.onAdd = function(map) {
-                const div = L.DomUtil.create('div', 'legend');
-                div.innerHTML = `
-                    <h4>Bird Categories</h4>
-                    <div><i class="category-waterbirds"></i> Waterbirds</div>
-                    <div><i class="category-raptors"></i> Raptors</div>
-                    <div><i class="category-ground-birds"></i> Ground Birds</div>
-                    <div><i class="category-aerial-specialists"></i> Aerial Specialists</div>
-                    <div><i class="category-tree-specialists"></i> Tree Specialists</div>
-                    <div><i class="category-perching-birds"></i> Perching Birds</div>
-                    <div><i class="category-other"></i> Other</div>
-                `;
-                return div;
-            };
-            legend.addTo(map);
-        }
-        function getBirdCategory(birdName) {
-            if (!birdName) return 'other';
-            
-            // 1. Waterbirds - Everything that swims, wades, or lives primarily near water
-            const waterbirds = [
-                'duck', 'goose', 'swan', 'loon', 'grebe', 'heron', 'egret', 'crane', 'pelican', 
-                'cormorant', 'rail', 'kingfisher', 'coot', 'ibis', 'bittern', 'gull', 'tern', 
-                'shorebird', 'sandpiper', 'plover', 'snipe', 'killdeer', 'phalarope', 'stilt', 
-                'avocet', 'oystercatcher', 'curlew', 'godwit', 'willet', 'yellowlegs', 'dowitcher'
-            ];
-            
-            // 2. Raptors - All birds of prey
-            const raptors = [
-                'hawk', 'eagle', 'falcon', 'owl', 'vulture', 'kite', 'osprey', 'harrier', 
-                'buzzard', 'accipiter', 'buteo', 'peregrine', 'merlin', 'kestrel', 'cooper', 
-                'sharp-shinned', 'red-tailed', 'red-shouldered', 'broad-winged', 'rough-legged'
-            ];
-            
-            // 3. Ground Birds - Birds that primarily feed and nest on the ground
-            const groundBirds = [
-                'quail', 'grouse', 'turkey', 'dove', 'pigeon', 'roadrunner', 'pheasant', 
-                'partridge', 'bobwhite', 'mourning dove', 'rock pigeon', 'common ground dove'
-            ];
-            
-            // 4. Aerial Specialists - Birds that catch food while flying
-            const aerialSpecialists = [
-                'hummingbird', 'swift', 'swallow', 'nighthawk', 'flycatcher', 'nightjar', 
-                'whip-poor-will', 'chimney swift', 'barn swallow', 'tree swallow', 'cliff swallow'
-            ];
-            
-            // 5. Tree Specialists - Birds specifically adapted for life on tree trunks and branches
-            const treeSpecialists = [
-                'woodpecker', 'sapsucker', 'flicker', 'nuthatch', 'creeper', 'downy', 'hairy', 
-                'red-bellied', 'pileated', 'red-headed', 'yellow-bellied', 'northern flicker'
-            ];
-            
-            birdName = birdName.toLowerCase();
-            
-            // Check each category in order of specificity
-            if (waterbirds.some(term => birdName.includes(term))) return 'waterbirds';
-            if (raptors.some(term => birdName.includes(term))) return 'raptors';
-            if (groundBirds.some(term => birdName.includes(term))) return 'ground-birds';
-            if (aerialSpecialists.some(term => birdName.includes(term))) return 'aerial-specialists';
-            if (treeSpecialists.some(term => birdName.includes(term))) return 'tree-specialists';
-            
-            // 6. Perching Birds (Songbirds) - The huge order Passeriformes - default for most small birds
-            return 'perching-birds';
-        }
-        function getMarkerColor(category) {
-            const colors = {
-                'waterbirds': '#377eb8',      // Blue for water
-                'raptors': '#e41a1c',         // Red for predators
-                'ground-birds': '#8b4513',    // Brown for ground
-                'aerial-specialists': '#ff69b4', // Pink for aerial
-                'tree-specialists': '#228b22',   // Forest green for tree
-                'perching-birds': '#4daf4a',     // Green for songbirds
-                'other': '#ff7f00'               // Orange for unknown
-            };
-            return colors[category] || colors.other;
-        }
-        function updateMapLocation(locationData) {
-            if (map) {
-                map.setView([locationData.lat, locationData.lng], 10);
-            }
-        }
-        function getCurrentLocation() {
-            const storedLocation = localStorage.getItem('currentLocation');
-            if (storedLocation) {
-                return JSON.parse(storedLocation);
-            }
-            const defaultLocation = {
-                name: 'Cincinnati, OH',
-                lat: 39.1031,
-                lng: -84.5120,
-                radius: 25
-            };
-            localStorage.setItem('currentLocation', JSON.stringify(defaultLocation));
-            return defaultLocation;
-        }
-        async function loadObservations() {
-            debugLog('Map', 'Loading observations');
-            const locationData = getCurrentLocation();
-            debugLog('Map', 'Using location data for API call', locationData);
-            
-            try {
-                const params = new URLSearchParams({
-                    lat: locationData.lat,
-                    lng: locationData.lng,
-                    radius: locationData.radius,
-                    timeframe: '7d'
-                });
-                const apiUrl = `/api/sightings?${params.toString()}`;
-                debugLog('Map', 'Making API request', apiUrl);
-                
-                const response = await fetch(apiUrl);
-                debugLog('Map', 'API response received', { status: response.status, ok: response.ok });
-                
-                const data = await response.json();
-                debugLog('Map', 'API data received', { dataLength: Array.isArray(data) ? data.length : 'not array' });
-                
-                if (!response.ok) throw new Error(data.error || 'Failed to load observations');
-                const observations = Array.isArray(data) ? data : (data.observations || []);
-                debugLog('Map', 'Processing observations', { count: observations.length });
-                if (observations.length > 0) {
-                    console.log('First observation object:', observations[0]);
-                }
-                markers.forEach(marker => map.removeLayer(marker));
-                markers = [];
-                const sightingsTableBody = document.getElementById('sightingsTableBody');
-                sightingsTableBody.innerHTML = '';
-                observations.forEach((obs, index) => {
-                    try {
-                        // Try all possible bird name fields
-                        const birdName = obs.bird_name || obs.comName || obs.species || obs.speciesCode || 'Unknown Bird';
-                        const category = getBirdCategory(birdName); // Always use new classification
-                        const color = getMarkerColor(category);
-                        const lat = parseFloat(obs.latitude || obs.lat);
-                        const lng = parseFloat(obs.longitude || obs.lng);
-                        if (isNaN(lat) || isNaN(lng)) return;
-                        const marker = L.circleMarker([lat, lng], {
-                            radius: 8,
-                            fillColor: color,
-                            color: '#fff',
-                            weight: 1,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        }).addTo(map);
-                        marker.bindPopup(`
-                            <strong>${birdName}</strong><br>
-                            Location: ${obs.location || obs.locName || 'Unknown Location'}<br>
-                            Category: ${category.replace(/-/g, ' ')}
-                        `);
-                        markers.push(marker);
-                        const row = document.createElement('tr');
-                        // Determine background and text color for the cell
-                        const bgColor = getMarkerColor(category);
-                        // Simple luminance check for text color
-                        function getTextColor(hex) {
-                            if (!hex) return '#fff';
-                            hex = hex.replace('#', '');
-                            if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
-                            const r = parseInt(hex.substr(0,2),16);
-                            const g = parseInt(hex.substr(2,2),16);
-                            const b = parseInt(hex.substr(4,2),16);
-                            // Perceived luminance
-                            const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
-                            return luminance > 0.6 ? '#222' : '#fff';
-                        }
-                        const textColor = getTextColor(bgColor);
-                        row.innerHTML = `
-                            <td>${birdName}</td>
-                            <td>${obs.location || obs.locName || 'Unknown Location'}</td>
-                            <td>${obs.obsDt ? new Date(obs.obsDt).toLocaleDateString() : new Date().toLocaleDateString()}</td>
-                            <td style="background:${bgColor}; color:${textColor}; font-weight:bold; text-align:center;">${category.replace(/-/g, ' ')}</td>
-                        `;
-                        sightingsTableBody.appendChild(row);
-                    } catch (error) { console.error('Error rendering observation:', error, obs); }
-                });
-                debugLog('Map', 'Successfully processed all observations', { markerCount: markers.length });
-            } catch (error) {
-                debugLog('Error', 'Failed to load observations', error);
-                alert('Failed to load observations. Please try again.');
-            }
-        }
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = deg2rad(lat2 - lat1);
-            const dLon = deg2rad(lon2 - lon1);
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2); 
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-            const d = R * c;
-            return d;
-        }
-        function deg2rad(deg) {
-            return deg * (Math.PI/180);
-        }
-        initMap();
-        loadObservations();
+document.addEventListener('DOMContentLoaded', function() {
 
-        // Fullscreen map toggle
-        document.getElementById('btn-fullscreen-map').addEventListener('click', function() {
-            const isFullscreen = document.body.classList.toggle('map-is-fullscreen');
-            this.innerHTML = isFullscreen
-                ? '<i class="fas fa-compress"></i><span class="d-md-none ms-1"> Exit</span>'
-                : '<i class="fas fa-expand"></i><span class="d-md-none ms-1"> Full screen</span>';
-            setTimeout(() => map.invalidateSize(), 50);
-        });
-        
-        // Listen for location updates from the first script section
-        document.addEventListener('locationUpdated', function(event) {
-            debugLog('Map', 'Location updated event received', event.detail);
-            updateMapLocation(event.detail);
-            loadObservations();
-        });
-        
-        window.addEventListener('storage', function(event) {
-            if (event.key === 'currentLocation') {
-                const newLocation = JSON.parse(event.newValue);
-                if (newLocation) {
-                    updateMapLocation(newLocation);
-                    loadObservations();
+    // ── Constants ────────────────────────────────────────────────────────────
+
+    const GROUP_COLORS = {
+        'waterbirds':         '#377eb8',
+        'raptors':            '#e41a1c',
+        'ground-birds':       '#a0522d',
+        'aerial-specialists': '#ff69b4',
+        'tree-specialists':   '#228b22',
+        'perching-birds':     '#4daf4a',
+        'other':              '#ff7f00'
+    };
+
+    const GROUP_LABELS = {
+        'waterbirds':         'Waterbirds',
+        'raptors':            'Raptors',
+        'ground-birds':       'Ground Birds',
+        'aerial-specialists': 'Aerial Specialists',
+        'tree-specialists':   'Tree Specialists',
+        'perching-birds':     'Perching Birds',
+        'other':              'Other'
+    };
+
+    // 20-color qualitative palette for species drill-down
+    const SPECIES_PALETTE = [
+        '#e6194b','#3cb44b','#ffe119','#4363d8','#f58231',
+        '#911eb4','#42d4f4','#f032e6','#bfef45','#469990',
+        '#9a6324','#800000','#aaffc3','#808000','#000075',
+        '#a9a9a9','#ffd8b1','#dcbeff','#fabed4','#ffffff'
+    ];
+
+    // Word-boundary keyword map (matches audit script)
+    const TIER1_KEYWORDS = {
+        'waterbirds': [
+            'duck','goose','geese','swan','teal','mallard','pintail','shoveler',
+            'gadwall','wigeon','scaup','canvasback','redhead','bufflehead',
+            'merganser','scoter','eider','goldeneye',
+            'heron','egret','bittern','ibis','spoonbill','stork',
+            'sandpiper','plover','dowitcher','yellowlegs','dunlin','knot',
+            'turnstone','godwit','curlew','whimbrel','snipe','woodcock',
+            'avocet','stilt','phalarope','oystercatcher',
+            'killdeer','sanderling','willet',
+            'gull','tern','skimmer','jaeger','kittiwake',
+            'grebe','loon',
+            'cormorant','pelican','anhinga','gannet','booby','frigatebird',
+            'tropicbird','skua','murre','puffin','razorbill','guillemot','auklet',
+            'coot','gallinule','moorhen','rail','sora','swamphen',
+            'crane','limpkin'
+        ],
+        'raptors': [
+            'eagle','hawk','falcon','owl','kite','harrier','osprey',
+            'vulture','condor','merlin','kestrel','caracara'
+        ],
+        'ground-birds': [
+            'turkey','grouse','quail','pheasant','partridge','ptarmigan',
+            'roadrunner','bobwhite',
+            'pigeon','dove','parakeet','parrot','macaw',
+            'peafowl','junglefowl'
+        ],
+        'aerial-specialists': [
+            'swallow','swift','martin','hummingbird','nighthawk','nightjar',
+            'whip-poor-will','poorwill'
+        ],
+        'tree-specialists': [
+            'woodpecker','sapsucker','flicker','kingfisher','nuthatch','creeper'
+        ],
+        'perching-birds': [
+            'sparrow','finch','warbler','thrush','robin','blackbird','oriole',
+            'jay','crow','raven','magpie','wren','chickadee','titmouse',
+            'flycatcher','phoebe','pewee','kingbird','vireo','tanager',
+            'grosbeak','bunting','towhee','junco','lark','pipit',
+            'mockingbird','catbird','thrasher','starling','waxwing',
+            'shrike','kinglet','gnatcatcher','bluebird','veery','solitaire',
+            'redstart','ovenbird','waterthrush','siskin','crossbill',
+            'redpoll','goldfinch','grackle','cowbird','cardinal',
+            'parula','yellowthroat','longspur','bushtit','verdin',
+            'phainopepla','cuckoo','chat','meadowlark','pyrrhuloxia'
+        ]
+    };
+
+    // ── State ────────────────────────────────────────────────────────────────
+
+    let map;
+    let markers = [];
+    let allObservations = [];
+    let drilldownGroup = null;          // null = tier 1, string = tier 2
+    let activeGroupFilters = new Set(Object.keys(GROUP_COLORS));
+    let activeSpeciesFilters = new Set();
+    let currentSpeciesColors = {};
+    let currentLegend = null;
+
+    // ── Classification ───────────────────────────────────────────────────────
+
+    function getBirdCategory(comName) {
+        if (!comName) return 'other';
+        const name = comName.toLowerCase();
+        for (const [category, keywords] of Object.entries(TIER1_KEYWORDS)) {
+            for (const kw of keywords) {
+                const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                if (new RegExp('\\b' + escaped + '\\b').test(name)) return category;
+            }
+        }
+        return 'other';
+    }
+
+    // ── Map init ─────────────────────────────────────────────────────────────
+
+    function getCurrentLocation() {
+        const stored = localStorage.getItem('currentLocation');
+        if (stored) return JSON.parse(stored);
+        const def = { name: 'Cincinnati, OH', lat: 39.1031, lng: -84.5120, radius: 25 };
+        localStorage.setItem('currentLocation', JSON.stringify(def));
+        return def;
+    }
+
+    function initMap() {
+        const loc = getCurrentLocation();
+        map = L.map('map').setView([loc.lat, loc.lng], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    }
+
+    // ── Legend ───────────────────────────────────────────────────────────────
+
+    function buildLegend() {
+        if (currentLegend) { currentLegend.remove(); currentLegend = null; }
+        const legend = L.control({ position: 'topright' });
+        legend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'legend');
+            const dot = (color) =>
+                `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;` +
+                `background:${color};box-shadow:0 0 0 1.5px rgba(255,255,255,0.6);flex-shrink:0;"></span>`;
+
+            if (drilldownGroup === null) {
+                div.innerHTML = '<h4>Bird Categories</h4>';
+                for (const [cat, label] of Object.entries(GROUP_LABELS)) {
+                    div.innerHTML += `<div>${dot(GROUP_COLORS[cat])} ${label}</div>`;
+                }
+            } else {
+                div.innerHTML = `<h4>${GROUP_LABELS[drilldownGroup]}</h4>`;
+                for (const [species, color] of Object.entries(currentSpeciesColors)) {
+                    div.innerHTML += `<div>${dot(color)} ${species}</div>`;
                 }
             }
+            return div;
+        };
+        legend.addTo(map);
+        currentLegend = legend;
+    }
+
+    // ── Filters panel ────────────────────────────────────────────────────────
+
+    function buildFiltersPanel() {
+        const container = document.getElementById('category-filters');
+        if (!container) return;
+
+        const dot = (color) =>
+            `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;` +
+            `background:${color};box-shadow:0 0 0 1.5px rgba(255,255,255,0.5);` +
+            `margin-right:8px;flex-shrink:0;"></span>`;
+
+        if (drilldownGroup === null) {
+            // Tier 1: group checkboxes + drill-down arrows
+            const counts = {};
+            allObservations.forEach(obs => {
+                const name = obs.bird_name || obs.comName || obs.species || '';
+                const cat = getBirdCategory(name);
+                counts[cat] = (counts[cat] || 0) + 1;
+            });
+
+            let html = '';
+            for (const [cat, label] of Object.entries(GROUP_LABELS)) {
+                const count = counts[cat] || 0;
+                const checked = activeGroupFilters.has(cat) ? 'checked' : '';
+                html += `
+                <div class="d-flex align-items-center mb-2" style="gap:6px;">
+                    <input type="checkbox" class="group-filter-cb" data-group="${cat}" ${checked}
+                        style="width:18px;height:18px;cursor:pointer;flex-shrink:0;">
+                    ${dot(GROUP_COLORS[cat])}
+                    <span class="group-drilldown-link" data-group="${cat}"
+                        style="cursor:pointer;color:var(--text-primary);flex:1;font-size:14px;"
+                        title="Click to drill into ${label}">
+                        ${label}
+                        <small style="color:var(--text-secondary);">(${count})</small>
+                    </span>
+                    <i class="fas fa-chevron-right" style="color:var(--text-secondary);font-size:11px;"></i>
+                </div>`;
+            }
+            container.innerHTML = html;
+
+            container.querySelectorAll('.group-filter-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) activeGroupFilters.add(this.dataset.group);
+                    else activeGroupFilters.delete(this.dataset.group);
+                    renderMarkers();
+                });
+            });
+
+            container.querySelectorAll('.group-drilldown-link').forEach(el => {
+                el.addEventListener('click', function() {
+                    drilldownGroup = this.dataset.group;
+                    // Assign a color to each unique species in this group
+                    const groupObs = allObservations.filter(obs => {
+                        const name = obs.bird_name || obs.comName || obs.species || '';
+                        return getBirdCategory(name) === drilldownGroup;
+                    });
+                    const uniqueSpecies = [...new Set(
+                        groupObs.map(obs => obs.bird_name || obs.comName || obs.species || 'Unknown')
+                    )].sort();
+                    currentSpeciesColors = {};
+                    uniqueSpecies.forEach((sp, i) => {
+                        currentSpeciesColors[sp] = SPECIES_PALETTE[i % SPECIES_PALETTE.length];
+                    });
+                    activeSpeciesFilters = new Set(uniqueSpecies);
+                    buildLegend();
+                    buildFiltersPanel();
+                    renderMarkers();
+                });
+            });
+
+        } else {
+            // Tier 2: back button + per-species checkboxes
+            let html = `
+            <button class="btn btn-outline-secondary btn-sm mb-3 w-100" id="btn-back-to-groups">
+                <i class="fas fa-arrow-left me-1"></i> All Categories
+            </button>
+            <div style="color:var(--accent);font-weight:600;margin-bottom:10px;font-size:15px;">
+                ${GROUP_LABELS[drilldownGroup]}
+            </div>`;
+
+            for (const [species, color] of Object.entries(currentSpeciesColors)) {
+                const checked = activeSpeciesFilters.has(species) ? 'checked' : '';
+                html += `
+                <div class="d-flex align-items-center mb-2" style="gap:6px;">
+                    <input type="checkbox" class="species-filter-cb" data-species="${species}"
+                        ${checked} style="width:18px;height:18px;cursor:pointer;flex-shrink:0;">
+                    ${dot(color)}
+                    <span style="color:var(--text-primary);font-size:13px;">${species}</span>
+                </div>`;
+            }
+            container.innerHTML = html;
+
+            document.getElementById('btn-back-to-groups').addEventListener('click', function() {
+                drilldownGroup = null;
+                currentSpeciesColors = {};
+                activeSpeciesFilters = new Set();
+                buildLegend();
+                buildFiltersPanel();
+                renderMarkers();
+            });
+
+            container.querySelectorAll('.species-filter-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) activeSpeciesFilters.add(this.dataset.species);
+                    else activeSpeciesFilters.delete(this.dataset.species);
+                    renderMarkers();
+                });
+            });
+        }
+    }
+
+    // ── Marker rendering ─────────────────────────────────────────────────────
+
+    function renderMarkers() {
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        const tbody = document.getElementById('sightingsTableBody');
+        tbody.innerHTML = '';
+
+        allObservations.forEach(obs => {
+            const birdName = obs.bird_name || obs.comName || obs.species || obs.speciesCode || 'Unknown Bird';
+            const category = getBirdCategory(birdName);
+            const lat = parseFloat(obs.latitude || obs.lat);
+            const lng = parseFloat(obs.longitude || obs.lng);
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            let color;
+            if (drilldownGroup === null) {
+                if (!activeGroupFilters.has(category)) return;
+                color = GROUP_COLORS[category] || GROUP_COLORS.other;
+            } else {
+                if (category !== drilldownGroup) return;
+                if (!activeSpeciesFilters.has(birdName)) return;
+                color = currentSpeciesColors[birdName] || '#aaa';
+            }
+
+            const marker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: color,
+                color: '#ffffff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            const dateStr = obs.obsDt ? new Date(obs.obsDt).toLocaleDateString() : '';
+            marker.bindPopup(`
+                <strong>${birdName}</strong><br>
+                Location: ${obs.location || obs.locName || 'Unknown'}<br>
+                ${drilldownGroup === null ? `Category: ${GROUP_LABELS[category] || category}<br>` : ''}
+                ${dateStr ? `Date: ${dateStr}` : ''}
+            `);
+            markers.push(marker);
+
+            // Table row
+            const row = document.createElement('tr');
+            const labelCell = drilldownGroup === null
+                ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:4px;"></span>${GROUP_LABELS[category] || category}`
+                : `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:4px;"></span>${birdName}`;
+            row.innerHTML = `
+                <td>${birdName}</td>
+                <td>${obs.location || obs.locName || 'Unknown'}</td>
+                <td>${dateStr}</td>
+                <td style="white-space:nowrap;">${labelCell}</td>
+            `;
+            tbody.appendChild(row);
         });
+    }
+
+    // ── Data loading ─────────────────────────────────────────────────────────
+
+    async function loadObservations() {
+        const loc = getCurrentLocation();
+        try {
+            const params = new URLSearchParams({
+                lat: loc.lat, lng: loc.lng, radius: loc.radius, timeframe: '7d'
+            });
+            const response = await fetch(`/api/sightings?${params.toString()}`);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to load');
+            allObservations = Array.isArray(data) ? data : (data.observations || []);
+
+            // Reset to tier 1 on new location load
+            drilldownGroup = null;
+            activeGroupFilters = new Set(Object.keys(GROUP_COLORS));
+            activeSpeciesFilters = new Set();
+            currentSpeciesColors = {};
+
+            buildLegend();
+            buildFiltersPanel();
+            renderMarkers();
+        } catch (error) {
+            debugLog('Error', 'Failed to load observations', error);
+            alert('Failed to load observations. Please try again.');
+        }
+    }
+
+    function updateMapLocation(locationData) {
+        if (map) map.setView([locationData.lat, locationData.lng], 10);
+    }
+
+    // ── Boot ─────────────────────────────────────────────────────────────────
+
+    initMap();
+    loadObservations();
+
+    document.getElementById('btn-fullscreen-map').addEventListener('click', function() {
+        const isFullscreen = document.body.classList.toggle('map-is-fullscreen');
+        this.innerHTML = isFullscreen
+            ? '<i class="fas fa-compress"></i><span class="d-md-none ms-1"> Exit</span>'
+            : '<i class="fas fa-expand"></i><span class="d-md-none ms-1"> Full screen</span>';
+        setTimeout(() => map.invalidateSize(), 50);
     });
+
+    document.addEventListener('locationUpdated', function(event) {
+        updateMapLocation(event.detail);
+        loadObservations();
+    });
+
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'currentLocation') {
+            const newLocation = JSON.parse(event.newValue);
+            if (newLocation) {
+                updateMapLocation(newLocation);
+                loadObservations();
+            }
+        }
+    });
+});
 </script>
-{% endblock %} 
+{% endblock %}
