@@ -35,7 +35,7 @@ Last updated: 2026-04-04
 
 ---
 
-## Features — Heatmap (new)
+## Features — Heatmap ✓ v1 implemented (2026-04-04)
 
 ### Overview
 Show a heatmap for a chosen bird category or species to visualize high-density areas and observation trends over time.

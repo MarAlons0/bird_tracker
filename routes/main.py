@@ -329,11 +329,14 @@ def get_sightings():
             logger.error("Missing required location parameters")
             return jsonify([])
             
-        logger.info(f"Fetching sightings for lat: {lat}, lng: {lng}, radius: {radius}")
-        
+        back = request.args.get('back', default=7, type=int)
+        back = min(max(back, 1), 30)  # clamp to eBird max of 30 days
+
+        logger.info(f"Fetching sightings for lat: {lat}, lng: {lng}, radius: {radius}, back: {back}")
+
         # Get sightings from eBird API using the tracker
         tracker = current_app.tracker
-        observations = tracker.get_recent_observations_by_location(lat, lng, radius)
+        observations = tracker.get_recent_observations_by_location(lat, lng, radius, days_back=back)
         
         # Transform observations to match the frontend's expected format
         sightings = []
