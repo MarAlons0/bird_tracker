@@ -112,7 +112,7 @@
 </style>
 <script>
     // Debug logging utility
-    const DEBUG = true;
+    const DEBUG = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     function debugLog(category, message, data = null) {
         if (!DEBUG) return;
         const timestamp = new Date().toISOString();
@@ -659,7 +659,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = document.getElementById('sightingsTableBody');
         tbody.innerHTML = '';
 
-        allObservations.forEach(obs => {
+        // Golden-angle jitter — evenly distributes stacked markers, deterministic per index
+        // Uses the golden angle (~137.5°) so successive points spread around the circle
+        // like sunflower seeds rather than clustering on one side. ~39m radius keeps
+        // the cluster visually tight but each dot individually clickable.
+        function jitterCoords(i, lat, lng) {
+            const angle = (i * 2.39996) % (2 * Math.PI); // 2.39996 rad ≈ golden angle
+            const r = 0.00035;                             // ~39m at mid-latitudes
+            return [lat + r * Math.sin(angle), lng + r * Math.cos(angle)];
+        }
+
+        allObservations.forEach((obs, i) => {
             const birdName = obs.bird_name || obs.comName || obs.species || obs.speciesCode || 'Unknown Bird';
             const category = getBirdCategory(birdName);
             const lat = parseFloat(obs.latitude || obs.lat);
@@ -676,9 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = currentSpeciesColors[birdName] || '#aaa';
             }
 
-            // Jitter to prevent stacking at identical coordinates
-            const jLat = lat + (Math.random() - 0.5) * 0.002;
-            const jLng = lng + (Math.random() - 0.5) * 0.002;
+            const [jLat, jLng] = jitterCoords(i, lat, lng);
             const marker = L.circleMarker([jLat, jLng], {
                 radius: 8,
                 fillColor: color,
