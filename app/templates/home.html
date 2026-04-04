@@ -709,7 +709,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const key = `${lat.toFixed(2)},${lng.toFixed(2)}`;
             if (!locMap[key]) locMap[key] = { lat, lng, recent: 0, older: 0 };
 
-            const obsTime = new Date(obs.timestamp).getTime();
+            // eBird dates arrive as "2026-04-04 09:30" — add T to make ISO 8601
+            const obsTime = new Date((obs.timestamp || '').replace(' ', 'T')).getTime();
+            if (!obsTime) continue;
             if (obsTime >= cutoff) locMap[key].recent++;
             else if (obsTime >= oldest) locMap[key].older++;
         }
@@ -763,12 +765,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap <i class="fas fa-check ms-1" style="font-size:10px;"></i>';
             }
 
-            // Hide circle markers and show heat layer
-            markers.forEach(m => m.setOpacity(0));
+            // Hide circle markers (circleMarker extends Path, not Marker — use setStyle)
+            markers.forEach(m => m.setStyle({ opacity: 0, fillOpacity: 0 }));
             const points = computeHeatData(heatObservations);
+            debugLog('Heatmap', `Rendering ${points.length} heat points`);
             heatLayer = L.heatLayer(points, {
                 radius: 35,
                 blur: 25,
+                minOpacity: 0.4,
                 maxZoom: 13,
                 max: 1.0,
                 gradient: HEAT_GRADIENT
@@ -779,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Remove heat layer and restore markers
             if (heatLayer) { map.removeLayer(heatLayer); heatLayer = null; }
-            markers.forEach(m => m.setOpacity(1));
+            markers.forEach(m => m.setStyle({ opacity: 1, fillOpacity: 0.8 }));
         }
 
         buildLegend();
