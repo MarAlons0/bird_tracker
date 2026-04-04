@@ -350,6 +350,10 @@ thead th {
     }
 }
 
+body.map-is-fullscreen {
+    overflow: hidden; /* prevent page scroll behind fullscreen map */
+}
+
 body.map-is-fullscreen #map-panel {
     position: fixed;
     top: 0;
@@ -364,6 +368,14 @@ body.map-is-fullscreen #map-panel {
 body.map-is-fullscreen #map {
     height: 100dvh !important;
     border-radius: 0 !important;
+}
+
+/* Fix button to viewport in fullscreen so it can't scroll off-screen */
+body.map-is-fullscreen #btn-fullscreen-map {
+    position: fixed !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    right: 10px;
+    z-index: 1100;
 }
 
 body.map-is-fullscreen .navbar,
