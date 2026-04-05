@@ -239,7 +239,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <h4 class="card-title mb-0">Bird Sightings Map</h4>
-                        <button class="btn btn-outline-secondary btn-sm" id="btn-heatmap-toggle" title="Toggle trend heatmap">
+                        <button class="btn btn-outline-warning btn-sm" id="btn-heatmap-toggle" title="Toggle trend heatmap">
                             <i class="fas fa-fire me-1"></i>Heatmap
                         </button>
                     </div>
@@ -741,8 +741,9 @@ document.addEventListener('DOMContentLoaded', function() {
         heatmapActive = !heatmapActive;
 
         if (heatmapActive) {
-            btn.classList.add('active');
-            btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap <i class="fas fa-check ms-1" style="font-size:10px;"></i>';
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-warning', 'text-dark');
+            btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
 
             // Fetch 30-day data if not already loaded for this location
             if (heatObservations.length === 0) {
@@ -757,12 +758,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     debugLog('Heatmap', 'Failed to fetch 30-day data', e);
                     heatmapActive = false;
                     btn.disabled = false;
-                    btn.classList.remove('active');
+                    btn.classList.remove('btn-warning', 'text-dark');
+                    btn.classList.add('btn-outline-warning');
                     btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
                     return;
                 }
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap <i class="fas fa-check ms-1" style="font-size:10px;"></i>';
             }
 
             // Hide circle markers (circleMarker extends Path, not Marker — use setStyle)
@@ -778,7 +779,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 gradient: HEAT_GRADIENT
             }).addTo(map);
         } else {
-            btn.classList.remove('active');
+            btn.classList.remove('btn-warning', 'text-dark');
+            btn.classList.add('btn-outline-warning');
             btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
 
             // Remove heat layer and restore markers
@@ -883,7 +885,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 heatmapActive = false;
                 if (heatLayer) { map.removeLayer(heatLayer); heatLayer = null; }
                 const btn = document.getElementById('btn-heatmap-toggle');
-                if (btn) { btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap'; }
+                if (btn) {
+                    btn.classList.remove('btn-warning', 'text-dark');
+                    btn.classList.add('btn-outline-warning');
+                    btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
+                }
             }
 
             buildLegend();
