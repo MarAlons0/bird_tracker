@@ -81,8 +81,7 @@ def users():
                     email=email,
                     username=username,
                     is_admin=is_admin,
-                    is_active=True,
-                    is_approved=True
+                    is_active=True
                 )
                 new_user.set_password(password)
                 db.session.add(new_user)
