@@ -64,7 +64,32 @@ def users():
         action = request.form.get('action')
         user_id = request.form.get('user_id')
 
-        if action == 'delete_user' and user_id:
+        if action == 'create_user':
+            email = request.form.get('email', '').strip().lower()
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+            is_admin = request.form.get('is_admin') == 'true'
+
+            if not email or not username or not password:
+                flash('All fields are required.', 'error')
+            elif User.query.filter_by(email=email).first():
+                flash('A user with that email already exists.', 'error')
+            elif User.query.filter_by(username=username).first():
+                flash('A user with that username already exists.', 'error')
+            else:
+                new_user = User(
+                    email=email,
+                    username=username,
+                    is_admin=is_admin,
+                    is_active=True,
+                    is_approved=True
+                )
+                new_user.set_password(password)
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f'User {username} created successfully.', 'success')
+
+        elif action == 'delete_user' and user_id:
             user = User.query.get(user_id)
             if user:
                 if user.id == current_user.id:
