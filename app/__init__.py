@@ -90,7 +90,14 @@ def create_app():
     
     @app.route('/favicon.ico')
     def favicon():
-        return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon')
+        response = send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon')
+        response.headers['Cache-Control'] = 'no-cache, must-revalidate'
+        return response
+
+    @app.route('/apple-touch-icon.png')
+    @app.route('/apple-touch-icon-precomposed.png')
+    def apple_touch_icon():
+        return send_from_directory(app.static_folder, 'apple-touch-icon.png', mimetype='image/png')
 
     logger.info("Application initialized successfully")
     return app
