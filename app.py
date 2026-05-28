@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, url_for, redirect, flash, send_file
+from flask import Flask, render_template, jsonify, request, url_for, redirect, flash, send_file, send_from_directory
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf import CSRFProtect
@@ -178,6 +178,15 @@ def create_app():
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.admin, url_prefix='/admin')
     print("Blueprints registered")
+
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon')
+
+    @app.route('/apple-touch-icon.png')
+    @app.route('/apple-touch-icon-precomposed.png')
+    def apple_touch_icon():
+        return send_from_directory(app.static_folder, 'apple-touch-icon.png', mimetype='image/png')
     
     # Initialize bird tracker
     print("Initializing bird tracker...")
