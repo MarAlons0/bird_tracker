@@ -181,16 +181,14 @@ def create_app():
 
     @app.route('/favicon.ico')
     def favicon():
-        response = send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon')
-        response.headers['Cache-Control'] = 'public, max-age=3600'
-        return response
+        return send_from_directory(app.static_folder, 'favicon.ico',
+                                   mimetype='image/x-icon', max_age=3600)
 
     @app.route('/apple-touch-icon.png')
     @app.route('/apple-touch-icon-precomposed.png')
     def apple_touch_icon():
-        response = send_from_directory(app.static_folder, 'apple-touch-icon.png', mimetype='image/png')
-        response.headers['Cache-Control'] = 'public, max-age=3600'
-        return response
+        return send_from_directory(app.static_folder, 'apple-touch-icon.png',
+                                   mimetype='image/png', max_age=3600)
     
     # Initialize bird tracker
     print("Initializing bird tracker...")
