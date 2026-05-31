@@ -4,6 +4,8 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
     .welcome-section {
         text-align: left;
@@ -239,9 +241,14 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <h4 class="card-title mb-0">Bird Sightings Map</h4>
-                        <button class="btn btn-outline-warning btn-sm" id="btn-heatmap-toggle" title="Toggle trend heatmap">
-                            <i class="fas fa-fire me-1"></i>Heatmap
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-cluster-toggle" title="Group nearby markers into clusters">
+                                <i class="fas fa-layer-group me-1"></i>Cluster
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" id="btn-heatmap-toggle" title="Toggle trend heatmap">
+                                <i class="fas fa-fire me-1"></i>Heatmap
+                            </button>
+                        </div>
                     </div>
                     <div id="map-panel" style="position: relative; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
                         <div id="map" style="height: 600px; width: 100%;"></div>
@@ -391,6 +398,7 @@
 
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -488,6 +496,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let heatmapActive = false;
     let heatLayer = null;
     let heatObservations = [];          // 30-day dataset cached for current location
+
+    // Cluster state
+    let clusterActive = false;
+    let markerCluster = null;
 
     // ── Classification ───────────────────────────────────────────────────────
 
@@ -736,6 +748,45 @@ document.addEventListener('DOMContentLoaded', function() {
         return points;
     }
 
+    // ── Cluster helpers ──────────────────────────────────────────────────────
+
+    // Custom cluster icon: neutral gray in tier-1 (mixed colors), group color in drilldown
+    function createClusterIcon(cluster) {
+        const count = cluster.getChildCount();
+        const color = drilldownGroup ? GROUP_COLORS[drilldownGroup] : '#555';
+        const size = count < 10 ? 30 : count < 100 ? 38 : 46;
+        const fontSize = size < 38 ? 12 : 14;
+        return L.divIcon({
+            html: `<div style="width:${size}px;height:${size}px;border-radius:50%;` +
+                  `background:${color};border:2.5px solid rgba(255,255,255,0.75);` +
+                  `display:flex;align-items:center;justify-content:center;` +
+                  `color:#fff;font-weight:700;font-size:${fontSize}px;` +
+                  `box-shadow:0 2px 6px rgba(0,0,0,0.45);">${count}</div>`,
+            className: '',
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
+        });
+    }
+
+    // Show/hide the observation layer (markers or cluster), used by both toggles
+    function hideObservationLayer() {
+        if (clusterActive && markerCluster) {
+            map.removeLayer(markerCluster);
+        } else {
+            markers.forEach(m => m.setStyle({ opacity: 0, fillOpacity: 0 }));
+        }
+    }
+
+    function showObservationLayer() {
+        if (clusterActive && markerCluster) {
+            map.addLayer(markerCluster);
+        } else {
+            markers.forEach(m => m.setStyle({ opacity: 1, fillOpacity: 0.8 }));
+        }
+    }
+
+    // ── Heatmap ──────────────────────────────────────────────────────────────
+
     async function toggleHeatmap() {
         const btn = document.getElementById('btn-heatmap-toggle');
         heatmapActive = !heatmapActive;
@@ -767,8 +818,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>Observations';
             }
 
-            // Hide circle markers (circleMarker extends Path, not Marker — use setStyle)
-            markers.forEach(m => m.setStyle({ opacity: 0, fillOpacity: 0 }));
+            hideObservationLayer();
             const points = computeHeatData(heatObservations);
             debugLog('Heatmap', `Rendering ${points.length} heat points`);
             heatLayer = L.heatLayer(points, {
@@ -784,31 +834,75 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('btn-outline-warning');
             btn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
 
-            // Remove heat layer and restore markers
             if (heatLayer) { map.removeLayer(heatLayer); heatLayer = null; }
-            markers.forEach(m => m.setStyle({ opacity: 1, fillOpacity: 0.8 }));
+            showObservationLayer();
         }
 
         buildLegend();
     }
 
+    // ── Clustering ───────────────────────────────────────────────────────────
+
+    function toggleCluster() {
+        const btn = document.getElementById('btn-cluster-toggle');
+        clusterActive = !clusterActive;
+
+        if (clusterActive) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-secondary');
+            btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Uncluster';
+
+            // Mutually exclusive with heatmap: turn it off silently
+            if (heatmapActive) {
+                heatmapActive = false;
+                if (heatLayer) { map.removeLayer(heatLayer); heatLayer = null; }
+                const hBtn = document.getElementById('btn-heatmap-toggle');
+                hBtn.classList.remove('btn-warning', 'text-dark');
+                hBtn.classList.add('btn-outline-warning');
+                hBtn.innerHTML = '<i class="fas fa-fire me-1"></i>Heatmap';
+            }
+        } else {
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-outline-secondary');
+            btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Cluster';
+        }
+
+        renderMarkers();
+        buildLegend();
+    }
+
     // ── Marker rendering ─────────────────────────────────────────────────────
 
+    // Golden-angle jitter — evenly distributes stacked markers, deterministic per index.
+    // Uses the golden angle (~137.5°) so successive points spread around the circle
+    // like sunflower seeds rather than clustering on one side. ~39m radius keeps
+    // the cluster visually tight but each dot individually clickable.
+    function jitterCoords(i, lat, lng) {
+        const angle = (i * 2.39996) % (2 * Math.PI); // 2.39996 rad ≈ golden angle
+        const r = 0.00035;                             // ~39m at mid-latitudes
+        return [lat + r * Math.sin(angle), lng + r * Math.cos(angle)];
+    }
+
     function renderMarkers() {
+        // Clear previous state — remove cluster group first, then any stray individual markers
+        if (markerCluster) { map.removeLayer(markerCluster); markerCluster = null; }
         markers.forEach(m => map.removeLayer(m));
         markers = [];
+
         const tbody = document.getElementById('sightingsTableBody');
         tbody.innerHTML = '';
 
-        // Golden-angle jitter — evenly distributes stacked markers, deterministic per index
-        // Uses the golden angle (~137.5°) so successive points spread around the circle
-        // like sunflower seeds rather than clustering on one side. ~39m radius keeps
-        // the cluster visually tight but each dot individually clickable.
-        function jitterCoords(i, lat, lng) {
-            const angle = (i * 2.39996) % (2 * Math.PI); // 2.39996 rad ≈ golden angle
-            const r = 0.00035;                             // ~39m at mid-latitudes
-            return [lat + r * Math.sin(angle), lng + r * Math.cos(angle)];
-        }
+        // Build a fresh cluster group when cluster mode is active
+        const clusterGroup = clusterActive
+            ? L.markerClusterGroup({
+                iconCreateFunction: createClusterIcon,
+                maxClusterRadius: 60,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true,
+                animate: true
+              })
+            : null;
 
         allObservations.forEach((obs, i) => {
             const birdName = obs.bird_name || obs.comName || obs.species || obs.speciesCode || 'Unknown Bird';
@@ -827,15 +921,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = currentSpeciesColors[birdName] || '#aaa';
             }
 
-            const [jLat, jLng] = jitterCoords(i, lat, lng);
-            const marker = L.circleMarker([jLat, jLng], {
+            // Cluster mode uses true coords; jitter mode spreads overlapping pins
+            const [mLat, mLng] = clusterActive
+                ? [lat, lng]
+                : jitterCoords(i, lat, lng);
+
+            const marker = L.circleMarker([mLat, mLng], {
                 radius: 8,
                 fillColor: color,
                 color: '#ffffff',
                 weight: 1,
                 opacity: 1,
                 fillOpacity: 0.8
-            }).addTo(map);
+            });
 
             const dateStr = obs.obsDt ? new Date(obs.obsDt).toLocaleDateString() : '';
             marker.bindPopup(`
@@ -845,6 +943,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${dateStr ? `Date: ${dateStr}` : ''}
             `);
             markers.push(marker);
+
+            if (clusterActive) {
+                clusterGroup.addLayer(marker);
+            } else {
+                marker.addTo(map);
+            }
 
             // Table row
             const row = document.createElement('tr');
@@ -859,6 +963,14 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             tbody.appendChild(row);
         });
+
+        if (clusterActive) {
+            map.addLayer(clusterGroup);
+            markerCluster = clusterGroup;
+        }
+
+        // If heatmap was already active when filters changed, keep markers hidden
+        if (heatmapActive) hideObservationLayer();
     }
 
     // ── Data loading ─────────────────────────────────────────────────────────
@@ -893,6 +1005,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            // Reset cluster state for new location (keep mode preference, rebuild layer)
+            if (markerCluster) { map.removeLayer(markerCluster); markerCluster = null; }
+
             buildLegend();
             buildFiltersPanel();
             renderMarkers();
@@ -912,6 +1027,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadObservations();
 
     document.getElementById('btn-heatmap-toggle').addEventListener('click', toggleHeatmap);
+    document.getElementById('btn-cluster-toggle').addEventListener('click', toggleCluster);
 
     document.getElementById('btn-fullscreen-map').addEventListener('click', function() {
         const isFullscreen = document.body.classList.toggle('map-is-fullscreen');
