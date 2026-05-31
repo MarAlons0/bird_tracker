@@ -1,6 +1,6 @@
 # Bird Tracker — Backlog
 
-Last updated: 2026-04-04
+Last updated: 2026-05-30
 
 ---
 
@@ -28,54 +28,90 @@ Last updated: 2026-04-04
 - The eBird API supports up to 30 days (`back` param max = 30)
 - On the Analysis page, the timeframe is also hardcoded
 
-### Marker clustering for very dense areas
-- Golden-angle jitter (~39m radius) works well for moderate density
-- In urban hotspots with hundreds of overlapping observations, even jitter produces a dense blob
-- Consider adding `Leaflet.markercluster` as an optional mode, or auto-switching when marker count exceeds a threshold (e.g. > 200 in viewport)
+### ~~Marker clustering for very dense areas~~ ✓ Done (2026-05-30)
+- Added `Leaflet.markercluster` as a manual toggle (Cluster button next to Heatmap)
+- When active: markers placed at true coordinates inside `L.markerClusterGroup`; zooming in spiderifies clusters so individual sightings are clickable
+- Cluster icons: neutral gray in tier-1 (mixed categories), group color in species drilldown
+- Mutually exclusive with heatmap; jitter resumes when clustering is turned off
 
 ---
 
-## Features — Heatmap ✓ v1 implemented (2026-04-04)
+## Features — Heatmap ✓ v1 implemented (2026-04-04) · v2 design (2026-04-05)
 
 ### Overview
 Show a heatmap for a chosen bird category or species to visualize high-density areas and observation trends over time.
 
 ### Implementation approach
 - **Library:** `leaflet.heat` plugin — lightweight, takes `[lat, lng, intensity]` arrays, overlays directly on the Leaflet map
-- **Intensity:** weighted by observation count per location (locations with more reports = hotter)
-- **Trigger:** a "Heatmap" toggle button in the filters panel, or a new map mode selector
-- **Mode:** overlay on top of regular markers (toggle between heatmap and dot markers) — not exclusive replacement
+- **Intensity:** encodes trend direction (0 = strongly decreasing, 0.5 = stable, 1.0 = strongly increasing)
+- **Toggle:** compound control — button + mode selector joined as a Bootstrap `input-group`
+  - Button label is always the *action*, not the state:
+    - At rest (observations visible): shows **"🔥 Heatmap"** — click to switch to heatmap
+    - Active (heatmap visible): shows **"⚬ Observations"** — click to switch back
+  - Style: `btn-outline-warning` at rest → `btn-warning text-dark` when active
+  - This is more intuitive than an on/off toggle because the label always tells the user what will happen, not what mode they're in
+  - Selector: two comparison modes (see below)
+- **Mode:** replaces dot markers when active (markers hidden via `setStyle({opacity:0, fillOpacity:0})` — NOT `setOpacity()`, which doesn't work on `L.Path`/`circleMarker`)
 
-### Trend visualization
-Three trend states per location: **increasing**, **stable**, **decreasing**
+### Comparison modes
 
-**How to compute:**
-- Split the available observation window into two equal periods (e.g. days 1–15 vs days 16–30)
-- Compare observation count per location between the two periods
-- Define thresholds: e.g. >20% increase = increasing, >20% decrease = decreasing, otherwise stable
+Two modes selectable in the compound control next to the heatmap button:
 
-**Visualization options (pick one):**
-
-| Option | Description | Pros | Cons |
+| Mode | Label | What it compares | Best window |
 |---|---|---|---|
-| **Color-coded heat** | Warm (red/orange) = increasing, cool (blue/purple) = decreasing, white/yellow = stable | Most elegant, single view | Requires enough data to be reliable; color meaning not obvious without legend |
-| **Separate heatmaps** | Toggle between "current density" heatmap and "trend direction" heatmap | Cleaner to interpret | Two separate mental models |
-| **Side-by-side time slices** | Two small maps: period 1 vs period 2 | Most honest representation of raw data | Poor on mobile — too small |
+| **Momentum** | "Momentum" | 1st half vs 2nd half of the selected time window | 30–180 days — catches recent shifts |
+| **VYA** | "VYA" | Current window vs same window 1 year earlier | 60–365 days — year-over-year changes |
 
-**Recommendation:** Start with Option 1 (color-coded heat) for mobile elegance. Fall back to Option 2 if trend data is too sparse to be meaningful.
+**Why two modes matter:** At a 1-year window, Momentum splits the year at the midpoint (summer vs winter) which conflates seasonality with trend. VYA compares apples to apples. At shorter windows (30–60 days), VYA fetches 13–14 months of data which may be sparse; Momentum is more reliable.
 
-### API constraints
-- eBird's recent observations endpoint (`/data/obs/geo/recent`) only goes back **30 days maximum**
-- This is sufficient for short-term trends (2-week vs 2-week comparison)
-- For longer historical trends (seasonal, year-over-year), the eBird API has a regional species endpoint (`/data/obs/{regionCode}/historic/{y}/{m}/{d}`) — different rate limits, requires region code not lat/lng
-- **Recommended scope for v1:** 30-day window only, split into two 15-day periods, using the existing geo/recent endpoint
+**Note:** "VPP" (vs Previous Period) in dashboard terminology means the period immediately before the current one — same length, adjacent. Momentum is *not* VPP; it compares the two halves of the same window, making it more of an acceleration/deceleration indicator.
 
-### Scope for v1
-1. Add `leaflet.heat` to the page
-2. Add a "Heatmap" toggle in the filters panel
-3. When active: fetch 30 days of observations, compute per-location counts for each 15-day half, render color-coded heatmap
-4. Legend updates to show: 🔴 Increasing · ⚪ Stable · 🔵 Decreasing
-5. Heatmap applies to whichever tier is active (all groups, or drill-down group)
+### Trend computation
+
+```
+intensity = (ratio + 1) / 2       where ratio = (recent - older) / (recent + older)
+```
+- `ratio` ranges −1 (fully decreased) to +1 (fully increased), mapped to 0–1 intensity
+- Edge cases: location only in recent window → intensity 0.85; only in older window → 0.15
+
+**For Momentum:** split the selected window at the midpoint
+- Recent = days 0 → N/2; Older = days N/2 → N
+
+**For VYA:** fetch `days + 365` in one call, filter into two non-contiguous windows
+- Recent = days 0 → N; Older = days 365 → 365+N
+- No backend changes needed — use existing `?days=` param with the larger value
+
+### Grid resolution
+- Default: `toFixed(2)` ≈ 1km grid (fine enough for bird sightings)
+- For sparse data sources, consider `toFixed(1)` ≈ 11km as fallback when total obs < 50
+
+### Sparse data fallback
+If filtered observation count < 20, fall back to plain density mode:
+- Intensity = normalized count (max location = 1.0)
+- Legend updates to "Density only — not enough data for trend view"
+- Keeps the heatmap useful rather than showing a meaningless single-color blob
+
+### Data fetch & caching
+- Separate fetch from the main map load — triggered only when user activates heatmap
+- Cached in `heatObservations` for the current location; cleared on location change or time window change
+- `minOpacity: 0.4` required — default (0.05) is nearly invisible with sparse data
+
+### Legend
+- Heatmap active: shows mode name, scope (All Groups or drill-down group), color key, and comparison description
+- Deactivated: reverts to standard species group / drill-down legend
+
+### Known bugs fixed (applicable to Bird Tracker v2)
+| Bug | Root cause | Fix |
+|---|---|---|
+| Markers don't restore after heatmap off | `circleMarker` is `L.Path` — `.setOpacity()` doesn't exist | Use `.setStyle({opacity:1, fillOpacity:0.85})` |
+| Heat layer invisible | Default `minOpacity: 0.05` too low for sparse data | Set `minOpacity: 0.4` |
+| Timestamp parse fails in some browsers | Space-separated datetime string | Replace space with `T` before `new Date()` |
+
+### v2 upgrade path for Bird Tracker
+Bird Tracker v1 uses a hardcoded 30-day window (eBird API cap). To add Momentum/VYA modes:
+- **Momentum** works as-is within the 30-day cap (15 vs 15 days)
+- **VYA** requires the eBird historic endpoint (`/data/obs/{regionCode}/historic/{y}/{m}/{d}`) since the geo/recent endpoint is capped at 30 days — different rate limits, needs region code not lat/lng; treat as a separate fetch
+- Add the compound `input-group` control (button + mode selector) to replace the current single toggle button
 
 ---
 
