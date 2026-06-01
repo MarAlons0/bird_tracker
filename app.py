@@ -44,6 +44,14 @@ logger = logging.getLogger(__name__)
 # Add parent directory to path so we can import bird_tracker
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+def _read_version() -> str:
+    version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'VERSION')
+    try:
+        with open(version_file) as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return '?.?.?'
+
 def create_app():
     print("Starting app creation...")
     # Get the project root directory (where app.py is located)
@@ -178,6 +186,12 @@ def create_app():
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.admin, url_prefix='/admin')
     print("Blueprints registered")
+
+    _version = _read_version()
+
+    @app.context_processor
+    def inject_globals():
+        return {'app_version': _version}
 
     @app.route('/favicon.ico')
     def favicon():
