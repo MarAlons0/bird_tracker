@@ -144,6 +144,12 @@ class EmailService:
         for species, count in analysis.get('top_species', []):
             top_species_html += f"<li>{species}: {count} sightings</li>\n"
 
+        # Absolute URL for the manage/unsubscribe link (email clients can't
+        # resolve relative paths). RENDER_EXTERNAL_URL is provided by Render.
+        base_url = (os.getenv('APP_BASE_URL') or os.getenv('RENDER_EXTERNAL_URL')
+                    or 'https://bird-tracker.onrender.com').rstrip('/')
+        manage_url = f"{base_url}/newsletter-preferences"
+
         return f"""
         <!DOCTYPE html>
         <html>
@@ -176,7 +182,8 @@ class EmailService:
 
                 <div class="footer">
                     <p>Thank you for using Bird Tracker!</p>
-                    <p><small>You're receiving this because you subscribed to weekly reports.</small></p>
+                    <p><small>You're receiving this because you subscribed to weekly reports.
+                    <a href="{manage_url}">Manage your subscription or unsubscribe</a>.</small></p>
                 </div>
             </div>
         </body>

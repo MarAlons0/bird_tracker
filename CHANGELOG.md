@@ -5,6 +5,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.4] – 2026-06-19
+
+### Added
+- **Newsletter manage/unsubscribe link** — the weekly report email footer now
+  links to the subscription page, and `/newsletter-preferences` is reachable
+  from the main nav (authenticated users). Basic CAN-SPAM hygiene. The page
+  stays login-gated; a tokenized one-click unsubscribe remains a possible
+  follow-up.
+
+---
+
 ## [1.4.3] – 2026-06-19
 
 ### Fixed
