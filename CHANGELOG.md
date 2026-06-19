@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.1] – 2026-06-19
+
+### Changed
+- **Newsletter map now mirrors the app's categories** — pins use the app's full
+  6-group palette via a shared `bird_categories` classifier (kept in sync with
+  `home.html`) instead of the earlier 4-group approximation that rendered most
+  pins green. Sightings are deduped by location so busy hotspots no longer
+  collapse to one pin (up to 40 spots, each colored by its most notable group),
+  and a color legend now appears beneath the map.
+
+---
+
 ## [1.5.0] – 2026-06-19
 
 ### Added

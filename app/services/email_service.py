@@ -5,28 +5,13 @@ import os
 import requests
 from flask import current_app
 
+from app.services.bird_categories import (
+    CATEGORY_PRIORITY, GROUP_COLORS, GROUP_LABELS, categorize,
+)
+
 logger = logging.getLogger(__name__)
 
 SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
-
-
-def _bird_pin_color(name):
-    """Map a bird common name to a Mapbox pin color (hex, no #) by group.
-
-    Mirrors the site map's category colors so the email's pins match the app.
-    """
-    n = (name or '').lower()
-    if any(k in n for k in ('duck', 'goose', 'swan', 'teal', 'wigeon', 'pintail',
-                            'shoveler', 'gadwall', 'mallard', 'heron', 'egret',
-                            'gull', 'tern', 'cormorant', 'grebe', 'loon', 'merganser')):
-        return '185fa5'  # waterbirds — blue
-    if any(k in n for k in ('hawk', 'eagle', 'falcon', 'owl', 'osprey', 'vulture',
-                            'kite', 'harrier')):
-        return 'a32d2d'  # raptors — red
-    if any(k in n for k in ('sandpiper', 'plover', 'curlew', 'godwit', 'dunlin',
-                            'killdeer', 'snipe', 'stilt', 'avocet', 'yellowlegs')):
-        return '854f0b'  # shorebirds — amber
-    return '3b6d11'  # perching / other — green
 
 
 class EmailService:
@@ -136,33 +121,47 @@ class EmailService:
     def _build_map_url(self, observations, center):
         """Build a Mapbox static-image URL of the week's sightings.
 
-        Pins are colored by bird group and capped at 15 to keep the URL within
-        Mapbox limits. Returns None when no token or center point is available
-        (the email then simply omits the map).
+        Sightings are deduped by location (so a busy hotspot doesn't collapse to
+        a single stacked pin), each spot is colored by its most notable group
+        (matching the app's palette), and the result is capped at 40 spots to
+        stay within Mapbox URL limits.
+
+        Returns (url, present_categories). url is None when no token or center
+        point is available, in which case the email omits the map.
         """
         token = os.getenv('MAPBOX_TOKEN')
         if not token or not center:
-            return None
+            return None, set()
 
-        markers = []
+        # Group by ~100 m cell; keep the most notable category seen at each spot.
+        spots = {}
         for obs in observations:
             lat = obs.get('lat')
             lng = obs.get('lng')
             if lat is None or lng is None:
                 continue
-            color = _bird_pin_color(obs.get('comName') or obs.get('species') or '')
-            markers.append(f"pin-s+{color}({lng},{lat})")
-            if len(markers) >= 15:
-                break
+            cat = categorize(obs.get('comName') or obs.get('species') or '')
+            key = (round(lat, 3), round(lng, 3))
+            prev = spots.get(key)
+            if prev is None or CATEGORY_PRIORITY.index(cat) < CATEGORY_PRIORITY.index(prev[2]):
+                spots[key] = (lat, lng, cat)
+
+        spot_list = list(spots.values())[:40]
+        present = {cat for (_, _, cat) in spot_list}
 
         clat, clng = center
-        if markers:
-            path = f"{','.join(markers)}/auto"
+        if spot_list:
+            markers = ",".join(
+                f"pin-s+{GROUP_COLORS.get(cat, GROUP_COLORS['other'])}({lng},{lat})"
+                for (lat, lng, cat) in spot_list
+            )
+            path = f"{markers}/auto"
         else:
             path = f"{clng},{clat},9"
 
-        return (f"https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/"
-                f"{path}/600x300@2x?access_token={token}")
+        url = (f"https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/"
+               f"{path}/600x300@2x?access_token={token}")
+        return url, present
 
     def create_weekly_report(self, user, observations, analysis, narrative=None,
                              notable=None, center=None, location_name=None):
@@ -199,13 +198,23 @@ class EmailService:
                     or 'https://bird-tracker.onrender.com').rstrip('/')
         manage_url = f"{base_url}/newsletter-preferences"
 
-        # Hotspot map (Mapbox static image — fetched by the recipient's client).
-        map_url = self._build_map_url(observations, center)
-        map_html = (
-            f'<img src="{map_url}" alt="Map of this week\'s sightings" width="600" '
-            f'style="width:100%;max-width:600px;border-radius:6px;display:block;margin:8px 0;" />'
-            if map_url else ""
-        )
+        # Hotspot map (Mapbox static image — fetched by the recipient's client),
+        # with a colour legend matching the app's category palette.
+        map_url, map_groups = self._build_map_url(observations, center)
+        map_html = ""
+        if map_url:
+            legend_chips = "".join(
+                f'<span style="display:inline-block;margin:0 12px 4px 0;font-size:11px;color:#666;">'
+                f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;'
+                f'background:#{GROUP_COLORS[cat]};vertical-align:middle;margin-right:5px;"></span>'
+                f'{GROUP_LABELS[cat]}</span>'
+                for cat in CATEGORY_PRIORITY if cat in map_groups
+            )
+            map_html = (
+                f'<img src="{map_url}" alt="Map of this week\'s sightings" width="600" '
+                f'style="width:100%;max-width:600px;border-radius:6px;display:block;margin:8px 0 6px;" />'
+                f'<div style="margin:0 0 12px;">{legend_chips}</div>'
+            )
 
         # AI narrative (already HTML). Omitted if generation failed.
         narrative_html = f'<h3>This week around you</h3>{narrative}' if narrative else ""
