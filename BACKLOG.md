@@ -1,5 +1,5 @@
 # Bird Tracker — Backlog
-_Last updated: 2026-06-09_
+_Last updated: 2026-06-19_
 
 ## 🔴 High
 - [ ] **Require `DEFAULT_USER_PASSWORD`** — `routes/auth.py` and `routes/admin.py` fall back to `'user123'`; raise a startup error instead of using a weak default. `[security]`
@@ -12,6 +12,9 @@ _Last updated: 2026-06-09_
 - [ ] **Heatmap v2 (Momentum / VYA modes)** — trend overlay on top of the shipped density heatmap. See [docs/DESIGN.md](docs/DESIGN.md#heatmap-v2--momentum--vya-trend-modes). `[feature]`
 - [ ] **Analysis page: show location/radius context** — "Analyzing sightings within 25 mi of Cincinnati, OH" so it's clearly not stale/wrong-area. `[feature]`
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
+- [ ] **Enhance newsletter content** — current weekly report is bare stats (total species, total observations, top species) and isn't engaging; make it compelling (e.g. AI narrative, notable/rare sightings, week-over-week trends, photos). Scope TBD — discuss possibilities first. `[feature]`
+- [ ] **Newsletter unsubscribe link** — the weekly email has no unsubscribe link and `/newsletter-preferences` isn't reachable from the nav. Add an unsubscribe link to the email footer (→ `/newsletter-preferences`) and surface the page in the nav. Basic CAN-SPAM hygiene before the list grows. `[feature]`
+- [ ] **Fix `/admin/` 500** — the `admin_panel` view (`routes/admin.py`) returns HTTP 500 in prod: its raw SQL selects `is_approved` / `newsletter_subscription` columns that don't exist in the `users` table (confirmed via Render logs). Remove the stale column refs or port the listing to the ORM (like the working `/admin/users`). `[bug]`
 - [ ] **Move `audit_categories.py` out of repo root** — to `scripts/` or delete (one-off validation tool). `[chore]`
 
 ## 🟢 Low / Nice to have
