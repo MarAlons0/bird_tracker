@@ -10,6 +10,25 @@ logger = logging.getLogger(__name__)
 SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
+def _bird_pin_color(name):
+    """Map a bird common name to a Mapbox pin color (hex, no #) by group.
+
+    Mirrors the site map's category colors so the email's pins match the app.
+    """
+    n = (name or '').lower()
+    if any(k in n for k in ('duck', 'goose', 'swan', 'teal', 'wigeon', 'pintail',
+                            'shoveler', 'gadwall', 'mallard', 'heron', 'egret',
+                            'gull', 'tern', 'cormorant', 'grebe', 'loon', 'merganser')):
+        return '185fa5'  # waterbirds — blue
+    if any(k in n for k in ('hawk', 'eagle', 'falcon', 'owl', 'osprey', 'vulture',
+                            'kite', 'harrier')):
+        return 'a32d2d'  # raptors — red
+    if any(k in n for k in ('sandpiper', 'plover', 'curlew', 'godwit', 'dunlin',
+                            'killdeer', 'snipe', 'stilt', 'avocet', 'yellowlegs')):
+        return '854f0b'  # shorebirds — amber
+    return '3b6d11'  # perching / other — green
+
+
 class EmailService:
     """Service for sending email reports."""
 
@@ -114,41 +133,102 @@ class EmailService:
             logger.error(f"Error sending email via SMTP: {e}")
             return False
 
-    def create_weekly_report(self, user, observations, analysis):
+    def _build_map_url(self, observations, center):
+        """Build a Mapbox static-image URL of the week's sightings.
+
+        Pins are colored by bird group and capped at 15 to keep the URL within
+        Mapbox limits. Returns None when no token or center point is available
+        (the email then simply omits the map).
         """
-        Create HTML email template for weekly bird report.
+        token = os.getenv('MAPBOX_TOKEN')
+        if not token or not center:
+            return None
+
+        markers = []
+        for obs in observations:
+            lat = obs.get('lat')
+            lng = obs.get('lng')
+            if lat is None or lng is None:
+                continue
+            color = _bird_pin_color(obs.get('comName') or obs.get('species') or '')
+            markers.append(f"pin-s+{color}({lng},{lat})")
+            if len(markers) >= 15:
+                break
+
+        clat, clng = center
+        if markers:
+            path = f"{','.join(markers)}/auto"
+        else:
+            path = f"{clng},{clat},9"
+
+        return (f"https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/"
+                f"{path}/600x300@2x?access_token={token}")
+
+    def create_weekly_report(self, user, observations, analysis, narrative=None,
+                             notable=None, center=None, location_name=None):
+        """
+        Create HTML email template for the weekly bird report.
 
         Args:
             user: User object with email attribute
             observations: List of observation data
             analysis: Analysis dict with total_species, total_observations, top_species
+            narrative: Optional AI-generated HTML narrative
+            notable: Optional list of notable/rare observation dicts
+            center: Optional (lat, lng) tuple for the map center
+            location_name: Optional location name (looked up if not provided)
 
         Returns:
             HTML string for the email body
         """
-        location_name = "your area"
+        # Resolve the location name if the caller didn't supply one.
+        if not location_name:
+            location_name = "your area"
+            try:
+                from app.models import UserPreferences, Location
+                user_pref = UserPreferences.query.filter_by(user_id=user.id).first()
+                if user_pref and user_pref.active_location_id:
+                    location = Location.query.get(user_pref.active_location_id)
+                    if location:
+                        location_name = location.name
+            except Exception as e:
+                logger.warning(f"Could not get location name: {e}")
 
-        # Try to get the location name
-        try:
-            from app.models import UserPreferences, Location
-            user_pref = UserPreferences.query.filter_by(user_id=user.id).first()
-            if user_pref and user_pref.active_location_id:
-                location = Location.query.get(user_pref.active_location_id)
-                if location:
-                    location_name = location.name
-        except Exception as e:
-            logger.warning(f"Could not get location name: {e}")
-
-        # Build top species list
-        top_species_html = ""
-        for species, count in analysis.get('top_species', []):
-            top_species_html += f"<li>{species}: {count} sightings</li>\n"
-
-        # Absolute URL for the manage/unsubscribe link (email clients can't
-        # resolve relative paths). RENDER_EXTERNAL_URL is provided by Render.
+        # Absolute base URL — email clients can't resolve relative paths.
         base_url = (os.getenv('APP_BASE_URL') or os.getenv('RENDER_EXTERNAL_URL')
                     or 'https://bird-tracker.onrender.com').rstrip('/')
         manage_url = f"{base_url}/newsletter-preferences"
+
+        # Hotspot map (Mapbox static image — fetched by the recipient's client).
+        map_url = self._build_map_url(observations, center)
+        map_html = (
+            f'<img src="{map_url}" alt="Map of this week\'s sightings" width="600" '
+            f'style="width:100%;max-width:600px;border-radius:6px;display:block;margin:8px 0;" />'
+            if map_url else ""
+        )
+
+        # AI narrative (already HTML). Omitted if generation failed.
+        narrative_html = f'<h3>This week around you</h3>{narrative}' if narrative else ""
+
+        # Notable/rare sightings nearby.
+        notable_items = ""
+        for obs in (notable or [])[:6]:
+            name = obs.get('comName', 'Unknown')
+            loc = obs.get('locName', '')
+            date = (obs.get('obsDt', '') or '')[:10]
+            notable_items += f"<li>{name} — {loc} ({date})</li>\n"
+        notable_html = (
+            f'<div style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;'
+            f'padding:12px 16px;margin:16px 0;">'
+            f'<h3 style="margin-top:0;color:#8a6d1b;">Notable sightings nearby</h3>'
+            f'<ul style="margin-bottom:0;">{notable_items}</ul></div>'
+            if notable_items else ""
+        )
+
+        # Top species list
+        top_species_html = ""
+        for species, count in analysis.get('top_species', [])[:5]:
+            top_species_html += f"<li>{species}: {count} sightings</li>\n"
 
         return f"""
         <!DOCTYPE html>
@@ -160,14 +240,17 @@ class EmailService:
                 h2 {{ color: #2c5530; }}
                 h3 {{ color: #4a7c59; }}
                 ul {{ padding-left: 20px; }}
+                .btn {{ display:inline-block; padding:10px 18px; margin-right:8px;
+                        border-radius:6px; text-decoration:none; font-size:14px; }}
                 .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 0.9em; color: #666; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <h2>Weekly Bird Sighting Report</h2>
-                <p>Hello {user.email},</p>
-                <p>Here's your weekly bird sighting report for <strong>{location_name}</strong>:</p>
+                <p>Here's your weekly report for <strong>{location_name}</strong>:</p>
+
+                {map_html}
 
                 <h3>Summary</h3>
                 <ul>
@@ -175,10 +258,19 @@ class EmailService:
                     <li>Total Observations: <strong>{analysis.get('total_observations', 0)}</strong></li>
                 </ul>
 
+                {narrative_html}
+
+                {notable_html}
+
                 <h3>Top Species This Week</h3>
                 <ul>
                     {top_species_html if top_species_html else '<li>No species data available</li>'}
                 </ul>
+
+                <p style="margin-top:24px;">
+                    <a class="btn" href="{base_url}/" style="background:#2c5530;color:#ffffff;">View on map</a>
+                    <a class="btn" href="{base_url}/analysis" style="border:1px solid #2c5530;color:#2c5530;">See full analysis</a>
+                </p>
 
                 <div class="footer">
                     <p>Thank you for using Bird Tracker!</p>

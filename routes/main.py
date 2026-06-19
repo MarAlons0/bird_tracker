@@ -311,7 +311,37 @@ def send_weekly_reports():
                 continue
 
             analysis = tracker.generate_analysis(observations)
-            html = tracker.create_email_template(user, observations, analysis)
+
+            # Location → map center + notable lookup + narrative context.
+            loc = tracker.get_active_location(user.id)
+            center = (loc['latitude'], loc['longitude']) if loc else None
+
+            location_name = None
+            if pref and pref.active_location_id:
+                loc_obj = Location.query.get(pref.active_location_id)
+                if loc_obj:
+                    location_name = loc_obj.name
+
+            # AI narrative (best-effort; degrade to stats-only on failure).
+            narrative = None
+            try:
+                formatted = tracker._format_observations_for_ai(observations)
+                narrative = tracker.ai.analyze_observations(formatted, location_name or "your area")
+            except Exception as e:
+                logger.warning(f"AI narrative failed for {user.email}: {e}")
+
+            # Notable/rare sightings nearby (best-effort).
+            notable = []
+            if loc:
+                try:
+                    notable = tracker.ebird.get_notable_observations_geo(
+                        loc['latitude'], loc['longitude'], loc['radius'], 7) or []
+                except Exception as e:
+                    logger.warning(f"Notable fetch failed for {user.email}: {e}")
+
+            html = tracker.create_email_template(
+                user, observations, analysis, narrative=narrative,
+                notable=notable, center=center, location_name=location_name)
 
             if tracker.send_email(to=user.email, subject="Your Weekly Bird Sighting Report", html=html):
                 sent += 1

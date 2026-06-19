@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.0] – 2026-06-19
+
+### Added
+- **Richer weekly newsletter** — the report now leads with a Mapbox static
+  **hotspot map** (pins colored by bird group), an **AI-written narrative**
+  (summary, rare/migratory species, birds of prey), a **"Notable sightings
+  nearby"** box from eBird's geo notable-observations endpoint, and **"View on
+  map" / "See full analysis"** deep links back into the app. Adds a
+  `get_notable_observations_geo()` eBird client method and a new `MAPBOX_TOKEN`
+  env var for the map. Every new section degrades gracefully if its data source
+  is unavailable (no token → no map; AI failure → stats only; etc.), and the AI
+  call is timeout-bounded so it can't hang the send.
+
+---
+
 ## [1.4.4] – 2026-06-19
 
 ### Added

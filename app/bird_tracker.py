@@ -260,9 +260,12 @@ class BirdSightingTracker:
     # Email Methods
     # =========================================================================
 
-    def create_email_template(self, user, observations, analysis):
+    def create_email_template(self, user, observations, analysis, narrative=None,
+                              notable=None, center=None, location_name=None):
         """Create HTML email template for the report."""
-        return self.email.create_weekly_report(user, observations, analysis)
+        return self.email.create_weekly_report(
+            user, observations, analysis, narrative=narrative, notable=notable,
+            center=center, location_name=location_name)
 
     def send_email(self, to, subject, html):
         """Send email using Flask-Mail."""

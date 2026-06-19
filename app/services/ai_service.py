@@ -70,6 +70,7 @@ class AIService:
                 model=self.ANALYSIS_MODEL,
                 max_tokens=4000,
                 temperature=0.7,
+                timeout=40.0,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )

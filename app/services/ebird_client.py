@@ -108,6 +108,50 @@ class EBirdClient:
             logger.error(f"Error fetching notable observations: {e}")
             return []
 
+    def get_notable_observations_geo(self, lat, lng, radius, days_back=7):
+        """
+        Get notable/rare observations near a lat/lng point (geo endpoint).
+
+        Mirrors get_recent_observations' location model so callers that work in
+        lat/lng/radius (e.g. the newsletter) don't need a region code.
+
+        Args:
+            lat: Latitude of the center point
+            lng: Longitude of the center point
+            radius: Search radius in kilometers (max 50)
+            days_back: Number of days to look back (max 30)
+
+        Returns:
+            List of notable observation dictionaries
+        """
+        if not self.api_key:
+            logger.error("eBird API key is missing")
+            return []
+
+        try:
+            url = f'{self.BASE_URL}/data/obs/geo/recent/notable'
+            params = {
+                'lat': lat,
+                'lng': lng,
+                'dist': min(radius, 50),
+                'back': min(days_back, 30),
+                'detail': 'simple',
+                'fmt': 'json'
+            }
+
+            headers = {'X-eBirdApiToken': self.api_key}
+            response = requests.get(url, params=params, headers=headers, timeout=30)
+
+            if response.status_code != 200:
+                logger.error(f"eBird notable (geo) API error: {response.status_code}")
+                return []
+
+            return response.json()
+
+        except Exception as e:
+            logger.error(f"Error fetching notable observations (geo): {e}")
+            return []
+
     def get_species_list(self, region_code):
         """
         Get list of species observed in a region.
