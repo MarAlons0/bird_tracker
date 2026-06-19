@@ -14,7 +14,6 @@ _Last updated: 2026-06-19_
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
 - [ ] **Enhance newsletter content** — current weekly report is bare stats (total species, total observations, top species) and isn't engaging; make it compelling (e.g. AI narrative, notable/rare sightings, week-over-week trends, photos). Scope TBD — discuss possibilities first. `[feature]`
 - [ ] **Newsletter unsubscribe link** — the weekly email has no unsubscribe link and `/newsletter-preferences` isn't reachable from the nav. Add an unsubscribe link to the email footer (→ `/newsletter-preferences`) and surface the page in the nav. Basic CAN-SPAM hygiene before the list grows. `[feature]`
-- [ ] **Fix `/admin/` 500** — the `admin_panel` view (`routes/admin.py`) returns HTTP 500 in prod: its raw SQL selects `is_approved` / `newsletter_subscription` columns that don't exist in the `users` table (confirmed via Render logs). Remove the stale column refs or port the listing to the ORM (like the working `/admin/users`). `[bug]`
 - [ ] **Move `audit_categories.py` out of repo root** — to `scripts/` or delete (one-off validation tool). `[chore]`
 
 ## 🟢 Low / Nice to have
@@ -23,6 +22,7 @@ _Last updated: 2026-06-19_
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
 
 ## ✅ Shipped
+- [x] **Fix `/admin/` 500** — 2026-06-19
 - [x] **Newsletter / email report** — 2026-06-19
 - [x] **Marker clustering** — 2026-05-30
 - [x] **Heatmap v1 (density)** — 2026-04-05
