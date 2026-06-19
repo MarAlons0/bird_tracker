@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.1] – 2026-06-19
+
+### Fixed
+- **Weekly report cold-start failures** — the GitHub Actions cron hit the
+  spun-down free-tier service and the cold boot collided with the request,
+  causing worker OOM kills and transient `psycopg2 SSL error: decryption failed
+  or bad record mac` on the first DB query. The workflow now wakes the service
+  (auth-free `/favicon.ico` poll) before triggering the report, and SQLAlchemy
+  is configured with `pool_pre_ping` + `pool_recycle` so dropped connections
+  reconnect transparently.
+
+---
+
 ## [1.4.0] – 2026-06-19
 
 ### Added

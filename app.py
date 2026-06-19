@@ -93,6 +93,15 @@ def create_app():
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # On Render's free tier the service spins down and Postgres drops idle
+    # connections, which can resurface as "SSL error: decryption failed or bad
+    # record mac". pool_pre_ping validates a connection before use (replacing a
+    # dead one transparently); pool_recycle retires connections before the
+    # server times them out.
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 280,
+    }
     app.config['TEMPLATES_AUTO_RELOAD'] = True  # Enable template auto-reloading
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable static file caching
     app.jinja_env.auto_reload = True  # Enable Jinja2 auto-reloading

@@ -12,8 +12,27 @@ jobs:
   send:
     runs-on: ubuntu-latest
     steps:
+      # Render free tier spins the service down when idle. Wake it with a cheap,
+      # auth-free, DB-free request (a static file) and wait until it's serving
+      # before doing the heavier report work — otherwise the cold-start boot
+      # collides with the request and the worker OOMs / drops its DB connection.
+      - name: Wake the service
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS --max-time 30 -o /dev/null "${{ secrets.APP_BASE_URL }}/favicon.ico"; then
+              echo "Service is awake (attempt $i)"
+              # brief settle time so the worker is fully ready before the POST
+              sleep 5
+              exit 0
+            fi
+            echo "Waiting for service to wake (attempt $i)..."
+            sleep 15
+          done
+          echo "Service did not wake within the allotted time" >&2
+          exit 1
+
       - name: Trigger weekly report
         run: |
-          curl -fsS --retry 3 --max-time 120 -X POST \
+          curl -fsS --retry 2 --retry-delay 10 --max-time 150 -X POST \
             -H "Authorization: Bearer ${{ secrets.REPORT_CRON_TOKEN }}" \
             "${{ secrets.APP_BASE_URL }}/api/send-weekly-reports"
