@@ -17,10 +17,10 @@ _Last updated: 2026-06-09_
 ## 🟢 Low / Nice to have
 - [ ] **Periodic keyword-list review** — re-run `audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
 - [ ] **Scientific-name classification fallback** — add a `sciName` → group secondary lookup so a changed common name doesn't break classification. `[feature]`
-- [ ] **Newsletter / email report** — infrastructure exists but needs a Render-compatible scheduler (e.g. GitHub Actions cron hitting an endpoint). `[feature]`
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
 
 ## ✅ Shipped
+- [x] **Newsletter / email report** — 2026-06-19
 - [x] **Marker clustering** — 2026-05-30
 - [x] **Heatmap v1 (density)** — 2026-04-05
 - [x] **Remove debug logging from production** — 2026-04-04
