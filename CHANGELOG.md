@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.3] – 2026-06-19
+
+### Fixed
+- **`/admin/` panel 500** — the admin root view (`admin_panel`) ran raw SQL that
+  selected `is_approved` / `newsletter_subscription` columns absent from the
+  `users` table. It duplicated the working ORM-based `/admin/users` page (its
+  template already posts every form there), so `/admin/` now simply redirects to
+  it. Removed the same dead-column references from the registration-approval
+  INSERT (`process_registration_request`) and the `--init-db` bootstrap, which
+  would have failed identically.
+
+---
+
 ## [1.4.2] – 2026-06-19
 
 ### Changed

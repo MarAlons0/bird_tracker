@@ -261,9 +261,7 @@ def init_db():
                     username="admin",
                     password_hash=generate_password_hash(admin_password),
                     is_admin=True,
-                    is_approved=True,
                     is_active=True,
-                    newsletter_subscription=True
                 )
                 db.session.add(admin)
                 print(f"Created admin user: {admin_email}")

@@ -131,120 +131,14 @@ def users():
 @login_required
 @admin_required
 def admin_panel():
-    if request.method == 'POST':
-        action = request.form.get('action')
-        user_id = request.form.get('user_id')
-        
-        if action == 'add_user':
-            email = request.form.get('email')
-            password = request.form.get('password')
-            is_admin = request.form.get('is_admin') == 'true'
-            
-            # Check if user exists using raw SQL
-            result = db.session.execute(
-                text("SELECT id FROM users WHERE email = :email"),
-                {"email": email}
-            ).fetchone()
-            
-            if result:
-                flash('Email already exists.', 'error')
-            else:
-                # Generate username from email
-                username = email.split('@')[0]
-                # Ensure username is unique using raw SQL
-                base_username = username
-                counter = 1
-                while db.session.execute(
-                    text("SELECT id FROM users WHERE username = :username"),
-                    {"username": username}
-                ).fetchone():
-                    username = f"{base_username}{counter}"
-                    counter += 1
-                
-                # Create user using raw SQL
-                db.session.execute(
-                    text("""
-                        INSERT INTO users (email, username, password_hash, is_active, is_admin, is_approved, newsletter_subscription)
-                        VALUES (:email, :username, :password_hash, :is_active, :is_admin, :is_approved, :newsletter_subscription)
-                    """),
-                    {
-                        "email": email,
-                        "username": username,
-                        "password_hash": generate_password_hash(password),
-                        "is_active": True,
-                        "is_admin": is_admin,
-                        "is_approved": True,
-                        "newsletter_subscription": True
-                    }
-                )
-                db.session.commit()
-                flash('User added successfully.', 'success')
-                
-        elif action == 'toggle_status':
-            # Update user status using raw SQL
-            db.session.execute(
-                text("""
-                    UPDATE users
-                    SET is_active = NOT is_active
-                    WHERE id = :user_id
-                """),
-                {"user_id": user_id}
-            )
-            db.session.commit()
-            flash('User status updated successfully.', 'success')
-                
-        elif action == 'delete_user':
-            # Delete user using raw SQL
-            db.session.execute(
-                text("DELETE FROM users WHERE id = :user_id"),
-                {"user_id": user_id}
-            )
-            db.session.commit()
-            flash('User deleted successfully.', 'success')
-            
-        elif action == 'reset_password':
-            # Reset user password to default
-            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'admin123')
-            db.session.execute(
-                text("""
-                    UPDATE users
-                    SET password_hash = :password_hash
-                    WHERE id = :user_id
-                """),
-                {
-                    "password_hash": generate_password_hash(default_password),
-                    "user_id": user_id
-                }
-            )
-            db.session.commit()
-            flash('User password has been reset to default.', 'success')
-    
-    # Get all users using raw SQL
-    result = db.session.execute(
-        text("""
-            SELECT id, username, email, is_admin, is_approved, registration_date, is_active,
-                   login_token, token_expiry, newsletter_subscription
-            FROM users
-            ORDER BY id
-        """)
-    ).fetchall()
-    
-    users = []
-    for row in result:
-        user = User()
-        user.id = row[0]
-        user.username = row[1]
-        user.email = row[2]
-        user.is_admin = row[3]
-        user.is_approved = row[4]
-        user.registration_date = row[5]
-        user.is_active = row[6]
-        user.login_token = row[7]
-        user.token_expiry = row[8]
-        user.newsletter_subscription = row[9]
-        users.append(user)
-    
-    return render_template('admin/users.html', users=users)
+    """Legacy admin root. User management lives at /admin/users.
+
+    This used to duplicate the user-management view with raw SQL that selected
+    is_approved / newsletter_subscription columns no longer present in the users
+    table, which 500'd. Its template already posts every form to admin.users, so
+    redirect there instead of maintaining a broken duplicate.
+    """
+    return redirect(url_for('admin.users'))
 
 @admin.route('/registration-requests')
 @login_required
@@ -313,17 +207,15 @@ def process_registration_request(request_id, action):
         default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
         db.session.execute(
             text("""
-                INSERT INTO users (email, username, password_hash, is_admin, is_approved, is_active, newsletter_subscription)
-                VALUES (:email, :username, :password_hash, :is_admin, :is_approved, :is_active, :newsletter_subscription)
+                INSERT INTO users (email, username, password_hash, is_admin, is_active)
+                VALUES (:email, :username, :password_hash, :is_admin, :is_active)
             """),
             {
                 "email": request.email,
                 "username": request.username,
                 "password_hash": generate_password_hash(default_password),
                 "is_admin": False,
-                "is_approved": True,
                 "is_active": True,
-                "newsletter_subscription": True
             }
         )
         
