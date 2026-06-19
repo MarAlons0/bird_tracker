@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter Preferences{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Newsletter Preferences</h2>
+                </div>
+                <div class="card-body text-center">
+                    {% if subscribed %}
+                        <p>You are <strong>subscribed</strong> to the weekly bird sighting report.</p>
+                        <form method="POST" action="{{ url_for('main.newsletter_preferences') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn btn-outline-danger">Unsubscribe</button>
+                        </form>
+                    {% else %}
+                        <p>You are <strong>not subscribed</strong> to the weekly bird sighting report.</p>
+                        <form method="POST" action="{{ url_for('main.newsletter_preferences') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="toggle">
+                            <button type="submit" class="btn btn-success">Subscribe</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

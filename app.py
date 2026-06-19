@@ -185,6 +185,9 @@ def create_app():
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.admin, url_prefix='/admin')
+    # The weekly-report trigger is called server-to-server by a scheduler with a
+    # bearer token, so it has no CSRF token; exempt it from CSRF protection.
+    csrf.exempt(main.send_weekly_reports)
     print("Blueprints registered")
 
     _version = _read_version()

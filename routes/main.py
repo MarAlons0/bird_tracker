@@ -4,6 +4,7 @@ from app.models import User, Location, UserPreferences
 from config.extensions import db
 from app.bird_tracker import BirdSightingTracker
 from datetime import datetime
+import hmac
 import os
 import logging
 from sqlalchemy import text
@@ -251,15 +252,77 @@ def update_location():
 @bp.route('/newsletter-preferences', methods=['GET', 'POST'])
 @login_required
 def newsletter_preferences():
-    if request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'toggle':
-            current_user.newsletter_subscription = not current_user.newsletter_subscription
-            db.session.commit()
-            flash(f"Newsletter subscription {'enabled' if current_user.newsletter_subscription else 'disabled'}.", 'success')
-            return redirect(url_for('main.newsletter_preferences'))
-    
-    return render_template('newsletter_preferences.html')
+    # Subscription is stored on UserPreferences.notification_enabled (defaults True).
+    pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    if pref is None:
+        pref = UserPreferences(user_id=current_user.id)
+        db.session.add(pref)
+        db.session.commit()
+
+    if request.method == 'POST' and request.form.get('action') == 'toggle':
+        pref.notification_enabled = not bool(pref.notification_enabled)
+        db.session.commit()
+        flash(f"Newsletter subscription {'enabled' if pref.notification_enabled else 'disabled'}.", 'success')
+        return redirect(url_for('main.newsletter_preferences'))
+
+    return render_template('newsletter_preferences.html', subscribed=pref.notification_enabled)
+
+
+@bp.route('/api/send-weekly-reports', methods=['POST'])
+def send_weekly_reports():
+    """Trigger the weekly bird-sighting newsletter for all subscribed users.
+
+    Designed to be called by an external scheduler (GitHub Actions cron), not a
+    logged-in user. Protected by a shared secret in the REPORT_CRON_TOKEN env var,
+    supplied as `Authorization: Bearer <token>`. CSRF-exempt (see app.py).
+    """
+    expected = os.getenv('REPORT_CRON_TOKEN')
+    if not expected:
+        logger.error("REPORT_CRON_TOKEN not configured; refusing to send reports")
+        return jsonify({'error': 'Reporting not configured'}), 503
+
+    provided = request.headers.get('Authorization', '')
+    if provided.startswith('Bearer '):
+        provided = provided[len('Bearer '):]
+    if not (provided and hmac.compare_digest(provided, expected)):
+        logger.warning("Unauthorized weekly-report trigger attempt")
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    tracker = current_app.tracker
+    sent = skipped = failed = 0
+
+    # Subscribers = active users who haven't opted out. A user is opted out only
+    # if they have a UserPreferences row with notification_enabled=False; users
+    # with no preferences row are treated as subscribed (the default).
+    users = User.query.filter_by(is_active=True).all()
+    logger.info(f"Weekly report run: evaluating {len(users)} active users")
+
+    for user in users:
+        pref = UserPreferences.query.filter_by(user_id=user.id).first()
+        if pref is not None and not pref.notification_enabled:
+            skipped += 1
+            continue
+
+        try:
+            observations = tracker.get_recent_observations(user_id=user.id, days_back=7)
+            if not observations:
+                logger.info(f"No observations for {user.email}; skipping")
+                skipped += 1
+                continue
+
+            analysis = tracker.generate_analysis(observations)
+            html = tracker.create_email_template(user, observations, analysis)
+
+            if tracker.send_email(to=user.email, subject="Your Weekly Bird Sighting Report", html=html):
+                sent += 1
+            else:
+                failed += 1
+        except Exception as e:
+            logger.error(f"Weekly report failed for {user.email}: {e}")
+            failed += 1
+
+    logger.info(f"Weekly report complete: sent={sent}, skipped={skipped}, failed={failed}")
+    return jsonify({'sent': sent, 'skipped': skipped, 'failed': failed}), 200
 
 @bp.route('/locations')
 @login_required

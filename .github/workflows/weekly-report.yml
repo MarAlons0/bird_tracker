@@ -1,0 +1,19 @@
+name: Weekly Bird Report
+
+# Render has no built-in scheduler, so GitHub Actions acts as the cron and
+# hits the app's trigger endpoint. The endpoint authenticates the request with
+# a shared secret (REPORT_CRON_TOKEN) and sends the report to subscribed users.
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # Mondays at 09:00 UTC
+  workflow_dispatch: {}    # allow manual runs from the Actions tab
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly report
+        run: |
+          curl -fsS --retry 3 --max-time 120 -X POST \
+            -H "Authorization: Bearer ${{ secrets.REPORT_CRON_TOKEN }}" \
+            "${{ secrets.APP_BASE_URL }}/api/send-weekly-reports"

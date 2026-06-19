@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.0] – 2026-06-19
+
+### Added
+- **Weekly newsletter scheduler** — `POST /api/send-weekly-reports` trigger
+  endpoint (bearer-token auth via `REPORT_CRON_TOKEN`, CSRF-exempt) sends the
+  weekly bird sighting report to subscribed users. Driven by a GitHub Actions
+  cron (`.github/workflows/weekly-report.yml`, Mondays 09:00 UTC) since Render
+  has no built-in scheduler. Subscription is stored on
+  `UserPreferences.notification_enabled`; users with no preference row default
+  to subscribed.
+- **Newsletter preferences page** — working subscribe/unsubscribe toggle at
+  `/newsletter-preferences` (previously rendered a missing template).
+
+---
+
 ## [1.3.1] – 2026-06-18
 
 ### Fixed
