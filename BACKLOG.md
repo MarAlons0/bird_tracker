@@ -13,15 +13,16 @@ _Last updated: 2026-06-19_
 - [ ] **Analysis page: show location/radius context** — "Analyzing sightings within 25 mi of Cincinnati, OH" so it's clearly not stale/wrong-area. `[feature]`
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
 - [ ] **Enhance newsletter content** — current weekly report is bare stats (total species, total observations, top species) and isn't engaging; make it compelling (e.g. AI narrative, notable/rare sightings, week-over-week trends, photos). Scope TBD — discuss possibilities first. `[feature]`
-- [ ] **Newsletter unsubscribe link** — the weekly email has no unsubscribe link and `/newsletter-preferences` isn't reachable from the nav. Add an unsubscribe link to the email footer (→ `/newsletter-preferences`) and surface the page in the nav. Basic CAN-SPAM hygiene before the list grows. `[feature]`
 - [ ] **Move `audit_categories.py` out of repo root** — to `scripts/` or delete (one-off validation tool). `[chore]`
 
 ## 🟢 Low / Nice to have
 - [ ] **Periodic keyword-list review** — re-run `audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
 - [ ] **Scientific-name classification fallback** — add a `sciName` → group secondary lookup so a changed common name doesn't break classification. `[feature]`
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
+- [ ] **Tokenized one-click unsubscribe** — current unsubscribe is login-gated (toggles `UserPreferences.notification_enabled` for `current_user`); add a signed-token link in the email so recipients opt out without logging in and can't affect other accounts. Proper CAN-SPAM one-click behavior. `[feature]`
 
 ## ✅ Shipped
+- [x] **Newsletter unsubscribe link** — 2026-06-19
 - [x] **Fix `/admin/` 500** — 2026-06-19
 - [x] **Newsletter / email report** — 2026-06-19
 - [x] **Marker clustering** — 2026-05-30
