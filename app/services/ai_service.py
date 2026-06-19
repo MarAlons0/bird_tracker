@@ -10,8 +10,8 @@ class AIService:
     """Service for AI-powered bird sighting analysis using Anthropic's Claude."""
 
     # Default models
-    ANALYSIS_MODEL = "claude-sonnet-4-20250514"
-    CHAT_MODEL = "claude-sonnet-4-20250514"
+    ANALYSIS_MODEL = "claude-sonnet-4-6"
+    CHAT_MODEL = "claude-sonnet-4-6"
 
     def __init__(self, api_key=None):
         """

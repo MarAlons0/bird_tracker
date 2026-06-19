@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.1] – 2026-06-18
+
+### Fixed
+- AI Analysis page returning 500 error — updated Claude model from deprecated
+  `claude-sonnet-4-20250514` to `claude-sonnet-4-6`.
+
+---
+
 ## [1.3.0] – 2026-05-30
 
 ### Added
