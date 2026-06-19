@@ -15,11 +15,27 @@ A Flask-based web application that helps users track and discover bird sightings
 - **User Authentication**: Secure login system with password management
 
 ### Bird Classification System
-Birds are automatically categorized into four main groups:
-- **Raptors**: Eagles, hawks, owls, falcons, vultures
-- **Waterfowl**: Ducks, geese, swans, herons, egrets
-- **Shorebirds**: Sandpipers, plovers, gulls, terns
-- **Songbirds**: Cardinals, finches, sparrows, warblers, and other small birds
+Birds are automatically classified into a **two-tier hierarchy** using word-boundary keyword matching on eBird common names.
+
+**Tier 1 — Groups (overview mode):**
+| Group | Examples |
+|---|---|
+| Waterbirds | Ducks, geese, herons, egrets, gulls, shorebirds, cormorants |
+| Raptors | Eagles, hawks, falcons, owls, vultures, ospreys |
+| Ground Birds | Turkeys, quail, grouse, doves, pigeons, roadrunners |
+| Aerial Specialists | Swallows, swifts, hummingbirds, nighthawks |
+| Tree Specialists | Woodpeckers, kingfishers, nuthatches, creepers |
+| Perching Birds | Sparrows, warblers, finches, thrushes, flycatchers, and all other passerines |
+
+Each group is color-coded on the map. Selecting a group in the Filters panel **drills down to Tier 2**.
+
+**Tier 2 — Species (drill-down mode):**
+- Map re-renders showing only that group's observations
+- Each species gets a distinct color from a 20-color palette
+- Legend updates to show the species list
+- "← All Categories" button returns to Tier 1
+
+The keyword lists were validated against real eBird data from four ecosystems (Midwest, semi-arid, temperate forest, subtropical) achieving < 2% unclassified species.
 
 ### Admin Panel
 - **User Management**: View, activate/deactivate, and delete user accounts
