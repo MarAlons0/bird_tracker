@@ -1,8 +1,13 @@
 """Email service for sending bird tracker reports."""
 import logging
+import os
+
+import requests
 from flask import current_app
 
 logger = logging.getLogger(__name__)
+
+SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
 class EmailService:
@@ -28,6 +33,10 @@ class EmailService:
         """
         Send an email.
 
+        Prefers the SendGrid HTTP API (works on Render's free tier, where
+        outbound SMTP is blocked). Falls back to Flask-Mail/SMTP when SendGrid
+        isn't configured — handy for local development.
+
         Args:
             to: Recipient email address(es) - string or list
             subject: Email subject
@@ -37,14 +46,58 @@ class EmailService:
         Returns:
             True if sent successfully, False otherwise
         """
+        recipients = [to] if isinstance(to, str) else to
+
+        api_key = os.getenv('SENDGRID_API_KEY')
+        from_email = os.getenv('SENDGRID_FROM_EMAIL')
+        if api_key and from_email:
+            return self._send_via_sendgrid(api_key, from_email, recipients, subject, html, text)
+
+        return self._send_via_smtp(recipients, subject, html, text)
+
+    def _send_via_sendgrid(self, api_key, from_email, recipients, subject, html, text):
+        """Send an HTML email through the SendGrid HTTP API."""
+        content = []
+        if text:
+            content.append({'type': 'text/plain', 'value': text})
+        content.append({'type': 'text/html', 'value': html})
+
+        payload = {
+            'personalizations': [{'to': [{'email': r} for r in recipients]}],
+            'from': {'email': from_email, 'name': 'Bird Tracker'},
+            'subject': subject,
+            'content': content,
+        }
+
+        try:
+            response = requests.post(
+                SENDGRID_URL,
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json',
+                },
+                json=payload,
+                timeout=10,
+            )
+        except requests.RequestException as e:
+            logger.error(f"SendGrid request failed: {e}")
+            return False
+
+        if response.status_code in (200, 202):
+            logger.info(f"Email sent successfully via SendGrid to {recipients}")
+            return True
+
+        logger.error(f"SendGrid error {response.status_code}: {response.text}")
+        return False
+
+    def _send_via_smtp(self, recipients, subject, html, text):
+        """Send an email through Flask-Mail/SMTP (local-dev fallback)."""
         try:
             from flask_mail import Message
 
             if not self.mail:
                 logger.error("Flask-Mail not configured")
                 return False
-
-            recipients = [to] if isinstance(to, str) else to
 
             msg = Message(
                 subject=subject,
@@ -54,11 +107,11 @@ class EmailService:
             )
 
             self.mail.send(msg)
-            logger.info(f"Email sent successfully to {recipients}")
+            logger.info(f"Email sent successfully via SMTP to {recipients}")
             return True
 
         except Exception as e:
-            logger.error(f"Error sending email: {e}")
+            logger.error(f"Error sending email via SMTP: {e}")
             return False
 
     def create_weekly_report(self, user, observations, analysis):

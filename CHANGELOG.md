@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.2] – 2026-06-19
+
+### Changed
+- **Email transport → SendGrid HTTP API.** Render's free tier blocks outbound
+  SMTP, so the Gmail/Flask-Mail send hung for 120s and the worker was OOM-killed.
+  `EmailService` now sends via the SendGrid HTTP API (`requests`, 10s timeout)
+  when `SENDGRID_API_KEY` + `SENDGRID_FROM_EMAIL` are set, mirroring the
+  domino-tracker approach. Flask-Mail/SMTP is retained only as a local-dev
+  fallback. No new dependency (`requests` was already required).
+
+---
+
 ## [1.4.1] – 2026-06-19
 
 ### Fixed
