@@ -81,6 +81,13 @@ Response `200`:
 Errors: `401` bad/missing token · `403` email not on allowlist · `400` invalid
 payload (missing lat/lng or arrival_date).
 
+> **Cold start:** Bird Tracker runs on Render's free tier and spins down when
+> idle, so the **first** call after a quiet period can take 30–60 s to wake.
+> Clients must use a request timeout of **≥60 s** (or warm the service with a
+> cheap GET, e.g. `/favicon.ico`, before POSTing) — otherwise the initial
+> activation times out with a "Read timed out" error even though everything is
+> configured correctly.
+
 ### Deactivate / cancel a trip
 
 ```
@@ -174,6 +181,12 @@ agent to tag its release.
 - *"rejected the payload (400)"* → a stop has no coordinates and couldn't be
   geocoded; the banner lists which day. Open that day, set/verify its
   destination, then Activate again.
+- *"Could not reach Bird Tracker … Read timed out"* → Bird Tracker (free tier)
+  was asleep and didn't wake within the client's timeout. Open
+  `https://bird-tracker.onrender.com/` in a browser, wait for it to load (that
+  wakes it), then Activate again — it responds in ~1 s while warm. Permanent fix
+  is on the TripPlanner side: raise the request timeout to ≥60 s and/or warm the
+  service with a cheap GET before the POST.
 
 You are never the weak link here — if any step is unclear or a banner is
 confusing, paste it back verbatim and the agents take it from there.
