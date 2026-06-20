@@ -20,6 +20,15 @@ site, delivered **one day before arrival** at that site.
 - **Shared-secret token auth** between the two apps (same pattern as the existing
   `REPORT_CRON_TOKEN`).
 
+> **Sender vs recipient — don't conflate these two addresses:**
+> - **Recipient = `alonsoencinci@gmail.com`** — the allowlisted user who *receives*
+>   the reports. TripPlanner sends it as `email` / `BIRD_TRACKER_EMAIL`, and it
+>   must match Bird Tracker's `TRIP_REPORT_ALLOWED_EMAILS`. **This is the address
+>   used throughout this contract.**
+> - **Sender = `mariobirdtracker@gmail.com`** — Bird Tracker's verified SendGrid
+>   `SENDGRID_FROM_EMAIL` (the "From" on the emails). Internal to Bird Tracker,
+>   **not part of this contract**; TripPlanner never references it.
+
 ## Architecture — who owns what
 
 - **TripPlanner** owns the itinerary and the user action. On "Activate bird
