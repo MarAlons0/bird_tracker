@@ -1,8 +1,7 @@
 # Bird Tracker — Backlog
-_Last updated: 2026-06-19_
+_Last updated: 2026-06-20_
 
 ## 🔴 High
-- [ ] **TripPlanner integration — scheduled trip bird reports** _(next project)_ — let TripPlanner trigger a Bird Tracker report for each trip stop, delivered one day before arrival. Bird Tracker owns scheduling (new `ScheduledReport` model + daily cron); TripPlanner POSTs the itinerary once on "activate". v1 is single-user (`alonsoencinci@gmail.com`), high-level stops only, shared-token auth. Full spec + API contract: [docs/TRIPPLANNER_INTEGRATION.md](docs/TRIPPLANNER_INTEGRATION.md). `[feature]`
 - [ ] **Require `DEFAULT_USER_PASSWORD`** — `routes/auth.py` and `routes/admin.py` fall back to `'user123'`; raise a startup error instead of using a weak default. `[security]`
 - [ ] **Remove hardcoded-password scripts** — `scripts/admin/create_admin_user.py`, `create_admin.py`, `create_user.py` hardcode `admin123`/`user123`; the app auto-creates admin from env vars, so delete them. `[security]`
 - [ ] **Delete/archive `quarantine/`** — legacy scripts, logs, and `bird_tracker_backup.sql` (may hold user data) sit in a public repo. `[security]`
@@ -23,6 +22,7 @@ _Last updated: 2026-06-19_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **TripPlanner integration — scheduled trip bird reports** — 2026-06-20
 - [x] **Enhance newsletter content** — 2026-06-19
 - [x] **Newsletter unsubscribe link** — 2026-06-19
 - [x] **Fix `/admin/` 500** — 2026-06-19
