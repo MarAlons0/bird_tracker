@@ -518,6 +518,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── Map init ─────────────────────────────────────────────────────────────
 
     function getCurrentLocation() {
+        // An explicit location in the URL (e.g. a Bird Tracker email's "View on
+        // map" link) wins, and is persisted so the whole app follows it.
+        const params = new URLSearchParams(window.location.search);
+        const urlLat = parseFloat(params.get('lat'));
+        const urlLng = parseFloat(params.get('lng'));
+        if (!isNaN(urlLat) && !isNaN(urlLng)) {
+            const loc = {
+                name: params.get('name') || 'Selected location',
+                lat: urlLat, lng: urlLng,
+                radius: parseFloat(params.get('radius')) || 25
+            };
+            localStorage.setItem('currentLocation', JSON.stringify(loc));
+            return loc;
+        }
         const stored = localStorage.getItem('currentLocation');
         if (stored) return JSON.parse(stored);
         const def = { name: 'Cincinnati, OH', lat: 39.1031, lng: -84.5120, radius: 25 };

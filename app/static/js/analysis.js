@@ -5,13 +5,28 @@ console.log('Analysis page loaded');
 const storedLocation = localStorage.getItem('currentLocation');
 console.log('Stored location on analysis page:', storedLocation);
 
-// Function to get current location from localStorage or default to Cincinnati
+// Function to get current location: a URL location (e.g. a Bird Tracker email's
+// "See full analysis" link) wins and is persisted, else localStorage, else default.
 function getCurrentLocation() {
+    const params = new URLSearchParams(window.location.search);
+    const urlLat = parseFloat(params.get('lat'));
+    const urlLng = parseFloat(params.get('lng'));
+    if (!isNaN(urlLat) && !isNaN(urlLng)) {
+        const loc = {
+            name: params.get('name') || 'Selected location',
+            lat: urlLat,
+            lng: urlLng,
+            radius: parseFloat(params.get('radius')) || 25
+        };
+        localStorage.setItem('currentLocation', JSON.stringify(loc));
+        return loc;
+    }
+
     const storedLocation = localStorage.getItem('currentLocation');
     if (storedLocation) {
         return JSON.parse(storedLocation);
     }
-    
+
     // Default to Cincinnati, OH
     return {
         name: 'Cincinnati, OH',

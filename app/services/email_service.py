@@ -1,6 +1,7 @@
 """Email service for sending bird tracker reports."""
 import logging
 import os
+from urllib.parse import urlencode
 
 import requests
 from flask import current_app
@@ -164,7 +165,7 @@ class EmailService:
         return url, present
 
     def create_weekly_report(self, user, observations, analysis, narrative=None,
-                             center=None, location_name=None):
+                             center=None, location_name=None, radius=None):
         """
         Create HTML email template for the weekly bird report.
 
@@ -199,6 +200,20 @@ class EmailService:
         base_url = (os.getenv('APP_BASE_URL') or os.getenv('RENDER_EXTERNAL_URL')
                     or 'https://bird-tracker.onrender.com').rstrip('/')
         manage_url = f"{base_url}/newsletter-preferences"
+
+        # Deep links carry this report's location so the app opens on it rather
+        # than the viewer's last-used location (the map/analysis pages read these
+        # query params). Omitted when there's no center.
+        loc_query = ""
+        if center:
+            loc_query = "?" + urlencode({
+                'lat': center[0],
+                'lng': center[1],
+                'name': location_name or '',
+                'radius': radius or 25,
+            })
+        map_link = f"{base_url}/{loc_query}"
+        analysis_link = f"{base_url}/analysis{loc_query}"
 
         # Hotspot map (Mapbox static image — fetched by the recipient's client),
         # with a colour legend matching the app's category palette.
@@ -263,8 +278,8 @@ class EmailService:
                 </ul>
 
                 <p style="margin-top:24px;">
-                    <a class="btn" href="{base_url}/" style="background:#2c5530;color:#ffffff;">View on map</a>
-                    <a class="btn" href="{base_url}/analysis" style="border:1px solid #2c5530;color:#2c5530;">See full analysis</a>
+                    <a class="btn" href="{map_link}" style="background:#2c5530;color:#ffffff;">View on map</a>
+                    <a class="btn" href="{analysis_link}" style="border:1px solid #2c5530;color:#2c5530;">See full analysis</a>
                 </p>
 
                 <div class="footer">

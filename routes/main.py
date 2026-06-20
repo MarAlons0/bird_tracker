@@ -349,7 +349,8 @@ def send_weekly_reports():
 
             html = tracker.create_email_template(
                 user, observations, analysis, narrative=narrative,
-                center=center, location_name=location_name)
+                center=center, location_name=location_name,
+                radius=loc['radius'] if loc else None)
 
             if tracker.send_email(to=user.email, subject="Your Weekly Bird Sighting Report", html=html):
                 sent += 1

@@ -261,11 +261,11 @@ class BirdSightingTracker:
     # =========================================================================
 
     def create_email_template(self, user, observations, analysis, narrative=None,
-                              center=None, location_name=None):
+                              center=None, location_name=None, radius=None):
         """Create HTML email template for the report."""
         return self.email.create_weekly_report(
             user, observations, analysis, narrative=narrative,
-            center=center, location_name=location_name)
+            center=center, location_name=location_name, radius=radius)
 
     def send_email(self, to, subject, html):
         """Send email using Flask-Mail."""
@@ -309,6 +309,6 @@ class BirdSightingTracker:
 
         html = self.email.create_weekly_report(
             None, observations, analysis, narrative=narrative,
-            center=(lat, lng), location_name=location_name)
+            center=(lat, lng), location_name=location_name, radius=radius)
         subject = subject or f"Bird Sighting Report — {location_name}"
         return self.send_email(email, subject, html)

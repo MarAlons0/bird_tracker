@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.3] – 2026-06-20
+
+### Changed
+- **Report deep links open the report's location.** The "View on map" / "See full
+  analysis" links in report emails now carry the report's coordinates
+  (`?lat&lng&name&radius`), and the map + analysis pages honor those params
+  (persisting them as the active location so the whole app follows). Previously
+  the links opened the viewer's *last-used* location — wrong for a trip report
+  about a different place. Applies to both trip reports and the weekly newsletter.
+
+---
+
 ## [1.6.2] – 2026-06-20
 
 ### Fixed
