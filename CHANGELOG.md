@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.1] – 2026-06-20
+
+### Removed
+- **Trimmed 18 unused dependencies** from `requirements.txt` — none were imported
+  by the app: folium, py-staticmaps, staticmap, Flask-SocketIO, Flask-Security,
+  Flask-User, Flask-Admin, Flask-Babel, Flask-Caching, Flask-RESTful,
+  Flask-JWT-Extended, Flask-OAuthlib, Flask-Principal, Flask-DebugToolbar,
+  Flask-Testing, Flask-Bcrypt, Flask-Marshmallow, Flask-Session, flask-bootstrap.
+  Drops the heavy numpy/branca/s2sphere/socketio transitive trees, cutting build
+  time and image size to ease free-tier deploys.
+
+---
+
 ## [1.6.0] – 2026-06-19
 
 ### Added
