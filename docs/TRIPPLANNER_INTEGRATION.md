@@ -118,6 +118,57 @@ both sides follow this one checklist; the user provisions both services and
 relays the joint-test result back to each agent. This section is the single
 source of truth for the rollout — don't keep a second copy in either chat.
 
+### Operator runbook (the human — do these in order)
+
+Plain-language version of the steps below. No terminal needed — everything is in
+the two Render dashboards and the TripPlanner UI. Do them top to bottom; don't
+skip ahead.
+
+**A. Get one shared secret.** Ask either agent for a token value (a long random
+string), or reuse the `TRIP_REPORT_TOKEN` already set on Bird Tracker if you set
+one for v1.6.0. You'll paste the *same* value into both apps. Keep it private —
+never commit it to a repo.
+
+**B. Set it on Bird Tracker (Render → the Bird Tracker service → Environment).**
+- `TRIP_REPORT_TOKEN` = the shared secret from step A.
+- Save. Render redeploys automatically — wait for "Live".
+
+**C. Set the three values on TripPlanner (Render → the TripPlanner service →
+Environment).** Use exactly the values in the table below:
+- `TRIP_REPORT_TOKEN` = the **same** secret as step B (must match character-for-character).
+- `BIRD_TRACKER_URL` = `https://bird-tracker.onrender.com`
+- `BIRD_TRACKER_EMAIL` = `alonsoencinci@gmail.com`
+- Save. Wait for TripPlanner to show "Live".
+
+**D. Smoke test (the real check).** In TripPlanner, open a trip that has at least
+one day with a destination and date → click **Activate bird reports**.
+- ✅ Success looks like a green banner: *"Bird reports activated — N stops scheduled."*
+- ❌ If you instead see a red banner, copy its exact wording and send it back —
+  it names the problem (token mismatch, email not allow-listed, URL wrong, or a
+  stop missing coordinates). See "If it fails" below.
+
+**E. Turn it off to confirm cancel works.** Click the small ✕ next to "Bird
+reports on". Expect *"Bird reports cancelled — N pending reports removed."*
+
+**F. Tell both agents the result.** Paste back: the exact banner text from D (and
+E), and — if you can grab them — the matching Bird Tracker log lines
+(`Scheduled N trip reports…` / `Cancelled N…`). That's the green light for each
+agent to tag its release.
+
+**If it fails (what the red banner means):**
+- *"rejected the token (401)"* → the two `TRIP_REPORT_TOKEN` values don't match,
+  or one wasn't saved. Re-paste the same value on both, wait for redeploys.
+- *"not on Bird Tracker's allowlist (403)"* → `BIRD_TRACKER_EMAIL` doesn't match
+  Bird Tracker's allow-list. Both should be `alonsoencinci@gmail.com`.
+- *"not configured"* → `BIRD_TRACKER_URL` or `TRIP_REPORT_TOKEN` is missing on
+  TripPlanner. Re-check step C.
+- *"rejected the payload (400)"* → a stop has no coordinates and couldn't be
+  geocoded; the banner lists which day. Open that day, set/verify its
+  destination, then Activate again.
+
+You are never the weak link here — if any step is unclear or a banner is
+confusing, paste it back verbatim and the agents take it from there.
+
 ### Environment variables (canonical)
 
 | Service | Variable | Value |
