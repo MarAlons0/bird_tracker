@@ -5,6 +5,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.0] – 2026-06-19
+
+### Added
+- **TripPlanner integration — scheduled trip reports.** New endpoints let
+  TripPlanner schedule pre-arrival bird reports for a trip's stops:
+  `POST /api/trip-reports` (idempotent upsert by `trip_id`) and
+  `DELETE /api/trip-reports/<trip_id>`, both authed with a shared
+  `TRIP_REPORT_TOKEN` and limited to an allowlisted recipient
+  (`TRIP_REPORT_ALLOWED_EMAILS`, default `alonsoencinci@gmail.com`). A new
+  `ScheduledReport` model stores each stop with `send_date = arrival_date − 1`,
+  and a daily `POST /api/send-due-reports` cron
+  (`.github/workflows/trip-reports.yml`) sends the ones due — reusing the weekly
+  report pipeline (map + AI narrative + links) via the tracker's new
+  `send_report_for_location()`. Contract: `docs/TRIPPLANNER_INTEGRATION.md`.
+
+---
+
 ## [1.5.2] – 2026-06-19
 
 ### Changed

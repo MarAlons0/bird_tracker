@@ -180,18 +180,20 @@ class EmailService:
         Returns:
             HTML string for the email body
         """
-        # Resolve the location name if the caller didn't supply one.
+        # Resolve the location name if the caller didn't supply one. (Trip
+        # reports pass location_name explicitly and have no User object.)
         if not location_name:
             location_name = "your area"
-            try:
-                from app.models import UserPreferences, Location
-                user_pref = UserPreferences.query.filter_by(user_id=user.id).first()
-                if user_pref and user_pref.active_location_id:
-                    location = Location.query.get(user_pref.active_location_id)
-                    if location:
-                        location_name = location.name
-            except Exception as e:
-                logger.warning(f"Could not get location name: {e}")
+            if user is not None:
+                try:
+                    from app.models import UserPreferences, Location
+                    user_pref = UserPreferences.query.filter_by(user_id=user.id).first()
+                    if user_pref and user_pref.active_location_id:
+                        location = Location.query.get(user_pref.active_location_id)
+                        if location:
+                            location_name = location.name
+                except Exception as e:
+                    logger.warning(f"Could not get location name: {e}")
 
         # Absolute base URL — email clients can't resolve relative paths.
         base_url = (os.getenv('APP_BASE_URL') or os.getenv('RENDER_EXTERNAL_URL')

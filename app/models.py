@@ -189,6 +189,31 @@ class Image(db.Model):
     
     # Relationship
     user = db.relationship('User', backref=db.backref('images', lazy='dynamic'))
-    
+
     def __repr__(self):
-        return f'<Image {self.id}: {self.filename}>' 
+        return f'<Image {self.id}: {self.filename}>'
+
+
+class ScheduledReport(db.Model):
+    """A bird report scheduled to be sent for a location on a future date.
+
+    Populated by the TripPlanner integration (one row per trip stop), sent the
+    day before arrival by the daily send-due-reports cron. See
+    docs/TRIPPLANNER_INTEGRATION.md.
+    """
+    __tablename__ = 'scheduled_reports'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), nullable=False, index=True)
+    trip_id = db.Column(db.String(64), nullable=False, index=True)  # e.g. 'tp_42'
+    name = db.Column(db.String(300))                                # location label
+    lat = db.Column(db.Float, nullable=False)
+    lng = db.Column(db.Float, nullable=False)
+    radius_miles = db.Column(db.Float, default=25)
+    send_date = db.Column(db.Date, nullable=False, index=True)      # arrival_date - 1
+    arrival_date = db.Column(db.Date, nullable=False)
+    sent_at = db.Column(db.DateTime, nullable=True)                 # NULL = still pending
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<ScheduledReport {self.trip_id} {self.name} send={self.send_date}>'

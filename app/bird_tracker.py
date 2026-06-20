@@ -272,3 +272,43 @@ class BirdSightingTracker:
         if isinstance(to, str):
             to = [to]
         return self.email.send(to, subject, html)
+
+    def send_report_for_location(self, email, lat, lng, radius, location_name, subject=None):
+        """Build and send a full bird report for an explicit location.
+
+        Shares the weekly newsletter's pipeline (hotspot map + AI narrative
+        grounded on eBird notables + links), but targets an arbitrary lat/lng
+        rather than a user's active location. Used by the TripPlanner-driven
+        scheduled reports. Returns True if an email was sent.
+        """
+        observations = self.get_recent_observations_by_location(lat, lng, radius, days_back=7)
+        if not observations:
+            logger.info(f"No observations near {location_name}; skipping report to {email}")
+            return False
+
+        analysis = self.generate_analysis(observations)
+
+        # eBird-flagged notable species nearby, deduped, to ground the narrative.
+        notable_species = []
+        try:
+            seen = set()
+            for nb in (self.ebird.get_notable_observations_geo(lat, lng, radius, 7) or []):
+                name = nb.get('comName')
+                if name and name not in seen:
+                    seen.add(name)
+                    notable_species.append(name)
+        except Exception as e:
+            logger.warning(f"Notable fetch failed for {location_name}: {e}")
+
+        narrative = None
+        try:
+            formatted = self._format_observations_for_ai(observations)
+            narrative = self.ai.analyze_observations(formatted, location_name, notable=notable_species)
+        except Exception as e:
+            logger.warning(f"AI narrative failed for {location_name}: {e}")
+
+        html = self.email.create_weekly_report(
+            None, observations, analysis, narrative=narrative,
+            center=(lat, lng), location_name=location_name)
+        subject = subject or f"Bird Sighting Report — {location_name}"
+        return self.send_email(email, subject, html)

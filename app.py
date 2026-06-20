@@ -197,6 +197,11 @@ def create_app():
     # The weekly-report trigger is called server-to-server by a scheduler with a
     # bearer token, so it has no CSRF token; exempt it from CSRF protection.
     csrf.exempt(main.send_weekly_reports)
+    # TripPlanner integration + daily scheduled-report cron are token-authed
+    # server-to-server calls with no CSRF token.
+    csrf.exempt(main.create_trip_reports)
+    csrf.exempt(main.delete_trip_reports)
+    csrf.exempt(main.send_due_reports)
     print("Blueprints registered")
 
     _version = _read_version()
