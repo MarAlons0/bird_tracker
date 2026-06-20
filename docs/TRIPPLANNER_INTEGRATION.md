@@ -110,6 +110,44 @@ Response `200`: `{ "cancelled": <n> }` (number of pending reports removed).
 4. Time zone assumption for "one day before arrival" (default: the report's send
    uses UTC date math unless TripPlanner sends a tz).
 
+## Rollout & joint verification
+
+Both apps are built and **verified to match this contract** (Bird Tracker
+endpoints ↔ TripPlanner `app/birdtracker.py`). To go live without diverging,
+both sides follow this one checklist; the user provisions both services and
+relays the joint-test result back to each agent. This section is the single
+source of truth for the rollout — don't keep a second copy in either chat.
+
+### Environment variables (canonical)
+
+| Service | Variable | Value |
+|---|---|---|
+| Bird Tracker | `TRIP_REPORT_TOKEN` | shared secret — `openssl rand -hex 32` |
+| Bird Tracker | `TRIP_REPORT_ALLOWED_EMAILS` | optional; defaults to `alonsoencinci@gmail.com` |
+| TripPlanner | `TRIP_REPORT_TOKEN` | **same value** as Bird Tracker |
+| TripPlanner | `BIRD_TRACKER_URL` | `https://bird-tracker.onrender.com` |
+| TripPlanner | `BIRD_TRACKER_EMAIL` | `alonsoencinci@gmail.com` |
+
+### Joint test (run in order)
+
+1. Set the env vars above on both Render services; wait for both redeploys.
+2. Liveness: `curl -X POST https://bird-tracker.onrender.com/api/trip-reports`
+   returns **401** (token now set) — not 404, not 503.
+3. In TripPlanner, open a trip and click **Activate bird reports**.
+   - Expected: success in the UI; TripPlanner sets `bird_reports_active`.
+   - Bird Tracker log: `Scheduled N trip reports for tp_<id> (alonsoencinci@gmail.com)`.
+4. (Optional) Real send: activate a trip whose next stop arrives **tomorrow**,
+   then run Bird Tracker → Actions → **Daily Trip Reports → Run workflow**.
+   - Expected: `{"sent": 1, ...}` and the email arrives.
+5. Cancel: toggle bird reports off in TripPlanner → Bird Tracker log
+   `Cancelled N pending trip reports for tp_<id>`.
+
+### Release gate
+
+Each side tags its release **only after the joint test (steps 3–4) passes** —
+don't release before it works end-to-end. Bird Tracker rides its rolling
+`v1.6.x`; TripPlanner holds `v1.9.0` until step 3 (ideally 4) succeeds.
+
 ## Later / out of scope for v1
 
 - Per-day **internal** itinerary (multiple sites/day) — same contract, more stops.
