@@ -13,7 +13,6 @@ _Last updated: 2026-06-19_
 - [ ] **Heatmap v2 (Momentum / VYA modes)** — trend overlay on top of the shipped density heatmap. See [docs/DESIGN.md](docs/DESIGN.md#heatmap-v2--momentum--vya-trend-modes). `[feature]`
 - [ ] **Analysis page: show location/radius context** — "Analyzing sightings within 25 mi of Cincinnati, OH" so it's clearly not stale/wrong-area. `[feature]`
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
-- [ ] **Enhance newsletter content** — current weekly report is bare stats (total species, total observations, top species) and isn't engaging; make it compelling (e.g. AI narrative, notable/rare sightings, week-over-week trends, photos). Scope TBD — discuss possibilities first. `[feature]`
 - [ ] **Consolidate bird classifiers** — there are now three copies of the tier-1 keyword/category logic: `home.html` (JS, app map), `app/services/bird_categories.py` (newsletter), and `audit_categories.py` (root validation script). Point the validation script (and ideally the analyze route) at `app/services/bird_categories.py`, move `audit_categories.py` out of repo root, and treat the shared module as the single Python source of truth. `[chore]`
 
 ## 🟢 Low / Nice to have
@@ -24,6 +23,7 @@ _Last updated: 2026-06-19_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Enhance newsletter content** — 2026-06-19
 - [x] **Newsletter unsubscribe link** — 2026-06-19
 - [x] **Fix `/admin/` 500** — 2026-06-19
 - [x] **Newsletter / email report** — 2026-06-19
