@@ -13,13 +13,14 @@ _Last updated: 2026-06-19_
 - [ ] **Analysis page: show location/radius context** — "Analyzing sightings within 25 mi of Cincinnati, OH" so it's clearly not stale/wrong-area. `[feature]`
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
 - [ ] **Enhance newsletter content** — current weekly report is bare stats (total species, total observations, top species) and isn't engaging; make it compelling (e.g. AI narrative, notable/rare sightings, week-over-week trends, photos). Scope TBD — discuss possibilities first. `[feature]`
-- [ ] **Move `audit_categories.py` out of repo root** — to `scripts/` or delete (one-off validation tool). `[chore]`
+- [ ] **Consolidate bird classifiers** — there are now three copies of the tier-1 keyword/category logic: `home.html` (JS, app map), `app/services/bird_categories.py` (newsletter), and `audit_categories.py` (root validation script). Point the validation script (and ideally the analyze route) at `app/services/bird_categories.py`, move `audit_categories.py` out of repo root, and treat the shared module as the single Python source of truth. `[chore]`
 
 ## 🟢 Low / Nice to have
 - [ ] **Periodic keyword-list review** — re-run `audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
 - [ ] **Scientific-name classification fallback** — add a `sciName` → group secondary lookup so a changed common name doesn't break classification. `[feature]`
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
 - [ ] **Tokenized one-click unsubscribe** — current unsubscribe is login-gated (toggles `UserPreferences.notification_enabled` for `current_user`); add a signed-token link in the email so recipients opt out without logging in and can't affect other accounts. Proper CAN-SPAM one-click behavior. `[feature]`
+- [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
 - [x] **Newsletter unsubscribe link** — 2026-06-19
