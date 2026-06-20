@@ -164,7 +164,7 @@ class EmailService:
         return url, present
 
     def create_weekly_report(self, user, observations, analysis, narrative=None,
-                             notable=None, center=None, location_name=None):
+                             center=None, location_name=None):
         """
         Create HTML email template for the weekly bird report.
 
@@ -216,23 +216,9 @@ class EmailService:
                 f'<div style="margin:0 0 12px;">{legend_chips}</div>'
             )
 
-        # AI narrative (already HTML). Omitted if generation failed.
+        # AI narrative (already HTML; grounds its rare-species list on eBird's
+        # notable flags). Omitted if generation failed.
         narrative_html = f'<h3>This week around you</h3>{narrative}' if narrative else ""
-
-        # Notable/rare sightings nearby.
-        notable_items = ""
-        for obs in (notable or [])[:6]:
-            name = obs.get('comName', 'Unknown')
-            loc = obs.get('locName', '')
-            date = (obs.get('obsDt', '') or '')[:10]
-            notable_items += f"<li>{name} — {loc} ({date})</li>\n"
-        notable_html = (
-            f'<div style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;'
-            f'padding:12px 16px;margin:16px 0;">'
-            f'<h3 style="margin-top:0;color:#8a6d1b;">Notable sightings nearby</h3>'
-            f'<ul style="margin-bottom:0;">{notable_items}</ul></div>'
-            if notable_items else ""
-        )
 
         # Top species list
         top_species_html = ""
@@ -268,8 +254,6 @@ class EmailService:
                 </ul>
 
                 {narrative_html}
-
-                {notable_html}
 
                 <h3>Top Species This Week</h3>
                 <ul>

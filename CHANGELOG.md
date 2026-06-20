@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.2] – 2026-06-19
+
+### Changed
+- **Notable rarities now feed the AI narrative instead of a separate box.** The
+  standalone "Notable sightings nearby" box was redundant with the narrative's
+  rare-species list, prone to duplicate rows (a lingering rarity logged on
+  multiple days), and surfaced messy eBird location strings. The eBird notable
+  feed is now deduped by species and passed into the AI prompt, so the
+  narrative's "unusual or rare species" section is grounded in eBird's
+  authoritative flags with context — and the redundant box is removed.
+
+---
+
 ## [1.5.1] – 2026-06-19
 
 ### Changed

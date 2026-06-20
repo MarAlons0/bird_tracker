@@ -261,10 +261,10 @@ class BirdSightingTracker:
     # =========================================================================
 
     def create_email_template(self, user, observations, analysis, narrative=None,
-                              notable=None, center=None, location_name=None):
+                              center=None, location_name=None):
         """Create HTML email template for the report."""
         return self.email.create_weekly_report(
-            user, observations, analysis, narrative=narrative, notable=notable,
+            user, observations, analysis, narrative=narrative,
             center=center, location_name=location_name)
 
     def send_email(self, to, subject, html):

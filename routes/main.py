@@ -322,26 +322,34 @@ def send_weekly_reports():
                 if loc_obj:
                     location_name = loc_obj.name
 
+            # eBird-flagged notable/rare species nearby (best-effort), deduped by
+            # species — fed into the narrative so the AI grounds its rare-species
+            # list on authoritative flags rather than guessing.
+            notable_species = []
+            if loc:
+                try:
+                    seen = set()
+                    for nb in (tracker.ebird.get_notable_observations_geo(
+                            loc['latitude'], loc['longitude'], loc['radius'], 7) or []):
+                        name = nb.get('comName')
+                        if name and name not in seen:
+                            seen.add(name)
+                            notable_species.append(name)
+                except Exception as e:
+                    logger.warning(f"Notable fetch failed for {user.email}: {e}")
+
             # AI narrative (best-effort; degrade to stats-only on failure).
             narrative = None
             try:
                 formatted = tracker._format_observations_for_ai(observations)
-                narrative = tracker.ai.analyze_observations(formatted, location_name or "your area")
+                narrative = tracker.ai.analyze_observations(
+                    formatted, location_name or "your area", notable=notable_species)
             except Exception as e:
                 logger.warning(f"AI narrative failed for {user.email}: {e}")
 
-            # Notable/rare sightings nearby (best-effort).
-            notable = []
-            if loc:
-                try:
-                    notable = tracker.ebird.get_notable_observations_geo(
-                        loc['latitude'], loc['longitude'], loc['radius'], 7) or []
-                except Exception as e:
-                    logger.warning(f"Notable fetch failed for {user.email}: {e}")
-
             html = tracker.create_email_template(
                 user, observations, analysis, narrative=narrative,
-                notable=notable, center=center, location_name=location_name)
+                center=center, location_name=location_name)
 
             if tracker.send_email(to=user.email, subject="Your Weekly Bird Sighting Report", html=html):
                 sent += 1

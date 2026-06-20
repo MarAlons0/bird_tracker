@@ -45,13 +45,15 @@ class AIService:
         """Check if the AI service is available."""
         return self.client is not None
 
-    def analyze_observations(self, observations, location_name):
+    def analyze_observations(self, observations, location_name, notable=None):
         """
         Generate AI analysis of bird observations.
 
         Args:
             observations: List of observation dicts with keys: species, count, location, timestamp
             location_name: Name of the location being analyzed
+            notable: Optional list of species names eBird has officially flagged as
+                notable/rare nearby, used to ground the "unusual or rare" section.
 
         Returns:
             HTML-formatted analysis string, or None on error
@@ -64,7 +66,7 @@ class AIService:
             # Format observations for the prompt
             formatted = self._format_observations(observations)
 
-            prompt = self._build_analysis_prompt(formatted, location_name)
+            prompt = self._build_analysis_prompt(formatted, location_name, notable=notable)
 
             response = self.client.messages.create(
                 model=self.ANALYSIS_MODEL,
@@ -140,11 +142,21 @@ Please provide a helpful and informative response based on the context and your 
 
         return "\n".join(formatted_lines)
 
-    def _build_analysis_prompt(self, observation_text, location):
+    def _build_analysis_prompt(self, observation_text, location, notable=None):
         """Build the analysis prompt for Claude."""
+        notable_block = ""
+        if notable:
+            species = ", ".join(notable)
+            notable_block = (
+                f"\n\neBird has officially flagged these species as notable/rare for "
+                f"{location} this week: {species}. Feature these prominently in the "
+                f'"Unusual or rare species" section and briefly explain why each is '
+                f"notable here (e.g. edge of range, out of season, or locally scarce). "
+                f"Do not invent rarities beyond these and what the observations support."
+            )
         return f"""You are an expert Naturalist analyzing bird sighting data for {location}. Analyze these observations and provide insights.
 
-{observation_text}
+{observation_text}{notable_block}
 
 Format your response EXACTLY as follows:
 
