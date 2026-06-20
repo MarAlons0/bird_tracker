@@ -5,6 +5,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.2] – 2026-06-20
+
+### Fixed
+- **Restore Flask-Bcrypt** — the v1.6.1 dependency trim removed it, but the
+  root-level `extensions.py` imports `flask_bcrypt`, so the app failed to boot
+  with `No module named 'flask_bcrypt'` (served the wsgi fallback error page).
+  Re-added. A whole-repo import scan confirms it was the only over-trimmed
+  package; the other 17 removals stand.
+
+---
+
 ## [1.6.1] – 2026-06-20
 
 ### Removed
