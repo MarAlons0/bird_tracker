@@ -237,10 +237,11 @@ class EmailService:
         # notable flags). Omitted if generation failed.
         narrative_html = f'<h3>This week around you</h3>{narrative}' if narrative else ""
 
-        # Top species list
+        # Most abundant species (ranked by individual birds counted, not records)
         top_species_html = ""
         for species, count in analysis.get('top_species', [])[:5]:
-            top_species_html += f"<li>{species}: {count} sightings</li>\n"
+            noun = "bird" if count == 1 else "birds"
+            top_species_html += f"<li>{species} — {count} {noun}</li>\n"
 
         return f"""
         <!DOCTYPE html>
@@ -266,13 +267,13 @@ class EmailService:
 
                 <h3>Summary</h3>
                 <ul>
-                    <li>Total Species Observed: <strong>{analysis.get('total_species', 0)}</strong></li>
-                    <li>Total Observations: <strong>{analysis.get('total_observations', 0)}</strong></li>
+                    <li>Species observed: <strong>{analysis.get('total_species', 0)}</strong></li>
+                    <li>Individual birds counted: <strong>{analysis.get('total_individuals', 0)}</strong></li>
                 </ul>
 
                 {narrative_html}
 
-                <h3>Top Species This Week</h3>
+                <h3>Most abundant species</h3>
                 <ul>
                     {top_species_html if top_species_html else '<li>No species data available</li>'}
                 </ul>

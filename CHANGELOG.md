@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.4] – 2026-06-20
+
+### Changed
+- **"Top species" now ranks by abundance, not record count.** eBird's geo/recent
+  endpoint returns one record per species, so the old per-record count was always
+  1 (every line read "1 sightings"). The report now ranks by `howMany` —
+  individual birds — e.g. "Purple Martin — 42 birds", and renames the section to
+  "Most abundant species". The summary's misleading "Total Observations" (which
+  equalled the species count) is replaced with "Individual birds counted".
+
+---
+
 ## [1.6.3] – 2026-06-20
 
 ### Changed

@@ -229,23 +229,34 @@ class BirdSightingTracker:
         return self._generate_basic_analysis(observations)
 
     def _generate_basic_analysis(self, observations):
-        """Generate basic analysis without AI."""
+        """Generate basic analysis without AI.
+
+        eBird's geo/recent endpoint returns one (most-recent) record per species,
+        so counting records is meaningless (always 1). Rank instead by `howMany`
+        — the number of individual birds — so top species reflects abundance.
+        """
         try:
-            species_counts = {}
+            species_counts = {}      # species -> total individual birds
+            total_individuals = 0
             for obs in observations:
                 if isinstance(obs, dict):
                     species = obs.get('comName', obs.get('species', obs.get('bird_name')))
+                    raw = obs.get('howMany')
+                    count = raw if isinstance(raw, int) and raw > 0 else 1
                 else:
                     species = obs.bird_name
+                    count = 1
 
                 if species:
-                    species_counts[species] = species_counts.get(species, 0) + 1
+                    species_counts[species] = species_counts.get(species, 0) + count
+                    total_individuals += count
 
             sorted_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)
 
             return {
                 'total_species': len(species_counts),
                 'total_observations': len(observations),
+                'total_individuals': total_individuals,
                 'top_species': sorted_species[:10],
                 'observation_dates': list(set(
                     obs.get('obsDt', obs.get('timestamp', '')) if isinstance(obs, dict) else ''
