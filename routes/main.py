@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_required, current_user
-from app.models import User, Location, UserPreferences, ScheduledReport
+from app.models import User, Location, UserPreferences
 from config.extensions import db
 from app.bird_tracker import BirdSightingTracker
-from datetime import datetime, date, timedelta
+from datetime import datetime
 import hmac
 import os
 import logging
@@ -363,141 +363,6 @@ def send_weekly_reports():
     logger.info(f"Weekly report complete: sent={sent}, skipped={skipped}, failed={failed}")
     return jsonify({'sent': sent, 'skipped': skipped, 'failed': failed}), 200
 
-
-def _authorize(token_env):
-    """Validate the Authorization: Bearer header against an env-var secret.
-
-    Returns None when authorized, else a (response, status) tuple to return.
-    """
-    expected = os.getenv(token_env)
-    if not expected:
-        logger.error(f"{token_env} not configured; refusing request")
-        return jsonify({'error': 'Not configured'}), 503
-    provided = request.headers.get('Authorization', '')
-    if provided.startswith('Bearer '):
-        provided = provided[len('Bearer '):]
-    if not (provided and hmac.compare_digest(provided, expected)):
-        logger.warning("Unauthorized request (bad bearer token)")
-        return jsonify({'error': 'Unauthorized'}), 401
-    return None
-
-
-# v1: trip reports are limited to a single allowlisted recipient.
-TRIP_REPORT_ALLOWED = {
-    e.strip().lower()
-    for e in os.getenv('TRIP_REPORT_ALLOWED_EMAILS', 'alonsoencinci@gmail.com').split(',')
-    if e.strip()
-}
-
-
-@bp.route('/api/trip-reports', methods=['POST'])
-def create_trip_reports():
-    """Schedule pre-arrival bird reports for a trip's stops (TripPlanner -> here).
-
-    Auth: Authorization: Bearer <TRIP_REPORT_TOKEN>. Re-POSTing the same trip_id
-    replaces that trip's pending schedule. CSRF-exempt (see app.py). See
-    docs/TRIPPLANNER_INTEGRATION.md.
-    """
-    auth_error = _authorize('TRIP_REPORT_TOKEN')
-    if auth_error:
-        return auth_error
-
-    data = request.get_json(silent=True) or {}
-    email = (data.get('email') or '').strip()
-    trip_id = (data.get('trip_id') or '').strip()
-    stops = data.get('stops')
-
-    if not email or not trip_id or not isinstance(stops, list) or not stops:
-        return jsonify({'error': 'email, trip_id, and a non-empty stops list are required'}), 400
-
-    if email.lower() not in TRIP_REPORT_ALLOWED:
-        logger.warning(f"Trip-report request for non-allowlisted email: {email}")
-        return jsonify({'error': 'Email not permitted'}), 403
-
-    # Validate every stop before mutating anything.
-    parsed = []
-    for stop in stops:
-        try:
-            lat = float(stop['lat'])
-            lng = float(stop['lng'])
-            arrival = date.fromisoformat(stop['arrival_date'])
-        except (KeyError, TypeError, ValueError):
-            return jsonify({'error': f'Invalid stop (need lat, lng, arrival_date): {stop}'}), 400
-        parsed.append({
-            'name': stop.get('name') or 'your destination',
-            'lat': lat,
-            'lng': lng,
-            'radius_miles': float(stop.get('radius_miles', 25) or 25),
-            'arrival_date': arrival,
-            'send_date': arrival - timedelta(days=1),
-        })
-
-    # Replace this trip's pending schedule (already-sent rows kept as history).
-    ScheduledReport.query.filter_by(trip_id=trip_id, sent_at=None).delete(synchronize_session=False)
-    for p in parsed:
-        db.session.add(ScheduledReport(
-            email=email, trip_id=trip_id, name=p['name'],
-            lat=p['lat'], lng=p['lng'], radius_miles=p['radius_miles'],
-            send_date=p['send_date'], arrival_date=p['arrival_date']))
-    db.session.commit()
-
-    logger.info(f"Scheduled {len(parsed)} trip reports for {trip_id} ({email})")
-    return jsonify({'scheduled': len(parsed), 'trip_id': trip_id}), 200
-
-
-@bp.route('/api/trip-reports/<trip_id>', methods=['DELETE'])
-def delete_trip_reports(trip_id):
-    """Cancel a trip's pending scheduled reports (TripPlanner -> here)."""
-    auth_error = _authorize('TRIP_REPORT_TOKEN')
-    if auth_error:
-        return auth_error
-
-    cancelled = ScheduledReport.query.filter_by(
-        trip_id=trip_id, sent_at=None).delete(synchronize_session=False)
-    db.session.commit()
-    logger.info(f"Cancelled {cancelled} pending trip reports for {trip_id}")
-    return jsonify({'cancelled': cancelled}), 200
-
-
-@bp.route('/api/send-due-reports', methods=['POST'])
-def send_due_reports():
-    """Send scheduled reports due today (daily cron -> here).
-
-    Auth: Authorization: Bearer <REPORT_CRON_TOKEN> (same secret as the weekly
-    newsletter cron). CSRF-exempt (see app.py).
-    """
-    auth_error = _authorize('REPORT_CRON_TOKEN')
-    if auth_error:
-        return auth_error
-
-    tracker = current_app.tracker
-    sent = skipped = failed = 0
-
-    due = ScheduledReport.query.filter(
-        ScheduledReport.sent_at.is_(None),
-        ScheduledReport.send_date <= date.today(),
-    ).all()
-    logger.info(f"Send-due-reports run: {len(due)} due")
-
-    for rpt in due:
-        try:
-            ok = tracker.send_report_for_location(
-                rpt.email, rpt.lat, rpt.lng, rpt.radius_miles, rpt.name)
-            # Mark attempted either way so a data-less stop doesn't retry forever.
-            rpt.sent_at = datetime.utcnow()
-            db.session.commit()
-            if ok:
-                sent += 1
-            else:
-                skipped += 1
-        except Exception as e:
-            # Transient failure (API down, etc.) — leave pending to retry next run.
-            logger.error(f"Scheduled report failed for {rpt.trip_id}/{rpt.name}: {e}")
-            db.session.rollback()
-            failed += 1
-
-    logger.info(f"Send-due-reports complete: sent={sent}, skipped={skipped}, failed={failed}")
-    return jsonify({'sent': sent, 'skipped': skipped, 'failed': failed}), 200
 
 @bp.route('/locations')
 @login_required

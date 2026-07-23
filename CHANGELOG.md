@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.0] – 2026-07-14
+
+### Removed
+- **Retired the TripPlanner trip-report integration.** TripPlanner now sources
+  bird sightings directly from the eBird API into its nightly Daily Digest, so
+  the pushed-itinerary path is no longer used. Removed the `/api/trip-reports`
+  (POST/DELETE) and `/api/send-due-reports` endpoints, the `ScheduledReport`
+  model, the `send_report_for_location()` helper, the `_authorize` helper, and
+  the Daily Trip Reports GitHub Actions workflow. The `scheduled_reports` table
+  is left in the database (empty, harmless) and the `TRIP_REPORT_*` env vars can
+  be deleted from Render at leisure. `docs/TRIPPLANNER_INTEGRATION.md` is kept,
+  marked deprecated, for history. The weekly newsletter is unaffected.
+
+---
+
 ## [1.6.4] – 2026-06-20
 
 ### Changed

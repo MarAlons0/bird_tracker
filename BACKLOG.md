@@ -22,7 +22,7 @@ _Last updated: 2026-06-20_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
-- [x] **TripPlanner integration — scheduled trip bird reports** — 2026-06-20
+- [x] **TripPlanner integration — scheduled trip bird reports** — 2026-06-20 (retired 2026-07-14 — TripPlanner now sources eBird directly; code removed in v1.7.0)
 - [x] **Enhance newsletter content** — 2026-06-19
 - [x] **Newsletter unsubscribe link** — 2026-06-19
 - [x] **Fix `/admin/` 500** — 2026-06-19

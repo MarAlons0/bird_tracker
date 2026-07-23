@@ -1,5 +1,14 @@
 # TripPlanner ↔ Bird Tracker Integration
 
+> ⚠️ **DEPRECATED / RETIRED (2026-07-14).** TripPlanner now sources bird
+> sightings directly from the eBird API into its nightly Daily Digest, so this
+> pushed-itinerary integration is no longer used. The Bird Tracker side was
+> removed in `v1.7.0` (the `/api/trip-reports`, `/api/send-due-reports`
+> endpoints, the `ScheduledReport` model code, the Daily Trip Reports cron, and
+> `send_report_for_location`). The `scheduled_reports` table was left in the DB
+> (empty, harmless). This document is kept for history only. The bird-selection
+> algorithm worth reusing lives in TripPlanner's `docs/BIRD_INTEL.md`.
+
 Design spec + API contract for sending a Bird Tracker report ahead of each stop
 on a TripPlanner itinerary. This is the coordination artifact: the TripPlanner
 agent builds against the **API contract** section; Bird Tracker builds the
