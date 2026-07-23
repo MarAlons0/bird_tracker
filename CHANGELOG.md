@@ -5,6 +5,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.1] – 2026-07-14
+
+### Security
+- **Removed the legacy `quarantine/` directory from the repo and its entire git
+  history.** It held old scripts, logs, and a database backup that should never
+  have been committed to a public repo. Purged from all history via
+  `git filter-repo` + force-push (all commit SHAs and the 16 tags were rewritten),
+  and the credential it had exposed was rotated. The deployed app is unchanged.
+
+---
+
 ## [1.7.0] – 2026-07-14
 
 ### Removed

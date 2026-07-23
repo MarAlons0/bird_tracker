@@ -1,10 +1,9 @@
 # Bird Tracker — Backlog
-_Last updated: 2026-06-20_
+_Last updated: 2026-07-14_
 
 ## 🔴 High
 - [ ] **Require `DEFAULT_USER_PASSWORD`** — `routes/auth.py` and `routes/admin.py` fall back to `'user123'`; raise a startup error instead of using a weak default. `[security]`
 - [ ] **Remove hardcoded-password scripts** — `scripts/admin/create_admin_user.py`, `create_admin.py`, `create_user.py` hardcode `admin123`/`user123`; the app auto-creates admin from env vars, so delete them. `[security]`
-- [ ] **Delete/archive `quarantine/`** — legacy scripts, logs, and `bird_tracker_backup.sql` (may hold user data) sit in a public repo. `[security]`
 
 ## 🟡 Medium
 - [ ] **Date range filter** — observations are hardcoded to `back=7`; expose 7/14/30-day selector (eBird cap 30). `[feature]`
@@ -22,6 +21,7 @@ _Last updated: 2026-06-20_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Delete/archive `quarantine/`** — 2026-07-14 (removed from repo and purged from git history; the leaked Anthropic key it exposed was rotated)
 - [x] **TripPlanner integration — scheduled trip bird reports** — 2026-06-20 (retired 2026-07-14 — TripPlanner now sources eBird directly; code removed in v1.7.0)
 - [x] **Enhance newsletter content** — 2026-06-19
 - [x] **Newsletter unsubscribe link** — 2026-06-19
