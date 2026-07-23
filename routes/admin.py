@@ -203,8 +203,9 @@ def process_registration_request(request_id, action):
             }
         )
         
-        # Create new user using raw SQL
-        default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
+        # Create new user using raw SQL (default password required at startup —
+        # no weak fallback).
+        default_password = os.getenv('DEFAULT_USER_PASSWORD')
         db.session.execute(
             text("""
                 INSERT INTO users (email, username, password_hash, is_admin, is_active)

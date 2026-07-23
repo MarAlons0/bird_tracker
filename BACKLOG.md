@@ -2,8 +2,7 @@
 _Last updated: 2026-07-14_
 
 ## 🔴 High
-- [ ] **Require `DEFAULT_USER_PASSWORD`** — `routes/auth.py` and `routes/admin.py` fall back to `'user123'`; raise a startup error instead of using a weak default. `[security]`
-- [ ] **Remove hardcoded-password scripts** — `scripts/admin/create_admin_user.py`, `create_admin.py`, `create_user.py` hardcode `admin123`/`user123`; the app auto-creates admin from env vars, so delete them. `[security]`
+- _(none — all cleared)_
 
 ## 🟡 Medium
 - [ ] **Date range filter** — observations are hardcoded to `back=7`; expose 7/14/30-day selector (eBird cap 30). `[feature]`
@@ -21,6 +20,8 @@ _Last updated: 2026-07-14_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Require `DEFAULT_USER_PASSWORD`** — 2026-07-14 (startup now fails if unset; removed the `user123` fallback and plaintext-password logging)
+- [x] **Remove hardcoded-password scripts** — 2026-07-14 (deleted the redundant create-admin/user scripts + `reset_admin_password.py`, all of which hardcoded passwords)
 - [x] **Delete/archive `quarantine/`** — 2026-07-14 (removed from repo and purged from git history; the leaked Anthropic key it exposed was rotated)
 - [x] **TripPlanner integration — scheduled trip bird reports** — 2026-06-20 (retired 2026-07-14 — TripPlanner now sources eBird directly; code removed in v1.7.0)
 - [x] **Enhance newsletter content** — 2026-06-19

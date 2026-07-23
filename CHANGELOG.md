@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.2] – 2026-07-14
+
+### Security
+- **No weak default password.** `DEFAULT_USER_PASSWORD` is now required at
+  startup — the app refuses to boot without it, and the `'user123'` fallback in
+  the registration and admin-approval flows is removed. Also stopped logging the
+  plaintext password when creating a user.
+- **Removed hardcoded-password scripts.** Deleted the redundant admin/user
+  creation scripts and `reset_admin_password.py`, which hardcoded default
+  passwords (the app already provisions the admin from `ADMIN_EMAIL` /
+  `ADMIN_PASSWORD`). Any account whose password was set by those scripts should
+  be reset.
+
+---
+
 ## [1.7.1] – 2026-07-14
 
 ### Security

@@ -88,6 +88,13 @@ def create_app():
     
     # Configure the app
     print("Configuring app...")
+    # Security: require an explicit default password for new/reset accounts —
+    # never fall back to a weak built-in default (previously 'user123').
+    if not os.getenv('DEFAULT_USER_PASSWORD'):
+        raise RuntimeError(
+            "DEFAULT_USER_PASSWORD environment variable is required "
+            "(no weak default is used for new or reset accounts)."
+        )
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///bird_tracker.db')
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):

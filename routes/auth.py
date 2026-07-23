@@ -139,10 +139,10 @@ def login():
                 username = f"{base_username}{counter}"
                 counter += 1
             
-            # Create user
-            default_password = os.getenv('DEFAULT_USER_PASSWORD', 'user123')
-            logger.info(f"Creating user with default password: {default_password}")
-            
+            # Create user with the configured default password (required at
+            # startup — no weak fallback, and never log the password value).
+            default_password = os.getenv('DEFAULT_USER_PASSWORD')
+
             new_user = User(
                 email=email,
                 username=username,
@@ -152,7 +152,7 @@ def login():
             )
             db.session.add(new_user)
             db.session.commit()
-            logger.info(f"Created new user with default password: {email}")
+            logger.info(f"Created new user: {email}")
             
             # Log user in
             remember = form.remember.data if form.remember else True
