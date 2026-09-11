@@ -5,6 +5,7 @@ _Last updated: 2026-09-11_
 - _(none — all cleared)_
 
 ## 🟡 Medium
+- [ ] **Pin `anthropic` SDK version** — `requirements.txt` has `anthropic>=0.19.1` with no upper bound, so a fresh Render build silently pulls a newer SDK. A newer SDK dropped the `temperature` kwarg and broke every AI call (v1.7.5); the same drift can break other params/models on any future redeploy, and it can't be caught locally (local venv keeps the old SDK). Pin to the version currently running in prod (grab it from Render's build log: `Successfully installed anthropic-X.Y.Z`) and review before bumping. Consider auditing other unpinned deps. `[chore]`
 - [ ] **Date range filter** — observations are hardcoded to `back=7`; expose 7/14/30-day selector (eBird cap 30). `[feature]`
 - [ ] **Persist drill-down state across reloads** — save `drilldownGroup` to `localStorage` and restore on load. `[feature]`
 - [ ] **Heatmap v2 (Momentum / VYA modes)** — trend overlay on top of the shipped density heatmap. See [docs/DESIGN.md](docs/DESIGN.md#heatmap-v2--momentum--vya-trend-modes). `[feature]`
