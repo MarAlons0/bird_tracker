@@ -5,6 +5,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.5] – 2026-09-11
+
+### Fixed
+- **AI narrative (and the AI Analysis page) restored — the real cause.** Every
+  Claude call was failing instantly with
+  `TypeError: Messages.create() got an unexpected keyword argument 'temperature'`,
+  caught by the service's `try/except` and returning `None` — so the weekly
+  report silently degraded to stats-only and the Analysis page returned nothing.
+  A newer `anthropic` SDK (pulled on a fresh Render build; `requirements.txt`
+  pins `anthropic>=0.19.1` with no upper bound) dropped the `temperature` kwarg
+  from `messages.create()`. Removed `temperature` from both call sites
+  (`analyze_observations`, `chat`). This — not the timeout (v1.7.4) — is why the
+  narrative was missing; it never reached the network. Couldn't be reproduced
+  locally because the local venv still has the older SDK that accepts the kwarg.
+
+---
+
 ## [1.7.4] – 2026-09-11
 
 ### Fixed

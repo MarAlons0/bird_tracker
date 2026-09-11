@@ -75,7 +75,11 @@ class AIService:
             response = self.client.messages.create(
                 model=self.ANALYSIS_MODEL,
                 max_tokens=4000,
-                temperature=0.7,
+                # No `temperature`: newer anthropic SDKs dropped sampling params
+                # from messages.create() (requirements pins `anthropic>=0.19.1`
+                # with no ceiling, so a fresh Render build pulls a version that
+                # raises TypeError on `temperature`). This silently returned None
+                # and stripped the narrative from the weekly report.
                 # A real narrative call takes ~40s (large prompt, ~4k max_tokens).
                 # 50s lets it finish while staying well under gunicorn's 120s
                 # worker timeout — with max_retries=0 (no x3 stacking), worst case
@@ -120,7 +124,7 @@ Please provide a helpful and informative response based on the context and your 
             response = self.client.messages.create(
                 model=self.CHAT_MODEL,
                 max_tokens=1000,
-                temperature=0.7,
+                # No `temperature` — see analyze_observations (newer SDK rejects it).
                 system="You are an expert ornithologist assistant. Provide accurate and helpful information about birds and bird sightings.",
                 messages=[{"role": "user", "content": prompt}]
             )
