@@ -12,6 +12,7 @@ from app.services.bird_categories import (
 
 logger = logging.getLogger(__name__)
 
+BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
@@ -38,9 +39,14 @@ class EmailService:
         """
         Send an email.
 
-        Prefers the SendGrid HTTP API (works on Render's free tier, where
-        outbound SMTP is blocked). Falls back to Flask-Mail/SMTP when SendGrid
-        isn't configured — handy for local development.
+        Prefers an HTTP email API (works on Render's free tier, where outbound
+        SMTP is blocked). Provider order:
+          1. Brevo (BREVO_API_KEY + BREVO_FROM_EMAIL) — current primary. Free
+             tier is 300/day and shares the account TripPlanner already uses.
+          2. SendGrid (SENDGRID_API_KEY + SENDGRID_FROM_EMAIL) — legacy. SendGrid
+             retired its free tier, so this path is dead unless someone is paying;
+             kept so an existing deployment keeps working.
+          3. Flask-Mail/SMTP — last resort, for local dev (blocked on Render).
 
         Args:
             to: Recipient email address(es) - string or list
@@ -53,12 +59,56 @@ class EmailService:
         """
         recipients = [to] if isinstance(to, str) else to
 
+        brevo_key = os.getenv('BREVO_API_KEY')
+        brevo_from = os.getenv('BREVO_FROM_EMAIL')
+        if brevo_key and brevo_from:
+            return self._send_via_brevo(brevo_key, brevo_from, recipients, subject, html, text)
+
         api_key = os.getenv('SENDGRID_API_KEY')
         from_email = os.getenv('SENDGRID_FROM_EMAIL')
         if api_key and from_email:
             return self._send_via_sendgrid(api_key, from_email, recipients, subject, html, text)
 
         return self._send_via_smtp(recipients, subject, html, text)
+
+    def _send_via_brevo(self, api_key, from_email, recipients, subject, html, text):
+        """Send an HTML email through Brevo's transactional API (HTTPS/443).
+
+        Authenticates with an `api-key` header (not Bearer) and expects
+        `htmlContent`/`textContent` — a different shape from SendGrid's. Mirrors
+        TripPlanner's proven mailer so both apps share one email stack. Bounded by
+        a 15s timeout so a stalled connection can't hang the gunicorn worker.
+        """
+        payload = {
+            'sender': {'email': from_email, 'name': 'Bird Tracker'},
+            'to': [{'email': r} for r in recipients],
+            'subject': subject,
+            'htmlContent': html,
+        }
+        if text:
+            payload['textContent'] = text
+
+        try:
+            response = requests.post(
+                BREVO_URL,
+                headers={
+                    'api-key': api_key,
+                    'accept': 'application/json',
+                    'content-type': 'application/json',
+                },
+                json=payload,
+                timeout=15,
+            )
+        except requests.RequestException as e:
+            logger.error(f"Brevo request failed: {e}")
+            return False
+
+        if response.status_code in (200, 201, 202):
+            logger.info(f"Email sent successfully via Brevo to {recipients}")
+            return True
+
+        logger.error(f"Brevo error {response.status_code}: {response.text}")
+        return False
 
     def _send_via_sendgrid(self, api_key, from_email, recipients, subject, html, text):
         """Send an HTML email through the SendGrid HTTP API."""

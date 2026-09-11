@@ -5,6 +5,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.3] – 2026-09-11
+
+### Fixed
+- **Weekly newsletter delivery restored (Brevo).** Sends had silently failed
+  since ~July 20: SendGrid returned `401 "Maximum credits exceeded"` (its free
+  tier is a time-limited trial, now exhausted). Email now goes through the
+  **Brevo** HTTP API (`BREVO_API_KEY` + `BREVO_FROM_EMAIL`) first, reusing the
+  same free-tier account TripPlanner already uses (300 emails/day over HTTPS,
+  no SMTP — which Render's free tier blocks). SendGrid is kept as a legacy
+  fallback, then SMTP for local dev.
+- **AI narrative can no longer hang the send (`502`).** The Anthropic client used
+  the SDK's default 2 retries, so a slow call became 40s × 3 = 120s and tripped
+  gunicorn's worker timeout — killing the whole newsletter (`502`) before the
+  best-effort `try/except` could degrade to a stats-only email. Set
+  `max_retries=0` and tightened the per-call timeout to 30s so a slow/failing AI
+  call fails fast and the email still goes out.
+- **Newsletter now fails loud.** The trigger endpoint returned `200` even when
+  every send failed, so the GitHub Actions cron showed green and the breakage
+  went unnoticed for weeks. It now returns `500` when any send fails, turning the
+  run red and emailing a failure notice (operator-alert pattern).
+
+---
+
 ## [1.7.2] – 2026-07-14
 
 ### Security

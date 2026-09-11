@@ -361,7 +361,11 @@ def send_weekly_reports():
             failed += 1
 
     logger.info(f"Weekly report complete: sent={sent}, skipped={skipped}, failed={failed}")
-    return jsonify({'sent': sent, 'skipped': skipped, 'failed': failed}), 200
+    # Fail loud: if any send failed, return 5xx so the GitHub Actions cron (curl
+    # -fsS) goes red and emails a failure notice. Returning 200 on failures is
+    # how a broken send (e.g. SendGrid out of credits) stayed silent for weeks.
+    status = 500 if failed else 200
+    return jsonify({'sent': sent, 'skipped': skipped, 'failed': failed}), status
 
 
 @bp.route('/locations')

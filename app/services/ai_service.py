@@ -32,7 +32,11 @@ class AIService:
 
         try:
             from anthropic import Anthropic
-            self.client = Anthropic(api_key=self.api_key)
+            # max_retries=0: the SDK retries transient failures twice by default,
+            # which multiplies the per-call timeout (40s x 3 = 120s) and hits
+            # gunicorn's worker timeout, killing the newsletter send (502). We
+            # want a slow/failing AI call to fail fast and degrade to stats-only.
+            self.client = Anthropic(api_key=self.api_key, max_retries=0)
             logger.info("Claude client initialized successfully")
         except ImportError:
             logger.error("anthropic package not installed")
@@ -72,7 +76,7 @@ class AIService:
                 model=self.ANALYSIS_MODEL,
                 max_tokens=4000,
                 temperature=0.7,
-                timeout=40.0,
+                timeout=30.0,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )
