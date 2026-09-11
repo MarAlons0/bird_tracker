@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.4] – 2026-09-11
+
+### Fixed
+- **Restore the AI narrative in the weekly report.** v1.7.3 tightened the
+  Anthropic call timeout to 30s, but a real narrative call takes ~40s — so it was
+  being cut off every time and the email silently degraded to stats-only (no
+  "This week around you" section, no rare-species list). Raised the timeout to
+  50s, which lets the call finish while staying under gunicorn's 120s worker
+  timeout (`max_retries=0` still prevents the retry-stacking that caused the
+  original `502`).
+
+---
+
 ## [1.7.3] – 2026-09-11
 
 ### Fixed

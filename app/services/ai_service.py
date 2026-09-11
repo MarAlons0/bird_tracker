@@ -76,7 +76,12 @@ class AIService:
                 model=self.ANALYSIS_MODEL,
                 max_tokens=4000,
                 temperature=0.7,
-                timeout=30.0,
+                # A real narrative call takes ~40s (large prompt, ~4k max_tokens).
+                # 50s lets it finish while staying well under gunicorn's 120s
+                # worker timeout — with max_retries=0 (no x3 stacking), worst case
+                # is ~2 users x 50s = 100s. Revisit if the subscriber list grows
+                # (see BACKLOG: "Background the newsletter send").
+                timeout=50.0,
                 system="You are an expert ornithologist analyzing bird sighting data. Provide direct analysis without any introductory statements or meta-commentary about the format.",
                 messages=[{"role": "user", "content": prompt}]
             )
