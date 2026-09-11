@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.6] – 2026-09-11
+
+### Changed
+- **Pinned the `anthropic` SDK to `==1.5.0`.** `requirements.txt` had
+  `anthropic>=0.19.1` with no ceiling, so a fresh Render build silently pulled a
+  newer SDK — the 1.x rewrite that dropped the `temperature` kwarg and broke
+  every AI call (v1.7.5). Pinned to the version verified in production so a
+  future redeploy can't drift into another breaking change. Review the AI code
+  before bumping.
+
+---
+
 ## [1.7.5] – 2026-09-11
 
 ### Fixed

@@ -25,7 +25,11 @@ APScheduler==3.10.4
 pytz==2026.2
 
 # AI + HTTP
-anthropic>=0.19.1
+# Pinned exactly: the SDK crossed to 1.x and dropped the `temperature` kwarg from
+# messages.create(), which silently broke every AI call on a redeploy (v1.7.5).
+# 1.5.0 is the version verified in prod. Review the code (sampling params, model
+# strings) before bumping — an unpinned floor lets a breaking SDK slip in.
+anthropic==1.5.0
 httpx>=0.26.0
 requests==2.31.0
 
