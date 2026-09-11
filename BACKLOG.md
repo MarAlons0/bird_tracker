@@ -1,5 +1,5 @@
 # Bird Tracker — Backlog
-_Last updated: 2026-07-14_
+_Last updated: 2026-09-11_
 
 ## 🔴 High
 - _(none — all cleared)_
@@ -20,6 +20,8 @@ _Last updated: 2026-07-14_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Restore weekly newsletter delivery (Brevo)** — 2026-09-11 (SendGrid's free trial expired → `401 Maximum credits exceeded`; switched to the Brevo HTTP API, reusing TripPlanner's authenticated `looking4nature.com` sender. Verified in prod: `sent=2`)
+- [x] **Newsletter reliability: fail-fast AI + fail-loud endpoint** — 2026-09-11 (Anthropic client `max_retries=0` + 30s timeout so a slow AI call can't trip gunicorn's 120s worker timeout / `502`; the trigger endpoint now returns `500` on any send failure so the cron goes red instead of hiding breakage)
 - [x] **Require `DEFAULT_USER_PASSWORD`** — 2026-07-14 (startup now fails if unset; removed the `user123` fallback and plaintext-password logging)
 - [x] **Remove hardcoded-password scripts** — 2026-07-14 (deleted the redundant create-admin/user scripts + `reset_admin_password.py`, all of which hardcoded passwords)
 - [x] **Delete/archive `quarantine/`** — 2026-07-14 (removed from repo and purged from git history; the leaked Anthropic key it exposed was rotated)
