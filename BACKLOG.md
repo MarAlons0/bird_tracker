@@ -5,7 +5,6 @@ _Last updated: 2026-09-11_
 - _(none — all cleared)_
 
 ## 🟡 Medium
-- [ ] **Pin `anthropic` SDK version** — `requirements.txt` has `anthropic>=0.19.1` with no upper bound, so a fresh Render build silently pulls a newer SDK. A newer SDK dropped the `temperature` kwarg and broke every AI call (v1.7.5); the same drift can break other params/models on any future redeploy, and it can't be caught locally (local venv keeps the old SDK). Pin to the version currently running in prod (grab it from Render's build log: `Successfully installed anthropic-X.Y.Z`) and review before bumping. Consider auditing other unpinned deps. `[chore]`
 - [ ] **Date range filter** — observations are hardcoded to `back=7`; expose 7/14/30-day selector (eBird cap 30). `[feature]`
 - [ ] **Persist drill-down state across reloads** — save `drilldownGroup` to `localStorage` and restore on load. `[feature]`
 - [ ] **Heatmap v2 (Momentum / VYA modes)** — trend overlay on top of the shipped density heatmap. See [docs/DESIGN.md](docs/DESIGN.md#heatmap-v2--momentum--vya-trend-modes). `[feature]`
@@ -21,6 +20,8 @@ _Last updated: 2026-09-11_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Pin `anthropic` SDK version** — 2026-09-11 (pinned `anthropic==1.5.0`; the unpinned `>=0.19.1` floor let a redeploy pull the 1.x SDK that dropped the `temperature` kwarg and broke every AI call — v1.7.5. Verified: Render build/deploy Live on the pin)
+- [x] **Restore AI narrative in the weekly report** — 2026-09-11 (real cause was the newer SDK rejecting `temperature`, swallowed as `None` → stats-only email + blank Analysis page; removed the kwarg — v1.7.5. Interim timeout bump was v1.7.4)
 - [x] **Restore weekly newsletter delivery (Brevo)** — 2026-09-11 (SendGrid's free trial expired → `401 Maximum credits exceeded`; switched to the Brevo HTTP API, reusing TripPlanner's authenticated `looking4nature.com` sender. Verified in prod: `sent=2`)
 - [x] **Newsletter reliability: fail-fast AI + fail-loud endpoint** — 2026-09-11 (Anthropic client `max_retries=0` + 30s timeout so a slow AI call can't trip gunicorn's 120s worker timeout / `502`; the trigger endpoint now returns `500` on any send failure so the cron goes red instead of hiding breakage)
 - [x] **Require `DEFAULT_USER_PASSWORD`** — 2026-07-14 (startup now fails if unset; removed the `user123` fallback and plaintext-password logging)
