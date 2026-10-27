@@ -32,6 +32,9 @@ pytz==2026.2
 anthropic==1.5.0
 httpx>=0.26.0
 requests==2.31.0
+# CA bundle used by requests/httpx. A floor, not a pin: the eMudhra intermediate-CA
+# compromise (2026-10-19) needs >= 2026.10.19, and a CA bundle should stay current.
+certifi>=2026.10.19
 
 # Images / media
 Pillow>=10.2.0

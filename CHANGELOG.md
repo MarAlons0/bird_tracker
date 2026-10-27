@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.7] – 2026-10-27
+
+### Security
+- **`certifi` CA bundle raised to ≥ 2026.10.19** for the eMudhra intermediate-certificate compromise (disclosed 2026-10-19). `requests`/`httpx` trust `certifi`'s bundled CA list, not the system store, so a rebuild alone kept trusting the compromised intermediates; `certifi` is now listed in `requirements.txt` so every build installs a fixed version.
+
+---
+
 ## [1.7.6] – 2026-09-11
 
 ### Changed
