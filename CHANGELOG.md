@@ -5,6 +5,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.9] – 2026-11-11
+
+### Fixed
+- **Annual keyword review: 343 more North American species now get the right
+  colour.** A new full-taxonomy audit (below) found 378 of the 1,438 species on
+  eBird's US + Canada lists falling to "Other" — including Bobolink, Dickcissel,
+  Brant, American Goshawk and Gyrfalcon (compound words never matched `hawk` /
+  `falcon`), Clark's Nutcracker, Great Kiskadee, every shearwater, petrel,
+  storm-petrel and albatross, the murrelets, and Painted Whitestart (renamed by
+  eBird from Painted Redstart). Added ~140 keywords, mostly family words
+  (`petrel`, `murrelet`, `waxbill`, `lovebird`, `wagtail`…). Now 35 remain, all
+  deliberate: Hawaiian endemics and escaped cage birds, for which "Other" is
+  honest.
+- **Birds named after another bird are classified by what they are.** Matching
+  now checks the name's head noun first — the last word, or the last part of a
+  hyphenated one — and only then the whole name. "Crane Hawk" was a waterbird
+  (`crane` matched first); it's now a raptor. Same rule fixes "Parrot-billed
+  Seedeater", "Amazon Kingfisher" and the hawk-cuckoos, and makes future keyword
+  additions safe from these collisions. Wrong-group species on the US + Canada
+  lists: 4 → 1 (Hawaii Creeper, a honeycreeper that is genuinely called a
+  creeper). The live map and the newsletter agree on all 11,201 eBird species.
+
+### Changed
+- **`scripts/audit_categories.py --taxonomy`** — classifies every US + Canada
+  species and checks it against the group implied by its eBird order/family,
+  reporting both "Other" and wrong-group species. The old regional mode (last 14
+  days at four sites) remains the default.
+- The map's classifier compiles its keyword patterns once and caches results,
+  instead of building a regex per keyword on every call.
+
+---
+
 ## [1.7.8] – 2026-11-11
 
 ### Changed

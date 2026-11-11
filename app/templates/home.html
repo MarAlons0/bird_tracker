@@ -443,16 +443,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Classification ───────────────────────────────────────────────────────
 
-    function getBirdCategory(comName) {
-        if (!comName) return 'other';
-        const name = comName.toLowerCase();
-        for (const [category, keywords] of Object.entries(TIER1_KEYWORDS)) {
-            for (const kw of keywords) {
-                const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                if (new RegExp('\\b' + escaped + '\\b').test(name)) return category;
-            }
+    // Mirrors categorize() in app/services/bird_categories.py — keep in step.
+    // Head noun first ("Crane Hawk" -> hawk), whole name as the fallback.
+    const CATEGORY_PATTERNS = Object.entries(TIER1_KEYWORDS).map(([category, keywords]) => [
+        category,
+        keywords.map(kw => new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'))
+    ]);
+    const categoryCache = new Map();
+
+    function firstCategoryMatch(text) {
+        for (const [category, patterns] of CATEGORY_PATTERNS) {
+            if (patterns.some(p => p.test(text))) return category;
         }
-        return 'other';
+        return null;
+    }
+
+    function getBirdCategory(comName) {
+        if (categoryCache.has(comName)) return categoryCache.get(comName);
+        const words = (comName || '').toLowerCase().trim().split(/\s+/).filter(Boolean);
+        let category = 'other';
+        if (words.length) {
+            const head = words[words.length - 1].split('-').pop();
+            category = firstCategoryMatch(head) || firstCategoryMatch(words.join(' ')) || 'other';
+        }
+        categoryCache.set(comName, category);
+        return category;
     }
 
     // ── Map init ─────────────────────────────────────────────────────────────
