@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app.models import User, Location, UserPreferences
 from config.extensions import db
 from app.bird_tracker import BirdSightingTracker
+from app.services.bird_categories import categorize, client_config
 from datetime import datetime
 import hmac
 import os
@@ -41,7 +42,8 @@ def home():
             logger.info(f"Loader type: {type(current_app.jinja_loader)}")
         
         google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-        return render_template('home.html', GOOGLE_PLACES_API_KEY=google_places_key)
+        return render_template('home.html', GOOGLE_PLACES_API_KEY=google_places_key,
+                               bird_categories=client_config())
     except Exception as e:
         logger.error(f"Error in home route: {str(e)}", exc_info=True)
         return render_template('error.html', error=str(e))
@@ -49,15 +51,8 @@ def home():
 @bp.route('/map')
 @login_required
 def map():
-    google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-    if not google_places_key:
-        return render_template('error.html', error="Google Places API key not configured")
-        
-    observations = current_app.tracker.get_recent_observations(user_id=current_user.id)
-    return render_template('map.html', 
-                         observations=observations,
-                         location=current_app.tracker.active_location,
-                         google_maps_key=google_places_key)
+    """Legacy URL — the old Google Maps page was retired; Home is the map now."""
+    return redirect(url_for('main.home'))
 
 @bp.route('/report')
 @login_required
@@ -456,38 +451,13 @@ def get_sightings():
                 'timestamp': obs.get('obsDt', obs.get('timestamp', '')),
                 'count': obs.get('howMany', obs.get('count', 1)),
                 'observer': obs.get('observer', 'eBird User'),
-                'category': _get_bird_category(obs.get('comName', obs.get('bird_name', '')))
+                'category': categorize(obs.get('comName', obs.get('bird_name', '')))
             })
-        
+
         return jsonify(sightings)
     except Exception as e:
         logger.error(f"Error fetching sightings: {e}", exc_info=True)
         return jsonify([])
-
-def _get_bird_category(bird_name):
-    """Helper function to categorize birds for marker colors."""
-    if not bird_name:
-        return 'songbird'
-    
-    bird_name_lower = bird_name.lower()
-    
-    # Waterfowl
-    waterfowl_keywords = ['duck', 'goose', 'swan', 'teal', 'wigeon', 'pintail', 'shoveler', 'gadwall', 'mallard']
-    if any(keyword in bird_name_lower for keyword in waterfowl_keywords):
-        return 'waterfowl'
-    
-    # Raptors
-    raptor_keywords = ['hawk', 'eagle', 'falcon', 'owl', 'osprey', 'vulture', 'kite', 'harrier']
-    if any(keyword in bird_name_lower for keyword in raptor_keywords):
-        return 'raptor'
-    
-    # Shorebirds
-    shorebird_keywords = ['sandpiper', 'plover', 'curlew', 'godwit', 'dunlin', 'killdeer', 'snipe', 'stilt', 'avocet']
-    if any(keyword in bird_name_lower for keyword in shorebird_keywords):
-        return 'shorebird'
-    
-    # Default to songbird
-    return 'songbird'
 
 @bp.route('/api/analyze', methods=['POST'])
 @login_required

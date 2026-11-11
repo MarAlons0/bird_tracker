@@ -390,20 +390,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/map')
-@login_required
-def map():
-    """Map page route"""
-    google_places_key = os.getenv('GOOGLE_PLACES_API_KEY')
-    if not google_places_key:
-        return render_template('error.html', error="Google Places API key not configured")
-        
-    observations = app.tracker.get_recent_observations(user_id=current_user.id)
-    return render_template('map.html', 
-                         observations=observations,
-                         location=app.tracker.active_location,
-                         google_maps_key=google_places_key)
-
 @app.route('/report')
 @login_required
 def report():

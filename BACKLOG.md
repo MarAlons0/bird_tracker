@@ -13,7 +13,7 @@ _Last updated: 2026-09-11_
 - [ ] **Consolidate bird classifiers** — there are now three copies of the tier-1 keyword/category logic: `home.html` (JS, app map), `app/services/bird_categories.py` (newsletter), and `audit_categories.py` (root validation script). Point the validation script (and ideally the analyze route) at `app/services/bird_categories.py`, move `audit_categories.py` out of repo root, and treat the shared module as the single Python source of truth. `[chore]`
 
 ## 🟢 Low / Nice to have
-- [ ] **Periodic keyword-list review** — re-run `audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
+- [ ] **Periodic keyword-list review** — re-run `scripts/audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
 - [ ] **Scientific-name classification fallback** — add a `sciName` → group secondary lookup so a changed common name doesn't break classification. `[feature]`
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
 - [ ] **Tokenized one-click unsubscribe** — current unsubscribe is login-gated (toggles `UserPreferences.notification_enabled` for `current_user`); add a signed-token link in the email so recipients opt out without logging in and can't affect other accounts. Proper CAN-SPAM one-click behavior. `[feature]`

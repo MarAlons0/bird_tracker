@@ -5,6 +5,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.7.8] – 2026-11-11
+
+### Changed
+- **One bird classifier instead of five.** `app/services/bird_categories.py` is
+  now the single source of truth for bird groups, keywords, colours, and labels.
+  The live map no longer carries a hand-copied JS keyword list — `home.html` gets
+  the data injected from the Python module, so the map and the newsletter can't
+  drift apart. Data is sent as ordered pairs because classification is
+  first-match: a plain `tojson` would sort the groups alphabetically and, e.g.,
+  turn Turkey Vulture into a ground bird.
+- **`/api/sightings` `category` field uses the shared classifier** — the same
+  seven groups as the map, replacing an old substring matcher with four
+  different labels (`raptor`/`waterfowl`/`shorebird`/`songbird`).
+- **Keyword audit script moved to `scripts/audit_categories.py`** and now audits
+  the shared classifier instead of its own drifted copy of the keyword list.
+
+### Fixed
+- **Prairie-chickens and Chuck-will's-widow are no longer "Other".** Merged the
+  two keywords the audit script had but the app was missing
+  (`prairie-chicken` → Ground Birds, `chuck-will` → Aerial Specialists).
+
+### Removed
+- **Legacy `/map` page (`map.html`).** Unlinked from the nav since Home's map
+  replaced it, still on Google Maps, and running its own substring classifier.
+  Removed the page and its two duplicate route definitions (plus an orphaned
+  `app/main.py`); `/map` now redirects to Home so old bookmarks still work.
+
+---
+
 ## [1.7.7] – 2026-10-27
 
 ### Security

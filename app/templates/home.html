@@ -404,25 +404,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Constants ────────────────────────────────────────────────────────────
 
-    const GROUP_COLORS = {
-        'waterbirds':         '#377eb8',
-        'raptors':            '#e41a1c',
-        'ground-birds':       '#a0522d',
-        'aerial-specialists': '#ff69b4',
-        'tree-specialists':   '#228b22',
-        'perching-birds':     '#4daf4a',
-        'other':              '#ff7f00'
-    };
-
-    const GROUP_LABELS = {
-        'waterbirds':         'Waterbirds',
-        'raptors':            'Raptors',
-        'ground-birds':       'Ground Birds',
-        'aerial-specialists': 'Aerial Specialists',
-        'tree-specialists':   'Tree Specialists',
-        'perching-birds':     'Perching Birds',
-        'other':              'Other'
-    };
+    // Groups, colours, labels, and keywords come from the single Python source
+    // of truth, app/services/bird_categories.py (edit them there, not here).
+    // Sent as ordered pairs: classification is first-match, so group order is
+    // precedence (Turkey Vulture is a raptor, not a ground bird).
+    const BIRD_CATEGORIES = {{ bird_categories|tojson }};
+    const GROUP_COLORS   = Object.fromEntries(BIRD_CATEGORIES.colors);
+    const GROUP_LABELS   = Object.fromEntries(BIRD_CATEGORIES.labels);
+    const TIER1_KEYWORDS = Object.fromEntries(BIRD_CATEGORIES.keywords);
 
     // 20-color qualitative palette for species drill-down
     const SPECIES_PALETTE = [
@@ -431,55 +420,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '#9a6324','#800000','#aaffc3','#808000','#000075',
         '#a9a9a9','#ffd8b1','#dcbeff','#fabed4','#ffffff'
     ];
-
-    // Word-boundary keyword map (matches audit script)
-    const TIER1_KEYWORDS = {
-        'waterbirds': [
-            'duck','goose','geese','swan','teal','mallard','pintail','shoveler',
-            'gadwall','wigeon','scaup','canvasback','redhead','bufflehead',
-            'merganser','scoter','eider','goldeneye',
-            'heron','egret','bittern','ibis','spoonbill','stork',
-            'sandpiper','plover','dowitcher','yellowlegs','dunlin','knot',
-            'turnstone','godwit','curlew','whimbrel','snipe','woodcock',
-            'avocet','stilt','phalarope','oystercatcher',
-            'killdeer','sanderling','willet',
-            'gull','tern','skimmer','jaeger','kittiwake',
-            'grebe','loon',
-            'cormorant','pelican','anhinga','gannet','booby','frigatebird',
-            'tropicbird','skua','murre','puffin','razorbill','guillemot','auklet',
-            'coot','gallinule','moorhen','rail','sora','swamphen',
-            'crane','limpkin'
-        ],
-        'raptors': [
-            'eagle','hawk','falcon','owl','kite','harrier','osprey',
-            'vulture','condor','merlin','kestrel','caracara'
-        ],
-        'ground-birds': [
-            'turkey','grouse','quail','pheasant','partridge','ptarmigan',
-            'roadrunner','bobwhite',
-            'pigeon','dove','parakeet','parrot','macaw',
-            'peafowl','junglefowl'
-        ],
-        'aerial-specialists': [
-            'swallow','swift','martin','hummingbird','nighthawk','nightjar',
-            'whip-poor-will','poorwill'
-        ],
-        'tree-specialists': [
-            'woodpecker','sapsucker','flicker','kingfisher','nuthatch','creeper'
-        ],
-        'perching-birds': [
-            'sparrow','finch','warbler','thrush','robin','blackbird','oriole',
-            'jay','crow','raven','magpie','wren','chickadee','titmouse',
-            'flycatcher','phoebe','pewee','kingbird','vireo','tanager',
-            'grosbeak','bunting','towhee','junco','lark','pipit',
-            'mockingbird','catbird','thrasher','starling','waxwing',
-            'shrike','kinglet','gnatcatcher','bluebird','veery','solitaire',
-            'redstart','ovenbird','waterthrush','siskin','crossbill',
-            'redpoll','goldfinch','grackle','cowbird','cardinal',
-            'parula','yellowthroat','longspur','bushtit','verdin',
-            'phainopepla','cuckoo','chat','meadowlark','pyrrhuloxia'
-        ]
-    };
 
     // ── State ────────────────────────────────────────────────────────────────
 
