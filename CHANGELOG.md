@@ -8,8 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.7.9] – 2026-11-11
 
 ### Fixed
-- **Annual keyword review: 343 more North American species now get the right
-  colour.** A new full-taxonomy audit (below) found 378 of the 1,438 species on
+- **Annual keyword review: 325 more North American species now get the right
+  colour.** A new full-taxonomy audit (below) found 360 of the 1,438 species on
   eBird's US + Canada lists falling to "Other" — including Bobolink, Dickcissel,
   Brant, American Goshawk and Gyrfalcon (compound words never matched `hawk` /
   `falcon`), Clark's Nutcracker, Great Kiskadee, every shearwater, petrel,
@@ -22,10 +22,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   now checks the name's head noun first — the last word, or the last part of a
   hyphenated one — and only then the whole name. "Crane Hawk" was a waterbird
   (`crane` matched first); it's now a raptor. Same rule fixes "Parrot-billed
-  Seedeater", "Amazon Kingfisher" and the hawk-cuckoos, and makes future keyword
-  additions safe from these collisions. Wrong-group species on the US + Canada
-  lists: 4 → 1 (Hawaii Creeper, a honeycreeper that is genuinely called a
-  creeper). The live map and the newsletter agree on all 11,201 eBird species.
+  Seedeater", and makes future keyword additions safe from these collisions
+  (the new `amazon` keyword would otherwise have turned Amazon Kingfisher into a
+  parrot). Wrong-group species on the US + Canada lists: 3 → 1 (Hawaii Creeper,
+  a honeycreeper that is genuinely called a creeper). The live map and the newsletter agree on all 11,201 eBird species.
 
 ### Changed
 - **`scripts/audit_categories.py --taxonomy`** — classifies every US + Canada
