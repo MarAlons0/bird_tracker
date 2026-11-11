@@ -1,5 +1,5 @@
 # Bird Tracker — Backlog
-_Last updated: 2026-09-11_
+_Last updated: 2026-11-11_
 
 ## 🔴 High
 - _(none — all cleared)_
@@ -10,7 +10,6 @@ _Last updated: 2026-09-11_
 - [ ] **Heatmap v2 (Momentum / VYA modes)** — trend overlay on top of the shipped density heatmap. See [docs/DESIGN.md](docs/DESIGN.md#heatmap-v2--momentum--vya-trend-modes). `[feature]`
 - [ ] **Analysis page: show location/radius context** — "Analyzing sightings within 25 mi of Cincinnati, OH" so it's clearly not stale/wrong-area. `[feature]`
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
-- [ ] **Consolidate bird classifiers** — there are now three copies of the tier-1 keyword/category logic: `home.html` (JS, app map), `app/services/bird_categories.py` (newsletter), and `audit_categories.py` (root validation script). Point the validation script (and ideally the analyze route) at `app/services/bird_categories.py`, move `audit_categories.py` out of repo root, and treat the shared module as the single Python source of truth. `[chore]`
 
 ## 🟢 Low / Nice to have
 - [ ] **Periodic keyword-list review** — re-run `scripts/audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
@@ -20,6 +19,7 @@ _Last updated: 2026-09-11_
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Consolidate bird classifiers** — 2026-11-11 (five copies → one: `app/services/bird_categories.py`; the live map gets its data injected from it, `/api/sightings` uses it, the audit script moved to `scripts/` and imports it; retired the legacy `/map` page; added prairie-chicken + Chuck-will's-widow — v1.7.8)
 - [x] **Pin `anthropic` SDK version** — 2026-09-11 (pinned `anthropic==1.5.0`; the unpinned `>=0.19.1` floor let a redeploy pull the 1.x SDK that dropped the `temperature` kwarg and broke every AI call — v1.7.5. Verified: Render build/deploy Live on the pin)
 - [x] **Restore AI narrative in the weekly report** — 2026-09-11 (real cause was the newer SDK rejecting `temperature`, swallowed as `None` → stats-only email + blank Analysis page; removed the kwarg — v1.7.5. Interim timeout bump was v1.7.4)
 - [x] **Restore weekly newsletter delivery (Brevo)** — 2026-09-11 (SendGrid's free trial expired → `401 Maximum credits exceeded`; switched to the Brevo HTTP API, reusing TripPlanner's authenticated `looking4nature.com` sender. Verified in prod: `sent=2`)
