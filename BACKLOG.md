@@ -12,13 +12,14 @@ _Last updated: 2026-11-11_
 - [ ] **Analysis page: loading state on location switch** — wire `#loading-spinner` to the location-change auto-generate. `[bug]`
 
 ## 🟢 Low / Nice to have
-- [ ] **Periodic keyword-list review** — re-run `scripts/audit_categories.py` after eBird taxonomy updates (annual, Aug) so renamed species don't silently fall to "Other"; consider a `?debug=1` category overlay. `[chore]`
+- [ ] **Periodic keyword-list review** — recurring, annual: after eBird's taxonomy update (Aug), run `scripts/audit_categories.py --taxonomy` and fix anything in the WRONG GROUP list, then add keywords for real North American birds in "Other" (renamed species land there). Known, deliberate leftovers: Hawaiian endemics, escaped cage birds, Hawaii Creeper. Last run 2026-11-11 (v1.7.9); next after the Aug 2027 update. `[chore]`
 - [ ] **Scientific-name classification fallback** — add a `sciName` → group secondary lookup so a changed common name doesn't break classification. `[feature]`
 - [ ] **Push notifications for rare sightings** — eBird notable-observations endpoint + web push (Service Worker + Push API); uses stored `Location` prefs. `[feature]`
 - [ ] **Tokenized one-click unsubscribe** — current unsubscribe is login-gated (toggles `UserPreferences.notification_enabled` for `current_user`); add a signed-token link in the email so recipients opt out without logging in and can't affect other accounts. Proper CAN-SPAM one-click behavior. `[feature]`
 - [ ] **Background the newsletter send** — the weekly-report endpoint runs the AI narrative + notable-observations calls synchronously per user inside the HTTP request. Fine for a handful of subscribers (timeout-bounded), but with a larger list it risks gunicorn's 120s worker timeout. Move the send to a background job/queue when the list grows. `[chore]`
 
 ## ✅ Shipped
+- [x] **Keyword-list review (2026)** — 2026-11-11 (new `--taxonomy` audit of all 1,438 US + Canada species: "Other" 360 → 35, wrong-group 3 → 1; ~140 keywords added; head-noun matching so "Crane Hawk" is a raptor; dropped the `?debug=1` overlay idea — the taxonomy audit covers it — v1.7.9)
 - [x] **Consolidate bird classifiers** — 2026-11-11 (five copies → one: `app/services/bird_categories.py`; the live map gets its data injected from it, `/api/sightings` uses it, the audit script moved to `scripts/` and imports it; retired the legacy `/map` page; added prairie-chicken + Chuck-will's-widow — v1.7.8)
 - [x] **Pin `anthropic` SDK version** — 2026-09-11 (pinned `anthropic==1.5.0`; the unpinned `>=0.19.1` floor let a redeploy pull the 1.x SDK that dropped the `temperature` kwarg and broke every AI call — v1.7.5. Verified: Render build/deploy Live on the pin)
 - [x] **Restore AI narrative in the weekly report** — 2026-09-11 (real cause was the newer SDK rejecting `temperature`, swallowed as `None` → stats-only email + blank Analysis page; removed the kwarg — v1.7.5. Interim timeout bump was v1.7.4)
